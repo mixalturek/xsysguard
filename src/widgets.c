@@ -120,7 +120,7 @@ typedef struct {
 
 /******************************************************************************/
 
-static GList *widget_list = NULL;
+static xsg_list *widget_list = NULL;
 
 static window_t window = {
 	"xsysguard",      /* name */
@@ -178,7 +178,7 @@ static void image_set_color(DATA32 color) {
 static widget_t *get_widget(uint16_t widget_id) {
 	widget_t *widget;
 
-	widget = g_list_nth_data(widget_list, (unsigned int) widget_id);
+	widget = xsg_list_nth_data(widget_list, (unsigned int) widget_id);
 
 	if (!widget)
 		g_error("Invalid widget id: %u", widget_id);
@@ -551,11 +551,11 @@ typedef struct {
 	} value;
 } text_var_t;
 
-static void parse_format(char *format, GList *var_list) {
+static void parse_format(char *format, xsg_list *var_list) {
 	/* TODO */
 }
 
-static void string_format(GString *buffer, char *format, GList *var_list) {
+static void string_format(GString *buffer, char *format, xsg_list *var_list) {
 	/* TODO */
 }
 
@@ -811,7 +811,7 @@ static void render() {
 	Imlib_Updates update;
 	Imlib_Image buffer;
 	bool solid_bg;
-	GList *l;
+	xsg_list *l;
 
 	window.updates = imlib_updates_merge_for_rendering(window.updates,
 			window.width, window.height);
@@ -860,7 +860,7 @@ static void render() {
 
 static void scroll_and_update(uint64_t count) {
 	widget_t *widget;
-	GList *l;
+	xsg_list *l;
 
 	for (l = widget_list; l; l = l->next) {
 
@@ -1258,7 +1258,7 @@ void xsg_widgets_parse_line() {
 	widget->scroll_func = scroll_line;
 	widget->data = (void *) line;
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 /******************************************************************************
@@ -1390,7 +1390,7 @@ void xsg_widgets_parse_rectangle() {
 		}
 	}
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 /******************************************************************************
@@ -1467,7 +1467,7 @@ void xsg_widgets_parse_ellipse() {
 	widget->scroll_func = scroll_ellipse;
 	widget->data = (void *) ellipse;
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 /******************************************************************************
@@ -1557,7 +1557,7 @@ void xsg_widgets_parse_polygon() {
 	widget->scroll_func = scroll_polygon;
 	widget->data = (void *) polygon;
 
-	widget_list = g_list_append(widget_list, widget);;
+	widget_list = xsg_list_append(widget_list, widget);;
 }
 
 /******************************************************************************
@@ -1664,7 +1664,7 @@ void xsg_widgets_parse_image() {
 		}
 	}
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 /******************************************************************************
@@ -1692,14 +1692,14 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image mask;
-	GList *var_list;
+	xsg_list *var_list;
 } barchart_t;
 
 static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	double min, max;
-	GList *l;
+	xsg_list *l;
 	int clip_x, clip_y, clip_w, clip_h;
 	int last_h = 0;
 	double value;
@@ -1813,7 +1813,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 static void update_barchart(widget_t *widget, uint16_t var_id) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
-	GList *l;
+	xsg_list *l;
 	double prev = 0.0;
 
 	barchart = (barchart_t *) widget->data;
@@ -1881,9 +1881,9 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 	}
 
 	*update = widget->update;
-	*widget_id = g_list_length(widget_list);
+	*widget_id = xsg_list_length(widget_list);
 
-	widget_list = g_list_append(widget_list, widget);;
+	widget_list = xsg_list_append(widget_list, widget);;
 }
 
 void xsg_widgets_parse_barchart_var(uint16_t var_id) {
@@ -1938,9 +1938,9 @@ void xsg_widgets_parse_barchart_var(uint16_t var_id) {
 		}
 	}
 
-	widget = g_list_last(widget_list)->data;
+	widget = xsg_list_last(widget_list)->data;
 	barchart = widget->data;
-	barchart->var_list = g_list_append(barchart->var_list, barchart_var);
+	barchart->var_list = xsg_list_append(barchart->var_list, barchart_var);
 }
 
 /******************************************************************************
@@ -1966,7 +1966,7 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	GList *var_list;
+	xsg_list *var_list;
 	unsigned int value_index;
 } linechart_t;
 
@@ -1974,7 +1974,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	double min, max;
-	GList *l;
+	xsg_list *l;
 	Imlib_Image tmp;
 	ImlibPolygon poly;
 	double pixel_h;
@@ -2072,7 +2072,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_linechart(widget_t *widget, uint16_t var_id) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
-	GList *l;
+	xsg_list *l;
 	double prev = 0.0;
 	unsigned int i;
 
@@ -2153,9 +2153,9 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 	}
 
 	*update = widget->update;
-	*widget_id = g_list_length(widget_list);
+	*widget_id = xsg_list_length(widget_list);
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 void xsg_widgets_parse_linechart_var(uint16_t var_id) {
@@ -2164,10 +2164,10 @@ void xsg_widgets_parse_linechart_var(uint16_t var_id) {
 	linechart_var_t * linechart_var;
 	unsigned int width, i;
 
-	widget = g_list_last(widget_list)->data;
+	widget = xsg_list_last(widget_list)->data;
 	linechart = widget->data;
 	linechart_var = g_new0(linechart_var_t, 1);
-	linechart->var_list = g_list_append(linechart->var_list, linechart_var);
+	linechart->var_list = xsg_list_append(linechart->var_list, linechart_var);
 
 	if (linechart->angle)
 		width = linechart->angle->width;
@@ -2224,7 +2224,7 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	GList *var_list;
+	xsg_list *var_list;
 	unsigned int value_index;
 } areachart_t;
 
@@ -2236,7 +2236,7 @@ static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_areachart(widget_t *widget, uint16_t var_id) {
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
-	GList *l;
+	xsg_list *l;
 	double prev = 0.0;
 	unsigned int i;
 
@@ -2317,9 +2317,9 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 	}
 
 	*update = widget->update;
-	*widget_id = g_list_length(widget_list);
+	*widget_id = xsg_list_length(widget_list);
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 void xsg_widgets_parse_areachart_var(uint16_t var_id) {
@@ -2328,10 +2328,10 @@ void xsg_widgets_parse_areachart_var(uint16_t var_id) {
 	areachart_var_t *areachart_var;
 	unsigned int width, i;
 
-	widget = g_list_last(widget_list)->data;
+	widget = xsg_list_last(widget_list)->data;
 	areachart = widget->data;
 	areachart_var = g_new0(areachart_var_t, 1);
-	areachart->var_list = g_list_append(areachart->var_list, areachart_var);
+	areachart->var_list = xsg_list_append(areachart->var_list, areachart_var);
 
 	if (areachart->angle)
 		width = areachart->angle->width;
@@ -2405,7 +2405,7 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	GList *var_list;
+	xsg_list *var_list;
 	GString *buffer;
 } text_t;
 
@@ -2417,7 +2417,7 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 static void update_text(widget_t *widget, uint16_t var_id) {
 	text_t *text;
 	text_var_t *text_var;
-	GList *l;
+	xsg_list *l;
 
 	text = (text_t *)widget->data;
 	for (l = text->var_list; l; l = l->next) {
@@ -2491,9 +2491,9 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	}
 
 	*update = widget->update;
-	*widget_id = g_list_length(widget_list);
+	*widget_id = xsg_list_length(widget_list);
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 void xsg_widgets_parse_text_var(uint16_t var_id) {
@@ -2501,10 +2501,10 @@ void xsg_widgets_parse_text_var(uint16_t var_id) {
 	text_t *text;
 	text_var_t *text_var;
 
-	widget = g_list_last(widget_list)->data;
+	widget = xsg_list_last(widget_list)->data;
 	text = widget->data;
 	text_var = g_new0(text_var_t, 1);
-	text->var_list = g_list_append(text->var_list, text_var);
+	text->var_list = xsg_list_append(text->var_list, text_var);
 
 	text_var->var_id = var_id;
 	text_var->mult = 1.0;
@@ -2536,7 +2536,7 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	GList *var_list;
+	xsg_list *var_list;
 	GString *buffer;
 } imagetext_t;
 
@@ -2548,7 +2548,7 @@ static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_imagetext(widget_t *widget, uint16_t var_id) {
 	imagetext_t *imagetext;
 	text_var_t *text_var;
-	GList *l;
+	xsg_list *l;
 
 	imagetext = (imagetext_t *)widget->data;
 	for (l = imagetext->var_list; l; l = l->next) {
@@ -2621,9 +2621,9 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	}
 
 	*update = widget->update;
-	*widget_id = g_list_length(widget_list);
+	*widget_id = xsg_list_length(widget_list);
 
-	widget_list = g_list_append(widget_list, widget);
+	widget_list = xsg_list_append(widget_list, widget);
 }
 
 void xsg_widgets_parse_imagetext_var(uint16_t var_id) {
@@ -2631,10 +2631,10 @@ void xsg_widgets_parse_imagetext_var(uint16_t var_id) {
 	imagetext_t *imagetext;
 	text_var_t *text_var;
 
-	widget = g_list_last(widget_list)->data;
+	widget = xsg_list_last(widget_list)->data;
 	imagetext = widget->data;
 	text_var = g_new0(text_var_t, 1);
-	imagetext->var_list = g_list_append(imagetext->var_list, text_var);
+	imagetext->var_list = xsg_list_append(imagetext->var_list, text_var);
 
 	text_var->var_id = var_id;
 	text_var->mult = 1.0;

@@ -46,12 +46,11 @@ typedef struct {
 
 /******************************************************************************/
 
-static GList *modules_list = NULL;
+static xsg_list *modules_list = NULL;
 
 /******************************************************************************/
 
 static char *remove_suffix(const char *string, const char *suffix) {
-
 	if (!g_str_has_suffix(string, suffix))
 		return NULL;
 
@@ -90,7 +89,7 @@ static void init() {
 				module_t *m = g_new0(module_t, 1);
 				m->name = name;
 				m->dir = *p;
-				modules_list = g_list_prepend(modules_list, m);
+				modules_list = xsg_list_prepend(modules_list, m);
 				g_message("Found module file \"%s\"", filename);
 			}
 		}
@@ -106,7 +105,7 @@ uint16_t xsg_modules_parse_var(uint64_t update, uint16_t id) {
 	void *module;
 	module_t *m = NULL;
 	xsg_var var;
-	GList *l;
+	xsg_list *l;
 
 	if (!modules_list)
 		init();
@@ -153,7 +152,7 @@ void xsg_modules_list() {
 	char *module_filename;
 	void *module;
 	module_t *m = NULL;
-	GList *l;
+	xsg_list *l;
 
 	if (!modules_list)
 		init();

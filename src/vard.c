@@ -36,7 +36,7 @@ typedef struct _var_t {
 
 /******************************************************************************/
 
-static GList *var_list = NULL;
+static xsg_list *var_list = NULL;
 
 /******************************************************************************/
 
@@ -60,7 +60,7 @@ static void send_var(var_t *v) {
 }
 
 static void update(uint64_t count) {
-	GList *l;
+	xsg_list *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -73,7 +73,7 @@ static void update(uint64_t count) {
 /******************************************************************************/
 
 void xsg_var_set_type(uint16_t var_id, uint8_t type) {
-	GList *l;
+	xsg_list *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -83,7 +83,7 @@ void xsg_var_set_type(uint16_t var_id, uint8_t type) {
 }
 
 void xsg_var_update(uint16_t var_id) {
-	GList *l;
+	xsg_list *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -106,7 +106,7 @@ uint16_t xsg_var_add(xsg_var *var, uint64_t update, uint16_t var_id) {
 	v->args = var->args;
 	v->var_id = var_id;
 
-	var_list = g_list_append(var_list, v);
+	var_list = xsg_list_append(var_list, v);
 
 	return var_id;
 }

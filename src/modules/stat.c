@@ -310,11 +310,11 @@ typedef struct {
 	void (*(func))();
 } stat_t;
 
-GList *stat_list = NULL;
+xsg_list *stat_list = NULL;
 
 static void add_stat(uint64_t update, void (*(func))()) {
 	stat_t *stat = 0;
-	GList *l;
+	xsg_list *l;
 
 	/* find matching entry in stat_list */
 	for (l = stat_list; l; l = l->next) {
@@ -334,14 +334,14 @@ static void add_stat(uint64_t update, void (*(func))()) {
 	stat = g_new(stat_t, 1);
 	stat->update = update;
 	stat->func = func;
-	stat_list = g_list_append(stat_list, stat);
+	stat_list = xsg_list_append(stat_list, stat);
 }
 
 /******************************************************************************/
 
 void update_stats(uint64_t count) {
 	stat_t *stat;
-	GList *l;
+	xsg_list *l;
 
 	for (l = stat_list; l; l = l->next) {
 		stat = l->data;

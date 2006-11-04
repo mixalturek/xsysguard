@@ -45,6 +45,14 @@
 
 typedef int bool;
 
+typedef struct _xsg_list xsg_list;
+
+struct _xsg_list {
+	void *data;
+	xsg_list *next;
+	xsg_list *prev;
+};
+
 typedef struct {
 	uint8_t type;
 	void *(*func)(void *args);
@@ -87,6 +95,16 @@ void xsg_var_update(uint16_t id);
 void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
+
+/******************************************************************************
+ * list.c
+ ******************************************************************************/
+
+xsg_list *xsg_list_append(xsg_list *list, void *data);
+xsg_list *xsg_list_prepend(xsg_list *list, void *data);
+xsg_list *xsg_list_last(xsg_list *list);
+unsigned int xsg_list_length(xsg_list *list);
+void *xsg_list_nth_data(xsg_list *list, unsigned int n);
 
 /******************************************************************************/
 

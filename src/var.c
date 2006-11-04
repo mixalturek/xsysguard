@@ -38,12 +38,12 @@ typedef struct _var_t {
 
 /******************************************************************************/
 
-static GList *var_list = NULL;
+static xsg_list *var_list = NULL;
 
 /******************************************************************************/
 
 static var_t *get_var(uint16_t var_id) {
-	GList *l;
+	xsg_list *l;
 	var_t *var;
 
 	for (l = var_list; l; l = l->next) {
@@ -89,11 +89,11 @@ uint16_t xsg_var_add(xsg_var *var, uint64_t update, uint16_t widget_id) {
 	v->var_id = var_id;
 	v->widget_id = widget_id;
 
-	var_list = g_list_append(var_list, v);
+	var_list = xsg_list_append(var_list, v);
 
 	var_id++;
 
-	return g_list_length(var_list) - 1;
+	return xsg_list_length(var_list) - 1;
 }
 
 void xsg_var_init() {
@@ -226,6 +226,4 @@ char *xsg_var_as_string(uint16_t var_id) {
 	}
 	return var->buffer->str;
 }
-
-/******************************************************************************/
 
