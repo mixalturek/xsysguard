@@ -46,7 +46,7 @@ static void *get_time(void *arg) {
 		args->buffer = g_string_set_size(args->buffer, args->buffer->len + 8);
 	}
 
-	g_message("Get time(%s) %s", args->format, args->buffer->str);
+	g_message("Get (\"%s\") \"%s\"", args->format, args->buffer->str);
 
 	return (void *) args->buffer->str;
 }

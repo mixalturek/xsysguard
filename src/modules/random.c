@@ -27,7 +27,7 @@ static void *get_random(void *arg) {
 
 	d = g_random_double();
 
-	g_message("get_random %f", d);
+	g_message("Get () %f", d);
 
 	return (void *) &d;
 }
