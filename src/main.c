@@ -55,7 +55,7 @@ static bool update(void *data) {
 	GList *l;
 
 	counter++;
-	g_message("Tick %llu", counter);
+	g_message("Tick %" PRIu64, counter);
 	for (l = update_list; l; l = l->next) {
 		void (*func)(uint64_t) = l->data;
 		func(counter);

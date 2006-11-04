@@ -82,7 +82,7 @@ static void init() {
 
 	g_message("Searching for modules...");
 	for (p = pathv; *p; p++) {
-		g_message("Searching for modules in '%s'", *p);
+		g_message("Searching for modules in \"%s\"", *p);
 		if ((dir = g_dir_open(*p, 0, NULL)) == NULL)
 			continue;
 		while ((filename = g_dir_read_name(dir)) != NULL) {
@@ -91,7 +91,7 @@ static void init() {
 				m->name = name;
 				m->dir = *p;
 				modules_list = g_list_prepend(modules_list, m);
-				g_message("Found module file '%s'", filename);
+				g_message("Found module file \"%s\"", filename);
 			}
 		}
 		g_dir_close(dir);
@@ -128,12 +128,12 @@ uint16_t xsg_modules_parse_var(uint64_t update, uint16_t id) {
 	module = dlopen(module_filename, RTLD_LAZY | RTLD_LOCAL);
 
 	if (!module)
-		g_error("Cannot load module '%s': %s", m->name, dlerror());
+		g_error("Cannot load module \"%s\": %s", m->name, dlerror());
 
 	parse = dlsym(module, XSG_MODULES_PARSE_FUNC);
 
 	if (!parse)
-		g_error("Cannot load module '%s': %s", m->name, dlerror());
+		g_error("Cannot load module \"%s\": %s", m->name, dlerror());
 
 	var.type = 0;
 	var.func = NULL;
@@ -142,7 +142,7 @@ uint16_t xsg_modules_parse_var(uint64_t update, uint16_t id) {
 	parse(&var, id, update);
 
 	if (var.type == 0 || var.func == NULL)
-		g_error("Module '%s' must set var->type and var->func != 0", module_filename);
+		g_error("Module \"%s\" must set var->type and var->func != 0", module_filename);
 
 	return xsg_var_add(&var, update, id);
 }

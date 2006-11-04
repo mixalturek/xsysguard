@@ -52,7 +52,7 @@ static var_t *get_var(uint16_t var_id) {
 			return var;
 	}
 
-	g_error("Invalid variable id: %u", var_id);
+	g_error("Invalid variable id: %" PRIu16, var_id);
 
 	return NULL;
 }
@@ -108,7 +108,7 @@ static double get_int_as_double(void *value) {
 
 	i = * (int64_t *) value;
 	d = (double) i;
-	g_message("Conversion(INT->DOUBLE) %" G_GINT64_FORMAT " -> %lg", i, d);
+	g_message("Conversion(INT->DOUBLE) %" PRId64 " -> %g", i, d);
 	return d;
 }
 
@@ -118,7 +118,7 @@ static double get_string_as_double(void *value) {
 
 	s = (char *) value;
 	d = g_ascii_strtod(s, NULL);
-	g_message("Conversion(STRING->DOUBLE) %s -> %lg", s, d);
+	g_message("Conversion(STRING->DOUBLE) %s -> %g", s, d);
 	return d;
 }
 
@@ -132,7 +132,7 @@ static int64_t get_double_as_int(void *value) {
 	r = d - (double) i;
 	if (r >= 0.5)
 		i++;
-	g_message("Conversion(DOUBLE->INT) %lg -> %" G_GINT64_FORMAT, d, i);
+	g_message("Conversion(DOUBLE->INT) %g -> %" PRId64, d, i);
 	return i;
 }
 
@@ -142,7 +142,7 @@ static int64_t get_string_as_int(void *value) {
 
 	s = (char *) value;
 	i = g_ascii_strtoll(s, NULL, 0);
-	g_message("Conversion(STRING->INT) %s -> %" G_GINT64_FORMAT, s, i);
+	g_message("Conversion(STRING->INT) %s -> %" PRId64, s, i);
 	return i;
 }
 
@@ -150,8 +150,8 @@ static char *get_double_as_string(void *value, GString *buffer) {
 	double d;
 
 	d = * (double *) value;
-	g_string_printf(buffer, "%lg", d);
-	g_message("Conversion(DOUBLE->STRING) %lg -> %s", d, buffer->str);
+	g_string_printf(buffer, "%g", d);
+	g_message("Conversion(DOUBLE->STRING) %g -> %s", d, buffer->str);
 	return buffer->str;
 }
 
@@ -159,8 +159,8 @@ static char *get_int_as_string(void *value, GString *buffer) {
 	int64_t i;
 
 	i = * (int64_t *) value;
-	g_string_printf(buffer, "%" G_GINT64_FORMAT, i);
-	g_message("Conversion(INT->STRING) %" G_GINT64_FORMAT " -> %s", i, buffer->str);
+	g_string_printf(buffer, "%" PRId64, i);
+	g_message("Conversion(INT->STRING) %" PRId64 " -> %s", i, buffer->str);
 	return buffer->str;
 }
 

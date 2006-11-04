@@ -200,7 +200,7 @@ int64_t xsg_conf_read_int() {
 
 	skip_space();
 
-	sscanf(ptr, "%" G_GINT64_FORMAT "%n", &i, &n);
+	sscanf(ptr, "%" SCNd64 "%n", &i, &n);
 
 	if (n < 1)
 		xsg_conf_error("integer");
@@ -215,7 +215,7 @@ uint64_t xsg_conf_read_uint() {
 
 	skip_space();
 
-	sscanf(ptr, "%" G_GUINT64_FORMAT "%n", &u, &n);
+	sscanf(ptr, "%" SCNu64 "%n", &u, &n);
 
 	if (n < 1)
 		xsg_conf_error("unsigned integer");
@@ -301,14 +301,14 @@ static char read_escape() {
 		case '7':
 		case '8':
 		case '9':
-			sscanf(ptr, "%3hho%n", &c, &n);
+			sscanf(ptr, "%3" SCNo8" %n", &c, &n);
 			ptr += n - 1;
 			return c;
 		case 'x':
 			ptr++;
 			if (*ptr == '\0')
 				return 0;
-			sscanf(ptr, "%shhx%n", &c, &n);
+			sscanf(ptr, "%2" SCNx8 "%n", &c, &n);
 			ptr += n - 1;
 			return c;
 		case '\0':
