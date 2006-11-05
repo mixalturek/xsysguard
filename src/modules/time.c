@@ -25,7 +25,7 @@
 
 struct time_args {
 	char *format;
-	GString *buffer;
+	xsg_string *buffer;
 };
 
 static void *get_time(void *arg) {
@@ -43,7 +43,7 @@ static void *get_time(void *arg) {
 		len = strftime(args->buffer->str, args->buffer->len, args->format, loctime);
 		if (len < args->buffer->len)
 			break;
-		args->buffer = g_string_set_size(args->buffer, args->buffer->len + 8);
+		args->buffer = xsg_string_set_size(args->buffer, args->buffer->len + 8);
 	}
 
 	g_message("Get (\"%s\") \"%s\"", args->format, args->buffer->str);
@@ -57,7 +57,7 @@ void parse(xsg_var *var, uint16_t id, uint64_t update) {
 	args = g_new0(struct time_args, 1);
 
 	args->format = xsg_conf_read_string();
-	args->buffer = g_string_sized_new(8);
+	args->buffer = xsg_string_sized_new(8);
 
 	var->type = XSG_STRING;
 	var->func = get_time;

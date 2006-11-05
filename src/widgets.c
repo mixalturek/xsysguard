@@ -555,7 +555,7 @@ static void parse_format(char *format, xsg_list *var_list) {
 	/* TODO */
 }
 
-static void string_format(GString *buffer, char *format, xsg_list *var_list) {
+static void string_format(xsg_string *buffer, char *format, xsg_list *var_list) {
 	/* TODO */
 }
 
@@ -2406,7 +2406,7 @@ typedef struct {
 	alignment_t alignment;
 	unsigned int tab_width;
 	xsg_list *var_list;
-	GString *buffer;
+	xsg_string *buffer;
 } text_t;
 
 static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2474,7 +2474,7 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	text->alignment = CENTER; /* FIXME */
 	text->tab_width = 0;
 	text->var_list = NULL;
-	text->buffer = g_string_new("");
+	text->buffer = xsg_string_new("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
@@ -2537,7 +2537,7 @@ typedef struct {
 	alignment_t alignment;
 	unsigned int tab_width;
 	xsg_list *var_list;
-	GString *buffer;
+	xsg_string *buffer;
 } imagetext_t;
 
 static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2604,7 +2604,7 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	imagetext->alignment = CENTER; /* FIXME */
 	imagetext->tab_width = 0;
 	imagetext->var_list = NULL;
-	imagetext->buffer = g_string_new("");
+	imagetext->buffer = xsg_string_new("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {

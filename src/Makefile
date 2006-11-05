@@ -64,7 +64,7 @@ endif
 COMMON_SRC     := main.c main.h 
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
-COMMON_SRC     += list.c
+COMMON_SRC     += utils.c
 COMMON_SRC     += var.h
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c var.c widgets.c widgets.h
 XSYSGUARDD_SRC := $(COMMON_SRC) xsysguardd.c vard.c

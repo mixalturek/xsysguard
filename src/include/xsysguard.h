@@ -23,7 +23,9 @@
 
 #define _GNU_SOURCE 1
 
+#include <unistd.h>
 #include <inttypes.h>
+
 #include <glib.h>
 
 /******************************************************************************/
@@ -46,6 +48,8 @@
 typedef int bool;
 
 typedef struct _xsg_list xsg_list;
+typedef struct _xsg_string xsg_string;
+typedef struct _xsg_var xsg_var;
 
 struct _xsg_list {
 	void *data;
@@ -53,11 +57,17 @@ struct _xsg_list {
 	xsg_list *prev;
 };
 
-typedef struct {
+struct _xsg_string {
+	char *str;
+	size_t len;
+	size_t allocated_len;
+};
+
+struct _xsg_var {
 	uint8_t type;
 	void *(*func)(void *args);
 	void *args;
-} xsg_var;
+};
 
 typedef void (*xsg_modules_parse_func)(xsg_var *var, uint16_t id, uint64_t update);
 typedef char *(*xsg_modules_info_func)(void);
@@ -97,7 +107,7 @@ void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
 
 /******************************************************************************
- * list.c
+ * utils.c
  ******************************************************************************/
 
 xsg_list *xsg_list_append(xsg_list *list, void *data);
@@ -105,6 +115,16 @@ xsg_list *xsg_list_prepend(xsg_list *list, void *data);
 xsg_list *xsg_list_last(xsg_list *list);
 unsigned int xsg_list_length(xsg_list *list);
 void *xsg_list_nth_data(xsg_list *list, unsigned int n);
+
+xsg_string *xsg_string_new(const char *init);
+xsg_string *xsg_string_sized_new(size_t dfl_size);
+xsg_string *xsg_string_assign(xsg_string *string, const char *rval);
+xsg_string *xsg_string_truncate(xsg_string *string, size_t len);
+xsg_string *xsg_string_set_size(xsg_string *string, ssize_t len);
+xsg_string *xsg_string_append(xsg_string *string, const char *val);
+xsg_string *xsg_string_append_len(xsg_string *string, const char *val, ssize_t len);
+xsg_string *xsg_string_insert_len(xsg_string *string, ssize_t pos, const char *val, ssize_t len);
+void xsg_string_printf(xsg_string *string, const char *format, ...);
 
 /******************************************************************************/
 

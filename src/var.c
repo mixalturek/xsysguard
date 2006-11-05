@@ -31,7 +31,7 @@ typedef struct _var_t {
 	uint8_t type;
 	void *(*func)(void *args);
 	void *args;
-	GString *buffer;
+	xsg_string *buffer;
 	uint16_t var_id;
 	uint16_t widget_id;
 } var_t;
@@ -146,20 +146,20 @@ static int64_t get_string_as_int(void *value) {
 	return i;
 }
 
-static char *get_double_as_string(void *value, GString *buffer) {
+static char *get_double_as_string(void *value, xsg_string *buffer) {
 	double d;
 
 	d = * (double *) value;
-	g_string_printf(buffer, "%g", d);
+	xsg_string_printf(buffer, "%g", d);
 	g_message("Conversion(DOUBLE->STRING) %g -> %s", d, buffer->str);
 	return buffer->str;
 }
 
-static char *get_int_as_string(void *value, GString *buffer) {
+static char *get_int_as_string(void *value, xsg_string *buffer) {
 	int64_t i;
 
 	i = * (int64_t *) value;
-	g_string_printf(buffer, "%" PRId64, i);
+	xsg_string_printf(buffer, "%" PRId64, i);
 	g_message("Conversion(INT->STRING) %" PRId64 " -> %s", i, buffer->str);
 	return buffer->str;
 }
@@ -212,11 +212,11 @@ char *xsg_var_as_string(uint16_t var_id) {
 	value = (var->func)(var->args);
 
 	if (var->buffer == NULL)
-		var->buffer = g_string_new("");
+		var->buffer = xsg_string_new("");
 
 	switch (var->type) {
 		case XSG_STRING:
-			g_string_assign(var->buffer, (char *) value);
+			xsg_string_assign(var->buffer, (char *) value);
 		case XSG_INT:
 			get_int_as_string(value, var->buffer);
 		case XSG_DOUBLE:
