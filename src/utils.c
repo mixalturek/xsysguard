@@ -272,3 +272,22 @@ void xsg_string_printf(xsg_string *string, const char *format, ...) {
 	va_end(args);
 }
 
+char *xsg_string_free(xsg_string *string, bool free_segment) {
+	char *segment;
+
+	if (string == NULL)
+		return NULL;
+
+	if (free_segment) {
+		g_free(string->str);
+		segment = NULL;
+	} else {
+		segment = string->str;
+	}
+
+	g_free(string);
+
+	return segment;
+}
+
+
