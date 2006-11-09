@@ -51,8 +51,6 @@
 #define ARGB_GREEN_IDX	1
 #define ARGB_BLUE_IDX	0
 
-#define ALL_VARS 0xffff
-
 typedef union {
 	uint32_t uint;
 	struct {
@@ -80,7 +78,7 @@ struct _widget_t {
 	unsigned int width;
 	unsigned int height;
 	void (*render_func)(widget_t *widget, Imlib_Image buffer, int x, int y, bool solid_bg);
-	void (*update_func)(widget_t *widget, uint16_t var_id);
+	void (*update_func)(widget_t *widget, uint16_t val_id);
 	void (*scroll_func)(widget_t *widget);
 	void *data;
 };
@@ -539,7 +537,7 @@ static alignment_t parse_alignment() {
  ******************************************************************************/
 
 typedef struct {
-	uint16_t var_id;
+	uint16_t val_id;
 	double mult;
 	double add;
 	uint8_t type;
@@ -549,13 +547,13 @@ typedef struct {
 		double d;
 		char *s;
 	} value;
-} text_var_t;
+} text_val_t;
 
-static void parse_format(char *format, xsg_list *var_list) {
+static void parse_format(char *format, xsg_list *val_list) {
 	/* TODO */
 }
 
-static void string_format(xsg_string *buffer, char *format, xsg_list *var_list) {
+static void string_format(xsg_string *buffer, char *format, xsg_list *val_list) {
 	/* TODO */
 }
 
@@ -869,7 +867,7 @@ static void scroll_and_update(uint64_t count) {
 		if (widget->update && (count % widget->update) == 0) {
 
 			(widget->scroll_func)(widget);
-			(widget->update_func)(widget, ALL_VARS);
+			(widget->update_func)(widget, 0);
 
 			window.updates = imlib_update_append_rect(window.updates,
 					widget->xoffset, widget->yoffset,
@@ -884,12 +882,12 @@ static void scroll_and_update(uint64_t count) {
 				0, 0, window.mask, ShapeSet);
 }
 
-void xsg_widgets_update(uint16_t widget_id, uint16_t var_id) {
+void xsg_widgets_update(uint16_t widget_id, uint16_t val_id) {
 	widget_t *widget;
 
 	widget = get_widget(widget_id);
 
-	(widget->update_func)(widget, var_id);
+	(widget->update_func)(widget, val_id);
 
 	window.updates = imlib_update_append_rect(window.updates,
 			widget->xoffset, widget->yoffset,
@@ -1225,7 +1223,7 @@ static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 			line->x2 - up_x, line->y2 - up_y, 0);
 }
 
-static void update_line(widget_t *widget, uint16_t var_id) {
+static void update_line(widget_t *widget, uint16_t val_id) {
 	return;
 }
 
@@ -1329,7 +1327,7 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	}
 }
 
-static void update_rectangle(widget_t *widget, uint16_t var_id) {
+static void update_rectangle(widget_t *widget, uint16_t val_id) {
 	return;
 }
 
@@ -1428,7 +1426,7 @@ static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int u
 				ellipse->a, ellipse->b);
 }
 
-static void update_ellipse(widget_t *widget, uint16_t var_id) {
+static void update_ellipse(widget_t *widget, uint16_t val_id) {
 	return;
 }
 
@@ -1506,7 +1504,7 @@ static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int u
 	imlib_polygon_free(poly);
 }
 
-static void update_polygon(widget_t *widget, uint16_t var_id) {
+static void update_polygon(widget_t *widget, uint16_t val_id) {
 	return;
 }
 
@@ -1593,7 +1591,7 @@ static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_
 				widget->yoffset - up_y, widget->width, widget->height);
 }
 
-static void update_image(widget_t *widget, uint16_t var_id) {
+static void update_image(widget_t *widget, uint16_t val_id) {
 	return;
 }
 
@@ -1670,12 +1668,12 @@ void xsg_widgets_parse_image() {
 /******************************************************************************
  *
  * BarChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Mask <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Mult <mult>] [Add <add>] [AddPrev]
+ * + <value> <color> [ColorRange <angle> <count> <distance> <color> ...] [Mult <mult>] [Add <add>] [AddPrev]
  *
  ******************************************************************************/
 
 typedef struct {
-	uint16_t var_id;
+	uint16_t val_id;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double angle;
@@ -1683,7 +1681,7 @@ typedef struct {
 	double add;
 	bool add_prev;
 	double value;
-} barchart_var_t;
+} barchart_val_t;
 
 typedef struct {
 	angle_t *angle;
@@ -1692,12 +1690,12 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image mask;
-	xsg_list *var_list;
+	xsg_list *val_list;
 } barchart_t;
 
 static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	barchart_t *barchart;
-	barchart_var_t *barchart_var;
+	barchart_val_t *barchart_val;
 	double min, max;
 	xsg_list *l;
 	int clip_x, clip_y, clip_w, clip_h;
@@ -1716,9 +1714,9 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 		min = barchart->min;
 	} else {
 		min = G_MAXDOUBLE;
-		for (l = barchart->var_list; l; l = l->next) {
-			barchart_var = l->data;
-			min = MIN(min, barchart_var->value);
+		for (l = barchart->val_list; l; l = l->next) {
+			barchart_val = l->data;
+			min = MIN(min, barchart_val->value);
 		}
 		if (min == G_MAXDOUBLE)
 			return;
@@ -1728,9 +1726,9 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 		max = barchart->max;
 	} else {
 		max = G_MINDOUBLE;
-		for (l = barchart->var_list; l; l = l->next) {
-			barchart_var = l->data;
-			max = MAX(max, barchart_var->value);
+		for (l = barchart->val_list; l; l = l->next) {
+			barchart_val = l->data;
+			max = MAX(max, barchart_val->value);
 		}
 		if (max == G_MINDOUBLE)
 			return;
@@ -1751,9 +1749,9 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 	pixel_h = (max - min) / (double) height;
 
-	for (l = barchart->var_list; l; l = l->next) {
-		barchart_var = l->data;
-		value = barchart_var->value;
+	for (l = barchart->val_list; l; l = l->next) {
+		barchart_val = l->data;
+		value = barchart_val->value;
 		if (isnan(value))
 			continue;
 
@@ -1761,7 +1759,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 		clip_y = last_h;
 		clip_w = width;
 
-		if (barchart_var->add_prev) {
+		if (barchart_val->add_prev) {
 			clip_h = last_h + llround(value / pixel_h);
 			last_h = clip_h + clip_y;
 		} else {
@@ -1774,13 +1772,13 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if ((clip_w <= 0) || (clip_h <= 0))
 			continue;
 		imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
-		if (barchart_var->range) {
-			imlib_context_set_color_range(barchart_var->range);
+		if (barchart_val->range) {
+			imlib_context_set_color_range(barchart_val->range);
 			imlib_image_fill_color_range_rectangle(0, 0,
-					width, height, barchart_var->angle);
+					width, height, barchart_val->angle);
 		} else {
-			imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
-					barchart_var->color.blue, barchart_var->color.alpha);
+			imlib_context_set_color(barchart_val->color.red, barchart_val->color.green,
+					barchart_val->color.blue, barchart_val->color.alpha);
 			imlib_image_fill_rectangle(0, 0, width, height);
 		}
 	}
@@ -1810,24 +1808,24 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	imlib_free_image();
 }
 
-static void update_barchart(widget_t *widget, uint16_t var_id) {
+static void update_barchart(widget_t *widget, uint16_t val_id) {
 	barchart_t *barchart;
-	barchart_var_t *barchart_var;
+	barchart_val_t *barchart_val;
 	xsg_list *l;
 	double prev = 0.0;
 
 	barchart = (barchart_t *) widget->data;
-	for (l = barchart->var_list; l; l = l->next) {
-		barchart_var = l->data;
+	for (l = barchart->val_list; l; l = l->next) {
+		barchart_val = l->data;
 
-		if ((var_id == ALL_VARS) || (barchart_var->var_id == var_id)) {
-			barchart_var->value = xsg_var_as_double(barchart_var->var_id);
-			barchart_var->value *= barchart_var->mult;
-			barchart_var->value += barchart_var->add;
-			if (barchart_var->add_prev)
-				barchart_var->value += prev;
+		if ((val_id == 0) || (barchart_val->val_id == val_id)) {
+			barchart_val->value = xsg_var_get_double(barchart_val->val_id);
+			barchart_val->value *= barchart_val->mult;
+			barchart_val->value += barchart_val->add;
+			if (barchart_val->add_prev)
+				barchart_val->value += prev;
 		}
-		prev = barchart_var->value;
+		prev = barchart_val->value;
 	}
 }
 
@@ -1858,7 +1856,7 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 	barchart->const_min = FALSE;
 	barchart->const_max = FALSE;
 	barchart->mask = NULL;
-	barchart->var_list = NULL;
+	barchart->val_list = NULL;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
@@ -1886,34 +1884,34 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);;
 }
 
-void xsg_widgets_parse_barchart_var(uint16_t var_id) {
+void xsg_widgets_parse_barchart_val(uint16_t val_id) {
 	widget_t *widget;
 	barchart_t *barchart;
-	barchart_var_t *barchart_var;
+	barchart_val_t *barchart_val;
 
-	barchart_var = g_new0(barchart_var_t, 1);
+	barchart_val = g_new0(barchart_val_t, 1);
 
-	barchart_var->var_id = var_id;
-	barchart_var->color = uint2color(xsg_conf_read_color());
-	barchart_var->range = NULL;
-	barchart_var->angle = 0.0;
-	barchart_var->mult = 1.0;
-	barchart_var->add = 0.0;
-	barchart_var->add_prev = FALSE;
-	barchart_var->value = nan("");
+	barchart_val->val_id = val_id;
+	barchart_val->color = uint2color(xsg_conf_read_color());
+	barchart_val->range = NULL;
+	barchart_val->angle = 0.0;
+	barchart_val->mult = 1.0;
+	barchart_val->add = 0.0;
+	barchart_val->add_prev = FALSE;
+	barchart_val->value = nan("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
-			barchart_var->range = imlib_create_color_range();
-			imlib_context_set_color_range(barchart_var->range);
+			barchart_val->range = imlib_create_color_range();
+			imlib_context_set_color_range(barchart_val->range);
 			imlib_context_set_color(
-					barchart_var->color.red,
-					barchart_var->color.green,
-					barchart_var->color.blue,
-					barchart_var->color.alpha);
+					barchart_val->color.red,
+					barchart_val->color.green,
+					barchart_val->color.blue,
+					barchart_val->color.alpha);
 			imlib_add_color_to_color_range(0);
-			barchart_var->angle = xsg_conf_read_double();
+			barchart_val->angle = xsg_conf_read_double();
 			count = xsg_conf_read_uint();
 			for (i = 0; i < count; i++) {
 				int distance;
@@ -1928,11 +1926,11 @@ void xsg_widgets_parse_barchart_var(uint16_t var_id) {
 				imlib_add_color_to_color_range(distance);
 			}
 		} else if (xsg_conf_find_command("AddPrev")) {
-			barchart_var->add_prev = TRUE;
+			barchart_val->add_prev = TRUE;
 		} else if (xsg_conf_find_command("Add")) {
-			barchart_var->add = xsg_conf_read_double();
+			barchart_val->add = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Mult")) {
-			barchart_var->mult = xsg_conf_read_double();
+			barchart_val->mult = xsg_conf_read_double();
 		} else {
 			xsg_conf_error("ColorRange, AddPrev, Add or Mult");
 		}
@@ -1940,24 +1938,24 @@ void xsg_widgets_parse_barchart_var(uint16_t var_id) {
 
 	widget = xsg_list_last(widget_list)->data;
 	barchart = widget->data;
-	barchart->var_list = xsg_list_append(barchart->var_list, barchart_var);
+	barchart->val_list = xsg_list_append(barchart->val_list, barchart_val);
 }
 
 /******************************************************************************
  *
  * LineChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [Mult <mult>] [Add <add>] [AddPrev]
+ * + <value> <color> [Mult <mult>] [Add <add>] [AddPrev]
  *
  ******************************************************************************/
 
 typedef struct {
-	uint16_t var_id;
+	uint16_t val_id;
 	Imlib_Color color;
 	double mult;
 	double add;
 	bool add_prev;
 	double *values;
-} linechart_var_t;
+} linechart_val_t;
 
 typedef struct {
 	angle_t *angle;
@@ -1966,13 +1964,13 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	xsg_list *var_list;
+	xsg_list *val_list;
 	unsigned int value_index;
 } linechart_t;
 
 static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	linechart_t *linechart;
-	linechart_var_t *linechart_var;
+	linechart_val_t *linechart_val;
 	double min, max;
 	xsg_list *l;
 	Imlib_Image tmp;
@@ -1998,10 +1996,10 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 		min = linechart->min;
 	} else {
 		min = G_MAXDOUBLE;
-		for (l = linechart->var_list; l; l = l->next) {
-			linechart_var = l->data;
+		for (l = linechart->val_list; l; l = l->next) {
+			linechart_val = l->data;
 			for (i = 0; i < width; i++)
-				min = MIN(min, linechart_var->values[i]);
+				min = MIN(min, linechart_val->values[i]);
 		}
 		if (min == G_MAXDOUBLE)
 			return;
@@ -2011,10 +2009,10 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 		max = linechart->max;
 	} else {
 		max = G_MINDOUBLE;
-		for (l = linechart->var_list; l; l = l->next) {
-			linechart_var = l->data;
+		for (l = linechart->val_list; l; l = l->next) {
+			linechart_val = l->data;
 			for (i = 0; i < width; i++)
-				max = MAX(max, linechart_var->values[i]);
+				max = MAX(max, linechart_val->values[i]);
 		}
 		if (max == G_MINDOUBLE)
 			return;
@@ -2029,8 +2027,8 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 
 	pixel_h = (max - min) / (double) height;
 
-	for (l= linechart->var_list; l; l = l->next) {
-		linechart_var = l->data;
+	for (l= linechart->val_list; l; l = l->next) {
+		linechart_val = l->data;
 
 		poly = imlib_polygon_new();
 
@@ -2040,7 +2038,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 
 			j = (i + linechart->value_index) % width;
 			x = width - i;
-			y = height - linechart_var->values[j] * pixel_h;
+			y = height - linechart_val->values[j] * pixel_h;
 
 			imlib_polygon_add_point(poly, x, y); /* FIXME */
 		}
@@ -2069,26 +2067,26 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	imlib_free_image();
 }
 
-static void update_linechart(widget_t *widget, uint16_t var_id) {
+static void update_linechart(widget_t *widget, uint16_t val_id) {
 	linechart_t *linechart;
-	linechart_var_t *linechart_var;
+	linechart_val_t *linechart_val;
 	xsg_list *l;
 	double prev = 0.0;
 	unsigned int i;
 
 	linechart = (linechart_t *) widget->data;
 	i = linechart->value_index;
-	for (l = linechart->var_list; l; l = l->next) {
-		linechart_var = l->data;
+	for (l = linechart->val_list; l; l = l->next) {
+		linechart_val = l->data;
 
-		if ((var_id == ALL_VARS) || (linechart_var->var_id == var_id)) {
-			linechart_var->values[i] = xsg_var_as_double(linechart_var->var_id);
-			linechart_var->values[i] *= linechart_var->mult;
-			linechart_var->values[i] += linechart_var->add;
-			if (linechart_var->add_prev)
-				linechart_var->values[i] += prev;
+		if ((val_id == 0) || (linechart_val->val_id == val_id)) {
+			linechart_val->values[i] = xsg_var_get_double(linechart_val->val_id);
+			linechart_val->values[i] *= linechart_val->mult;
+			linechart_val->values[i] += linechart_val->add;
+			if (linechart_val->add_prev)
+				linechart_val->values[i] += prev;
 		}
-		prev = linechart_var->values[i];
+		prev = linechart_val->values[i];
 	}
 }
 
@@ -2129,7 +2127,7 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 	linechart->const_min = FALSE;
 	linechart->const_max = FALSE;
 	linechart->background = NULL;
-	linechart->var_list = NULL;
+	linechart->val_list = NULL;
 	linechart->value_index = 0;
 
 	while (!xsg_conf_find_newline()) {
@@ -2158,39 +2156,39 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_linechart_var(uint16_t var_id) {
+void xsg_widgets_parse_linechart_val(uint16_t val_id) {
 	widget_t *widget;
 	linechart_t *linechart;
-	linechart_var_t * linechart_var;
+	linechart_val_t * linechart_val;
 	unsigned int width, i;
 
 	widget = xsg_list_last(widget_list)->data;
 	linechart = widget->data;
-	linechart_var = g_new0(linechart_var_t, 1);
-	linechart->var_list = xsg_list_append(linechart->var_list, linechart_var);
+	linechart_val = g_new0(linechart_val_t, 1);
+	linechart->val_list = xsg_list_append(linechart->val_list, linechart_val);
 
 	if (linechart->angle)
 		width = linechart->angle->width;
 	else
 		width = widget->width;
 
-	linechart_var->var_id = var_id;
-	linechart_var->color = uint2color(xsg_conf_read_color());
-	linechart_var->mult = 1.0;
-	linechart_var->add = 0.0;
-	linechart_var->add_prev = FALSE;
-	linechart_var->values = g_new0(double, width);
+	linechart_val->val_id = val_id;
+	linechart_val->color = uint2color(xsg_conf_read_color());
+	linechart_val->mult = 1.0;
+	linechart_val->add = 0.0;
+	linechart_val->add_prev = FALSE;
+	linechart_val->values = g_new0(double, width);
 
 	for (i = 0; i < width; i++)
-		linechart_var->values[i] = nan("");
+		linechart_val->values[i] = nan("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("AddPrev")) {
-			linechart_var->add_prev = TRUE;
+			linechart_val->add_prev = TRUE;
 		} else if (xsg_conf_find_command("Add")) {
-			linechart_var->add = xsg_conf_read_double();
+			linechart_val->add = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Mult")) {
-			linechart_var->mult = xsg_conf_read_double();
+			linechart_val->mult = xsg_conf_read_double();
 		} else {
 			xsg_conf_error("AddPrev, Add or Mult");
 		}
@@ -2200,12 +2198,12 @@ void xsg_widgets_parse_linechart_var(uint16_t var_id) {
 /******************************************************************************
  *
  * AreaChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [Mult <mult>] [Add <add>] [AddPrev]
+ * + <value> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [Mult <mult>] [Add <add>] [AddPrev]
  *
  ******************************************************************************/
 
 typedef struct {
-	uint16_t var_id;
+	uint16_t val_id;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double angle;
@@ -2215,7 +2213,7 @@ typedef struct {
 	double add;
 	bool add_prev;
 	double *values;
-} areachart_var_t;
+} areachart_val_t;
 
 typedef struct {
 	angle_t *angle;
@@ -2224,7 +2222,7 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	xsg_list *var_list;
+	xsg_list *val_list;
 	unsigned int value_index;
 } areachart_t;
 
@@ -2233,26 +2231,26 @@ static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	/* TODO */
 }
 
-static void update_areachart(widget_t *widget, uint16_t var_id) {
+static void update_areachart(widget_t *widget, uint16_t val_id) {
 	areachart_t *areachart;
-	areachart_var_t *areachart_var;
+	areachart_val_t *areachart_val;
 	xsg_list *l;
 	double prev = 0.0;
 	unsigned int i;
 
 	areachart = (areachart_t *) widget->data;
 	i = areachart->value_index;
-	for (l = areachart->var_list; l ; l = l->next) {
-		areachart_var = l->data;
+	for (l = areachart->val_list; l ; l = l->next) {
+		areachart_val = l->data;
 
-		if ((var_id == ALL_VARS) || (areachart_var->var_id == var_id)) {
-			areachart_var->values[i] = xsg_var_as_double(areachart_var->var_id);
-			areachart_var->values[i] *= areachart_var->mult;
-			areachart_var->values[i] += areachart_var->add;
-			if (areachart_var->add_prev)
-				areachart_var->values[i] += prev;
+		if ((val_id == 0) || (areachart_val->val_id == val_id)) {
+			areachart_val->values[i] = xsg_var_get_double(areachart_val->val_id);
+			areachart_val->values[i] *= areachart_val->mult;
+			areachart_val->values[i] += areachart_val->add;
+			if (areachart_val->add_prev)
+				areachart_val->values[i] += prev;
 		}
-		prev = areachart_var->values[i];
+		prev = areachart_val->values[i];
 	}
 }
 
@@ -2293,7 +2291,7 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 	areachart->const_min = FALSE;
 	areachart->const_max = FALSE;
 	areachart->background = NULL;
-	areachart->var_list = NULL;
+	areachart->val_list = NULL;
 	areachart->value_index = 0;
 
 	while (!xsg_conf_find_newline()) {
@@ -2322,47 +2320,47 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_areachart_var(uint16_t var_id) {
+void xsg_widgets_parse_areachart_val(uint16_t val_id) {
 	widget_t *widget;
 	areachart_t *areachart;
-	areachart_var_t *areachart_var;
+	areachart_val_t *areachart_val;
 	unsigned int width, i;
 
 	widget = xsg_list_last(widget_list)->data;
 	areachart = widget->data;
-	areachart_var = g_new0(areachart_var_t, 1);
-	areachart->var_list = xsg_list_append(areachart->var_list, areachart_var);
+	areachart_val = g_new0(areachart_val_t, 1);
+	areachart->val_list = xsg_list_append(areachart->val_list, areachart_val);
 
 	if (areachart->angle)
 		width = areachart->angle->width;
 	else
 		width = widget->width;
 
-	areachart_var->var_id = var_id;
-	areachart_var->color = uint2color(xsg_conf_read_color());
-	areachart_var->range = NULL;
-	areachart_var->angle = 0.0;
-	areachart_var->top_height = 0;
-	areachart_var->mult = 1.0;
-	areachart_var->add = 0.0;
-	areachart_var->add_prev = FALSE;
-	areachart_var->values = g_new0(double, width);
+	areachart_val->val_id = val_id;
+	areachart_val->color = uint2color(xsg_conf_read_color());
+	areachart_val->range = NULL;
+	areachart_val->angle = 0.0;
+	areachart_val->top_height = 0;
+	areachart_val->mult = 1.0;
+	areachart_val->add = 0.0;
+	areachart_val->add_prev = FALSE;
+	areachart_val->values = g_new0(double, width);
 
 	for (i = 0; i < width; i++)
-		areachart_var->values[i] = nan("");
+		areachart_val->values[i] = nan("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
-			areachart_var->range = imlib_create_color_range();
-			imlib_context_set_color_range(areachart_var->range);
+			areachart_val->range = imlib_create_color_range();
+			imlib_context_set_color_range(areachart_val->range);
 			imlib_context_set_color(
-					areachart_var->color.red,
-					areachart_var->color.green,
-					areachart_var->color.blue,
-					areachart_var->color.alpha);
+					areachart_val->color.red,
+					areachart_val->color.green,
+					areachart_val->color.blue,
+					areachart_val->color.alpha);
 			imlib_add_color_to_color_range(0);
-			areachart_var->angle = xsg_conf_read_double();
+			areachart_val->angle = xsg_conf_read_double();
 			count = xsg_conf_read_uint();
 			for (i = 0; i < count; i++) {
 				int distance;
@@ -2377,14 +2375,14 @@ void xsg_widgets_parse_areachart_var(uint16_t var_id) {
 				imlib_add_color_to_color_range(distance);
 			}
 		} else if (xsg_conf_find_command("Top")) {
-			areachart_var->top_height = xsg_conf_read_uint();
-			areachart_var->top_color = uint2color(xsg_conf_read_color());
+			areachart_val->top_height = xsg_conf_read_uint();
+			areachart_val->top_color = uint2color(xsg_conf_read_color());
 		} else if (xsg_conf_find_command("AddPrev")) {
-			areachart_var->add_prev = TRUE;
+			areachart_val->add_prev = TRUE;
 		} else if (xsg_conf_find_command("Add")) {
-			areachart_var->add = xsg_conf_read_double();
+			areachart_val->add = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Mult")) {
-			areachart_var->mult = xsg_conf_read_double();
+			areachart_val->mult = xsg_conf_read_double();
 		} else {
 			xsg_conf_error("ColorRange, Top, AddPrev, Add or Mult");
 		}
@@ -2394,7 +2392,7 @@ void xsg_widgets_parse_areachart_var(uint16_t var_id) {
 /******************************************************************************
  *
  * Text <update> <x> <y> <width> <height> <color> <font> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable> [Mult <mult>] [Add <add>]
+ * + <value> [Mult <mult>] [Add <add>]
  *
  ******************************************************************************/
 
@@ -2405,7 +2403,7 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list *var_list;
+	xsg_list *val_list;
 	xsg_string *buffer;
 } text_t;
 
@@ -2414,28 +2412,28 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 	/* TODO */
 }
 
-static void update_text(widget_t *widget, uint16_t var_id) {
+static void update_text(widget_t *widget, uint16_t val_id) {
 	text_t *text;
-	text_var_t *text_var;
+	text_val_t *text_val;
 	xsg_list *l;
 
 	text = (text_t *)widget->data;
-	for (l = text->var_list; l; l = l->next) {
-		text_var = l->data;
+	for (l = text->val_list; l; l = l->next) {
+		text_val = l->data;
 
-		if (text_var->type == 0)
-			parse_format(text->format, text->var_list);
+		if (text_val->type == 0)
+			parse_format(text->format, text->val_list);
 
-		if ((var_id == ALL_VARS) || (var_id == text_var->var_id)) {
-			switch (text_var->type) {
+		if ((val_id == 0) || (val_id == text_val->val_id)) {
+			switch (text_val->type) {
 				case XSG_INT:
-					text_var->value.i = xsg_var_as_int(text_var->var_id);
+					text_val->value.i = xsg_var_get_int(text_val->val_id);
 					break;
 				case XSG_DOUBLE:
-					text_var->value.d = xsg_var_as_double(text_var->var_id);
+					text_val->value.d = xsg_var_get_double(text_val->val_id);
 					break;
 				case XSG_STRING:
-					text_var->value.s = xsg_var_as_string(text_var->var_id);
+					text_val->value.s = xsg_var_get_string(text_val->val_id);
 					break;
 				default:
 					g_error("Unexpected type");
@@ -2443,7 +2441,7 @@ static void update_text(widget_t *widget, uint16_t var_id) {
 		}
 	}
 
-	string_format(text->buffer, text->format, text->var_list);
+	string_format(text->buffer, text->format, text->val_list);
 }
 
 static void scroll_text(widget_t *widget) {
@@ -2473,7 +2471,7 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	text->angle = NULL;
 	text->alignment = CENTER; /* FIXME */
 	text->tab_width = 0;
-	text->var_list = NULL;
+	text->val_list = NULL;
 	text->buffer = xsg_string_new("");
 
 	while (!xsg_conf_find_newline()) {
@@ -2496,27 +2494,27 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_text_var(uint16_t var_id) {
+void xsg_widgets_parse_text_val(uint16_t val_id) {
 	widget_t *widget;
 	text_t *text;
-	text_var_t *text_var;
+	text_val_t *text_val;
 
 	widget = xsg_list_last(widget_list)->data;
 	text = widget->data;
-	text_var = g_new0(text_var_t, 1);
-	text->var_list = xsg_list_append(text->var_list, text_var);
+	text_val = g_new0(text_val_t, 1);
+	text->val_list = xsg_list_append(text->val_list, text_val);
 
-	text_var->var_id = var_id;
-	text_var->mult = 1.0;
-	text_var->add = 0.0;
-	text_var->type = 0;
-	text_var->value.u = 0;
+	text_val->val_id = val_id;
+	text_val->mult = 1.0;
+	text_val->add = 0.0;
+	text_val->type = 0;
+	text_val->value.u = 0;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Add")) {
-			text_var->add = xsg_conf_read_double();
+			text_val->add = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Mult")) {
-			text_var->mult = xsg_conf_read_double();
+			text_val->mult = xsg_conf_read_double();
 		} else {
 			xsg_conf_error("Add or Mult");
 		}
@@ -2526,7 +2524,7 @@ void xsg_widgets_parse_text_var(uint16_t var_id) {
 /******************************************************************************
  *
  * ImageText <update> <x> <y> <width> <height> <filemask> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable> [Mult <mult>] [Add <add>]
+ * + <value> [Mult <mult>] [Add <add>]
  *
  ******************************************************************************/
 
@@ -2536,7 +2534,7 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list *var_list;
+	xsg_list *val_list;
 	xsg_string *buffer;
 } imagetext_t;
 
@@ -2545,28 +2543,28 @@ static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int
 	/* TODO */
 }
 
-static void update_imagetext(widget_t *widget, uint16_t var_id) {
+static void update_imagetext(widget_t *widget, uint16_t val_id) {
 	imagetext_t *imagetext;
-	text_var_t *text_var;
+	text_val_t *text_val;
 	xsg_list *l;
 
 	imagetext = (imagetext_t *)widget->data;
-	for (l = imagetext->var_list; l; l = l->next) {
-		text_var = l->data;
+	for (l = imagetext->val_list; l; l = l->next) {
+		text_val = l->data;
 
-		if (text_var->type == 0)
-			parse_format(imagetext->format, imagetext->var_list);
+		if (text_val->type == 0)
+			parse_format(imagetext->format, imagetext->val_list);
 
-		if ((var_id == ALL_VARS) || (var_id == text_var->var_id)) {
-			switch (text_var->type) {
+		if ((val_id == 0) || (val_id == text_val->val_id)) {
+			switch (text_val->type) {
 				case XSG_INT:
-					text_var->value.i = xsg_var_as_int(text_var->var_id);
+					text_val->value.i = xsg_var_get_int(text_val->val_id);
 					break;
 				case XSG_DOUBLE:
-					text_var->value.d = xsg_var_as_double(text_var->var_id);
+					text_val->value.d = xsg_var_get_double(text_val->val_id);
 					break;
 				case XSG_STRING:
-					text_var->value.s = xsg_var_as_string(text_var->var_id);
+					text_val->value.s = xsg_var_get_string(text_val->val_id);
 					break;
 				default:
 					g_error("Unexpected type");
@@ -2574,7 +2572,7 @@ static void update_imagetext(widget_t *widget, uint16_t var_id) {
 		}
 	}
 
-	string_format(imagetext->buffer, imagetext->format, imagetext->var_list);
+	string_format(imagetext->buffer, imagetext->format, imagetext->val_list);
 }
 
 static void scroll_imagetext(widget_t *widget) {
@@ -2603,7 +2601,7 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	imagetext->angle = NULL;
 	imagetext->alignment = CENTER; /* FIXME */
 	imagetext->tab_width = 0;
-	imagetext->var_list = NULL;
+	imagetext->val_list = NULL;
 	imagetext->buffer = xsg_string_new("");
 
 	while (!xsg_conf_find_newline()) {
@@ -2626,27 +2624,27 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_imagetext_var(uint16_t var_id) {
+void xsg_widgets_parse_imagetext_val(uint16_t val_id) {
 	widget_t *widget;
 	imagetext_t *imagetext;
-	text_var_t *text_var;
+	text_val_t *text_val;
 
 	widget = xsg_list_last(widget_list)->data;
 	imagetext = widget->data;
-	text_var = g_new0(text_var_t, 1);
-	imagetext->var_list = xsg_list_append(imagetext->var_list, text_var);
+	text_val = g_new0(text_val_t, 1);
+	imagetext->val_list = xsg_list_append(imagetext->val_list, text_val);
 
-	text_var->var_id = var_id;
-	text_var->mult = 1.0;
-	text_var->add = 0.0;
-	text_var->type = 0;
-	text_var->value.u = 0;
+	text_val->val_id = val_id;
+	text_val->mult = 1.0;
+	text_val->add = 0.0;
+	text_val->type = 0;
+	text_val->value.u = 0;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Add")) {
-			text_var->add = xsg_conf_read_double();
+			text_val->add = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Mult")) {
-			text_var->mult = xsg_conf_read_double();
+			text_val->mult = xsg_conf_read_double();
 		} else {
 			xsg_conf_error("Add or Mult");
 		}

@@ -26,7 +26,7 @@
 /*****************************************************************************/
 
 void xsg_widgets_init();
-void xsg_widgets_update(uint16_t widget_id, uint16_t var_id);
+void xsg_widgets_update(uint16_t widget_id, uint16_t val_id);
 
 /*****************************************************************************/
 
@@ -53,15 +53,15 @@ void xsg_widgets_parse_ellipse();
 void xsg_widgets_parse_polygon();
 void xsg_widgets_parse_image();
 void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_barchart_var(uint16_t var_id);
+void xsg_widgets_parse_barchart_val(uint16_t val_id);
 void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_linechart_var(uint16_t var_id);
+void xsg_widgets_parse_linechart_val(uint16_t val_id);
 void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_areachart_var(uint16_t var_id);
+void xsg_widgets_parse_areachart_val(uint16_t val_id);
 void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_text_var(uint16_t var_id);
+void xsg_widgets_parse_text_val(uint16_t val_id);
 void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_imagetext_var(uint16_t var_id);
+void xsg_widgets_parse_imagetext_val(uint16_t val_id);
 
 /******************************************************************************/
 

@@ -25,7 +25,6 @@
 
 #include "modules.h"
 #include "conf.h"
-#include "var.h"
 
 /******************************************************************************/
 
@@ -99,12 +98,11 @@ static void init() {
 
 /******************************************************************************/
 
-uint16_t xsg_modules_parse_var(uint64_t update, uint16_t id) {
+void xsg_modules_parse_var(xsg_var *var, uint64_t update, uint16_t id) {
 	xsg_modules_parse_func parse;
 	char *module_filename = NULL;
 	void *module;
 	module_t *m = NULL;
-	xsg_var var;
 	xsg_list *l;
 
 	if (!modules_list)
@@ -134,16 +132,14 @@ uint16_t xsg_modules_parse_var(uint64_t update, uint16_t id) {
 	if (!parse)
 		g_error("Cannot load module \"%s\": %s", m->name, dlerror());
 
-	var.type = 0;
-	var.func = NULL;
-	var.args = NULL;
+	var->type = 0;
+	var->func = NULL;
+	var->args = NULL;
 
-	parse(&var, id, update);
+	parse(var, id, update);
 
-	if (var.type == 0 || var.func == NULL)
+	if (var->type == 0 || var->func == NULL)
 		g_error("Module \"%s\" must set var->type and var->func != 0", module_filename);
-
-	return xsg_var_add(&var, update, id);
 }
 
 void xsg_modules_list() {

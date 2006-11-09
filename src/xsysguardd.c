@@ -110,7 +110,7 @@ static void read_config(FILE *stream) {
 			config = g_new0(char, config_len + 1);
 			read_data(config, config_len, stream);
 			xsg_conf_set_buffer(config);
-			xsg_modules_parse_var(update, var_id);
+			xsg_var_parse(update, var_id);
 			g_free(config);
 		} else {
 			g_error("inconsistent configuration");

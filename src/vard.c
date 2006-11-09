@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include "var.h"
+#include "modules.h"
 
 /******************************************************************************/
 
@@ -95,15 +96,18 @@ void xsg_var_update(uint16_t var_id) {
 
 /******************************************************************************/
 
-uint16_t xsg_var_add(xsg_var *var, uint64_t update, uint16_t var_id) {
+uint16_t xsg_var_parse(uint64_t update, uint16_t var_id) {
+	xsg_var var;
 	var_t *v;
+
+	xsg_modules_parse_var(&var, update, var_id);
 
 	v = g_new0(var_t, 1);
 
 	v->update = update;
-	v->type = var->type;
-	v->func = var->func;
-	v->args = var->args;
+	v->type = var.type;
+	v->func = var.func;
+	v->args = var.args;
 	v->var_id = var_id;
 
 	var_list = xsg_list_append(var_list, v);

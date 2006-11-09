@@ -109,7 +109,7 @@ static void parse_env() {
 
 static void parse_config(char *config_buffer) {
 	uint64_t update;
-	uint16_t var_id;
+	uint16_t val_id;
 	uint16_t widget_id;
 
 	xsg_conf_set_buffer(config_buffer);
@@ -171,34 +171,24 @@ static void parse_config(char *config_buffer) {
 			xsg_widgets_parse_image();
 		} else if (xsg_conf_find_command("BarChart")) {
 			xsg_widgets_parse_barchart(&update, &widget_id);
-			while (xsg_conf_find_command("+")) {
-				var_id = xsg_modules_parse_var(update, widget_id);
-				xsg_widgets_parse_barchart_var(var_id);
-			}
+			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
+				xsg_widgets_parse_barchart_val(val_id);
 		} else if (xsg_conf_find_command("LineChart")) {
 			xsg_widgets_parse_linechart(&update, &widget_id);
-			while (xsg_conf_find_command("+")) {
-				var_id = xsg_modules_parse_var(update, widget_id);
-				xsg_widgets_parse_linechart_var(var_id);
-			}
+			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
+				xsg_widgets_parse_linechart_val(val_id);
 		} else if (xsg_conf_find_command("AreaChart")) {
 			xsg_widgets_parse_areachart(&update, &widget_id);
-			while (xsg_conf_find_command("+")) {
-				var_id = xsg_modules_parse_var(update, widget_id);
-				xsg_widgets_parse_areachart_var(var_id);
-			}
+			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
+				xsg_widgets_parse_areachart_val(val_id);
 		} else if (xsg_conf_find_command("Text")) {
 			xsg_widgets_parse_text(&update, &widget_id);
-			while (xsg_conf_find_command("+")) {
-				var_id = xsg_modules_parse_var(update, widget_id);
-				xsg_widgets_parse_text_var(var_id);
-			}
+			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
+				xsg_widgets_parse_text_val(val_id);
 		} else if (xsg_conf_find_command("ImageText")) {
 			xsg_widgets_parse_imagetext(&update, &widget_id);
-			while (xsg_conf_find_command("+")) {
-				var_id = xsg_modules_parse_var(update, widget_id);
-				xsg_widgets_parse_imagetext_var(var_id);
-			}
+			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
+				xsg_widgets_parse_imagetext_val(val_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart, Text or ImageText");
