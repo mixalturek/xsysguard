@@ -23,29 +23,17 @@
 /******************************************************************************/
 
 static void *get_int(void *arg) {
-	int64_t *i;
-
-	i = (int64_t *) arg;
-	g_message("Get (int) %" PRId64, *i);
-
+	g_message("Get (int) %" PRId64, *(int64_t *) arg);
 	return arg;
 }
 
 static void *get_double(void *arg) {
-	double *d;
-
-	d = (double *) arg;
-	g_message("Get (double) %f", *d);
-
+	g_message("Get (double) %f", *(double *) arg);
 	return arg;
 }
 
 static void *get_string(void *arg) {
-	char *s;
-
-	s = (char *) arg;
-	g_message("Get (string) \"%s\"", s);
-
+	g_message("Get (string) \"%s\"", (char *) arg);
 	return arg;
 }
 
