@@ -31,21 +31,21 @@
  *
  ******************************************************************************/
 
-xsg_list *xsg_list_last(xsg_list *list) {
+xsg_list_t *xsg_list_last(xsg_list_t *list) {
 	if (list)
 		while (list->next)
 			list = list->next;
 	return list;
 }
 
-void *xsg_list_nth_data(xsg_list *list, unsigned int n) {
+void *xsg_list_nth_data(xsg_list_t *list, unsigned int n) {
 	while ((n-- > 0) && list)
 		list = list->next;
 
 	return list ? list->data : NULL;
 }
 
-unsigned int xsg_list_length(xsg_list *list) {
+unsigned int xsg_list_length(xsg_list_t *list) {
 	unsigned int length;
 
 	length = 0;
@@ -57,11 +57,11 @@ unsigned int xsg_list_length(xsg_list *list) {
 	return length;
 }
 
-xsg_list *xsg_list_append(xsg_list *list, void *data) {
-	xsg_list *new_list;
-	xsg_list *last;
+xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
+	xsg_list_t *new_list;
+	xsg_list_t *last;
 
-	new_list = g_new0(xsg_list, 1);
+	new_list = g_new0(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = NULL;
 
@@ -76,10 +76,10 @@ xsg_list *xsg_list_append(xsg_list *list, void *data) {
 	}
 }
 
-xsg_list *xsg_list_prepend(xsg_list *list, void *data) {
-	xsg_list *new_list;
+xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
+	xsg_list_t *new_list;
 
-	new_list = g_new0(xsg_list, 1);
+	new_list = g_new0(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = list;
 
@@ -116,15 +116,15 @@ static size_t nearest_power(size_t base, size_t num) {
 	}
 }
 
-static void xsg_string_maybe_expand(xsg_string *string, size_t len) {
+static void xsg_string_maybe_expand(xsg_string_t *string, size_t len) {
 	if (string->len + len >= string->allocated_len) {
 		string->allocated_len = nearest_power(1, string->len + len + 1);
 		string->str = g_realloc(string->str, string->allocated_len);
 	}
 }
 
-xsg_string *xsg_string_new(const char *init) {
-	xsg_string *string;
+xsg_string_t *xsg_string_new(const char *init) {
+	xsg_string_t *string;
 
 	if (init == NULL || *init == '\0') {
 		string = xsg_string_sized_new(2);
@@ -138,8 +138,8 @@ xsg_string *xsg_string_new(const char *init) {
 	return string;
 }
 
-xsg_string *xsg_string_sized_new(size_t dfl_size) {
-	xsg_string *string = g_new0(xsg_string, 1);
+xsg_string_t *xsg_string_sized_new(size_t dfl_size) {
+	xsg_string_t *string = g_new0(xsg_string_t, 1);
 
 	string->allocated_len = 0;
 	string->len = 0;
@@ -151,7 +151,7 @@ xsg_string *xsg_string_sized_new(size_t dfl_size) {
 	return string;
 }
 
-xsg_string *xsg_string_assign(xsg_string *string, const char *rval) {
+xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) {
 	if (string == NULL)
 		return NULL;
 	if (rval == NULL)
@@ -165,7 +165,7 @@ xsg_string *xsg_string_assign(xsg_string *string, const char *rval) {
 	return string;
 }
 
-xsg_string *xsg_string_truncate(xsg_string *string, size_t len) {
+xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) {
 	if (string == NULL)
 		return NULL;
 
@@ -175,7 +175,7 @@ xsg_string *xsg_string_truncate(xsg_string *string, size_t len) {
 	return string;
 }
 
-xsg_string *xsg_string_set_size(xsg_string *string, ssize_t len) {
+xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) {
 	if (string == NULL)
 		return NULL;
 
@@ -188,7 +188,7 @@ xsg_string *xsg_string_set_size(xsg_string *string, ssize_t len) {
 	return string;
 }
 
-xsg_string *xsg_string_append(xsg_string *string, const char *val) {
+xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) {
 	if (string == NULL)
 		return NULL;
 	if (val == NULL)
@@ -197,7 +197,7 @@ xsg_string *xsg_string_append(xsg_string *string, const char *val) {
 	return xsg_string_insert_len(string, -1, val, -1);
 }
 
-xsg_string *xsg_string_append_len(xsg_string *string, const char *val, ssize_t len) {
+xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) {
 	if (string == NULL)
 		return NULL;
 	if (val == NULL)
@@ -205,7 +205,7 @@ xsg_string *xsg_string_append_len(xsg_string *string, const char *val, ssize_t l
 	return xsg_string_insert_len(string, -1, val, len);
 }
 
-xsg_string *xsg_string_insert_len(xsg_string *string, ssize_t pos, const char *val, ssize_t len) {
+xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len) {
 	if (string == NULL)
 		return NULL;
 	if (val == NULL)
@@ -253,7 +253,7 @@ xsg_string *xsg_string_insert_len(xsg_string *string, ssize_t pos, const char *v
 	return string;
 }
 
-static void xsg_string_append_printf_internal(xsg_string *string, const char *fmt, va_list args) {
+static void xsg_string_append_printf_internal(xsg_string_t *string, const char *fmt, va_list args) {
 	char *buffer;
 	int length;
 
@@ -262,7 +262,7 @@ static void xsg_string_append_printf_internal(xsg_string *string, const char *fm
 	g_free(buffer);
 }
 
-void xsg_string_printf(xsg_string *string, const char *format, ...) {
+void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
 	va_list args;
 
 	xsg_string_truncate(string, 0);
@@ -272,7 +272,7 @@ void xsg_string_printf(xsg_string *string, const char *format, ...) {
 	va_end(args);
 }
 
-char *xsg_string_free(xsg_string *string, bool free_segment) {
+char *xsg_string_free(xsg_string_t *string, bool free_segment) {
 	char *segment;
 
 	if (string == NULL)

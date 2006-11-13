@@ -45,7 +45,7 @@ typedef struct {
 
 /******************************************************************************/
 
-static xsg_list *modules_list = NULL;
+static xsg_list_t *modules_list = NULL;
 
 /******************************************************************************/
 
@@ -98,12 +98,12 @@ static void init() {
 
 /******************************************************************************/
 
-void xsg_modules_parse_var(xsg_var *var, uint64_t update, uint16_t id) {
+void xsg_modules_parse_var(xsg_var_t *var, uint64_t update, uint16_t id) {
 	xsg_modules_parse_func parse;
 	char *module_filename = NULL;
 	void *module;
 	module_t *m = NULL;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	if (!modules_list)
 		init();
@@ -148,7 +148,7 @@ void xsg_modules_list() {
 	char *module_filename;
 	void *module;
 	module_t *m = NULL;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	if (!modules_list)
 		init();

@@ -32,7 +32,7 @@ typedef struct _val_t val_t;
 
 struct _var_t {
 	char op;
-	void *(*op_func)(void *var_a, void *var_b, xsg_string *buffer);
+	void *(*op_func)(void *var_a, void *var_b, xsg_string_t *buffer);
 	uint8_t type;
 	void *(*func)(void *args);
 	void *args;
@@ -44,21 +44,21 @@ struct _var_t {
 struct _val_t {
 	uint64_t update;
 	uint8_t type;
-	xsg_list *var_list;
-	xsg_string *buffer;
+	xsg_list_t *var_list;
+	xsg_string_t *buffer;
 	uint16_t widget_id;
 	uint16_t val_id;
 };
 
 /******************************************************************************/
 
-static xsg_list *var_list = NULL;
-static xsg_list *val_list = NULL;
+static xsg_list_t *var_list = NULL;
+static xsg_list_t *val_list = NULL;
 
 /******************************************************************************/
 
 static var_t *get_var(uint16_t var_id) {
-	xsg_list *l;
+	xsg_list_t *l;
 	var_t *var;
 
 	for (l = var_list; l; l = l->next) {
@@ -73,7 +73,7 @@ static var_t *get_var(uint16_t var_id) {
 }
 
 static val_t *get_val(uint16_t val_id) {
-	xsg_list *l;
+	xsg_list_t *l;
 	val_t *val;
 
 	for (l = val_list; l; l = l->next) {
@@ -139,7 +139,7 @@ static void *get_string_as_int(void *value) {
 	return (void *) &i;
 }
 
-static char *get_double_as_string(void *value, xsg_string *buffer) {
+static char *get_double_as_string(void *value, xsg_string_t *buffer) {
 	double d;
 
 	d = * (double *) value;
@@ -148,7 +148,7 @@ static char *get_double_as_string(void *value, xsg_string *buffer) {
 	return buffer->str;
 }
 
-static char *get_int_as_string(void *value, xsg_string *buffer) {
+static char *get_int_as_string(void *value, xsg_string_t *buffer) {
 	int64_t i;
 
 	i = * (int64_t *) value;
@@ -159,14 +159,14 @@ static char *get_int_as_string(void *value, xsg_string *buffer) {
 
 /******************************************************************************/
 
-static void *set(void *var_a, void *var_b, xsg_string *buffer) {
+static void *set(void *var_a, void *var_b, xsg_string_t *buffer) {
 	return var_b;
 }
 
 /******************************************************************************/
 
 static const uint8_t add_int_int_type = XSG_INT;
-static void *add_int_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) var_b;
@@ -176,7 +176,7 @@ static void *add_int_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_int_double_type = XSG_DOUBLE;
-static void *add_int_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_int_as_double(var_a);
 	double *b = (double *) var_b;
@@ -186,7 +186,7 @@ static void *add_int_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_int_string_type = XSG_INT;
-static void *add_int_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -196,7 +196,7 @@ static void *add_int_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_double_int_type = XSG_DOUBLE;
-static void *add_double_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) get_int_as_double(var_b);
@@ -206,7 +206,7 @@ static void *add_double_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_double_double_type = XSG_DOUBLE;
-static void *add_double_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) var_b;
@@ -216,7 +216,7 @@ static void *add_double_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_double_string_type = XSG_DOUBLE;
-static void *add_double_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) get_string_as_double(var_b);
@@ -226,7 +226,7 @@ static void *add_double_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_string_int_type = XSG_INT;
-static void *add_string_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -236,7 +236,7 @@ static void *add_string_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_string_double_type = XSG_DOUBLE;
-static void *add_string_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_string_as_double(var_a);
 	double *b = (double *) var_b;
@@ -246,7 +246,7 @@ static void *add_string_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t add_string_string_type = XSG_DOUBLE;
-static void *add_string_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *add_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_string_as_double(var_a);
 	double *b = (double *) get_string_as_double(var_b);
@@ -258,7 +258,7 @@ static void *add_string_string(void *var_a, void *var_b, xsg_string *buffer) {
 /******************************************************************************/
 
 static const uint8_t mult_int_int_type = XSG_INT;
-static void *mult_int_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) var_b;
@@ -268,7 +268,7 @@ static void *mult_int_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_int_double_type = XSG_DOUBLE;
-static void *mult_int_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_int_as_double(var_a);
 	double *b = (double *) var_b;
@@ -278,7 +278,7 @@ static void *mult_int_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_int_string_type = XSG_INT;
-static void *mult_int_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -288,7 +288,7 @@ static void *mult_int_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_double_int_type = XSG_DOUBLE;
-static void *mult_double_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) get_int_as_double(var_b);
@@ -298,7 +298,7 @@ static void *mult_double_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_double_double_type = XSG_DOUBLE;
-static void *mult_double_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) var_b;
@@ -308,7 +308,7 @@ static void *mult_double_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_double_string_type = XSG_DOUBLE;
-static void *mult_double_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) var_a;
 	double *b = (double *) get_string_as_double(var_b);
@@ -318,7 +318,7 @@ static void *mult_double_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_string_int_type = XSG_INT;
-static void *mult_string_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -328,7 +328,7 @@ static void *mult_string_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_string_double_type = XSG_DOUBLE;
-static void *mult_string_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_string_as_double(var_a);
 	double *b = (double *) var_b;
@@ -338,7 +338,7 @@ static void *mult_string_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mult_string_string_type = XSG_DOUBLE;
-static void *mult_string_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mult_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static double res;
 	double *a = (double *) get_string_as_double(var_a);
 	double *b = (double *) get_string_as_double(var_b);
@@ -350,7 +350,7 @@ static void *mult_string_string(void *var_a, void *var_b, xsg_string *buffer) {
 /******************************************************************************/
 
 static const uint8_t div_int_int_type = XSG_INT;
-static void *div_int_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) var_b;
@@ -360,7 +360,7 @@ static void *div_int_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_int_double_type = XSG_INT;
-static void *div_int_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -370,7 +370,7 @@ static void *div_int_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_int_string_type = XSG_INT;
-static void *div_int_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -380,7 +380,7 @@ static void *div_int_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_double_int_type = XSG_INT;
-static void *div_double_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -390,7 +390,7 @@ static void *div_double_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_double_double_type = XSG_INT;
-static void *div_double_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -400,7 +400,7 @@ static void *div_double_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_double_string_type = XSG_INT;
-static void *div_double_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -410,7 +410,7 @@ static void *div_double_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_string_int_type = XSG_INT;
-static void *div_string_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -420,7 +420,7 @@ static void *div_string_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_string_double_type = XSG_INT;
-static void *div_string_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -430,7 +430,7 @@ static void *div_string_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t div_string_string_type = XSG_INT;
-static void *div_string_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *div_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -442,7 +442,7 @@ static void *div_string_string(void *var_a, void *var_b, xsg_string *buffer) {
 /******************************************************************************/
 
 static const uint8_t mod_int_int_type = XSG_INT;
-static void *mod_int_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) var_b;
@@ -452,7 +452,7 @@ static void *mod_int_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_int_double_type = XSG_INT;
-static void *mod_int_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -462,7 +462,7 @@ static void *mod_int_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_int_string_type = XSG_INT;
-static void *mod_int_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) var_a;
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -472,7 +472,7 @@ static void *mod_int_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_double_int_type = XSG_INT;
-static void *mod_double_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -482,7 +482,7 @@ static void *mod_double_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_double_double_type = XSG_INT;
-static void *mod_double_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -492,7 +492,7 @@ static void *mod_double_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_double_string_type = XSG_INT;
-static void *mod_double_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_double_as_int(var_a);
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -502,7 +502,7 @@ static void *mod_double_string(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_string_int_type = XSG_INT;
-static void *mod_string_int(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) var_b;
@@ -512,7 +512,7 @@ static void *mod_string_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_string_double_type = XSG_INT;
-static void *mod_string_double(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
@@ -522,7 +522,7 @@ static void *mod_string_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t mod_string_string_type = XSG_INT;
-static void *mod_string_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *mod_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	static int64_t res;
 	int64_t *a = (int64_t *) get_string_as_int(var_a);
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
@@ -534,8 +534,8 @@ static void *mod_string_string(void *var_a, void *var_b, xsg_string *buffer) {
 /******************************************************************************/
 
 static const uint8_t cat_int_int_type = XSG_STRING;
-static void *cat_int_int(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	get_int_as_string(var_a, buffer);
 	get_int_as_string(var_b, tmp);
@@ -545,8 +545,8 @@ static void *cat_int_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_int_double_type = XSG_STRING;
-static void *cat_int_double(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	get_int_as_string(var_a, buffer);
 	get_double_as_string(var_b, tmp);
@@ -556,15 +556,15 @@ static void *cat_int_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_int_string_type = XSG_STRING;
-static void *cat_int_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *cat_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	get_int_as_string(var_a, buffer);
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
 
 static const uint8_t cat_double_int_type = XSG_STRING;
-static void *cat_double_int(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	get_double_as_string(var_a, buffer);
 	get_int_as_string(var_b, tmp);
@@ -574,8 +574,8 @@ static void *cat_double_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_double_double_type = XSG_STRING;
-static void *cat_double_double(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	get_double_as_string(var_a, buffer);
 	get_double_as_string(var_b, tmp);
@@ -585,15 +585,15 @@ static void *cat_double_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_double_string_type = XSG_STRING;
-static void *cat_double_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *cat_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	get_double_as_string(var_a, buffer);
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
 
 static const uint8_t cat_string_int_type = XSG_STRING;
-static void *cat_string_int(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	xsg_string_assign(buffer, var_a);
 	get_int_as_string(var_b, tmp);
@@ -603,8 +603,8 @@ static void *cat_string_int(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_string_double_type = XSG_STRING;
-static void *cat_string_double(void *var_a, void *var_b, xsg_string *buffer) {
-	xsg_string *tmp = xsg_string_new(NULL);
+static void *cat_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
+	xsg_string_t *tmp = xsg_string_new(NULL);
 
 	xsg_string_assign(buffer, var_a);
 	get_double_as_string(var_b, tmp);
@@ -614,7 +614,7 @@ static void *cat_string_double(void *var_a, void *var_b, xsg_string *buffer) {
 }
 
 static const uint8_t cat_string_string_type = XSG_STRING;
-static void *cat_string_string(void *var_a, void *var_b, xsg_string *buffer) {
+static void *cat_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
@@ -622,7 +622,7 @@ static void *cat_string_string(void *var_a, void *var_b, xsg_string *buffer) {
 /******************************************************************************/
 
 static void *calc(val_t *val) {
-	xsg_list *l;
+	xsg_list_t *l;
 	var_t *var;
 	void *value;
 	void *reg = NULL;
@@ -720,13 +720,13 @@ char *xsg_var_get_string(uint16_t val_id) {
 /******************************************************************************/
 
 void update_op_funcs(val_t *val) {
-	xsg_list *l;
+	xsg_list_t *l;
 	uint8_t type = 0;
 
 	g_debug("Begin update_op_funcs");
 
 	for (l = val->var_list; l; l = l->next) {
-		void *(*op_func)(void*, void*, xsg_string*) = NULL;
+		void *(*op_func)(void*, void*, xsg_string_t*) = NULL;
 		var_t *var = l->data;
 		char op = var->op;
 		uint8_t type_a = type;
@@ -1092,7 +1092,7 @@ uint16_t xsg_var_parse(uint64_t update, uint16_t widget_id) {
 
 	do {
 		var_t *v;
-		xsg_var var;
+		xsg_var_t var;
 
 		xsg_modules_parse_var(&var, update, widget_id);
 

@@ -24,9 +24,9 @@
 
 /******************************************************************************/
 
-static xsg_list *init_list = NULL;
-static xsg_list *update_list = NULL;
-static xsg_list *shutdown_list = NULL;
+static xsg_list_t *init_list = NULL;
+static xsg_list_t *update_list = NULL;
+static xsg_list_t *shutdown_list = NULL;
 
 static uint64_t counter = 0;
 static uint64_t interval = 1000;
@@ -52,7 +52,7 @@ void xsg_main_add_shutdown_func(void (*func)(void)) {
 /******************************************************************************/
 
 static bool update(void *data) {
-	xsg_list *l;
+	xsg_list_t *l;
 
 	counter++;
 	g_message("Tick %" PRIu64, counter);
@@ -67,7 +67,7 @@ static bool update(void *data) {
 void xsg_main_loop() {
 	GMainLoop *loop;
 	GSource *timeout;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	timeout = g_timeout_source_new(interval);
 	g_source_set_callback(timeout, update, NULL, NULL);

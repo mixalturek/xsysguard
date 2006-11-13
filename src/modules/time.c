@@ -25,7 +25,7 @@
 
 struct time_args {
 	char *format;
-	xsg_string *buffer;
+	xsg_string_t *buffer;
 };
 
 static void *get_time(void *arg) {
@@ -51,7 +51,7 @@ static void *get_time(void *arg) {
 	return (void *) args->buffer->str;
 }
 
-void parse(xsg_var *var, uint16_t id, uint64_t update) {
+void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	struct time_args *args;
 
 	args = g_new0(struct time_args, 1);

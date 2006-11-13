@@ -37,7 +37,7 @@ typedef struct _var_t {
 
 /******************************************************************************/
 
-static xsg_list *var_list = NULL;
+static xsg_list_t *var_list = NULL;
 
 /******************************************************************************/
 
@@ -61,7 +61,7 @@ static void send_var(var_t *v) {
 }
 
 static void update(uint64_t count) {
-	xsg_list *l;
+	xsg_list_t *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -74,7 +74,7 @@ static void update(uint64_t count) {
 /******************************************************************************/
 
 void xsg_var_set_type(uint16_t var_id, uint8_t type) {
-	xsg_list *l;
+	xsg_list_t *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -84,7 +84,7 @@ void xsg_var_set_type(uint16_t var_id, uint8_t type) {
 }
 
 void xsg_var_update(uint16_t var_id) {
-	xsg_list *l;
+	xsg_list_t *l;
 	var_t *v;
 
 	for (l = var_list; l; l = l->next) {
@@ -97,7 +97,7 @@ void xsg_var_update(uint16_t var_id) {
 /******************************************************************************/
 
 uint16_t xsg_var_parse(uint64_t update, uint16_t var_id) {
-	xsg_var var;
+	xsg_var_t var;
 	var_t *v;
 
 	xsg_modules_parse_var(&var, update, var_id);

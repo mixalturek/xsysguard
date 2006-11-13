@@ -310,11 +310,11 @@ typedef struct {
 	void (*(func))();
 } stat_t;
 
-xsg_list *stat_list = NULL;
+xsg_list_t *stat_list = NULL;
 
 static void add_stat(uint64_t update, void (*(func))()) {
 	stat_t *stat = 0;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	/* find matching entry in stat_list */
 	for (l = stat_list; l; l = l->next) {
@@ -341,7 +341,7 @@ static void add_stat(uint64_t update, void (*(func))()) {
 
 void update_stats(uint64_t count) {
 	stat_t *stat;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	for (l = stat_list; l; l = l->next) {
 		stat = l->data;
@@ -448,7 +448,7 @@ static void *get_host_info_uptime(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_host_info(xsg_var *var) {
+static void parse_host_info(xsg_var_t *var) {
 
 	if (xsg_conf_find_command("os_name")) {
 		var->type = XSG_STRING;
@@ -574,7 +574,7 @@ static void *get_cpu_stats_total(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_cpu_stats(xsg_var *var) {
+static void parse_cpu_stats(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -693,7 +693,7 @@ static void *get_cpu_stats_diff_total(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_cpu_stats_diff(xsg_var *var) {
+static void parse_cpu_stats_diff(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -799,7 +799,7 @@ static void *get_cpu_percents_nice(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_cpu_percents(xsg_var *var) {
+static void parse_cpu_percents(xsg_var_t *var) {
 
 	var->type = XSG_DOUBLE;
 
@@ -877,7 +877,7 @@ static void *get_mem_stats_cache(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_mem_stats(xsg_var *var) {
+static void parse_mem_stats(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -938,7 +938,7 @@ static void *get_load_stats_min15(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_load_stats(xsg_var *var) {
+static void parse_load_stats(xsg_var_t *var) {
 
 	var->type = XSG_DOUBLE;
 
@@ -984,7 +984,7 @@ static void *get_user_stats_num_entries(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_user_stats(xsg_var *var) {
+static void parse_user_stats(xsg_var_t *var) {
 
 	if (xsg_conf_find_command("name_list")) {
 		var->type = XSG_STRING;
@@ -1042,7 +1042,7 @@ static void *get_swap_stats_free(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_swap_stats(xsg_var *var) {
+static void parse_swap_stats(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -1407,7 +1407,7 @@ static void *get_fs_stats_avail_blocks(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_fs_stats(xsg_var *var) {
+static void parse_fs_stats(xsg_var_t *var) {
 	char *data;
 
 	data = xsg_conf_read_string();
@@ -1516,7 +1516,7 @@ static void *get_disk_io_stats_write_bytes(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_disk_io_stats(xsg_var *var) {
+static void parse_disk_io_stats(xsg_var_t *var) {
 	char *disk_name;
 
 	disk_name = xsg_conf_read_string();
@@ -1578,7 +1578,7 @@ static void *get_disk_io_stats_diff_write_bytes(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_disk_io_stats_diff(xsg_var *var) {
+static void parse_disk_io_stats_diff(xsg_var_t *var) {
 	char *disk_name;
 
 	disk_name = xsg_conf_read_string();
@@ -1725,7 +1725,7 @@ static void *get_network_io_stats_collisions(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_network_io_stats(xsg_var *var) {
+static void parse_network_io_stats(xsg_var_t *var) {
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
@@ -1882,7 +1882,7 @@ static void *get_network_io_stats_diff_collisions(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_network_io_stats_diff(xsg_var *var) {
+static void parse_network_io_stats_diff(xsg_var_t *var) {
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
@@ -1972,7 +1972,7 @@ static void *get_network_iface_stats_duplex(void *arg) {
 	return (void *) value;;
 }
 
-static void parse_network_iface_stats(xsg_var *var) {
+static void parse_network_iface_stats(xsg_var_t *var) {
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
@@ -2029,7 +2029,7 @@ static void *get_page_stats_pages_pageout(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_page_stats(xsg_var *var) {
+static void parse_page_stats(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -2073,7 +2073,7 @@ static void *get_page_stats_diff_pages_pageout(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_page_stats_diff(xsg_var *var) {
+static void parse_page_stats_diff(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -2702,7 +2702,7 @@ static void *get_process_stats_state(void *arg) {
 	return (void *) value;
 }
 
-static void parse_process_stats(xsg_var *var) {
+static void parse_process_stats(xsg_var_t *var) {
 	sg_process_stats *(*list_func)() = NULL;
 	char *list_order = NULL;
 	bool ascending = TRUE;
@@ -2898,7 +2898,7 @@ static void *get_process_count_zombie(void *arg) {
 	return (void *) &value;
 }
 
-static void parse_process_count(xsg_var *var) {
+static void parse_process_count(xsg_var_t *var) {
 
 	var->type = XSG_INT;
 
@@ -2933,7 +2933,7 @@ void shutdown_stats() {
 
 /******************************************************************************/
 
-void parse(xsg_var *var, uint16_t id, uint64_t update) {
+void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	static bool first_time = TRUE;
 
 	if (first_time) {

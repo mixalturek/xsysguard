@@ -37,7 +37,7 @@ static void *get_string(void *arg) {
 	return arg;
 }
 
-void parse(xsg_var *var, uint16_t id, uint64_t update) {
+void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	if (xsg_conf_find_command("int")) {
 		int64_t *i;
 

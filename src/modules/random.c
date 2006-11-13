@@ -32,7 +32,7 @@ static void *get_random(void *arg) {
 	return (void *) &d;
 }
 
-void parse(xsg_var *var, uint16_t id, uint64_t update) {
+void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	var->type = XSG_DOUBLE;
 	var->func = get_random;
 	var->args = NULL;

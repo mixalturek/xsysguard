@@ -118,7 +118,7 @@ typedef struct {
 
 /******************************************************************************/
 
-static xsg_list *widget_list = NULL;
+static xsg_list_t *widget_list = NULL;
 
 static window_t window = {
 	"xsysguard",      /* name */
@@ -549,11 +549,11 @@ typedef struct {
 	} value;
 } text_val_t;
 
-static void parse_format(char *format, xsg_list *val_list) {
+static void parse_format(char *format, xsg_list_t *val_list) {
 	/* TODO */
 }
 
-static void string_format(xsg_string *buffer, char *format, xsg_list *val_list) {
+static void string_format(xsg_string_t *buffer, char *format, xsg_list_t *val_list) {
 	/* TODO */
 }
 
@@ -809,7 +809,7 @@ static void render() {
 	Imlib_Updates update;
 	Imlib_Image buffer;
 	bool solid_bg;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	window.updates = imlib_updates_merge_for_rendering(window.updates,
 			window.width, window.height);
@@ -858,7 +858,7 @@ static void render() {
 
 static void scroll_and_update(uint64_t count) {
 	widget_t *widget;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	for (l = widget_list; l; l = l->next) {
 
@@ -1690,14 +1690,14 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image mask;
-	xsg_list *val_list;
+	xsg_list_t *val_list;
 } barchart_t;
 
 static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	barchart_t *barchart;
 	barchart_val_t *barchart_val;
 	double min, max;
-	xsg_list *l;
+	xsg_list_t *l;
 	int clip_x, clip_y, clip_w, clip_h;
 	int last_h = 0;
 	double value;
@@ -1811,7 +1811,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 static void update_barchart(widget_t *widget, uint16_t val_id) {
 	barchart_t *barchart;
 	barchart_val_t *barchart_val;
-	xsg_list *l;
+	xsg_list_t *l;
 	double prev = 0.0;
 
 	barchart = (barchart_t *) widget->data;
@@ -1964,7 +1964,7 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	xsg_list *val_list;
+	xsg_list_t *val_list;
 	unsigned int value_index;
 } linechart_t;
 
@@ -1972,7 +1972,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	linechart_t *linechart;
 	linechart_val_t *linechart_val;
 	double min, max;
-	xsg_list *l;
+	xsg_list_t *l;
 	Imlib_Image tmp;
 	ImlibPolygon poly;
 	double pixel_h;
@@ -2070,7 +2070,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_linechart(widget_t *widget, uint16_t val_id) {
 	linechart_t *linechart;
 	linechart_val_t *linechart_val;
-	xsg_list *l;
+	xsg_list_t *l;
 	double prev = 0.0;
 	unsigned int i;
 
@@ -2222,7 +2222,7 @@ typedef struct {
 	bool const_min;
 	bool const_max;
 	Imlib_Image background;
-	xsg_list *val_list;
+	xsg_list_t *val_list;
 	unsigned int value_index;
 } areachart_t;
 
@@ -2234,7 +2234,7 @@ static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_areachart(widget_t *widget, uint16_t val_id) {
 	areachart_t *areachart;
 	areachart_val_t *areachart_val;
-	xsg_list *l;
+	xsg_list_t *l;
 	double prev = 0.0;
 	unsigned int i;
 
@@ -2403,8 +2403,8 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list *val_list;
-	xsg_string *buffer;
+	xsg_list_t *val_list;
+	xsg_string_t *buffer;
 } text_t;
 
 static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2415,7 +2415,7 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 static void update_text(widget_t *widget, uint16_t val_id) {
 	text_t *text;
 	text_val_t *text_val;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	text = (text_t *)widget->data;
 	for (l = text->val_list; l; l = l->next) {
@@ -2534,8 +2534,8 @@ typedef struct {
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list *val_list;
-	xsg_string *buffer;
+	xsg_list_t *val_list;
+	xsg_string_t *buffer;
 } imagetext_t;
 
 static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2546,7 +2546,7 @@ static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int
 static void update_imagetext(widget_t *widget, uint16_t val_id) {
 	imagetext_t *imagetext;
 	text_val_t *text_val;
-	xsg_list *l;
+	xsg_list_t *l;
 
 	imagetext = (imagetext_t *)widget->data;
 	for (l = imagetext->val_list; l; l = l->next) {
