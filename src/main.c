@@ -55,7 +55,7 @@ static bool update(void *data) {
 	xsg_list_t *l;
 
 	counter++;
-	g_message("Tick %" PRIu64, counter);
+	xsg_message("Tick %" PRIu64, counter);
 	for (l = update_list; l; l = l->next) {
 		void (*func)(uint64_t) = l->data;
 		func(counter);

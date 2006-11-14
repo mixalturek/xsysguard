@@ -23,10 +23,16 @@
 
 #define _GNU_SOURCE 1
 
+#include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <stdarg.h>
 
 #include <glib.h>
+
+#if (__GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+#pragma GCC system_header
+#endif
 
 /******************************************************************************/
 
@@ -110,12 +116,14 @@ void xsg_main_add_shutdown_func(void (*func)(void));
  * utils.c
  ******************************************************************************/
 
+/* list */
 xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_last(xsg_list_t *list);
 unsigned int xsg_list_length(xsg_list_t *list);
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
 
+/* string */
 xsg_string_t *xsg_string_new(const char *init);
 xsg_string_t *xsg_string_sized_new(size_t dfl_size);
 xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval);
@@ -126,6 +134,47 @@ xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize
 xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len);
 void xsg_string_printf(xsg_string_t *string, const char *format, ...);
 char *xsg_string_free(xsg_string_t *string, bool free_segment);
+
+/******************************************************************************
+ * logging
+ ******************************************************************************/
+
+#ifndef LOG_DOMAIN
+#define LOG_DOMAIN ((char *) 0)
+#endif /* LOG_DOMAIN */
+
+#define LOG_LEVEL_ERROR   0x00
+#define LOG_LEVEL_WARNING 0x01
+#define LOG_LEVEL_MESSAGE 0x02
+#define LOG_LEVEL_DEBUG   0x03
+
+void xsg_log(const char *domain, uint32_t level, const char *format, va_list args);
+
+static void xsg_error(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	xsg_log(LOG_DOMAIN, LOG_LEVEL_ERROR, format, args);
+	va_end(args);
+	abort();
+}
+static void xsg_warning(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	xsg_log(LOG_DOMAIN, LOG_LEVEL_WARNING, format, args);
+	va_end(args);
+}
+static void xsg_message(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	xsg_log(LOG_DOMAIN, LOG_LEVEL_MESSAGE, format, args);
+	va_end(args);
+}
+static void xsg_debug(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+	xsg_log(LOG_DOMAIN, LOG_LEVEL_DEBUG, format, args);
+	va_end(args);
+}
 
 /******************************************************************************/
 

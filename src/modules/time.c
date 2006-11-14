@@ -46,7 +46,7 @@ static void *get_time(void *arg) {
 		args->buffer = xsg_string_set_size(args->buffer, args->buffer->len + 8);
 	}
 
-	g_message("Get (\"%s\") \"%s\"", args->format, args->buffer->str);
+	xsg_message("Get (\"%s\") \"%s\"", args->format, args->buffer->str);
 
 	return (void *) args->buffer->str;
 }

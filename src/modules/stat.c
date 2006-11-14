@@ -97,9 +97,9 @@ static void libstatgrab_error() {
 	sg_set_error(SG_ERROR_NONE, "");
 
 	if (errnum > 0)
-		g_warning("libstatgrab: %s: %s: %s", error_str, error_arg, strerror(errnum));
+		xsg_warning("libstatgrab: %s: %s: %s", error_str, error_arg, strerror(errnum));
 	else
-		g_warning("libstatgrab: %s: %s", error_str, error_arg);
+		xsg_warning("libstatgrab: %s: %s", error_str, error_arg);
 }
 
 /******************************************************************************
@@ -109,65 +109,65 @@ static void libstatgrab_error() {
  ******************************************************************************/
 
 static void get_host_info() {
-	g_message("Get (host_info)");
+	xsg_message("Get (host_info)");
 	if (!(stats.host_info = sg_get_host_info())) {
-		g_warning("sg_get_host_info() returned NULL");
+		xsg_warning("sg_get_host_info() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_cpu_stats() {
-	g_message("Get (cpu_stats)");
+	xsg_message("Get (cpu_stats)");
 	if (!(stats.cpu_stats = sg_get_cpu_stats())) {
-		g_warning("sg_get_cpu_stats() returned NULL");
+		xsg_warning("sg_get_cpu_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_cpu_stats_diff() {
-	g_message("Get (cpu_stats_diff)");
+	xsg_message("Get (cpu_stats_diff)");
 	if (!(stats.cpu_stats_diff = sg_get_cpu_stats_diff())) {
-		g_warning("sg_get_cpu_stats_diff() returned NULL");
+		xsg_warning("sg_get_cpu_stats_diff() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_cpu_percents() {
-	g_message("Get (cpu_percents)");
+	xsg_message("Get (cpu_percents)");
 	if (!(stats.cpu_percents = sg_get_cpu_percents())) {
-		g_warning("sg_get_cpu_percents() returned NULL");
+		xsg_warning("sg_get_cpu_percents() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_mem_stats() {
-	g_message("Get (mem_stats)");
+	xsg_message("Get (mem_stats)");
 	if (!(stats.mem_stats = sg_get_mem_stats())) {
-		g_warning("sg_get_mem_stats() returned NULL");
+		xsg_warning("sg_get_mem_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_load_stats() {
-	g_message("Get (load_stats)");
+	xsg_message("Get (load_stats)");
 	if (!(stats.load_stats = sg_get_load_stats())) {
-		g_warning("sg_get_load_stats() returned NULL");
+		xsg_warning("sg_get_load_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_user_stats() {
-	g_message("Get (user_stats)");
+	xsg_message("Get (user_stats)");
 	if (!(stats.user_stats = sg_get_user_stats())) {
-		g_warning("sg_get_user_stats() returned NULL");
+		xsg_warning("sg_get_user_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_swap_stats() {
-	g_message("Get (swap_stats)");
+	xsg_message("Get (swap_stats)");
 	if (!(stats.swap_stats = sg_get_swap_stats())) {
-		g_warning("sg_get_swap_stats() returned NULL");
+		xsg_warning("sg_get_swap_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
@@ -175,9 +175,9 @@ static void get_swap_stats() {
 static void get_fs_stats() {
 	size_t size;
 
-	g_message("Get (fs_stats)");
+	xsg_message("Get (fs_stats)");
 	if (!(stats.fs_stats_by_device_name = sg_get_fs_stats(&stats.fs_entries))) {
-		g_warning("sg_get_fs_stats() returned NULL");
+		xsg_warning("sg_get_fs_stats() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -190,9 +190,9 @@ static void get_fs_stats() {
 }
 
 static void get_disk_io_stats() {
-	g_message("Get (disk_io_stats)");
+	xsg_message("Get (disk_io_stats)");
 	if (!(stats.disk_io_stats = sg_get_disk_io_stats(&stats.disk_io_entries))) {
-		g_warning("sg_get_disk_io_stats() returned NULL");
+		xsg_warning("sg_get_disk_io_stats() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -200,9 +200,9 @@ static void get_disk_io_stats() {
 }
 
 static void get_disk_io_stats_diff() {
-	g_message("Get (disk_io_stats_diff)");
+	xsg_message("Get (disk_io_stats_diff)");
 	if (!(stats.disk_io_stats_diff = sg_get_disk_io_stats_diff(&stats.disk_io_diff_entries))) {
-		g_warning("sg_get_disk_io_stats_diff() returned NULL");
+		xsg_warning("sg_get_disk_io_stats_diff() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -210,9 +210,9 @@ static void get_disk_io_stats_diff() {
 }
 
 static void get_network_io_stats() {
-	g_message("Get (network_io_stats)");
+	xsg_message("Get (network_io_stats)");
 	if (!(stats.network_io_stats = sg_get_network_io_stats(&stats.network_io_entries))) {
-		g_warning("sg_get_network_io_stats() returned NULL");
+		xsg_warning("sg_get_network_io_stats() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -220,9 +220,9 @@ static void get_network_io_stats() {
 }
 
 static void get_network_io_stats_diff() {
-	g_message("Get (network_io_stats_diff)");
+	xsg_message("Get (network_io_stats_diff)");
 	if (!(stats.network_io_stats_diff = sg_get_network_io_stats_diff(&stats.network_io_diff_entries))) {
-		g_warning("sg_get_network_io_stats_diff() returned NULL");
+		xsg_warning("sg_get_network_io_stats_diff() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -230,9 +230,9 @@ static void get_network_io_stats_diff() {
 }
 
 static void get_network_iface_stats() {
-	g_message("Get (network_iface_stats)");
+	xsg_message("Get (network_iface_stats)");
 	if (!(stats.network_iface_stats = sg_get_network_iface_stats(&stats.network_iface_entries))) {
-		g_warning("sg_get_network_iface_stats() returned NULL");
+		xsg_warning("sg_get_network_iface_stats() returned NULL");
 		libstatgrab_error();
 		return;
 	}
@@ -240,23 +240,23 @@ static void get_network_iface_stats() {
 }
 
 static void get_page_stats() {
-	g_message("Get (page_stats)");
+	xsg_message("Get (page_stats)");
 	if (!(stats.page_stats = sg_get_page_stats())) {
-		g_warning("sg_get_page_stats() returned NULL");
+		xsg_warning("sg_get_page_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_page_stats_diff() {
-	g_message("Get (page_stats_diff)");
+	xsg_message("Get (page_stats_diff)");
 	if (!(stats.page_stats_diff = sg_get_page_stats_diff())) {
-		g_warning("sg_get_page_stats_diff() returned NULL");
+		xsg_warning("sg_get_page_stats_diff() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_process_stats() {
-	g_message("Get (process_stats)");
+	xsg_message("Get (process_stats)");
 	if (stats.process_stats_by_name) {
 		free(stats.process_stats_by_name);
 		stats.process_stats_by_name = 0;
@@ -290,15 +290,15 @@ static void get_process_stats() {
 		stats.process_stats_by_time = 0;
 	}
 	if (!(stats.process_stats = sg_get_process_stats(&stats.process_entries))) {
-		g_warning("sg_get_process_stats() returned NULL");
+		xsg_warning("sg_get_process_stats() returned NULL");
 		libstatgrab_error();
 	}
 }
 
 static void get_process_count() {
-	g_message("Get (process_count)");
+	xsg_message("Get (process_count)");
 	if (!(stats.process_count = sg_get_process_count())) {
-		g_warning("sg_get_process_count() returned NULL");
+		xsg_warning("sg_get_process_count() returned NULL");
 		libstatgrab_error();
 	}
 }
@@ -364,7 +364,7 @@ static void *get_host_info_os_name(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (host_info:os_name) \"%s\"", value);
+	xsg_message("Get (host_info:os_name) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -377,7 +377,7 @@ static void *get_host_info_os_release(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (host_info:os_release) \"%s\"", value);
+	xsg_message("Get (host_info:os_release) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -390,7 +390,7 @@ static void *get_host_info_os_version(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (host_info:os_version) \"%s\"", value);
+	xsg_message("Get (host_info:os_version) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -403,7 +403,7 @@ static void *get_host_info_platform(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (host_info:platform) \"%s\"", value);
+	xsg_message("Get (host_info:platform) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -416,7 +416,7 @@ static void *get_host_info_hostname(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (host_info:hostname) \"%s\"", value);
+	xsg_message("Get (host_info:hostname) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -442,7 +442,7 @@ static void *get_host_info_uptime(void *arg) {
 		if (data->div)
 			value /= data->div;
 	}
-	g_message("Get (host_info:uptime:mod=%" PRIu64 ":div=%" PRIu64 ") %" PRId64,
+	xsg_message("Get (host_info:uptime:mod=%" PRIu64 ":div=%" PRIu64 ") %" PRId64,
 			data->mod, data->div, value);
 
 	return (void *) &value;
@@ -491,7 +491,7 @@ static void *get_cpu_stats_user(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:user) %" PRId64, value);
+	xsg_message("Get (cpu_stats:user) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -504,7 +504,7 @@ static void *get_cpu_stats_kernel(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:kernel) %" PRId64, value);
+	xsg_message("Get (cpu_stats:kernel) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -517,7 +517,7 @@ static void *get_cpu_stats_idle(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:idle) %" PRId64, value);
+	xsg_message("Get (cpu_stats:idle) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -530,7 +530,7 @@ static void *get_cpu_stats_iowait(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:iowait) %" PRId64, value);
+	xsg_message("Get (cpu_stats:iowait) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -543,7 +543,7 @@ static void *get_cpu_stats_swap(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:swap) %" PRId64, value);
+	xsg_message("Get (cpu_stats:swap) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -556,7 +556,7 @@ static void *get_cpu_stats_nice(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:nice) %" PRId64, value);
+	xsg_message("Get (cpu_stats:nice) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -569,7 +569,7 @@ static void *get_cpu_stats_total(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats:total) %" PRId64, value);
+	xsg_message("Get (cpu_stats:total) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -610,7 +610,7 @@ static void *get_cpu_stats_diff_user(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:user) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:user) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -623,7 +623,7 @@ static void *get_cpu_stats_diff_kernel(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:kernel) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:kernel) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -636,7 +636,7 @@ static void *get_cpu_stats_diff_idle(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:idle) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:idle) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -649,7 +649,7 @@ static void *get_cpu_stats_diff_iowait(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:iowait) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:iowait) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -662,7 +662,7 @@ static void *get_cpu_stats_diff_swap(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:swap) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:swap) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -675,7 +675,7 @@ static void *get_cpu_stats_diff_nice(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:nice) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:nice) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -688,7 +688,7 @@ static void *get_cpu_stats_diff_total(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (cpu_stats_diff:total) %" PRId64, value);
+	xsg_message("Get (cpu_stats_diff:total) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -729,7 +729,7 @@ static void *get_cpu_percents_user(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:user) %f", value);
+	xsg_message("Get (cpu_percents:user) %f", value);
 
 	return (void *) &value;
 }
@@ -742,7 +742,7 @@ static void *get_cpu_percents_kernel(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:kernel) %f", value);
+	xsg_message("Get (cpu_percents:kernel) %f", value);
 
 	return (void *) &value;
 }
@@ -755,7 +755,7 @@ static void *get_cpu_percents_idle(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:idle) %f", value);
+	xsg_message("Get (cpu_percents:idle) %f", value);
 
 	return (void *) &value;
 }
@@ -768,7 +768,7 @@ static void *get_cpu_percents_iowait(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:iowait) %f", value);
+	xsg_message("Get (cpu_percents:iowait) %f", value);
 
 	return (void *) &value;
 }
@@ -781,7 +781,7 @@ static void *get_cpu_percents_swap(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:swap) %f", value);
+	xsg_message("Get (cpu_percents:swap) %f", value);
 
 	return (void *) &value;
 }
@@ -794,7 +794,7 @@ static void *get_cpu_percents_nice(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (cpu_percents:nice) %f", value);
+	xsg_message("Get (cpu_percents:nice) %f", value);
 
 	return (void *) &value;
 }
@@ -833,7 +833,7 @@ static void *get_mem_stats_total(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (mem_stats:total) %" PRId64, value);
+	xsg_message("Get (mem_stats:total) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -846,7 +846,7 @@ static void *get_mem_stats_free(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (mem_stats:free) %" PRId64, value);
+	xsg_message("Get (mem_stats:free) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -859,7 +859,7 @@ static void *get_mem_stats_used(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (mem_stats:used) %" PRId64, value);
+	xsg_message("Get (mem_stats:used) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -872,7 +872,7 @@ static void *get_mem_stats_cache(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (mem_stats:cache) %" PRId64, value);
+	xsg_message("Get (mem_stats:cache) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -907,7 +907,7 @@ static void *get_load_stats_min1(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (load_stats:min1) %f", value);
+	xsg_message("Get (load_stats:min1) %f", value);
 
 	return (void *) &value;
 }
@@ -920,7 +920,7 @@ static void *get_load_stats_min5(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (load_stats:min5) %f", value);
+	xsg_message("Get (load_stats:min5) %f", value);
 
 	return (void *) &value;
 }
@@ -933,7 +933,7 @@ static void *get_load_stats_min15(void *arg) {
 	else
 		value = 0.0;
 
-	g_message("Get (load_stats:min15) %f", value);
+	xsg_message("Get (load_stats:min15) %f", value);
 
 	return (void *) &value;
 }
@@ -966,7 +966,7 @@ static void *get_user_stats_name_list(void *arg) {
 	else
 		value = "";
 
-	g_message("Get (user_stats:name_list) \"%s\"", value);
+	xsg_message("Get (user_stats:name_list) \"%s\"", value);
 
 	return (void *) value;
 }
@@ -979,7 +979,7 @@ static void *get_user_stats_num_entries(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (user_stats:num_entries) %" PRId64, value);
+	xsg_message("Get (user_stats:num_entries) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -1011,7 +1011,7 @@ static void *get_swap_stats_total(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (swap_stats:total) %" PRId64, value);
+	xsg_message("Get (swap_stats:total) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -1024,7 +1024,7 @@ static void *get_swap_stats_used(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (swap_stats:used) %" PRId64, value);
+	xsg_message("Get (swap_stats:used) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -1037,7 +1037,7 @@ static void *get_swap_stats_free(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (swap_stats:free) %" PRId64, value);
+	xsg_message("Get (swap_stats:free) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -1088,10 +1088,10 @@ static void *get_fs_stats_device_name(void *arg) {
 	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
 		value = ret->device_name;
 	} else {
-		g_message("Get (fs_stats:\"%s\":device_name) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":device_name) NOT FOUND", data);
 		return (void *) "";
 	}
-	g_message("Get (fs_stats:\"%s\":device_name) \"%s\"", data, value);
+	xsg_message("Get (fs_stats:\"%s\":device_name) \"%s\"", data, value);
 
 	return (void *) value;
 }
@@ -1108,10 +1108,10 @@ static void *get_fs_stats_fs_type(void *arg) {
 	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
 		value = ret->fs_type;
 	} else {
-		g_message("Get (fs_stats:\"%s\":fs_type) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":fs_type) NOT FOUND", data);
 		return (void *) "";
 	}
-	g_message("Get (fs_stats:\"%s\":fs_type) \"%s\"", data, value);
+	xsg_message("Get (fs_stats:\"%s\":fs_type) \"%s\"", data, value);
 
 	return (void *) value;
 }
@@ -1128,10 +1128,10 @@ static void *get_fs_stats_mnt_point(void *arg) {
 	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
 		value = ret->mnt_point;
 	} else {
-		g_message("Get (fs_stats:\"%s\":mnt_point) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":mnt_point) NOT FOUND", data);
 		return (void *) "";
 	}
-	g_message("Get (fs_stats:\"%s\":mnt_point) \"%s\"", data, value);
+	xsg_message("Get (fs_stats:\"%s\":mnt_point) \"%s\"", data, value);
 
 	return (void *) value;
 }
@@ -1149,10 +1149,10 @@ static void *get_fs_stats_size(void *arg) {
 		value = ret->size;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":size) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":size) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":size) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":size) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1170,10 +1170,10 @@ static void *get_fs_stats_used(void *arg) {
 		value = ret->used;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":used) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":used) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":used) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":used) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1191,10 +1191,10 @@ static void *get_fs_stats_avail(void *arg) {
 		value = ret->avail;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":avail) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":avail) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":avail) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":avail) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1212,10 +1212,10 @@ static void *get_fs_stats_total_inodes(void *arg) {
 		value = ret->total_inodes;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":total_inodes) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":total_inodes) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":total_inodes) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":total_inodes) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1233,10 +1233,10 @@ static void *get_fs_stats_used_inodes(void *arg) {
 		value = ret->used_inodes;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":used_inodes) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":used_inodes) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":used_inodes) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":used_inodes) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1254,10 +1254,10 @@ static void *get_fs_stats_free_inodes(void *arg) {
 		value = ret->free_inodes;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":free_inodes) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":free_inodes) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":free_inodes) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":free_inodes) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1275,10 +1275,10 @@ static void *get_fs_stats_avail_inodes(void *arg) {
 		value = ret->avail_inodes;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":avail_inodes) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":avail_inodes) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":avail_inodes) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":avail_inodes) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1296,10 +1296,10 @@ static void *get_fs_stats_io_size(void *arg) {
 		value = ret->io_size;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":io_size) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":io_size) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":io_size) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":io_size) %" PRId64, data, value);
 	return (void *) &value;
 }
 
@@ -1316,10 +1316,10 @@ static void *get_fs_stats_block_size(void *arg) {
 		value = ret->block_size;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":block_size) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":block_size) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":block_size) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":block_size) %" PRId64, data, value);
 	return (void *) &value;
 }
 
@@ -1336,10 +1336,10 @@ static void *get_fs_stats_total_blocks(void *arg) {
 		value = ret->total_blocks;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":total_blocks) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":total_blocks) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":total_blocks) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":total_blocks) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1357,10 +1357,10 @@ static void *get_fs_stats_free_blocks(void *arg) {
 		value = ret->free_blocks;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":free_blocks) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":free_blocks) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":free_blocks) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":free_blocks) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1378,10 +1378,10 @@ static void *get_fs_stats_used_blocks(void *arg) {
 		value = ret->used_blocks;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":used_blocks) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":used_blocks) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":used_blocks) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":used_blocks) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1399,10 +1399,10 @@ static void *get_fs_stats_avail_blocks(void *arg) {
 		value = ret->avail_blocks;
 	} else {
 		value = 0;
-		g_message("Get (fs_stats:\"%s\":avail_blocks) NOT FOUND", data);
+		xsg_message("Get (fs_stats:\"%s\":avail_blocks) NOT FOUND", data);
 		return (void *) &value;
 	}
-	g_message("Get (fs_stats:\"%s\":avail_blocks) %" PRId64, data, value);
+	xsg_message("Get (fs_stats:\"%s\":avail_blocks) %" PRId64, data, value);
 
 	return (void *) &value;
 }
@@ -1491,10 +1491,10 @@ static void *get_disk_io_stats_read_bytes(void *arg) {
 
 	if ((ret = get_disk_io_stats_for_disk_name(disk_name))) {
 		value = ret->read_bytes;
-		g_message("Get (disk_io_stats:\"%s\":read_bytes) %" PRId64, disk_name, value);
+		xsg_message("Get (disk_io_stats:\"%s\":read_bytes) %" PRId64, disk_name, value);
 	} else {
 		value = 0;
-		g_message("Get (disk_io_stats:\"%s\":read_bytes) NOT FOUND", disk_name);
+		xsg_message("Get (disk_io_stats:\"%s\":read_bytes) NOT FOUND", disk_name);
 	}
 	return (void *) &value;
 }
@@ -1508,10 +1508,10 @@ static void *get_disk_io_stats_write_bytes(void *arg) {
 
 	if ((ret = get_disk_io_stats_for_disk_name(disk_name))) {
 		value = ret->write_bytes;
-		g_message("Get (disk_io_stats:\"%s\":write_bytes) %" PRId64, disk_name, value);
+		xsg_message("Get (disk_io_stats:\"%s\":write_bytes) %" PRId64, disk_name, value);
 	} else {
 		value = 0;
-		g_message("Get (disk_io_stats:\"%s\":write_bytes) NOT FOUND", disk_name);
+		xsg_message("Get (disk_io_stats:\"%s\":write_bytes) NOT FOUND", disk_name);
 	}
 	return (void *) &value;
 }
@@ -1553,10 +1553,10 @@ static void *get_disk_io_stats_diff_read_bytes(void *arg) {
 
 	if ((ret = get_disk_io_stats_diff_for_disk_name(disk_name))) {
 		value = ret->read_bytes;
-		g_message("Get (disk_io_stats_diff:\"%s\":read_bytes) %" PRId64, disk_name, value);
+		xsg_message("Get (disk_io_stats_diff:\"%s\":read_bytes) %" PRId64, disk_name, value);
 	} else {
 		value = 0;
-		g_message("Get (disk_io_stats_diff:\"%s\":read_bytes) NOT FOUND", disk_name);
+		xsg_message("Get (disk_io_stats_diff:\"%s\":read_bytes) NOT FOUND", disk_name);
 	}
 	return (void *) &value;
 }
@@ -1570,10 +1570,10 @@ static void *get_disk_io_stats_diff_write_bytes(void *arg) {
 
 	if ((ret = get_disk_io_stats_diff_for_disk_name(disk_name))) {
 		value = ret->write_bytes;
-		g_message("Get (disk_io_stats_diff:\"%s\":write_bytes) %" PRId64, disk_name, value);
+		xsg_message("Get (disk_io_stats_diff:\"%s\":write_bytes) %" PRId64, disk_name, value);
 	} else {
 		value = 0;
-		g_message("Get (disk_io_stats_diff:\"%s\":write_bytes) NOT FOUND", disk_name);
+		xsg_message("Get (disk_io_stats_diff:\"%s\":write_bytes) NOT FOUND", disk_name);
 	}
 	return (void *) &value;
 }
@@ -1615,10 +1615,10 @@ static void *get_network_io_stats_tx(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->tx;
-		g_message("Get (network_io_stats:\"%s\":tx) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":tx) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":tx) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":tx) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1632,10 +1632,10 @@ static void *get_network_io_stats_rx(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->rx;
-		g_message("Get (network_io_stats:\"%s\":rx) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":rx) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":rx) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":rx) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1649,10 +1649,10 @@ static void *get_network_io_stats_ipackets(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->ipackets;
-		g_message("Get (network_io_stats:\"%s\":ipackets) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":ipackets) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":ipackets) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":ipackets) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1666,10 +1666,10 @@ static void *get_network_io_stats_opackets(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->opackets;
-		g_message("Get (network_io_stats:\"%s\":opackets) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":opackets) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":opackets) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":opackets) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1683,10 +1683,10 @@ static void *get_network_io_stats_ierrors(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->ierrors;
-		g_message("Get (network_io_stats:\"%s\":ierrors) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":ierrors) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":ierrors) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":ierrors) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1700,10 +1700,10 @@ static void *get_network_io_stats_oerrors(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->oerrors;
-		g_message("Get (network_io_stats:\"%s\":oerrors) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":oerrors) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":oerrors) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":oerrors) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1717,10 +1717,10 @@ static void *get_network_io_stats_collisions(void *arg) {
 
 	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
 		value = ret->collisions;
-		g_message("Get (network_io_stats:\"%s\":collisions) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats:\"%s\":collisions) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats:\"%s\":collisions) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats:\"%s\":collisions) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1772,10 +1772,10 @@ static void *get_network_io_stats_diff_tx(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->tx;
-		g_message("Get (network_io_stats_diff:\"%s\":tx) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":tx) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":tx) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":tx) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1789,10 +1789,10 @@ static void *get_network_io_stats_diff_rx(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->rx;
-		g_message("Get (network_io_stats_diff:\"%s\":rx) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":rx) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":rx) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":rx) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1806,10 +1806,10 @@ static void *get_network_io_stats_diff_ipackets(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->ipackets;
-		g_message("Get (network_io_stats_diff:\"%s\":ipackets) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":ipackets) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":ipackets) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":ipackets) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1823,10 +1823,10 @@ static void *get_network_io_stats_diff_opackets(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->opackets;
-		g_message("Get (network_io_stats_diff:\"%s\":opackets) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":opackets) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":opackets) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":opackets) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1840,10 +1840,10 @@ static void *get_network_io_stats_diff_ierrors(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->ierrors;
-		g_message("Get (network_io_stats_diff:\"%s\":ierrors) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":ierrors) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":ierrors) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":ierrors) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1857,10 +1857,10 @@ static void *get_network_io_stats_diff_oerrors(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->oerrors;
-		g_message("Get (network_io_stats_diff:\"%s\":oerrors) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":oerrors) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":oerrors) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":oerrors) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1874,10 +1874,10 @@ static void *get_network_io_stats_diff_collisions(void *arg) {
 
 	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
 		value = ret->collisions;
-		g_message("Get (network_io_stats_diff:\"%s\":collisions) %" PRId64, interface_name, value);
+		xsg_message("Get (network_io_stats_diff:\"%s\":collisions) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_io_stats_diff:\"%s\":collisions) NOT FOUND", interface_name);
+		xsg_message("Get (network_io_stats_diff:\"%s\":collisions) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1930,10 +1930,10 @@ static void *get_network_iface_stats_speed(void *arg) {
 
 	if ((ret = get_network_iface_stats_for_interface_name(interface_name))) {
 		value = ret->speed;
-		g_message("Get (network_iface_stats:\"%s\":speed) %" PRId64, interface_name, value);
+		xsg_message("Get (network_iface_stats:\"%s\":speed) %" PRId64, interface_name, value);
 	} else {
 		value = 0;
-		g_message("Get (network_iface_stats:\"%s\":speed) NOT FOUND", interface_name);
+		xsg_message("Get (network_iface_stats:\"%s\":speed) NOT FOUND", interface_name);
 	}
 	return (void *) &value;
 }
@@ -1955,7 +1955,7 @@ static void *get_network_iface_stats_duplex(void *arg) {
 	interface_name = data->interface_name;
 
 	if (!(ret = get_network_iface_stats_for_interface_name(interface_name))) {
-		g_message("Get (network_iface_stats:\"%s\":duplex:\"%s\":\"%s\":\"%s\") NOT FOUND",
+		xsg_message("Get (network_iface_stats:\"%s\":duplex:\"%s\":\"%s\":\"%s\") NOT FOUND",
 				interface_name, data->full, data->half, data->unknown);
 		return (void *) "";
 	}
@@ -1967,7 +1967,7 @@ static void *get_network_iface_stats_duplex(void *arg) {
 		value = data->unknown;
 	else
 		value = data->unknown;
-	g_message("Get (network_iface_stats:\"%s\":duplex:\"%s\":\"%s\":\"%s\") \"%s\"",
+	xsg_message("Get (network_iface_stats:\"%s\":duplex:\"%s\":\"%s\":\"%s\") \"%s\"",
 			interface_name, data->full, data->half, data->unknown, value);
 	return (void *) value;;
 }
@@ -2011,7 +2011,7 @@ static void *get_page_stats_pages_pagein(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (page_stats:pages_pagein) %" PRId64, value);
+	xsg_message("Get (page_stats:pages_pagein) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2024,7 +2024,7 @@ static void *get_page_stats_pages_pageout(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (page_stats:pages_pageout) %" PRId64, value);
+	xsg_message("Get (page_stats:pages_pageout) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2055,7 +2055,7 @@ static void *get_page_stats_diff_pages_pagein(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (page_stats_diff:pages_pagein) %" PRId64, value);
+	xsg_message("Get (page_stats_diff:pages_pagein) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2068,7 +2068,7 @@ static void *get_page_stats_diff_pages_pageout(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (page_stats_diff:pages_pageout) %" PRId64, value);
+	xsg_message("Get (page_stats_diff:pages_pageout) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2232,7 +2232,7 @@ static void *get_process_stats_process_name(void *arg) {
 	data = (process_stats_data_t *) arg;
 
 	if (data->number >= stats.process_entries) {
-		g_message("Get (process_stats:process_name:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:process_name:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) "";
 	}
@@ -2246,7 +2246,7 @@ static void *get_process_stats_process_name(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->process_name;
-	g_message("Get (process_stats:process_name:%s:%s:%" PRIu32 ") %s", data->list_order,
+	xsg_message("Get (process_stats:process_name:%s:%s:%" PRIu32 ") %s", data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) value;
@@ -2261,7 +2261,7 @@ static void *get_process_stats_proctitle(void *arg) {
 	data = (process_stats_data_t *) arg;
 
 	if (data->number >= stats.process_entries) {
-		g_message("Get (process_stats:proctitle:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:proctitle:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) "";
 	}
@@ -2275,7 +2275,7 @@ static void *get_process_stats_proctitle(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->proctitle;
-	g_message("Get (process_stats:proctitle:%s:%s:%" PRIu32 ") %s", data->list_order,
+	xsg_message("Get (process_stats:proctitle:%s:%s:%" PRIu32 ") %s", data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) value;
@@ -2291,7 +2291,7 @@ static void *get_process_stats_pid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:pid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:pid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2305,7 +2305,7 @@ static void *get_process_stats_pid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->pid;
-	g_message("Get (process_stats:pid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:pid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2321,7 +2321,7 @@ static void *get_process_stats_parent(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:parent:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:parent:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2335,7 +2335,7 @@ static void *get_process_stats_parent(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->parent;
-	g_message("Get (process_stats:parent:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:parent:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2351,7 +2351,7 @@ static void *get_process_stats_pgid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:pgid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:pgid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2365,7 +2365,7 @@ static void *get_process_stats_pgid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->pgid;
-	g_message("Get (process_stats:pgid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:pgid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2381,7 +2381,7 @@ static void *get_process_stats_uid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:uid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:uid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2395,7 +2395,7 @@ static void *get_process_stats_uid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->uid;
-	g_message("Get (process_stats:uid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:uid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2411,7 +2411,7 @@ static void *get_process_stats_euid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:euid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:euid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2425,7 +2425,7 @@ static void *get_process_stats_euid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->euid;
-	g_message("Get (process_stats:euid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:euid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2441,7 +2441,7 @@ static void *get_process_stats_gid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:gid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:gid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2455,7 +2455,7 @@ static void *get_process_stats_gid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->gid;
-	g_message("Get (process_stats:gid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:gid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2471,7 +2471,7 @@ static void *get_process_stats_egid(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:egid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:egid:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2485,7 +2485,7 @@ static void *get_process_stats_egid(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->egid;
-	g_message("Get (process_stats:egid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:egid:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2501,7 +2501,7 @@ static void *get_process_stats_proc_size(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:proc_size:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:proc_size:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2515,7 +2515,7 @@ static void *get_process_stats_proc_size(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->proc_size;
-	g_message("Get (process_stats:proc_size:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:proc_size:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2531,7 +2531,7 @@ static void *get_process_stats_proc_resident(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:proc_resident:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:proc_resident:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2545,7 +2545,7 @@ static void *get_process_stats_proc_resident(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->proc_resident;
-	g_message("Get (process_stats:proc_resident:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:proc_resident:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2561,7 +2561,7 @@ static void *get_process_stats_time_spent(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:time_spent:%s:%s:%" PRIu32 ":%llu:%llu) NOT FOUND",
+		xsg_message("Get (process_stats:time_spent:%s:%s:%" PRIu32 ":%llu:%llu) NOT FOUND",
 				data->list_order,
 				(data->ascending ? "ascending" : "descending"),
 				data->number, data->mod, data->div);
@@ -2583,7 +2583,7 @@ static void *get_process_stats_time_spent(void *arg) {
 	if (data->div)
 		value /= data->div;
 
-	g_message("Get (process_stats:time_spent:%s:%s:%" PRIu32 ":%llu:%llu) %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:time_spent:%s:%s:%" PRIu32 ":%llu:%llu) %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number,
 			data->mod, data->div, value);
 
@@ -2600,7 +2600,7 @@ static void *get_process_stats_cpu_percent(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:cpu_percent:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:cpu_percent:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2614,7 +2614,7 @@ static void *get_process_stats_cpu_percent(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->cpu_percent;
-	g_message("Get (process_stats:cpu_percent:%s:%s:%" PRIu32 ") %f", data->list_order,
+	xsg_message("Get (process_stats:cpu_percent:%s:%s:%" PRIu32 ") %f", data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2630,7 +2630,7 @@ static void *get_process_stats_nice(void *arg) {
 
 	if (data->number >= stats.process_entries) {
 		value = 0;
-		g_message("Get (process_stats:nice:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
+		xsg_message("Get (process_stats:nice:%s:%s:%" PRIu32 ") NOT FOUND", data->list_order,
 				(data->ascending ? "ascending" : "descending"), data->number);
 		return (void *) &value;
 	}
@@ -2644,7 +2644,7 @@ static void *get_process_stats_nice(void *arg) {
 	sg = sg_list + index;
 
 	value = sg->nice;
-	g_message("Get (process_stats:nice:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
+	xsg_message("Get (process_stats:nice:%s:%s:%" PRIu32 ") %" PRId64, data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number, value);
 
 	return (void *) &value;
@@ -2659,7 +2659,7 @@ static void *get_process_stats_state(void *arg) {
 	data = (process_stats_state_data_t *) arg;
 
 	if (data->number >= stats.process_entries) {
-		g_message("Get (process_stats:state:%s:%s:%" PRIu32 ":\"%s\":\"%s\":\"%s\":\"%s\":\"%s\") NOT FOUND",
+		xsg_message("Get (process_stats:state:%s:%s:%" PRIu32 ":\"%s\":\"%s\":\"%s\":\"%s\":\"%s\") NOT FOUND",
 				data->list_order,
 				(data->ascending ? "ascending" : "descending"),
 				data->number, data->running, data->sleeping, data->stopped,
@@ -2694,7 +2694,7 @@ static void *get_process_stats_state(void *arg) {
 			break;
 	}
 
-	g_message("Get (process_stats:state:%s:%s:%" PRIu32 ":\"%s\":\"%s\":\"%s\":\"%s\":\"%s\") \"%s\"", data->list_order,
+	xsg_message("Get (process_stats:state:%s:%s:%" PRIu32 ":\"%s\":\"%s\":\"%s\":\"%s\":\"%s\") \"%s\"", data->list_order,
 			(data->ascending ? "ascending" : "descending"), data->number,
 			data->running, data->sleeping, data->stopped, data->zombie,
 			data->unknown, value);
@@ -2841,7 +2841,7 @@ static void *get_process_count_total(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (process_count:total) %" PRId64, value);
+	xsg_message("Get (process_count:total) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2854,7 +2854,7 @@ static void *get_process_count_running(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (process_count:running) %" PRId64, value);
+	xsg_message("Get (process_count:running) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2867,7 +2867,7 @@ static void *get_process_count_sleeping(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (process_count:sleeping) %" PRId64, value);
+	xsg_message("Get (process_count:sleeping) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2880,7 +2880,7 @@ static void *get_process_count_stopped(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (process_count:stopped) %" PRId64, value);
+	xsg_message("Get (process_count:stopped) %" PRId64, value);
 
 	return (void *) &value;
 }
@@ -2893,7 +2893,7 @@ static void *get_process_count_zombie(void *arg) {
 	else
 		value = 0;
 
-	g_message("Get (process_count:zombie) %" PRId64, value);
+	xsg_message("Get (process_count:zombie) %" PRId64, value);
 
 	return (void *) &value;
 }

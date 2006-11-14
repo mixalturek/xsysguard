@@ -90,7 +90,7 @@ void xsg_conf_error(const char *expected) {
 	p[n-1] = '^';
 	p[n] = '\0';
 
-	g_error("Cannot parse configuration line %d: %s expected.\n%s\n%s\n",
+	xsg_error("Cannot parse configuration line %d: %s expected.\n%s\n%s\n",
 			line, expected, ptr, p);
 }
 

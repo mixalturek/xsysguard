@@ -179,7 +179,7 @@ static widget_t *get_widget(uint16_t widget_id) {
 	widget = xsg_list_nth_data(widget_list, (unsigned int) widget_id);
 
 	if (!widget)
-		g_error("Invalid widget id: %u", widget_id);
+		xsg_error("Invalid widget id: %u", widget_id);
 
 	return widget;
 }
@@ -208,13 +208,13 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 	}
 
 	for (p = pathv; *p; p++) {
-		g_message("Searching for image '%s' in '%s'.", filename, *p);
+		xsg_message("Searching for image '%s' in '%s'.", filename, *p);
 		file = g_build_filename(*p, filename, NULL);
 		if (g_file_test(file, G_FILE_TEST_IS_REGULAR)) {
 			image = imlib_load_image(file);
 		}
 		if (image) {
-			g_message("Found image '%s'.", file);
+			xsg_message("Found image '%s'.", file);
 			g_free(file);
 			return image;
 		}
@@ -222,7 +222,7 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 	}
 
 	if (throw_error)
-		g_error("Cannot find image '%s'.", filename);
+		xsg_error("Cannot find image '%s'.", filename);
 
 	return NULL;
 }
@@ -565,7 +565,7 @@ static void string_format(xsg_string_t *buffer, char *format, xsg_list_t *val_li
 
 #ifndef ENABLE_XRENDER
 
-#define XRENDER_ERROR g_error("Compiled without XRender support")
+#define XRENDER_ERROR xsg_error("Compiled without XRender support")
 
 static Visual *find_argb_visual() { XRENDER_ERROR; return NULL; }
 static void xrender_check() { XRENDER_ERROR; }
@@ -589,7 +589,7 @@ static Visual *find_argb_visual() {
 			&template, &nvi);
 
 	if (xvi == NULL)
-		g_error("Cannot find an argb visual.");
+		xsg_error("Cannot find an argb visual.");
 
 	for (i = 0; i < nvi; i++) {
 		format = XRenderFindVisualFormat(window.display, xvi[i].visual);
@@ -602,7 +602,7 @@ static Visual *find_argb_visual() {
 	XFree(xvi);
 
 	if (visual == NULL)
-		g_error("Cannot find an argb visual.");
+		xsg_error("Cannot find an argb visual.");
 
 	return visual;
 }
@@ -617,14 +617,14 @@ static void xrender_check() {
 	int composite_minor;
 
 	if (!XRenderQueryExtension(window.display, &render_event, &render_error))
-		g_error("No render extension found.");
+		xsg_error("No render extension found.");
 
 	if (!XQueryExtension(window.display, COMPOSITE_NAME, &composite_opcode, &composite_event, &composite_error))
-		g_error("No composite extension found.");
+		xsg_error("No composite extension found.");
 
 	XCompositeQueryVersion(window.display, &composite_major, &composite_minor);
 
-	g_message("Composite extension found: %d.%d", composite_major, composite_minor);
+	xsg_message("Composite extension found: %d.%d", composite_major, composite_minor);
 }
 
 static void xrender_init() {
@@ -818,7 +818,7 @@ static void render() {
 
 		imlib_updates_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
 
-		g_message("Render (x=%d, y=%d, width=%d, height=%d)", up_x, up_y, up_w, up_h);
+		xsg_message("Render (x=%d, y=%d, width=%d, height=%d)", up_x, up_y, up_w, up_h);
 
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
@@ -914,7 +914,7 @@ void set_xatom(const char *type, const char *property) {
 	type_atom = XInternAtom(window.display, type, FALSE);
 	property_atom = XInternAtom(window.display, property, FALSE);
 
-	g_message("Setting Xatom %s = %s", type, property);
+	xsg_message("Setting Xatom \"%s\" = \"%s\"", type, property);
 
 	xev.type = ClientMessage;
 	xev.xclient.type = ClientMessage;
@@ -1027,14 +1027,14 @@ static void handle_xevents() {
 	while (XPending(window.display)) {
 		XNextEvent(window.display, &event);
 		if (event.type == Expose) {
-			g_message("XExpose (x=%d, y=%d, width=%d, height=%d)",
+			xsg_message("XExpose (x=%d, y=%d, width=%d, height=%d)",
 					event.xexpose.x, event.xexpose.y,
 					event.xexpose.width, event.xexpose.height);
 			window.updates = imlib_update_append_rect(window.updates,
 					event.xexpose.x, event.xexpose.y,
 					event.xexpose.width, event.xexpose.height);
 		} else {
-			g_message("XEvent (type=%d)", event.type);
+			xsg_message("XEvent (type=%d)", event.type);
 		}
 	}
 }
@@ -1097,7 +1097,7 @@ void xsg_widgets_init() {
 	XSetWindowAttributes attrs;
 
 	if ((window.display = XOpenDisplay(NULL)) == NULL)
-		g_error("Cannot open display");
+		xsg_error("Cannot open display");
 
 	window.screen = XDefaultScreen(window.display);
 
@@ -1125,7 +1125,7 @@ void xsg_widgets_init() {
 		int event_base, error_base;
 
 		if (!XShapeQueryExtension(window.display, &event_base, &error_base))
-			g_error("No xshape extension found");
+			xsg_error("No xshape extension found");
 	}
 
 	colormap = XCreateColormap(window.display,
@@ -1210,7 +1210,7 @@ typedef struct {
 static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	line_t *line;
 
-	g_message("Render Line");
+	xsg_message("Render Line");
 
 	line = (line_t *) widget->data;
 
@@ -1279,7 +1279,7 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	int xoffset, yoffset;
 	unsigned int width, height;
 
-	g_message("Render Rectangle");
+	xsg_message("Render Rectangle");
 
 	rectangle = (rectangle_t *) widget->data;
 
@@ -1409,7 +1409,7 @@ typedef struct {
 static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	ellipse_t *ellipse;
 
-	g_message("Render Ellipse");
+	xsg_message("Render Ellipse");
 
 	ellipse = (ellipse_t *) widget->data;
 
@@ -1485,7 +1485,7 @@ static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int u
 	polygon_t *polygon;
 	ImlibPolygon poly;
 
-	g_message("Render Polygon");
+	xsg_message("Render Polygon");
 
 	polygon = (polygon_t *) widget->data;
 
@@ -1574,7 +1574,7 @@ typedef struct {
 static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	image_t *image;
 
-	g_message("Render Image");
+	xsg_message("Render Image");
 
 	image = (image_t *) widget->data;
 
@@ -1706,7 +1706,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	unsigned int width;
 	unsigned int height;
 
-	g_message("Render BarChart");
+	xsg_message("Render BarChart");
 
 	barchart = (barchart_t *) widget->data;
 
@@ -1980,7 +1980,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	unsigned int height;
 	unsigned int i;
 
-	g_message("Render LineChart");
+	xsg_message("Render LineChart");
 
 	linechart = (linechart_t *) widget->data;
 
@@ -2227,7 +2227,7 @@ typedef struct {
 } areachart_t;
 
 static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	g_message("Render AreaChart");
+	xsg_message("Render AreaChart");
 	/* TODO */
 }
 
@@ -2408,7 +2408,7 @@ typedef struct {
 } text_t;
 
 static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	g_message("Render Text");
+	xsg_message("Render Text");
 	/* TODO */
 }
 
@@ -2539,7 +2539,7 @@ typedef struct {
 } imagetext_t;
 
 static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	g_message("Render ImageText");
+	xsg_message("Render ImageText");
 	/* TODO */
 }
 

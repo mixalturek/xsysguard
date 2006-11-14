@@ -67,7 +67,7 @@ static var_t *get_var(uint16_t var_id) {
 			return var;
 	}
 
-	g_error("Invalid variable id: %" PRIu16, var_id);
+	xsg_error("Invalid variable id: %" PRIu16, var_id);
 
 	return NULL;
 }
@@ -82,7 +82,7 @@ static val_t *get_val(uint16_t val_id) {
 			return val;
 	}
 
-	g_error("Invalid value id: %" PRIu16, val_id);
+	xsg_error("Invalid value id: %" PRIu16, val_id);
 
 	return NULL;
 }
@@ -101,7 +101,7 @@ static void *get_int_as_double(void *value) {
 
 	i = * (int64_t *) value;
 	d = (double) i;
-	g_message("Conversion (int -> double) %" PRId64 " -> %g", i, d);
+	xsg_message("Conversion (int -> double) %" PRId64 " -> %g", i, d);
 	return (void *) &d;
 }
 
@@ -111,7 +111,7 @@ static void *get_string_as_double(void *value) {
 
 	s = (char *) value;
 	d = g_ascii_strtod(s, NULL);
-	g_message("Conversion (string -> double) %s -> %g", s, d);
+	xsg_message("Conversion (string -> double) %s -> %g", s, d);
 	return (void *) &d;
 }
 
@@ -125,7 +125,7 @@ static void *get_double_as_int(void *value) {
 	r = d - (double) i;
 	if (r >= 0.5)
 		i++;
-	g_message("Conversion (double -> int) %g -> %" PRId64, d, i);
+	xsg_message("Conversion (double -> int) %g -> %" PRId64, d, i);
 	return (void *) &i;
 }
 
@@ -135,7 +135,7 @@ static void *get_string_as_int(void *value) {
 
 	s = (char *) value;
 	i = g_ascii_strtoll(s, NULL, 0);
-	g_message("Conversion (string -> int) %s -> %" PRId64, s, i);
+	xsg_message("Conversion (string -> int) %s -> %" PRId64, s, i);
 	return (void *) &i;
 }
 
@@ -144,7 +144,7 @@ static char *get_double_as_string(void *value, xsg_string_t *buffer) {
 
 	d = * (double *) value;
 	xsg_string_printf(buffer, "%g", d);
-	g_message("Conversion (double -> string) %g -> %s", d, buffer->str);
+	xsg_message("Conversion (double -> string) %g -> %s", d, buffer->str);
 	return buffer->str;
 }
 
@@ -153,7 +153,7 @@ static char *get_int_as_string(void *value, xsg_string_t *buffer) {
 
 	i = * (int64_t *) value;
 	xsg_string_printf(buffer, "%" PRId64, i);
-	g_message("Conversion (int -> string) %" PRId64 " -> %s", i, buffer->str);
+	xsg_message("Conversion (int -> string) %" PRId64 " -> %s", i, buffer->str);
 	return buffer->str;
 }
 
@@ -172,7 +172,7 @@ static void *add_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a + *b;
-	g_message("Add (int + int -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Add (int + int -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -183,7 +183,7 @@ static void *add_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) var_b;
 
 	res = *a + *b;
-	g_message("Add (int + double -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (int + double -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -194,7 +194,7 @@ static void *add_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a + *b;
-	g_message("Add (int + string -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Add (int + string -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -205,7 +205,7 @@ static void *add_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) get_int_as_double(var_b);
 
 	res = *a + *b;
-	g_message("Add (double + int -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (double + int -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -216,7 +216,7 @@ static void *add_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) var_b;
 
 	res = *a + *b;
-	g_message("Add (double + double -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (double + double -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -227,7 +227,7 @@ static void *add_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) get_string_as_double(var_b);
 
 	res = *a + *b;
-	g_message("Add (double + string -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (double + string -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -238,7 +238,7 @@ static void *add_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a + *b;
-	g_message("Add (string + int -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Add (string + int -> int) %"PRId64" + %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -249,7 +249,7 @@ static void *add_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) var_b;
 
 	res = *a + *b;
-	g_message("Add (string + double -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (string + double -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -260,7 +260,7 @@ static void *add_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) get_string_as_double(var_b);
 
 	res = *a + *b;
-	g_message("Add (string + string -> double) %g + %g -> %g", *a, *b, res);
+	xsg_message("Add (string + string -> double) %g + %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -273,7 +273,7 @@ static void *mult_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a * *b;
-	g_message("Mult (int * int -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mult (int * int -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -284,7 +284,7 @@ static void *mult_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) var_b;
 
 	res = *a * *b;
-	g_message("Mult (int * double -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (int * double -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -295,7 +295,7 @@ static void *mult_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a * *b;
-	g_message("Mult (int * string -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mult (int * string -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -306,7 +306,7 @@ static void *mult_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	double *b = (double *) get_int_as_double(var_b);
 
 	res = *a * *b;
-	g_message("Mult (double * int -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (double * int -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -317,7 +317,7 @@ static void *mult_double_double(void *var_a, void *var_b, xsg_string_t *buffer) 
 	double *b = (double *) var_b;
 
 	res = *a * *b;
-	g_message("Mult (double * double -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (double * double -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -328,7 +328,7 @@ static void *mult_double_string(void *var_a, void *var_b, xsg_string_t *buffer) 
 	double *b = (double *) get_string_as_double(var_b);
 
 	res = *a * *b;
-	g_message("Mult (double * string -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (double * string -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -339,7 +339,7 @@ static void *mult_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a * *b;
-	g_message("Mult (string * int -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mult (string * int -> int) %"PRId64" * %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -350,7 +350,7 @@ static void *mult_string_double(void *var_a, void *var_b, xsg_string_t *buffer) 
 	double *b = (double *) var_b;
 
 	res = *a * *b;
-	g_message("Mult (string * double -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (string * double -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -361,7 +361,7 @@ static void *mult_string_string(void *var_a, void *var_b, xsg_string_t *buffer) 
 	double *b = (double *) get_string_as_double(var_b);
 
 	res = *a * *b;
-	g_message("Mult (string * string -> double) %g * %g -> %g", *a, *b, res);
+	xsg_message("Mult (string * string -> double) %g * %g -> %g", *a, *b, res);
 	return &res;
 }
 
@@ -374,7 +374,7 @@ static void *div_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a / *b;
-	g_message("Div (int / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (int / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -385,7 +385,7 @@ static void *div_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (int / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (int / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -396,7 +396,7 @@ static void *div_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (int / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (int / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -407,7 +407,7 @@ static void *div_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a / *b;
-	g_message("Div (double / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (double / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -418,7 +418,7 @@ static void *div_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (double / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (double / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -429,7 +429,7 @@ static void *div_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (double / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (double / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -440,7 +440,7 @@ static void *div_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a / *b;
-	g_message("Div (string / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (string / int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -451,7 +451,7 @@ static void *div_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (string / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (string / double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -462,7 +462,7 @@ static void *div_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a / *b;
-	g_message("Div (string / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Div (string / string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -475,7 +475,7 @@ static void *mod_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a % *b;
-	g_message("Mod (int %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (int %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -486,7 +486,7 @@ static void *mod_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (int %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (int %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -497,7 +497,7 @@ static void *mod_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (int %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (int %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -508,7 +508,7 @@ static void *mod_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a % *b;
-	g_message("Mod (double %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (double %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -519,7 +519,7 @@ static void *mod_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (double %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (double %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -530,7 +530,7 @@ static void *mod_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (double %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (double %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -541,7 +541,7 @@ static void *mod_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) var_b;
 
 	res = *a % *b;
-	g_message("Mod (string %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (string %% int -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -552,7 +552,7 @@ static void *mod_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_double_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (string %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (string %% double -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -563,7 +563,7 @@ static void *mod_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	int64_t *b = (int64_t *) get_string_as_int(var_b);
 
 	res = *a % *b;
-	g_message("Mod (string %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
+	xsg_message("Mod (string %% string -> int) %"PRId64" / %"PRId64" -> %"PRId64, *a, *b, res);
 	return &res;
 }
 
@@ -575,7 +575,7 @@ static void *cat_int_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	get_int_as_string(var_a, buffer);
 	get_int_as_string(var_b, tmp);
-	g_message("Cat (int . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (int . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -587,7 +587,7 @@ static void *cat_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	get_int_as_string(var_a, buffer);
 	get_double_as_string(var_b, tmp);
-	g_message("Cat (int . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (int . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -596,7 +596,7 @@ static void *cat_int_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 static const uint8_t cat_int_string_type = XSG_STRING;
 static void *cat_int_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	get_int_as_string(var_a, buffer);
-	g_message("Cat (int . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, (char *) var_b, buffer->str, (char *) var_b);
+	xsg_message("Cat (int . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, (char *) var_b, buffer->str, (char *) var_b);
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
@@ -607,7 +607,7 @@ static void *cat_double_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	get_double_as_string(var_a, buffer);
 	get_int_as_string(var_b, tmp);
-	g_message("Cat (double . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (double . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -619,7 +619,7 @@ static void *cat_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	get_double_as_string(var_a, buffer);
 	get_double_as_string(var_b, tmp);
-	g_message("Cat (double . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (double . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -628,7 +628,7 @@ static void *cat_double_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 static const uint8_t cat_double_string_type = XSG_STRING;
 static void *cat_double_string(void *var_a, void *var_b, xsg_string_t *buffer) {
 	get_double_as_string(var_a, buffer);
-	g_message("Cat (double . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, (char *) var_b, buffer->str, (char *) var_b);
+	xsg_message("Cat (double . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, (char *) var_b, buffer->str, (char *) var_b);
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
@@ -639,7 +639,7 @@ static void *cat_string_int(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	xsg_string_assign(buffer, var_a);
 	get_int_as_string(var_b, tmp);
-	g_message("Cat (string . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (string . int -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -651,7 +651,7 @@ static void *cat_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 	xsg_string_assign(buffer, var_a);
 	get_double_as_string(var_b, tmp);
-	g_message("Cat (string . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
+	xsg_message("Cat (string . double -> string) \"%s\" . \"%s\" -> \"%s%s\"", buffer->str, tmp->str, buffer->str, tmp->str);
 	xsg_string_append(buffer, tmp->str);
 	xsg_string_free(tmp, TRUE);
 	return buffer->str;
@@ -659,7 +659,7 @@ static void *cat_string_double(void *var_a, void *var_b, xsg_string_t *buffer) {
 
 static const uint8_t cat_string_string_type = XSG_STRING;
 static void *cat_string_string(void *var_a, void *var_b, xsg_string_t *buffer) {
-	g_message("Cat (string . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", (char *) var_a, (char *) var_b, (char *) var_a, (char *) var_b);
+	xsg_message("Cat (string . string -> string) \"%s\" . \"%s\" -> \"%s%s\"", (char *) var_a, (char *) var_b, (char *) var_a, (char *) var_b);
 	xsg_string_append(buffer, (char *) var_b);
 	return buffer->str;
 }
@@ -706,7 +706,7 @@ double xsg_var_get_double(uint16_t val_id) {
 			break;
 	}
 
-	g_message("Get (double) %g", d);
+	xsg_message("Get (double) %g", d);
 	return d;
 }
 
@@ -733,7 +733,7 @@ int64_t xsg_var_get_int(uint16_t val_id) {
 			break;
 	}
 
-	g_message("Get (int) %"PRId64, i);
+	xsg_message("Get (int) %"PRId64, i);
 	return i;
 }
 
@@ -761,7 +761,7 @@ char *xsg_var_get_string(uint16_t val_id) {
 			break;
 	}
 
-	g_message("Get (string) \"%s\"", val->buffer->str);
+	xsg_message("Get (string) \"%s\"", val->buffer->str);
 	return val->buffer->str;
 }
 
@@ -771,7 +771,7 @@ void update_op_funcs(val_t *val) {
 	xsg_list_t *l;
 	uint8_t type = 0;
 
-	g_debug("Begin update_op_funcs");
+	xsg_debug("Begin update_op_funcs");
 
 	for (l = val->var_list; l; l = l->next) {
 		void *(*op_func)(void*, void*, xsg_string_t*) = NULL;
@@ -780,7 +780,7 @@ void update_op_funcs(val_t *val) {
 		uint8_t type_a = type;
 		uint8_t type_b = var->type;
 
-		g_debug("Updating op for op=%c type_a=%d type_b=%d", op, type_a, type_b);
+		xsg_debug("Updating op for op=%c type_a=%d type_b=%d", op, type_a, type_b);
 
 		if (type == 0) {
 			type = var->type;
@@ -1093,13 +1093,13 @@ void update_op_funcs(val_t *val) {
 		}
 
 		if (op_func == NULL || type == 0)
-			g_error("Unknown type or op_func");
+			xsg_error("Unknown type or op_func");
 
 		var->op_func = op_func;
 	}
 	val->type = type;
 
-	g_debug("End update_op_funcs");
+	xsg_debug("End update_op_funcs");
 }
 
 /******************************************************************************/

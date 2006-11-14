@@ -44,50 +44,27 @@
 
 /******************************************************************************/
 
-static uint8_t log_level = G_LOG_LEVEL_ERROR;
+static uint32_t log_level = LOG_LEVEL_ERROR;
 
-static void set_log_level(int log) {
-	if (log < 1) return;
-	log_level |= G_LOG_LEVEL_CRITICAL;
-	if (log < 2) return;
-	log_level |= G_LOG_LEVEL_WARNING;
-	if (log < 3) return;
-	log_level |= G_LOG_LEVEL_MESSAGE;
-	if (log < 4) return;
-	log_level |= G_LOG_LEVEL_INFO;
-	if (log < 5) return;
-	log_level |= G_LOG_LEVEL_DEBUG;
-}
+void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
+	if (log_level < level)
+		return;
 
-static void log_handler(const char *domain, GLogLevelFlags level, const char *message, void *data) {
+	if (level == LOG_LEVEL_ERROR)
+		fprintf(stderr, "ERROR: ");
+	else if (level == LOG_LEVEL_WARNING)
+		fprintf(stderr, "WARNING: ");
+	else if (level == LOG_LEVEL_MESSAGE)
+		fprintf(stderr, "MESSAGE: ");
+	else if (level == LOG_LEVEL_DEBUG)
+		fprintf(stderr, "DEBUG: ");
 
-	if (log_level & level & 0xff && domain) {
-		if (level & G_LOG_LEVEL_ERROR)
-			fprintf(stderr, "[%s] ERROR: %s\n", domain, message);
-		else if (level & G_LOG_LEVEL_CRITICAL)
-			fprintf(stderr, "[%s] CRITICAL: %s\n", domain, message);
-		else if (level & G_LOG_LEVEL_WARNING)
-			fprintf(stderr, "[%s] WARNING: %s\n", domain, message);
-		else if (level & G_LOG_LEVEL_MESSAGE)
-			fprintf(stderr, "[%s] %s\n", domain, message);
-		else if (level & G_LOG_LEVEL_INFO)
-			fprintf(stderr, "[%s] INFO: %s\n", domain, message);
-		else if (level & G_LOG_LEVEL_DEBUG)
-			fprintf(stderr, "[%s] ERROR: %s\n", domain, message);
-	} else if (log_level & level & 0xff) {
-		if (level & G_LOG_LEVEL_ERROR)
-			fprintf(stderr, "ERROR: %s\n", message);
-		else if (level & G_LOG_LEVEL_CRITICAL)
-			fprintf(stderr, "CRITICAL: %s\n", message);
-		else if (level & G_LOG_LEVEL_WARNING)
-			fprintf(stderr, "WARNING: %s\n", message);
-		else if (level & G_LOG_LEVEL_MESSAGE)
-			fprintf(stderr, "%s\n", message);
-		else if (level & G_LOG_LEVEL_INFO)
-			fprintf(stderr, "INFO: %s\n", message);
-		else if (level & G_LOG_LEVEL_DEBUG)
-			fprintf(stderr, "DEBUG: %s\n", message);
-	}
+	if (domain != NULL)
+		fprintf(stderr, "[%s] ", domain);
+
+	vfprintf(stderr, format, args);
+
+	fprintf(stderr, "\n");
 }
 
 /******************************************************************************/
@@ -101,10 +78,10 @@ static void parse_env() {
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	g_message("Setting environment variable %s = %s", variable, value);
+	xsg_message("Setting environment variable %s = %s", variable, value);
 
 	if (!g_setenv(variable, value, overwrite))
-		g_warning("Cannot set environment variable %s = %s", variable, value);
+		xsg_warning("Cannot set environment variable %s = %s", variable, value);
 }
 
 static void parse_config(char *config_buffer) {
@@ -207,7 +184,7 @@ static char *find_config_file(char *name) {
 	if (g_file_test(file, G_FILE_TEST_IS_REGULAR))
 		return file;
 
-	g_error("Cannot find file '%s'", name);
+	xsg_error("Cannot find file \"%s\"", name);
 	return 0;
 }
 
@@ -237,18 +214,15 @@ int main(int argc, char **argv) {
 		{ NULL }
 	};
 
-	g_log_set_default_handler(log_handler, NULL);
-
 	context = g_option_context_new("[CONFIG]");
 	g_option_context_add_main_entries(context, option_entries, NULL);
 	g_option_context_parse(context, &argc, &argv, &error);
 	g_option_context_free(context);
 
 	if (error)
-		g_error("%s", error->message);
+		xsg_error("%s", error->message);
 
-	if (log)
-		set_log_level(log);
+	log_level = log;
 
 	if (list_modules) {
 		xsg_modules_list();
@@ -263,7 +237,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (!g_file_get_contents(file, &config_buffer, NULL, &error))
-		g_error("%s", error->message);
+		xsg_error("%s", error->message);
 
 	xsg_var_init();
 

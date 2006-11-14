@@ -30,48 +30,40 @@
 
 /******************************************************************************/
 
-static uint8_t log_level = G_LOG_LEVEL_ERROR;
+static uint32_t log_level = LOG_LEVEL_ERROR;
 
-static void set_log_level(int log) {
-	if (log < 1) return;
-	log_level |= G_LOG_LEVEL_CRITICAL;
-	if (log < 2) return;
-	log_level |= G_LOG_LEVEL_WARNING;
-	if (log < 3) return;
-	log_level |= G_LOG_LEVEL_MESSAGE;
-	if (log < 4) return;
-	log_level |= G_LOG_LEVEL_INFO;
-	if (log < 5) return;
-	log_level |= G_LOG_LEVEL_DEBUG;
-}
+void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
+	char buffer[1025];
+	uint16_t len = 0;
+	uint8_t type = 0;
+	uint8_t l;
 
-static void log_handler(const char *domain, GLogLevelFlags level, const char *message, void *data) {
+	if (log_level < level)
+		return;
 
-	if (log_level & level & 0xff) {
-		uint8_t type = 0;
-		uint8_t l;
-		uint16_t len = 0;
+	if (level == LOG_LEVEL_ERROR)
+		len += snprintf(buffer, sizeof(buffer) - 1 - len, "ERROR: ");
+	else if (level == LOG_LEVEL_WARNING)
+		len += snprintf(buffer, sizeof(buffer) - 1 - len, "WARNING: ");
+	else if (level == LOG_LEVEL_MESSAGE)
+		len += snprintf(buffer, sizeof(buffer) - 1 - len, "MESSAGE: ");
+	else if (level == LOG_LEVEL_DEBUG)
+		len += snprintf(buffer, sizeof(buffer) - 1 - len, "DWBUG: ");
 
-		if (!message)
-			return;
+	if (domain != NULL)
+		len += snprintf(buffer, sizeof(buffer) - 1 - len, "[%s] ", domain);
 
-		l = (uint8_t) level & 0xff;
+	len += vsnprintf(buffer, sizeof(buffer) - 1 - len, format, args);
 
-		fwrite(&type, 1, 1, stdout);
-		fwrite(&l, 1, 1, stdout);
+	len += snprintf(buffer, sizeof(buffer) - 1 - len, "\n");
 
-		len = strlen(message);
+	l = level;
 
-		if (domain) {
-			len += strlen(domain) + 3;
-			fwrite(&len, 2, 1, stdout);
-			fprintf(stdout, "[%s] %s", domain, message);
-		} else {
-			fwrite(&len, 2, 2, stdout);
-			fprintf(stdout, "%s", message);
-		}
-		fflush(stdout);
-	}
+	fwrite(&type, 1, 1, stdout);
+	fwrite(&l, 1, 1, stdout);
+	fwrite(&len, 2, 1, stdout);
+	fwrite(buffer, len, 1, stdout);
+	fflush(stdout);
 }
 
 /******************************************************************************/
@@ -79,7 +71,7 @@ static void log_handler(const char *domain, GLogLevelFlags level, const char *me
 static void read_data(void *ptr, size_t size, FILE *stream) {
 
 	if (fread(ptr, 1, size, stream) != size)
-		g_error("cannot read configuration");
+		xsg_error("cannot read configuration");
 }
 
 static void read_config(FILE *stream) {
@@ -113,7 +105,7 @@ static void read_config(FILE *stream) {
 			xsg_var_parse(update, var_id);
 			g_free(config);
 		} else {
-			g_error("inconsistent configuration");
+			xsg_error("inconsistent configuration");
 		}
 	}
 }
@@ -133,18 +125,15 @@ int main(int argc, char **argv) {
 		{ NULL }
 	};
 
-	g_log_set_default_handler(log_handler, NULL);
-
 	context = g_option_context_new(NULL);
 	g_option_context_add_main_entries(context, option_entries, NULL);
 	g_option_context_parse(context, &argc, &argv, &error);
 	g_option_context_free(context);
 
 	if (error)
-		g_error("%s", error->message);
+		xsg_error("%s", error->message);
 
-	if (log)
-		set_log_level(log);
+	log_level = log;
 
 	if (list_modules) {
 		xsg_modules_list();

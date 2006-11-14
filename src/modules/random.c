@@ -194,7 +194,7 @@ static void *get_random(void *arg) {
 
 	d = random_double();
 
-	g_message("Get () %f", d);
+	xsg_message("Get () %f", d);
 
 	return (void *) &d;
 }
