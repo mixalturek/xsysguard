@@ -102,7 +102,7 @@ uint16_t xsg_var_parse(uint64_t update, uint16_t var_id) {
 
 	xsg_modules_parse_var(&var, update, var_id);
 
-	v = g_new0(var_t, 1);
+	v = xsg_new0(var_t, 1);
 
 	v->update = update;
 	v->type = var.type;

@@ -54,7 +54,7 @@ static void *get_time(void *arg) {
 void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	struct time_args *args;
 
-	args = g_new0(struct time_args, 1);
+	args = xsg_new0(struct time_args, 1);
 
 	args->format = xsg_conf_read_string();
 	args->buffer = xsg_string_sized_new(8);

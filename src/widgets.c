@@ -200,7 +200,7 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 				if (*p[0] == '~')
 					*p = g_build_filename(g_get_home_dir(), *p, NULL);
 		} else {
-			pathv = g_new0(char *, 3);
+			pathv = xsg_new0(char *, 3);
 			pathv[0] = HOME_IMAGE_DIR;
 			pathv[1] = IMAGE_DIR;
 			pathv[2] = NULL;
@@ -215,10 +215,10 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 		}
 		if (image) {
 			xsg_message("Found image '%s'.", file);
-			g_free(file);
+			xsg_free(file);
 			return image;
 		}
-		g_free(file);
+		xsg_free(file);
 	}
 
 	if (throw_error)
@@ -388,8 +388,8 @@ static ImlibPolygon poly_copy(ImlibPolygon polygon, int xoffset, int yoffset) {
 	int i;
 
 	poly = (poly_t *) polygon;
-	new_poly = (poly_t *) malloc(sizeof(poly_t));
-	new_poly->points = (point_t *) malloc(sizeof(point_t) * poly->pointcount);
+	new_poly = (poly_t *) xsg_malloc(sizeof(poly_t));
+	new_poly->points = (point_t *) xsg_malloc(sizeof(point_t) * poly->pointcount);
 	new_poly->pointcount = poly->pointcount;
 	new_poly->lx = poly->lx + xoffset;
 	new_poly->rx = poly->rx + xoffset;
@@ -443,7 +443,7 @@ static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *wi
 		yoffset -= ca * h;
 	}
 
-	angle = g_new0(angle_t, 1);
+	angle = xsg_new0(angle_t, 1);
 
 	angle->xoffset = xoffset;
 	angle->yoffset = yoffset;
@@ -652,8 +652,8 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 	height = imlib_image_get_height();
 	data = imlib_image_get_data_for_reading_only();
 
-	colors_data = g_new(DATA32, width * height);
-	alpha_data = g_new(DATA32, width * height);
+	colors_data = xsg_new(DATA32, width * height);
+	alpha_data = xsg_new(DATA32, width * height);
 
 	colors_image = XCreateImage(window.display, window.visual,
 			32, ZPixmap, 0,	(char *) colors_data,
@@ -665,9 +665,9 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 
 	if (window.xshape) {
 
-		mask_data = g_new(DATA8, width * height);
+		mask_data = xsg_new(DATA8, width * height);
 
-		mask_image = g_new(XImage, 1);
+		mask_image = xsg_new(XImage, 1);
 		mask_image->width = width;
 		mask_image->height = height;
 		mask_image->xoffset = 0;
@@ -729,8 +729,8 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 		mask_gc = XCreateGC(window.display, window.mask, 0, 0);
 		XPutImage(window.display, window.mask, mask_gc, mask_image, 0, 0,
 				xoffset, yoffset, window.width, window.height);
-		g_free(mask_data);
-		g_free(mask_image);
+		xsg_free(mask_data);
+		xsg_free(mask_image);
 		XFreeGC(window.display, mask_gc);
 	}
 }
@@ -1064,12 +1064,12 @@ static void attach_source(int fd) {
 	GSource *source;
 	GPollFD* pollfd;
 
-	pollfd = g_new0(GPollFD, 1);
+	pollfd = xsg_new0(GPollFD, 1);
 	pollfd->fd = fd;
 	pollfd->events = G_IO_IN | G_IO_HUP | G_IO_ERR;
 	pollfd->revents = 0;
 
-	source_funcs = g_new0(GSourceFuncs, 1);
+	source_funcs = xsg_new0(GSourceFuncs, 1);
 
 	source_funcs->prepare = prepare_source;
 	source_funcs->check = check_source;
@@ -1235,8 +1235,8 @@ void xsg_widgets_parse_line() {
 	widget_t *widget;
 	line_t *line;
 
-	widget = g_new0(widget_t, 1);
-	line = g_new(line_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	line = xsg_new(line_t, 1);
 
 	line->x1 = xsg_conf_read_int();
 	line->y1 = xsg_conf_read_int();
@@ -1339,8 +1339,8 @@ void xsg_widgets_parse_rectangle() {
 	widget_t *widget;
 	rectangle_t *rectangle;
 
-	widget = g_new0(widget_t, 1);
-	rectangle = g_new(rectangle_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	rectangle = xsg_new(rectangle_t, 1);
 
 	widget->update = 0;
 	widget->xoffset = xsg_conf_read_int();
@@ -1438,8 +1438,8 @@ void xsg_widgets_parse_ellipse() {
 	widget_t *widget;
 	ellipse_t *ellipse;
 
-	widget = g_new0(widget_t, 1);
-	ellipse = g_new0(ellipse_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	ellipse = xsg_new0(ellipse_t, 1);
 
 	ellipse->xc = xsg_conf_read_int();
 	ellipse->yc = xsg_conf_read_int();
@@ -1518,8 +1518,8 @@ void xsg_widgets_parse_polygon() {
 	unsigned int count, i;
 	int x1, y1, x2, y2;
 
-	widget = g_new0(widget_t, 1);
-	polygon = g_new0(polygon_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	polygon = xsg_new0(polygon_t, 1);
 
 	polygon->color = uint2color(xsg_conf_read_color());
 	polygon->polygon = imlib_polygon_new();
@@ -1604,8 +1604,8 @@ void xsg_widgets_parse_image() {
 	image_t *image;
 	double angle = 0.0;
 
-	widget = g_new0(widget_t, 1);
-	image = g_new0(image_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	image = xsg_new0(image_t, 1);
 
 	widget->update = 0;
 	widget->xoffset = xsg_conf_read_int();
@@ -1837,8 +1837,8 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 	widget_t *widget;
 	barchart_t *barchart;
 
-	widget = g_new0(widget_t, 1);
-	barchart = g_new0(barchart_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	barchart = xsg_new0(barchart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
@@ -1872,7 +1872,7 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 		} else if (xsg_conf_find_command("Mask")) {
 			char *filename = xsg_conf_read_string();
 			barchart->mask = load_image(filename, TRUE);
-			g_free(filename);
+			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Mask");
 		}
@@ -1889,7 +1889,7 @@ void xsg_widgets_parse_barchart_val(uint16_t val_id) {
 	barchart_t *barchart;
 	barchart_val_t *barchart_val;
 
-	barchart_val = g_new0(barchart_val_t, 1);
+	barchart_val = xsg_new0(barchart_val_t, 1);
 
 	barchart_val->val_id = val_id;
 	barchart_val->color = uint2color(xsg_conf_read_color());
@@ -2108,8 +2108,8 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 	widget_t *widget;
 	linechart_t *linechart;
 
-	widget = g_new0(widget_t, 1);
-	linechart = g_new0(linechart_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	linechart = xsg_new0(linechart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
@@ -2144,7 +2144,7 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
 			linechart->background = load_image(filename, TRUE);
-			g_free(filename);
+			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Background");
 		}
@@ -2164,7 +2164,7 @@ void xsg_widgets_parse_linechart_val(uint16_t val_id) {
 
 	widget = xsg_list_last(widget_list)->data;
 	linechart = widget->data;
-	linechart_val = g_new0(linechart_val_t, 1);
+	linechart_val = xsg_new0(linechart_val_t, 1);
 	linechart->val_list = xsg_list_append(linechart->val_list, linechart_val);
 
 	if (linechart->angle)
@@ -2177,7 +2177,7 @@ void xsg_widgets_parse_linechart_val(uint16_t val_id) {
 	linechart_val->mult = 1.0;
 	linechart_val->add = 0.0;
 	linechart_val->add_prev = FALSE;
-	linechart_val->values = g_new0(double, width);
+	linechart_val->values = xsg_new0(double, width);
 
 	for (i = 0; i < width; i++)
 		linechart_val->values[i] = nan("");
@@ -2272,8 +2272,8 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 	widget_t *widget;
 	areachart_t *areachart;
 
-	widget = g_new0(widget_t, 1);
-	areachart = g_new(areachart_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	areachart = xsg_new(areachart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
@@ -2308,7 +2308,7 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
 			areachart->background = load_image(filename, TRUE);
-			g_free(filename);
+			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Background");
 		}
@@ -2328,7 +2328,7 @@ void xsg_widgets_parse_areachart_val(uint16_t val_id) {
 
 	widget = xsg_list_last(widget_list)->data;
 	areachart = widget->data;
-	areachart_val = g_new0(areachart_val_t, 1);
+	areachart_val = xsg_new0(areachart_val_t, 1);
 	areachart->val_list = xsg_list_append(areachart->val_list, areachart_val);
 
 	if (areachart->angle)
@@ -2344,7 +2344,7 @@ void xsg_widgets_parse_areachart_val(uint16_t val_id) {
 	areachart_val->mult = 1.0;
 	areachart_val->add = 0.0;
 	areachart_val->add_prev = FALSE;
-	areachart_val->values = g_new0(double, width);
+	areachart_val->values = xsg_new0(double, width);
 
 	for (i = 0; i < width; i++)
 		areachart_val->values[i] = nan("");
@@ -2452,8 +2452,8 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	widget_t *widget;
 	text_t *text;
 
-	widget = g_new0(widget_t, 1);
-	text = g_new0(text_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	text = xsg_new0(text_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
@@ -2501,7 +2501,7 @@ void xsg_widgets_parse_text_val(uint16_t val_id) {
 
 	widget = xsg_list_last(widget_list)->data;
 	text = widget->data;
-	text_val = g_new0(text_val_t, 1);
+	text_val = xsg_new0(text_val_t, 1);
 	text->val_list = xsg_list_append(text->val_list, text_val);
 
 	text_val->val_id = val_id;
@@ -2583,8 +2583,8 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	widget_t *widget;
 	imagetext_t *imagetext;
 
-	widget = g_new0(widget_t, 1);
-	imagetext = g_new0(imagetext_t, 1);
+	widget = xsg_new0(widget_t, 1);
+	imagetext = xsg_new0(imagetext_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
@@ -2631,7 +2631,7 @@ void xsg_widgets_parse_imagetext_val(uint16_t val_id) {
 
 	widget = xsg_list_last(widget_list)->data;
 	imagetext = widget->data;
-	text_val = g_new0(text_val_t, 1);
+	text_val = xsg_new0(text_val_t, 1);
 	imagetext->val_list = xsg_list_append(imagetext->val_list, text_val);
 
 	text_val->val_id = val_id;

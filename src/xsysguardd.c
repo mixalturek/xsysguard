@@ -99,11 +99,11 @@ static void read_config(FILE *stream) {
 			update = GUINT64_FROM_BE(update);
 			read_data(&config_len, 2, stream);
 			config_len = GUINT16_FROM_BE(config_len);
-			config = g_new0(char, config_len + 1);
+			config = xsg_new0(char, config_len + 1);
 			read_data(config, config_len, stream);
 			xsg_conf_set_buffer(config);
 			xsg_var_parse(update, var_id);
-			g_free(config);
+			xsg_free(config);
 		} else {
 			xsg_error("inconsistent configuration");
 		}

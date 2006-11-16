@@ -41,7 +41,7 @@ void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	if (xsg_conf_find_command("int")) {
 		int64_t *i;
 
-		i = g_new0(int64_t, 1);
+		i = xsg_new0(int64_t, 1);
 		*i = xsg_conf_read_int();
 
 		var->type = XSG_INT;
@@ -50,7 +50,7 @@ void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
 	} else if (xsg_conf_find_command("double")) {
 		double *d;
 
-		d = g_new0(double, 1);
+		d = xsg_new0(double, 1);
 		*d = xsg_conf_read_double();
 
 		var->type = XSG_DOUBLE;

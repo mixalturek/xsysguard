@@ -1129,7 +1129,7 @@ uint16_t xsg_var_parse(uint64_t update, uint16_t widget_id) {
 	if (op == 0)
 		return 0;
 
-	val = g_new0(val_t, 1);
+	val = xsg_new0(val_t, 1);
 	val->update = update;
 	val->var_list = NULL;
 	val->buffer = NULL;
@@ -1144,7 +1144,7 @@ uint16_t xsg_var_parse(uint64_t update, uint16_t widget_id) {
 
 		xsg_modules_parse_var(&var, update, widget_id);
 
-		v = g_new0(var_t, 1);
+		v = xsg_new0(var_t, 1);
 		v->op = op;
 		v->type = var.type;
 		v->func = var.func;

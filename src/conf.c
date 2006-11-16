@@ -85,7 +85,7 @@ void xsg_conf_error(const char *expected) {
 
 	n = p - ptr;
 
-	p = g_new0(char, n + 1);
+	p = xsg_new0(char, n + 1);
 	memset(p, ' ', n);
 	p[n-1] = '^';
 	p[n] = '\0';
@@ -328,13 +328,13 @@ static char *read_env() {
 	while (!is(' ') && !is(':') && !is('\t') && !is('\n') && !is('\0'))
 		ptr++;
 
-	p = g_new0(char, ptr - begin + 1);
+	p = xsg_new0(char, ptr - begin + 1);
 	strncpy(p, begin, ptr - begin);
 
 	env = g_getenv(p);
 
 	if (env) {
-		g_free(p);
+		xsg_free(p);
 		return g_strdup(env);
 	} else {
 		return p;
@@ -383,7 +383,7 @@ char *xsg_conf_read_string() {
 	len = ptr - start_ptr;
 	ptr = start_ptr;
 
-	string = g_new0(char, len + 1);
+	string = xsg_new0(char, len + 1);
 
 	dest = string;
 

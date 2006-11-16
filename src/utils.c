@@ -21,9 +21,71 @@
 /* most stuff copied from glib */
 
 #include <xsysguard.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+/******************************************************************************
+ *
+ * gmem.c
+ *
+ ******************************************************************************/
+
+void *xsg_malloc(size_t size) {
+	if (size) {
+		void *mem;
+
+		xsg_debug("malloc %lu bytes", size);
+
+		mem = malloc(size);
+		if (mem)
+			return mem;
+
+		xsg_error("Failed to allocate %lu bytes", size);
+	}
+	return NULL;
+}
+
+void *xsg_malloc0(size_t size) {
+	if (size) {
+		void *mem;
+
+		xsg_debug("malloc0 %lu bytes", size);
+
+		mem = calloc(1, size);
+		if (mem)
+			return mem;
+
+		xsg_error("Failed to allocate %lu bytes", size);
+	}
+	return NULL;
+}
+
+void *xsg_realloc(void *mem, size_t size) {
+	if (size) {
+
+		xsg_debug("realloc %lu bytes", size);
+
+		if (!mem)
+			mem = malloc(size);
+		else
+			mem = realloc(mem, size);
+
+		if (mem)
+			return mem;
+
+		xsg_error("Failed to allocate %lu bytes", size);
+	}
+	if (mem)
+		free(mem);
+
+	return NULL;
+}
+
+void xsg_free(void *mem) {
+	free(mem);
+}
 
 /******************************************************************************
  *
@@ -61,7 +123,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 	xsg_list_t *last;
 
-	new_list = g_new0(xsg_list_t, 1);
+	new_list = xsg_new0(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = NULL;
 
@@ -79,7 +141,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 
-	new_list = g_new0(xsg_list_t, 1);
+	new_list = xsg_new0(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = list;
 
@@ -119,7 +181,7 @@ static size_t nearest_power(size_t base, size_t num) {
 static void xsg_string_maybe_expand(xsg_string_t *string, size_t len) {
 	if (string->len + len >= string->allocated_len) {
 		string->allocated_len = nearest_power(1, string->len + len + 1);
-		string->str = g_realloc(string->str, string->allocated_len);
+		string->str = xsg_realloc(string->str, string->allocated_len);
 	}
 }
 
@@ -139,7 +201,7 @@ xsg_string_t *xsg_string_new(const char *init) {
 }
 
 xsg_string_t *xsg_string_sized_new(size_t dfl_size) {
-	xsg_string_t *string = g_new0(xsg_string_t, 1);
+	xsg_string_t *string = xsg_new0(xsg_string_t, 1);
 
 	string->allocated_len = 0;
 	string->len = 0;
@@ -259,7 +321,7 @@ static void xsg_string_append_printf_internal(xsg_string_t *string, const char *
 
 	length = vasprintf(&buffer, fmt, args);
 	xsg_string_append_len(string, buffer, length);
-	g_free(buffer);
+	xsg_free(buffer);
 }
 
 void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
@@ -279,13 +341,13 @@ char *xsg_string_free(xsg_string_t *string, bool free_segment) {
 		return NULL;
 
 	if (free_segment) {
-		g_free(string->str);
+		xsg_free(string->str);
 		segment = NULL;
 	} else {
 		segment = string->str;
 	}
 
-	g_free(string);
+	xsg_free(string);
 
 	return segment;
 }

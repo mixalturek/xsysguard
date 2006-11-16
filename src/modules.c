@@ -72,7 +72,7 @@ static void init() {
 			if (*p[0] == '~')
 				*p = g_build_filename(g_get_home_dir(), *p, NULL);
 	} else {
-		pathv = g_new0(char *, 3);
+		pathv = xsg_new0(char *, 3);
 		pathv[0] = HOME_MODULE_DIR;
 		pathv[1] = MODULE_DIR;
 		pathv[2] = NULL;
@@ -85,7 +85,7 @@ static void init() {
 			continue;
 		while ((filename = g_dir_read_name(dir)) != NULL) {
 			if ((name = remove_suffix(filename, ".so")) != NULL) {
-				module_t *m = g_new0(module_t, 1);
+				module_t *m = xsg_new0(module_t, 1);
 				m->name = name;
 				m->dir = *p;
 				modules_list = xsg_list_prepend(modules_list, m);

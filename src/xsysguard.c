@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 
 	parse_config(config_buffer);
 
-	g_free(config_buffer);
+	xsg_free(config_buffer);
 
 	xsg_widgets_init();
 

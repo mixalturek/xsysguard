@@ -89,7 +89,7 @@ static void rand_set_seed_array(rand_t *rand, const uint32_t *seed, unsigned int
 }
 
 static rand_t *rand_new_with_seed_array(const uint32_t *seed, unsigned int seed_length) {
-	rand_t *rand = g_new0(rand_t, 1);
+	rand_t *rand = xsg_new0(rand_t, 1);
 
 	rand_set_seed_array(rand, seed, seed_length);
 	return rand;

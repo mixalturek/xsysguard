@@ -116,6 +116,19 @@ void xsg_main_add_shutdown_func(void (*func)(void));
  * utils.c
  ******************************************************************************/
 
+/* mem */
+void *xsg_malloc(size_t size);
+void *xsg_malloc0(size_t size);
+void *xsg_realloc(void *mem, size_t size);
+void xsg_free(void *mem);
+
+#define xsg_new(struct_type, n_structs) \
+	((struct_type *) xsg_malloc(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+#define xsg_new0(struct_type, n_structs) \
+	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+#define xsg_renew(struct_type, mem, n_structs) \
+	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+
 /* list */
 xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);

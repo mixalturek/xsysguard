@@ -182,7 +182,7 @@ static void get_fs_stats() {
 		return;
 	}
 	size = sizeof(sg_fs_stats) * stats.fs_entries;
-	stats.fs_stats_by_mnt_point = (sg_fs_stats *) g_realloc((void *) stats.fs_stats_by_mnt_point, size);
+	stats.fs_stats_by_mnt_point = (sg_fs_stats *) xsg_realloc((void *) stats.fs_stats_by_mnt_point, size);
 	memcpy(stats.fs_stats_by_mnt_point, stats.fs_stats_by_device_name, size);
 
 	qsort(stats.fs_stats_by_device_name, stats.fs_entries, sizeof(sg_fs_stats), sg_fs_compare_device_name);
@@ -258,35 +258,35 @@ static void get_page_stats_diff() {
 static void get_process_stats() {
 	xsg_message("Get (process_stats)");
 	if (stats.process_stats_by_name) {
-		free(stats.process_stats_by_name);
+		xsg_free(stats.process_stats_by_name);
 		stats.process_stats_by_name = 0;
 	}
 	if (stats.process_stats_by_pid) {
-		free(stats.process_stats_by_pid);
+		xsg_free(stats.process_stats_by_pid);
 		stats.process_stats_by_pid = 0;
 	}
 	if (stats.process_stats_by_uid) {
-		free(stats.process_stats_by_uid);
+		xsg_free(stats.process_stats_by_uid);
 		stats.process_stats_by_uid = 0;
 	}
 	if (stats.process_stats_by_gid) {
-		free(stats.process_stats_by_gid);
+		xsg_free(stats.process_stats_by_gid);
 		stats.process_stats_by_gid = 0;
 	}
 	if (stats.process_stats_by_size) {
-		free(stats.process_stats_by_size);
+		xsg_free(stats.process_stats_by_size);
 		stats.process_stats_by_size = 0;
 	}
 	if (stats.process_stats_by_res) {
-		free(stats.process_stats_by_res);
+		xsg_free(stats.process_stats_by_res);
 		stats.process_stats_by_res = 0;
 	}
 	if (stats.process_stats_by_cpu) {
-		free(stats.process_stats_by_cpu);
+		xsg_free(stats.process_stats_by_cpu);
 		stats.process_stats_by_cpu = 0;
 	}
 	if (stats.process_stats_by_time) {
-		free(stats.process_stats_by_time);
+		xsg_free(stats.process_stats_by_time);
 		stats.process_stats_by_time = 0;
 	}
 	if (!(stats.process_stats = sg_get_process_stats(&stats.process_entries))) {
@@ -331,7 +331,7 @@ static void add_stat(uint64_t update, void (*(func))()) {
 		}
 	}
 	/* no matching entry found in stat_list -> add new entry */
-	stat = g_new(stat_t, 1);
+	stat = xsg_new(stat_t, 1);
 	stat->update = update;
 	stat->func = func;
 	stat_list = xsg_list_append(stat_list, stat);
@@ -466,7 +466,7 @@ static void parse_host_info(xsg_var_t *var) {
 		var->type = XSG_STRING;
 		var->func = get_host_info_hostname;
 	} else if (xsg_conf_find_command("uptime")) {
-		host_info_uptime_t *data = g_new0(host_info_uptime_t, 1);
+		host_info_uptime_t *data = xsg_new0(host_info_uptime_t, 1);
 		data->mod = xsg_conf_read_uint();
 		data->div = xsg_conf_read_uint();
 		var->type = XSG_INT;
@@ -1983,7 +1983,7 @@ static void parse_network_iface_stats(xsg_var_t *var) {
 	} else if (xsg_conf_find_command("duplex")) {
 		network_iface_stats_duplex_data_t *data;
 
-		data = g_new0(network_iface_stats_duplex_data_t, 1);
+		data = xsg_new0(network_iface_stats_duplex_data_t, 1);
 		data->interface_name = interface_name;
 		data->full = xsg_conf_read_string();
 		data->half = xsg_conf_read_string();
@@ -2098,7 +2098,7 @@ sg_process_stats *get_process_stats_orderedby_name() {
 		return stats.process_stats_by_name;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_name = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_name = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_name, stats.process_stats, size);
 	qsort(stats.process_stats_by_name, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_name);
 	return stats.process_stats_by_name;
@@ -2111,7 +2111,7 @@ sg_process_stats *get_process_stats_orderedby_pid() {
 		return stats.process_stats_by_pid;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_pid = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_pid = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_pid, stats.process_stats, size);
 	qsort(stats.process_stats_by_pid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_pid);
 	return stats.process_stats_by_pid;
@@ -2124,7 +2124,7 @@ sg_process_stats *get_process_stats_orderedby_uid() {
 		return stats.process_stats_by_uid;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_uid = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_uid = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_uid, stats.process_stats, size);
 	qsort(stats.process_stats_by_uid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_uid);
 	return stats.process_stats_by_uid;
@@ -2137,7 +2137,7 @@ sg_process_stats *get_process_stats_orderedby_gid() {
 		return stats.process_stats_by_gid;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_gid = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_gid = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_gid, stats.process_stats, size);
 	qsort(stats.process_stats_by_gid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_gid);
 	return stats.process_stats_by_gid;
@@ -2150,7 +2150,7 @@ sg_process_stats *get_process_stats_orderedby_size() {
 		return stats.process_stats_by_size;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_size = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_size = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_size, stats.process_stats, size);
 	qsort(stats.process_stats_by_size, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_size);
 	return stats.process_stats_by_size;
@@ -2163,7 +2163,7 @@ sg_process_stats *get_process_stats_orderedby_res() {
 		return stats.process_stats_by_res;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_res = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_res = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_res, stats.process_stats, size);
 	qsort(stats.process_stats_by_res, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_res);
 	return stats.process_stats_by_res;
@@ -2176,7 +2176,7 @@ sg_process_stats *get_process_stats_orderedby_cpu() {
 		return stats.process_stats_by_cpu;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_cpu = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_cpu = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_cpu, stats.process_stats, size);
 	qsort(stats.process_stats_by_cpu, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_cpu);
 	return stats.process_stats_by_cpu;
@@ -2189,7 +2189,7 @@ sg_process_stats *get_process_stats_orderedby_time() {
 		return stats.process_stats_by_time;
 
 	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_time = (sg_process_stats *) g_malloc(size);
+	stats.process_stats_by_time = (sg_process_stats *) xsg_malloc(size);
 	memcpy(stats.process_stats_by_time, stats.process_stats, size);
 	qsort(stats.process_stats_by_time, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_time);
 	return stats.process_stats_by_time;
@@ -2798,7 +2798,7 @@ static void parse_process_stats(xsg_var_t *var) {
 
 	if (var->func == get_process_stats_time_spent) {
 		process_stats_time_spent_data_t *data;
-		data = g_new0(process_stats_time_spent_data_t, 1);
+		data = xsg_new0(process_stats_time_spent_data_t, 1);
 		data->list_func = list_func;
 		data->list_order = list_order;
 		data->ascending = ascending;
@@ -2807,7 +2807,7 @@ static void parse_process_stats(xsg_var_t *var) {
 		data->div = xsg_conf_read_uint();;
 	} else if (var->func == get_process_stats_state) {
 		process_stats_state_data_t *data;
-		data = g_new0(process_stats_state_data_t, 1);
+		data = xsg_new0(process_stats_state_data_t, 1);
 		data->list_func = list_func;
 		data->list_order = list_order;
 		data->ascending = ascending;
@@ -2819,7 +2819,7 @@ static void parse_process_stats(xsg_var_t *var) {
 		data->unknown = xsg_conf_read_string();
 	} else {
 		process_stats_data_t *data;
-		data = g_new0(process_stats_data_t, 1);
+		data = xsg_new0(process_stats_data_t, 1);
 		data->list_func = list_func;
 		data->list_order = list_order;
 		data->ascending = ascending;
