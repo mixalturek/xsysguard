@@ -61,7 +61,8 @@ XSG_LDFLAGS += -lXrender -lXcomposite
 XSG_CFLAGS  += -D ENABLE_XRENDER=1
 endif
 
-COMMON_SRC     := main.c main.h 
+COMMON_SRC     := include/xsysguard.h
+COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += utils.c
