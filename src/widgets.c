@@ -121,34 +121,34 @@ typedef struct {
 static xsg_list_t *widget_list = NULL;
 
 static window_t window = {
-	"xsysguard",      /* name */
-	"xsysguard",      /* class */
-	"xsysguard",      /* resource */
-	"64x64+128+128",  /* geometry */
-	0,                /* flags */
-	NorthWestGravity, /* win_gravity */
-	128,              /* xoffset */
-	128,              /* yoffset */
-	64,               /* width */
-	64,               /* height */
-	FALSE,            /* sticky */
-	FALSE,            /* skip_taskbar */
-	FALSE,            /* skip_pager */
-	0,                /* layer */
-	TRUE,             /* decorations */
-	0x00000000,       /* background */
-	FALSE,            /* copy_from_parent */
-	FALSE,            /* copy_from_root */
-	1024,             /* cache_size */
-	FALSE,            /* xshape */
-	FALSE,            /* argb_visual */
-	NULL,             /* display */
-	NULL,             /* visual */
-	0,                /* depth */
-	0,                /* screen */
-	0,                /* id */
-	0,                /* updates */
-	0,                /* mask */
+	name: "xsysguard",
+	class: "xsysguard",
+	resource: "xsysguard",
+	geometry: "64x64+128+128",
+	flags: 0,
+	win_gravity: NorthWestGravity,
+	xoffset: 128,
+	yoffset: 128,
+	width: 64,
+	height: 64,
+	sticky: FALSE,
+	skip_taskbar: FALSE,
+	skip_pager: FALSE,
+	layer: 0,
+	decorations: TRUE,
+	background: 0x00000000,
+	copy_from_parent: FALSE,
+	copy_from_root: FALSE,
+	cache_size: 1024,
+	xshape: FALSE,
+	argb_visual: FALSE,
+	display: NULL,
+	visual: NULL,
+	depth: 0,
+	screen: 0,
+	id: 0,
+	updates: 0,
+	mask: 0,
 };
 
 /******************************************************************************
