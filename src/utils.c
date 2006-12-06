@@ -33,13 +33,13 @@
  ******************************************************************************/
 
 void *xsg_malloc(size_t size) {
-	if (size) {
+	if (likely(size)) {
 		void *mem;
 
 		xsg_debug("malloc %lu bytes", size);
 
 		mem = malloc(size);
-		if (mem)
+		if (likely(mem != NULL))
 			return mem;
 
 		xsg_error("Failed to allocate %lu bytes", size);
@@ -48,13 +48,13 @@ void *xsg_malloc(size_t size) {
 }
 
 void *xsg_malloc0(size_t size) {
-	if (size) {
+	if (likely(size)) {
 		void *mem;
 
 		xsg_debug("malloc0 %lu bytes", size);
 
 		mem = calloc(1, size);
-		if (mem)
+		if (likely(mem != NULL))
 			return mem;
 
 		xsg_error("Failed to allocate %lu bytes", size);
@@ -63,16 +63,16 @@ void *xsg_malloc0(size_t size) {
 }
 
 void *xsg_realloc(void *mem, size_t size) {
-	if (size) {
+	if (likely(size)) {
 
 		xsg_debug("realloc %lu bytes", size);
 
-		if (!mem)
+		if (unlikely(mem == NULL))
 			mem = malloc(size);
 		else
 			mem = realloc(mem, size);
 
-		if (mem)
+		if (likely(mem != NULL))
 			return mem;
 
 		xsg_error("Failed to allocate %lu bytes", size);
@@ -214,12 +214,12 @@ xsg_string_t *xsg_string_sized_new(size_t dfl_size) {
 }
 
 xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
-	if (rval == NULL)
+	if (unlikely(rval == NULL))
 		return string;
 
-	if (string->str != rval) {
+	if (likely(string->str != rval)) {
 		xsg_string_truncate(string, 0);
 		xsg_string_append(string, rval);
 	}
@@ -228,7 +228,7 @@ xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) {
 }
 
 xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
 
 	string->len = MIN(len, string->len);
@@ -238,7 +238,7 @@ xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) {
 }
 
 xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
 
 	if (len >= string->allocated_len)
@@ -251,26 +251,26 @@ xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) {
 }
 
 xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
-	if (val == NULL)
+	if (unlikely(val == NULL))
 		return string;
 
 	return xsg_string_insert_len(string, -1, val, -1);
 }
 
 xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
-	if (val == NULL)
+	if (unlikely(val == NULL))
 		return string;
 	return xsg_string_insert_len(string, -1, val, len);
 }
 
 xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len) {
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
-	if (val == NULL)
+	if (unlikely(val == NULL))
 		return string;
 	if (len < 0)
 		len = strlen(val);
@@ -337,7 +337,7 @@ void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
 char *xsg_string_free(xsg_string_t *string, bool free_segment) {
 	char *segment;
 
-	if (string == NULL)
+	if (unlikely(string == NULL))
 		return NULL;
 
 	if (free_segment) {
@@ -351,5 +351,4 @@ char *xsg_string_free(xsg_string_t *string, bool free_segment) {
 
 	return segment;
 }
-
 
