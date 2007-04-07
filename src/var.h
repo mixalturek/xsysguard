@@ -25,20 +25,17 @@
 
 /******************************************************************************/
 
-void xsg_var_set_type(uint16_t id, uint8_t type);
-void xsg_var_update(uint16_t id);
-
-/******************************************************************************/
-
 void xsg_var_init();
 
+void xsg_var_update(uint32_t var_id);
+
 /******************************************************************************/
 
-uint16_t xsg_var_parse(uint64_t update, uint16_t id);
+uint32_t xsg_var_parse_double(uint32_t id, uint64_t update);
+uint32_t xsg_var_parse_string(uint32_t id, uint64_t update);
 
-int64_t xsg_var_get_int(uint16_t val_id);
-double xsg_var_get_double(uint16_t val_id);
-char *xsg_var_get_string(uint16_t val_id);
+double xsg_var_get_double(uint32_t var_id);
+char *xsg_var_get_string(uint32_t var_id);
 
 /*****************************************************************************/
 

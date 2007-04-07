@@ -18,17 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/* most stuff copied from glib */
-
 #include <xsysguard.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-#include <stdio.h>
 
 /******************************************************************************
  *
- * gmem.c
+ * mem
  *
  ******************************************************************************/
 
@@ -89,266 +84,128 @@ void xsg_free(void *mem) {
 
 /******************************************************************************
  *
- * glist.c
+ * strfuncs
  *
  ******************************************************************************/
 
-xsg_list_t *xsg_list_last(xsg_list_t *list) {
-	if (list)
-		while (list->next)
-			list = list->next;
-	return list;
-}
+bool xsg_str_has_suffix(const char *str, const char *suffix) {
+	int str_len;
+	int suffix_len;
 
-void *xsg_list_nth_data(xsg_list_t *list, unsigned int n) {
-	while ((n-- > 0) && list)
-		list = list->next;
+	if (unlikely(str == NULL))
+		return FALSE;
+	if (unlikely(suffix == NULL))
+		return FALSE;
 
-	return list ? list->data : NULL;
-}
+	str_len = strlen(str);
+	suffix_len = strlen(suffix);
 
-unsigned int xsg_list_length(xsg_list_t *list) {
-	unsigned int length;
+	if (str_len < suffix_len)
+		return FALSE;
 
-	length = 0;
-	while (list) {
-		length++;
-		list = list->next;
-	}
-
-	return length;
-}
-
-xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
-	xsg_list_t *new_list;
-	xsg_list_t *last;
-
-	new_list = xsg_new0(xsg_list_t, 1);
-	new_list->data = data;
-	new_list->next = NULL;
-
-	if (list) {
-		last = xsg_list_last(list);
-		last->next = new_list;
-		new_list->prev = last;
-		return list;
-	} else {
-		new_list->prev = NULL;
-		return new_list;
-	}
-}
-
-xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
-	xsg_list_t *new_list;
-
-	new_list = xsg_new0(xsg_list_t, 1);
-	new_list->data = data;
-	new_list->next = list;
-
-	if (list) {
-		new_list->prev = list->prev;
-		if (list->prev)
-			list->prev->next = new_list;
-		list->prev = new_list;
-	} else {
-		new_list->prev = NULL;
-	}
-
-	return new_list;
+	return strcmp(str + str_len - suffix_len, suffix) == 0;
 }
 
 /******************************************************************************
  *
- * gstring.c
+ * byte order
  *
  ******************************************************************************/
 
-#define MY_MAXSIZE ((size_t)-1)
+static int am_big_endian(void) {
+	long one = 1;
+	return !(*((char *)(&one)));
+}
 
-static size_t nearest_power(size_t base, size_t num) {
-	if (num > MY_MAXSIZE / 2) {
-		return MY_MAXSIZE;
+static uint16_t swap_16(uint16_t u) {
+	return (u >> 8) | (u << 8);
+}
+
+static uint32_t swap_32(uint32_t u) {
+	return  ((u >> 24)) |
+		((u <<  8) & 0x00ff0000) |
+		((u >>  8) & 0x0000ff00) |
+		((u << 24));
+}
+
+static uint64_t swap_64(uint64_t u) {
+	return  ((u >> 56)) |
+		((u << 40) & 0x00ff000000000000ULL) |
+		((u << 24) & 0x0000ff0000000000ULL) |
+		((u <<  8) & 0x000000ff00000000ULL) |
+		((u >>  8) & 0x00000000ff000000ULL) |
+		((u >> 24) & 0x0000000000ff0000ULL) |
+		((u >> 40) & 0x000000000000ff00ULL) |
+		((u << 56));
+}
+
+uint16_t xsg_uint16_be(uint16_t u) {
+	if (am_big_endian())
+		return u;
+	else
+		return swap_16(u);
+}
+
+uint16_t xsg_uint16_le(uint16_t u) {
+	if (am_big_endian())
+		return swap_16(u);
+	else
+		return u;
+}
+
+uint32_t xsg_uint32_be(uint32_t u) {
+	if (am_big_endian())
+		return u;
+	else
+		return swap_32(u);
+}
+
+uint32_t xsg_uint32_le(uint32_t u) {
+	if (am_big_endian())
+		return swap_32(u);
+	else
+		return u;
+}
+
+uint64_t xsg_uint64_be(uint64_t u) {
+	if (am_big_endian())
+		return u;
+	else
+		return swap_64(u);
+}
+
+uint64_t xsg_uint64_le(uint64_t u) {
+	if (am_big_endian())
+		return swap_64(u);
+	else
+		return u;
+}
+
+double xsg_double_be(double d) {
+	if (am_big_endian()) {
+		return d;
 	} else {
-		size_t n = base;
-
-		while (n < num)
-			n <<= 1;
-
-		return n;
+		union {
+			double d;
+			uint64_t u;
+		} u;
+		u.d = d;
+		u.u = swap_64(u.u);
+		return u.d;
 	}
 }
 
-static void xsg_string_maybe_expand(xsg_string_t *string, size_t len) {
-	if (string->len + len >= string->allocated_len) {
-		string->allocated_len = nearest_power(1, string->len + len + 1);
-		string->str = xsg_realloc(string->str, string->allocated_len);
-	}
-}
-
-xsg_string_t *xsg_string_new(const char *init) {
-	xsg_string_t *string;
-
-	if (init == NULL || *init == '\0') {
-		string = xsg_string_sized_new(2);
+double xsg_double_le(double d) {
+	if (am_big_endian()) {
+		union {
+			double d;
+			uint64_t u;
+		} u;
+		u.d = d;
+		u.u = swap_64(u.u);
+		return u.d;
 	} else {
-		int len;
-
-		len = strlen(init);
-		string = xsg_string_sized_new(len + 2);
-		xsg_string_append_len(string, init, len);
+		return d;
 	}
-	return string;
-}
-
-xsg_string_t *xsg_string_sized_new(size_t dfl_size) {
-	xsg_string_t *string = xsg_new0(xsg_string_t, 1);
-
-	string->allocated_len = 0;
-	string->len = 0;
-	string->str = NULL;
-
-	xsg_string_maybe_expand(string, MAX(dfl_size, 2));
-	string->str[0] = 0;
-
-	return string;
-}
-
-xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(rval == NULL))
-		return string;
-
-	if (likely(string->str != rval)) {
-		xsg_string_truncate(string, 0);
-		xsg_string_append(string, rval);
-	}
-
-	return string;
-}
-
-xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-
-	string->len = MIN(len, string->len);
-	string->str[string->len] = 0;
-
-	return string;
-}
-
-xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-
-	if (len >= string->allocated_len)
-		xsg_string_maybe_expand(string, len - string->len);
-
-	string->len = len;
-	string->str[len] = 0;
-
-	return string;
-}
-
-xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
-
-	return xsg_string_insert_len(string, -1, val, -1);
-}
-
-xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
-	return xsg_string_insert_len(string, -1, val, len);
-}
-
-xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
-	if (len < 0)
-		len = strlen(val);
-	if (pos < 0)
-		pos = string->len;
-	else if (pos > string->len)
-		return string;
-
-	if (val >= string->str && val <= string->str + string->len) {
-		size_t offset = val - string->str;
-		size_t precount = 0;
-
-		xsg_string_maybe_expand(string, len);
-		val = string->str + offset;
-
-		if (pos < string->len)
-			  memmove(string->str + pos + len, string->str + pos, string->len - pos);
-
-		if (offset < pos) {
-			precount = MIN(len, pos - offset);
-			memcpy(string->str + pos, val, precount);
-		}
-
-		if (len > precount)
-			memcpy(string->str + pos + precount, val + precount + len, len - precount);
-	} else {
-		xsg_string_maybe_expand(string, len);
-
-		if (pos < string->len)
-			memmove(string->str + pos + len, string->str + pos, string->len - pos);
-
-		if (len == 1)
-			string->str[pos] = *val;
-		else
-			memcpy(string->str + pos, val, len);
-	}
-
-	string->len += len;
-
-	string->str[string->len] = 0;
-
-	return string;
-}
-
-static void xsg_string_append_printf_internal(xsg_string_t *string, const char *fmt, va_list args) {
-	char *buffer;
-	int length;
-
-	length = vasprintf(&buffer, fmt, args);
-	xsg_string_append_len(string, buffer, length);
-	xsg_free(buffer);
-}
-
-void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
-	va_list args;
-
-	xsg_string_truncate(string, 0);
-
-	va_start(args, format);
-	xsg_string_append_printf_internal(string, format, args);
-	va_end(args);
-}
-
-char *xsg_string_free(xsg_string_t *string, bool free_segment) {
-	char *segment;
-
-	if (unlikely(string == NULL))
-		return NULL;
-
-	if (free_segment) {
-		xsg_free(string->str);
-		segment = NULL;
-	} else {
-		segment = string->str;
-	}
-
-	xsg_free(string);
-
-	return segment;
 }
 

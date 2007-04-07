@@ -22,6 +22,8 @@
 
 #include "main.h"
 
+#include <glib.h> // FIXME
+
 /******************************************************************************/
 
 static xsg_list_t *init_list = NULL;
@@ -35,6 +37,10 @@ static uint64_t interval = 1000;
 
 void xsg_main_set_interval(uint64_t i) {
 	interval = i;
+}
+
+uint64_t xsg_main_get_counter(void) {
+	return counter;
 }
 
 void xsg_main_add_init_func(void (*func)(void)) {

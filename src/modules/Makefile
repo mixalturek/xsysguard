@@ -32,7 +32,7 @@ SHELL 		:= /bin/sh
 CC 		?= gcc
 INSTALL 	?= install
 INSTALL_PROGRAM ?= $(INSTALL)
-INSTALL_DATA 	?= ${INSTALL} -m 644
+INSTALL_DATA 	?= $(INSTALL) -m 644
 
 VERSION := $(shell cat ../../VERSION)
 ifndef VERSION

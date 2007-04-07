@@ -25,7 +25,8 @@
 
 /******************************************************************************/
 
-void xsg_modules_parse_var(xsg_var_t *var, uint64_t update, uint16_t id);
+void xsg_modules_parse_double(uint32_t var_id, uint64_t update, double (**func)(void *), void **arg);
+void xsg_modules_parse_string(uint32_t var_id, uint64_t update, char * (**func)(void *), void **arg);
 void xsg_modules_list();
 
 /******************************************************************************/

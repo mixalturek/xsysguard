@@ -26,42 +26,42 @@
 /*****************************************************************************/
 
 void xsg_widgets_init();
-void xsg_widgets_update(uint16_t widget_id, uint16_t val_id);
+void xsg_widgets_update(uint32_t widget_id, uint32_t var_id);
 
 /*****************************************************************************/
 
-void xsg_widgets_parse_name();
-void xsg_widgets_parse_class();
-void xsg_widgets_parse_resource();
-void xsg_widgets_parse_geometry();
-void xsg_widgets_parse_sticky();
-void xsg_widgets_parse_skip_taskbar();
-void xsg_widgets_parse_skip_pager();
-void xsg_widgets_parse_layer();
-void xsg_widgets_parse_decorations();
-void xsg_widgets_parse_background();
-void xsg_widgets_parse_grab_root();
-void xsg_widgets_parse_cache_size();
-void xsg_widgets_parse_xshape();
-void xsg_widgets_parse_argb_visual();
+void xsg_widgets_parse_name(void);
+void xsg_widgets_parse_class(void);
+void xsg_widgets_parse_resource(void);
+void xsg_widgets_parse_geometry(void);
+void xsg_widgets_parse_sticky(void);
+void xsg_widgets_parse_skip_taskbar(void);
+void xsg_widgets_parse_skip_pager(void);
+void xsg_widgets_parse_layer(void);
+void xsg_widgets_parse_decorations(void);
+void xsg_widgets_parse_background(void);
+void xsg_widgets_parse_grab_root(void);
+void xsg_widgets_parse_cache_size(void);
+void xsg_widgets_parse_xshape(void);
+void xsg_widgets_parse_argb_visual(void);
 
 /*****************************************************************************/
 
-void xsg_widgets_parse_line();
-void xsg_widgets_parse_rectangle();
-void xsg_widgets_parse_ellipse();
-void xsg_widgets_parse_polygon();
-void xsg_widgets_parse_image();
-void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_barchart_val(uint16_t val_id);
-void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_linechart_val(uint16_t val_id);
-void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_areachart_val(uint16_t val_id);
-void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_text_val(uint16_t val_id);
-void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id);
-void xsg_widgets_parse_imagetext_val(uint16_t val_id);
+void xsg_widgets_parse_line(void);
+void xsg_widgets_parse_rectangle(void);
+void xsg_widgets_parse_ellipse(void);
+void xsg_widgets_parse_polygon(void);
+void xsg_widgets_parse_image(void);
+void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id);
+void xsg_widgets_parse_barchart_val(uint32_t var_id);
+void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id);
+void xsg_widgets_parse_linechart_val(uint32_t var_id);
+void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id);
+void xsg_widgets_parse_areachart_val(uint32_t var_id);
+void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id);
+void xsg_widgets_parse_text_val(uint32_t var_id);
+void xsg_widgets_parse_imagetext(uint64_t *update, uint32_t *widget_id);
+void xsg_widgets_parse_imagetext_val(uint32_t var_id);
 
 /******************************************************************************/
 

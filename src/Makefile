@@ -32,7 +32,7 @@ SHELL 		:= /bin/sh
 CC 		?= gcc
 INSTALL 	?= install
 INSTALL_PROGRAM ?= $(INSTALL)
-INSTALL_DATA 	?= ${INSTALL} -m 644
+INSTALL_DATA 	?= $(INSTALL) -m 644
 
 VERSION := $(shell cat ../VERSION)
 ifndef VERSION
@@ -65,7 +65,8 @@ COMMON_SRC     := include/xsysguard.h
 COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
-COMMON_SRC     += utils.c
+COMMON_SRC     += rpn.c rpn.h
+COMMON_SRC     += string.c list.c utils.c
 COMMON_SRC     += var.h
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c var.c widgets.c widgets.h
 XSYSGUARDD_SRC := $(COMMON_SRC) xsysguardd.c vard.c

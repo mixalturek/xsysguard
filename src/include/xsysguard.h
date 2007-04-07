@@ -25,10 +25,8 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <inttypes.h>
 #include <stdarg.h>
-
-#include <glib.h>
+#include <inttypes.h>
 
 /******************************************************************************/
 
@@ -53,58 +51,34 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define ABS(a) (((a) < 0) ? -(a) : (a))
 
-/******************************************************************************/
+#define ISNAN(d) (((d) != (d)) ? TRUE : FALSE)
 
-#define XSG_INT		0x01
-#define XSG_DOUBLE	0x02
-#define XSG_STRING	0x03
-
-#define XSG_MODULES_PARSE_FUNC "parse"
-#define XSG_MODULES_INFO_FUNC "info"
+#define DNAN ((double)(0.0/0.0))
+#define DINF ((double)(1.0/0.0))
 
 /******************************************************************************/
 
 typedef int bool;
 
-typedef struct _xsg_list_t xsg_list_t;
-typedef struct _xsg_string_t xsg_string_t;
-typedef struct _xsg_var_t xsg_var_t;
-
-struct _xsg_list_t {
-	void *data;
-	xsg_list_t *next;
-	xsg_list_t *prev;
-};
-
-struct _xsg_string_t {
-	char *str;
-	size_t len;
-	size_t allocated_len;
-};
-
-struct _xsg_var_t {
-	uint8_t type;
-	void *(*func)(void *args);
-	void *args;
-};
-
-typedef void (*xsg_modules_parse_func)(xsg_var_t *var, uint16_t id, uint64_t update);
-typedef char *(*xsg_modules_info_func)(void);
-
 /******************************************************************************/
 
-void parse(xsg_var_t *var, uint16_t id, uint64_t update);
-char *info(void);
+typedef void xsg_modules_parse_double_t(uint32_t id, uint64_t update, double (**func)(void *), void **arg);
+typedef void xsg_modules_parse_string_t(uint32_t id, uint64_t update, char * (**func)(void *), void **arg);
+typedef char *xsg_modules_info_t(void);
+
+xsg_modules_parse_double_t parse_double;
+xsg_modules_parse_string_t parse_string;
+xsg_modules_info_t info;
 
 /******************************************************************************
  * conf.c
  ******************************************************************************/
 
-bool xsg_conf_read_boolean();
-int64_t xsg_conf_read_int();
-uint64_t xsg_conf_read_uint();
-double xsg_conf_read_double();
-char *xsg_conf_read_string();
+bool xsg_conf_read_boolean(void);
+int64_t xsg_conf_read_int(void);
+uint64_t xsg_conf_read_uint(void);
+double xsg_conf_read_double(void);
+char *xsg_conf_read_string(void);
 
 bool xsg_conf_find_command(const char *command);
 
@@ -114,20 +88,74 @@ void xsg_conf_error(const char *expected);
  * var.c
  ******************************************************************************/
 
-void xsg_var_set_type(uint16_t id, uint8_t type);
-void xsg_var_update(uint16_t id);
+void xsg_var_update(uint32_t id);
 
 /******************************************************************************
  * main.c
  ******************************************************************************/
 
+uint64_t xsg_main_get_counter(void);
 void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
 
 /******************************************************************************
+ * list.c
+ ******************************************************************************/
+
+typedef struct _xsg_list_t xsg_list_t;
+
+struct _xsg_list_t {
+	void *data;
+	xsg_list_t *next;
+	xsg_list_t *prev;
+};
+
+xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
+xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
+xsg_list_t *xsg_list_last(xsg_list_t *list);
+unsigned int xsg_list_length(xsg_list_t *list);
+void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
+
+/******************************************************************************
+ * string.c
+ ******************************************************************************/
+
+typedef struct _xsg_string_t xsg_string_t;
+
+struct _xsg_string_t {
+	char *str;
+	size_t len;
+	size_t allocated_len;
+};
+
+xsg_string_t *xsg_string_new(const char *init);
+xsg_string_t *xsg_string_sized_new(size_t dfl_size);
+xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval);
+xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len);
+xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len);
+xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val);
+xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len);
+xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len);
+void xsg_string_printf(xsg_string_t *string, const char *format, ...);
+char *xsg_string_free(xsg_string_t *string, bool free_segment);
+
+/******************************************************************************
  * utils.c
  ******************************************************************************/
+
+/* strfuncs */
+bool xsg_str_has_suffix(const char *str, const char *suffix);
+
+/* byte order */
+uint16_t xsg_uint16_be(uint16_t u);
+uint16_t xsg_uint16_le(uint16_t u);
+uint32_t xsg_uint32_be(uint32_t u);
+uint32_t xsg_uint32_le(uint32_t u);
+uint64_t xsg_uint64_be(uint64_t u);
+uint64_t xsg_uint64_le(uint64_t u);
+double xsg_double_be(double d);
+double xsg_double_le(double d);
 
 /* mem */
 void *xsg_malloc(size_t size);
@@ -141,25 +169,6 @@ void xsg_free(void *mem);
 	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
 #define xsg_renew(struct_type, mem, n_structs) \
 	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
-
-/* list */
-xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
-xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
-xsg_list_t *xsg_list_last(xsg_list_t *list);
-unsigned int xsg_list_length(xsg_list_t *list);
-void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
-
-/* string */
-xsg_string_t *xsg_string_new(const char *init);
-xsg_string_t *xsg_string_sized_new(size_t dfl_size);
-xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval);
-xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len);
-xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len);
-xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val);
-xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len);
-xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len);
-void xsg_string_printf(xsg_string_t *string, const char *format, ...);
-char *xsg_string_free(xsg_string_t *string, bool free_segment);
 
 /******************************************************************************
  * logging

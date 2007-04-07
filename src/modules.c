@@ -26,6 +26,8 @@
 #include "modules.h"
 #include "conf.h"
 
+#include <glib.h> // FIXME
+
 /******************************************************************************/
 
 #ifndef HOME_MODULE_DIR
@@ -40,7 +42,8 @@
 
 typedef struct {
 	char *name;
-	char *dir;
+//	char *dir;
+	char *file;
 } module_t;
 
 /******************************************************************************/
@@ -49,11 +52,12 @@ static xsg_list_t *modules_list = NULL;
 
 /******************************************************************************/
 
+// TODO move to utils.c
 static char *remove_suffix(const char *string, const char *suffix) {
-	if (!g_str_has_suffix(string, suffix))
+	if (!xsg_str_has_suffix(string, suffix))
 		return NULL;
 
-	return g_strndup(string, strlen(string) - strlen(suffix));
+	return strndup(string, strlen(string) - strlen(suffix));
 }
 
 static void init() {
@@ -87,7 +91,7 @@ static void init() {
 			if ((name = remove_suffix(filename, ".so")) != NULL) {
 				module_t *m = xsg_new0(module_t, 1);
 				m->name = name;
-				m->dir = *p;
+				m->file = g_build_filename(*p, filename, NULL);
 				modules_list = xsg_list_prepend(modules_list, m);
 				xsg_message("Found module file \"%s\"", filename);
 			}
@@ -98,9 +102,9 @@ static void init() {
 
 /******************************************************************************/
 
-void xsg_modules_parse_var(xsg_var_t *var, uint64_t update, uint16_t id) {
-	xsg_modules_parse_func parse;
-	char *module_filename = NULL;
+void xsg_modules_parse_double(uint32_t var_id, uint64_t update, double (**func)(void *), void **arg) {
+	xsg_modules_parse_double_t *parse_double;
+	char *filename = NULL;
 	void *module;
 	module_t *m = NULL;
 	xsg_list_t *l;
@@ -111,41 +115,78 @@ void xsg_modules_parse_var(xsg_var_t *var, uint64_t update, uint16_t id) {
 	for (l = modules_list; l; l = l->next) {
 		m = l->data;
 		if (xsg_conf_find_command(m->name)) {
-			module_filename = g_build_filename(
-					m->dir,
-					g_strconcat(m->name, ".so", NULL),
-					NULL);
+			filename = m->file;
 			break;
 		}
 	}
 
-	if (!module_filename)
-		xsg_conf_error("Modulename");
+	if (!filename)
+		xsg_conf_error("module name");
 
-	module = dlopen(module_filename, RTLD_LAZY | RTLD_LOCAL);
+	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
 	if (!module)
-		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
+		xsg_error("cannot load module \"%s\": %s", m->name, dlerror());
 
-	parse = dlsym(module, XSG_MODULES_PARSE_FUNC);
+	parse_double = dlsym(module, "parse_double");
 
-	if (!parse)
-		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
+	if (!parse_double)
+		xsg_error("cannot find \"parse_double\" symbol in module \"%s\": %s", m->name, dlerror());
 
-	var->type = 0;
-	var->func = NULL;
-	var->args = NULL;
+	*func = NULL;
+	*arg = NULL;
 
-	parse(var, id, update);
+	parse_double(var_id, update, func, arg);
 
-	if (var->type == 0 || var->func == NULL)
-		xsg_error("Module \"%s\" must set var->type and var->func != 0", module_filename);
+	if (*func == NULL)
+		xsg_error("module \"%s\" must set func != NULL", m->name);
+}
+
+void xsg_modules_parse_string(uint32_t var_id, uint64_t update, char * (**func)(void *), void **arg) {
+	xsg_modules_parse_string_t *parse_string;
+	char *filename = NULL;
+	void *module;
+	module_t *m = NULL;
+	xsg_list_t *l;
+
+	if (!modules_list)
+		init();
+
+	for (l = modules_list; l; l = l->next) {
+		m = l->data;
+		if (xsg_conf_find_command(m->name)) {
+			filename = m->file;
+			break;
+		}
+	}
+
+	if (!filename)
+		xsg_conf_error("module name");
+
+	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
+
+	if (!module)
+		xsg_error("cannot load module \"%s\": %s", m->name, dlerror());
+
+	parse_string = dlsym(module, "parse_string");
+
+	if (!parse_string)
+		xsg_error("cannot find \"parse_string\" symbol in module \"%s\": %s", m->name, dlerror());
+
+	*func = NULL;
+	*arg = NULL;
+
+	parse_string(var_id, update, func, arg);
+
+	if (*func == NULL)
+		xsg_error("module \"%s\" must set func != NULL", m->name);
 }
 
 void xsg_modules_list() {
-	xsg_modules_parse_func parse;
-	xsg_modules_info_func info;
-	char *module_filename;
+	xsg_modules_parse_double_t *parse_double;
+	xsg_modules_parse_string_t *parse_string;
+	xsg_modules_info_t *info;
+	char *filename;
 	void *module;
 	module_t *m = NULL;
 	xsg_list_t *l;
@@ -156,18 +197,20 @@ void xsg_modules_list() {
 	printf("Available modules:\n");
 	for (l = modules_list; l; l = l->next) {
 		m = l->data;
-		module_filename = g_build_filename(m->dir, g_strconcat(m->name, ".so", NULL), NULL);
-		module = dlopen(module_filename, RTLD_LAZY | RTLD_LOCAL);
+		filename = m->file;
+
+		module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
 		if (!module)
 			continue;
 
-		parse = dlsym(module, XSG_MODULES_PARSE_FUNC);
+		parse_double = dlsym(module, "parse_double");
+		parse_string = dlsym(module, "parse_string");
 
-		if (!parse)
+		if ((!parse_double) && (!parse_string))
 			continue;
 
-		info = dlsym(module, XSG_MODULES_INFO_FUNC);
+		info = dlsym(module, "info");
 
 		if (info)
 			printf("%s - %s\n", m->name, info());

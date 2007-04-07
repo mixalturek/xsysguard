@@ -25,13 +25,13 @@
 
 /******************************************************************************/
 
-void xsg_main_add_init_func(void (*func)(void));
-void xsg_main_add_update_func(void (*func)(uint64_t));
-void xsg_main_add_shutdown_func(void (*func)(void));
+//void xsg_main_add_init_func(void (*func)(void));
+//void xsg_main_add_update_func(void (*func)(uint64_t));
+//void xsg_main_add_shutdown_func(void (*func)(void));
 
 /******************************************************************************/
 
-void xsg_main_loop();
+void xsg_main_loop(void);
 void xsg_main_set_interval(uint64_t i);
 
 /******************************************************************************/

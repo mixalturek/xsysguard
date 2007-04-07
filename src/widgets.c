@@ -36,6 +36,8 @@
 #include "conf.h"
 #include "var.h"
 
+#include <glib.h> // FIXME
+
 /******************************************************************************/
 
 #ifndef HOME_IMAGE_DIR
@@ -78,7 +80,7 @@ struct _widget_t {
 	unsigned int width;
 	unsigned int height;
 	void (*render_func)(widget_t *widget, Imlib_Image buffer, int x, int y, bool solid_bg);
-	void (*update_func)(widget_t *widget, uint16_t val_id);
+	void (*update_func)(widget_t *widget, uint32_t val_id);
 	void (*scroll_func)(widget_t *widget);
 	void *data;
 };
@@ -173,7 +175,7 @@ static void image_set_color(DATA32 color) {
 	imlib_image_put_back_data(data);
 }
 
-static widget_t *get_widget(uint16_t widget_id) {
+static widget_t *get_widget(uint32_t widget_id) {
 	widget_t *widget;
 
 	widget = xsg_list_nth_data(widget_list, (unsigned int) widget_id);
@@ -537,7 +539,7 @@ static alignment_t parse_alignment() {
  ******************************************************************************/
 
 typedef struct {
-	uint16_t val_id;
+	uint32_t val_id;
 	double mult;
 	double add;
 	uint8_t type;
@@ -882,7 +884,7 @@ static void scroll_and_update(uint64_t count) {
 				0, 0, window.mask, ShapeSet);
 }
 
-void xsg_widgets_update(uint16_t widget_id, uint16_t val_id) {
+void xsg_widgets_update(uint32_t widget_id, uint32_t val_id) {
 	widget_t *widget;
 
 	widget = get_widget(widget_id);
@@ -1223,7 +1225,7 @@ static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 			line->x2 - up_x, line->y2 - up_y, 0);
 }
 
-static void update_line(widget_t *widget, uint16_t val_id) {
+static void update_line(widget_t *widget, uint32_t val_id) {
 	return;
 }
 
@@ -1327,7 +1329,7 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	}
 }
 
-static void update_rectangle(widget_t *widget, uint16_t val_id) {
+static void update_rectangle(widget_t *widget, uint32_t val_id) {
 	return;
 }
 
@@ -1426,7 +1428,7 @@ static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int u
 				ellipse->a, ellipse->b);
 }
 
-static void update_ellipse(widget_t *widget, uint16_t val_id) {
+static void update_ellipse(widget_t *widget, uint32_t val_id) {
 	return;
 }
 
@@ -1504,7 +1506,7 @@ static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int u
 	imlib_polygon_free(poly);
 }
 
-static void update_polygon(widget_t *widget, uint16_t val_id) {
+static void update_polygon(widget_t *widget, uint32_t val_id) {
 	return;
 }
 
@@ -1591,7 +1593,7 @@ static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_
 				widget->yoffset - up_y, widget->width, widget->height);
 }
 
-static void update_image(widget_t *widget, uint16_t val_id) {
+static void update_image(widget_t *widget, uint32_t val_id) {
 	return;
 }
 
@@ -1673,7 +1675,7 @@ void xsg_widgets_parse_image() {
  ******************************************************************************/
 
 typedef struct {
-	uint16_t val_id;
+	uint32_t val_id;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double angle;
@@ -1808,7 +1810,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	imlib_free_image();
 }
 
-static void update_barchart(widget_t *widget, uint16_t val_id) {
+static void update_barchart(widget_t *widget, uint32_t val_id) {
 	barchart_t *barchart;
 	barchart_val_t *barchart_val;
 	xsg_list_t *l;
@@ -1833,7 +1835,7 @@ static void scroll_barchart(widget_t *widget) {
 	return;
 }
 
-void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
+void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	barchart_t *barchart;
 
@@ -1884,7 +1886,7 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);;
 }
 
-void xsg_widgets_parse_barchart_val(uint16_t val_id) {
+void xsg_widgets_parse_barchart_val(uint32_t val_id) {
 	widget_t *widget;
 	barchart_t *barchart;
 	barchart_val_t *barchart_val;
@@ -1949,7 +1951,7 @@ void xsg_widgets_parse_barchart_val(uint16_t val_id) {
  ******************************************************************************/
 
 typedef struct {
-	uint16_t val_id;
+	uint32_t val_id;
 	Imlib_Color color;
 	double mult;
 	double add;
@@ -2067,7 +2069,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	imlib_free_image();
 }
 
-static void update_linechart(widget_t *widget, uint16_t val_id) {
+static void update_linechart(widget_t *widget, uint32_t val_id) {
 	linechart_t *linechart;
 	linechart_val_t *linechart_val;
 	xsg_list_t *l;
@@ -2104,7 +2106,7 @@ static void scroll_linechart(widget_t *widget) {
 	linechart->value_index = (linechart->value_index + 1) % width;
 }
 
-void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
+void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	linechart_t *linechart;
 
@@ -2156,7 +2158,7 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_linechart_val(uint16_t val_id) {
+void xsg_widgets_parse_linechart_val(uint32_t val_id) {
 	widget_t *widget;
 	linechart_t *linechart;
 	linechart_val_t * linechart_val;
@@ -2203,7 +2205,7 @@ void xsg_widgets_parse_linechart_val(uint16_t val_id) {
  ******************************************************************************/
 
 typedef struct {
-	uint16_t val_id;
+	uint32_t val_id;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double angle;
@@ -2231,7 +2233,7 @@ static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	/* TODO */
 }
 
-static void update_areachart(widget_t *widget, uint16_t val_id) {
+static void update_areachart(widget_t *widget, uint32_t val_id) {
 	areachart_t *areachart;
 	areachart_val_t *areachart_val;
 	xsg_list_t *l;
@@ -2268,7 +2270,7 @@ static void scroll_areachart(widget_t *widget) {
 	areachart->value_index = (areachart->value_index + 1) % width;
 }
 
-void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
+void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	areachart_t *areachart;
 
@@ -2320,7 +2322,7 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_areachart_val(uint16_t val_id) {
+void xsg_widgets_parse_areachart_val(uint32_t val_id) {
 	widget_t *widget;
 	areachart_t *areachart;
 	areachart_val_t *areachart_val;
@@ -2412,7 +2414,7 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 	/* TODO */
 }
 
-static void update_text(widget_t *widget, uint16_t val_id) {
+static void update_text(widget_t *widget, uint32_t val_id) {
 	text_t *text;
 	text_val_t *text_val;
 	xsg_list_t *l;
@@ -2425,6 +2427,7 @@ static void update_text(widget_t *widget, uint16_t val_id) {
 			parse_format(text->format, text->val_list);
 
 		if ((val_id == 0) || (val_id == text_val->val_id)) {
+/* FIXME
 			switch (text_val->type) {
 				case XSG_INT:
 					text_val->value.i = xsg_var_get_int(text_val->val_id);
@@ -2438,6 +2441,7 @@ static void update_text(widget_t *widget, uint16_t val_id) {
 				default:
 					g_error("Unexpected type");
 			}
+*/
 		}
 	}
 
@@ -2448,7 +2452,7 @@ static void scroll_text(widget_t *widget) {
 	return;
 }
 
-void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
+void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	text_t *text;
 
@@ -2494,7 +2498,7 @@ void xsg_widgets_parse_text(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_text_val(uint16_t val_id) {
+void xsg_widgets_parse_text_val(uint32_t val_id) {
 	widget_t *widget;
 	text_t *text;
 	text_val_t *text_val;
@@ -2543,7 +2547,7 @@ static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int
 	/* TODO */
 }
 
-static void update_imagetext(widget_t *widget, uint16_t val_id) {
+static void update_imagetext(widget_t *widget, uint32_t val_id) {
 	imagetext_t *imagetext;
 	text_val_t *text_val;
 	xsg_list_t *l;
@@ -2556,6 +2560,7 @@ static void update_imagetext(widget_t *widget, uint16_t val_id) {
 			parse_format(imagetext->format, imagetext->val_list);
 
 		if ((val_id == 0) || (val_id == text_val->val_id)) {
+/* FIXME
 			switch (text_val->type) {
 				case XSG_INT:
 					text_val->value.i = xsg_var_get_int(text_val->val_id);
@@ -2569,6 +2574,7 @@ static void update_imagetext(widget_t *widget, uint16_t val_id) {
 				default:
 					g_error("Unexpected type");
 			}
+*/
 		}
 	}
 
@@ -2579,7 +2585,7 @@ static void scroll_imagetext(widget_t *widget) {
 	return;
 }
 
-void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
+void xsg_widgets_parse_imagetext(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	imagetext_t *imagetext;
 
@@ -2624,7 +2630,7 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint16_t *widget_id) {
 	widget_list = xsg_list_append(widget_list, widget);
 }
 
-void xsg_widgets_parse_imagetext_val(uint16_t val_id) {
+void xsg_widgets_parse_imagetext_val(uint32_t val_id) {
 	widget_t *widget;
 	imagetext_t *imagetext;
 	text_val_t *text_val;

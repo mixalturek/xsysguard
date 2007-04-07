@@ -23,45 +23,55 @@
 
 /******************************************************************************/
 
-struct time_args {
+struct strftime_args {
 	char *format;
 	xsg_string_t *buffer;
 };
 
-static void *get_time(void *arg) {
-	struct time_args *args;
+/******************************************************************************/
+
+static double get_time(void *arg) {
+	return (double) time(NULL);
+}
+
+static char *get_strftime(void *arg) {
+	struct strftime_args *args;
 	time_t curtime;
 	struct tm *loctime;
 
-	args = (struct time_args *) arg;
+	args = (struct strftime_args *) arg;
 
-	curtime = time(0);
+	curtime = time(NULL);
 	loctime = localtime(&curtime);
 
 	while (1) {
 		size_t len;
 		len = strftime(args->buffer->str, args->buffer->len, args->format, loctime);
-		if (len < args->buffer->len)
+		if (likely(len < args->buffer->len))
 			break;
 		args->buffer = xsg_string_set_size(args->buffer, args->buffer->len + 8);
 	}
 
-	xsg_message("Get (\"%s\") \"%s\"", args->format, args->buffer->str);
-
-	return (void *) args->buffer->str;
+	return args->buffer->str;
 }
 
-void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
-	struct time_args *args;
+/******************************************************************************/
 
-	args = xsg_new0(struct time_args, 1);
+void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+	*func = get_time;
+	*arg = NULL;
+}
+
+void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **arg) {
+	struct strftime_args *args;
+
+	args = xsg_new0(struct strftime_args, 1);
 
 	args->format = xsg_conf_read_string();
 	args->buffer = xsg_string_sized_new(8);
 
-	var->type = XSG_STRING;
-	var->func = get_time;
-	var->args = args;
+	*func = get_strftime;
+	*arg = args;
 }
 
 char *info() {

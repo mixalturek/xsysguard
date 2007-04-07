@@ -1,4 +1,4 @@
-/* const.c
+/* rpn.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
@@ -18,35 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef __RPN_H__
+#define __RPN_H__ 1
+
 #include <xsysguard.h>
 
 /******************************************************************************/
 
-static double get_double(void *arg) {
-	return * (double *) arg;
-}
+void xsg_rpn_init(void);
+uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update);
+double xsg_rpn_calc(uint32_t rpn_id);
 
-static char *get_string(void *arg) {
-	return (char *) arg;
-}
+/*****************************************************************************/
 
-/******************************************************************************/
-
-void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
-	double *d;
-
-	d = xsg_new0(double, 1);
-	*d = xsg_conf_read_double();
-	*arg = (void *) d;
-	*func = get_double;
-}
-
-void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **arg) {
-	*arg = xsg_conf_read_string();
-	*func = get_string;
-}
-
-char *info() {
-	return "always returns the same constant value";
-}
+#endif /* __RPN_H__ */
 

@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <errno.h>
 
+// TODO no rand_double() for async events
+// TODO use drand48
+
 /******************************************************************************/
 
 /* NOTE: the following functions are c&p from glib/grand.c */
@@ -177,32 +180,19 @@ static double rand_double(rand_t *rand) {
 	return retval;
 }
 
-static double random_double() {
-	double result;
+/******************************************************************************/
 
+static double get_random(void *arg) {
 	if (!global_random)
 		global_random = rand_new();
-
-	result = rand_double(global_random);
-	return result;
+	return rand_double(global_random);
 }
 
 /******************************************************************************/
 
-static void *get_random(void *arg) {
-	static double d;
-
-	d = random_double();
-
-	xsg_message("Get () %f", d);
-
-	return (void *) &d;
-}
-
-void parse(xsg_var_t *var, uint16_t id, uint64_t update) {
-	var->type = XSG_DOUBLE;
-	var->func = get_random;
-	var->args = NULL;
+void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+	*func = get_random;
+	*arg = NULL;
 }
 
 char *info() {

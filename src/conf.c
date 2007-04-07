@@ -19,7 +19,6 @@
  */
 
 #include <xsysguard.h>
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -110,7 +109,7 @@ bool xsg_conf_find_command(const char *command) {
 		nptr++;
 	}
 
-	if (*nptr != ':' && *nptr != ' ' && *nptr != '\t' && *nptr != '\n')
+	if (*nptr != ',' && *nptr != ':' && *nptr != ' ' && *nptr != '\t' && *nptr != '\n')
 		return FALSE;
 
 	if (*nptr == '\n')
@@ -230,14 +229,14 @@ uint32_t xsg_conf_read_color() {
 
 	skip_space();
 
-	sscanf(ptr, "%" G_GINT32_MODIFIER "x%n", &c.uint, &n);
+	sscanf(ptr, "%"SCNx32"%n", &c.uint, &n);
 
 	if (n < 1)
 		xsg_conf_error("color");
 
 	ptr += n;
 
-	tmp.uint = GUINT32_TO_BE(c.uint);
+	tmp.uint = xsg_uint32_be(c.uint);
 
 	c.argb.a = tmp.rgba.a;
 	c.argb.r = tmp.rgba.r;
@@ -325,17 +324,17 @@ static char *read_env() {
 
 	begin = ptr;
 
-	while (!is(' ') && !is(':') && !is('\t') && !is('\n') && !is('\0'))
+	while (!is(' ') && !is(':') && !is(',') && !is('\t') && !is('\n') && !is('\0'))
 		ptr++;
 
 	p = xsg_new0(char, ptr - begin + 1);
 	strncpy(p, begin, ptr - begin);
 
-	env = g_getenv(p);
+	env = getenv(p);
 
 	if (env) {
 		xsg_free(p);
-		return g_strdup(env);
+		return strdup(env);
 	} else {
 		return p;
 	}

@@ -28,6 +28,8 @@
 #include "main.h"
 #include "var.h"
 
+#include <glib.h>
+
 /******************************************************************************/
 
 #ifndef DEFAULT_CONFIG_FILE
@@ -84,10 +86,20 @@ static void parse_env() {
 		xsg_warning("Cannot set environment variable %s = %s", variable, value);
 }
 
+static bool parse_var(uint32_t widget_id, uint64_t update, uint32_t *var_id) {
+	if (xsg_conf_find_command("+"))
+		*var_id = xsg_var_parse_double(widget_id, update);
+	else if (xsg_conf_find_command("."))
+		*var_id = xsg_var_parse_string(widget_id, update);
+	else
+		return FALSE;
+	return TRUE;
+}
+
 static void parse_config(char *config_buffer) {
 	uint64_t update;
-	uint16_t val_id;
-	uint16_t widget_id;
+	uint32_t var_id;
+	uint32_t widget_id;
 
 	xsg_conf_set_buffer(config_buffer);
 
@@ -148,24 +160,24 @@ static void parse_config(char *config_buffer) {
 			xsg_widgets_parse_image();
 		} else if (xsg_conf_find_command("BarChart")) {
 			xsg_widgets_parse_barchart(&update, &widget_id);
-			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
-				xsg_widgets_parse_barchart_val(val_id);
+			while (parse_var(widget_id, update, &var_id) != 0)
+				xsg_widgets_parse_barchart_val(var_id);
 		} else if (xsg_conf_find_command("LineChart")) {
 			xsg_widgets_parse_linechart(&update, &widget_id);
-			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
-				xsg_widgets_parse_linechart_val(val_id);
+			while (parse_var(widget_id, update, &var_id) != 0)
+				xsg_widgets_parse_linechart_val(var_id);
 		} else if (xsg_conf_find_command("AreaChart")) {
 			xsg_widgets_parse_areachart(&update, &widget_id);
-			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
-				xsg_widgets_parse_areachart_val(val_id);
+			while (parse_var(widget_id, update, &var_id) != 0)
+				xsg_widgets_parse_areachart_val(var_id);
 		} else if (xsg_conf_find_command("Text")) {
 			xsg_widgets_parse_text(&update, &widget_id);
-			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
-				xsg_widgets_parse_text_val(val_id);
+			while (parse_var(widget_id, update, &var_id) != 0)
+				xsg_widgets_parse_text_val(var_id);
 		} else if (xsg_conf_find_command("ImageText")) {
 			xsg_widgets_parse_imagetext(&update, &widget_id);
-			while ((val_id = xsg_var_parse(update, widget_id)) != 0)
-				xsg_widgets_parse_imagetext_val(val_id);
+			while (parse_var(widget_id, update, &var_id) != 0)
+				xsg_widgets_parse_imagetext_val(var_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart, Text or ImageText");
@@ -239,12 +251,11 @@ int main(int argc, char **argv) {
 	if (!g_file_get_contents(file, &config_buffer, NULL, &error))
 		xsg_error("%s", error->message);
 
-	xsg_var_init();
-
 	parse_config(config_buffer);
 
 	xsg_free(config_buffer);
 
+	xsg_var_init();
 	xsg_widgets_init();
 
 	xsg_main_loop();

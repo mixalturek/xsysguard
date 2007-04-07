@@ -25,26 +25,26 @@
 
 /******************************************************************************/
 
-bool xsg_conf_read_boolean();
-int64_t xsg_conf_read_int();
-uint64_t xsg_conf_read_uint();
-double xsg_conf_read_double();
-char *xsg_conf_read_string();
+//bool xsg_conf_read_boolean(void);
+//int64_t xsg_conf_read_int(void);
+//uint64_t xsg_conf_read_uint(void);
+//double xsg_conf_read_double(void);
+//char *xsg_conf_read_string(void);
 
-bool xsg_conf_find_command(const char *command);
+//bool xsg_conf_find_command(const char *command);
 
-void xsg_conf_error(const char *expected);
+//void xsg_conf_error(const char *expected);
 
 /******************************************************************************/
 
 void xsg_conf_set_buffer(char *buffer);
 
-bool xsg_conf_find_comment();
-bool xsg_conf_find_newline();
-bool xsg_conf_find_end();
+bool xsg_conf_find_comment(void);
+bool xsg_conf_find_newline(void);
+bool xsg_conf_find_end(void);
 
-void xsg_conf_read_newline();
-uint32_t xsg_conf_read_color();
+void xsg_conf_read_newline(void);
+uint32_t xsg_conf_read_color(void);
 
 /******************************************************************************/
 

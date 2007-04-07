@@ -28,6 +28,8 @@
 #include "main.h"
 #include "var.h"
 
+#include <glib.h> // FIXME
+
 /******************************************************************************/
 
 static uint32_t log_level = LOG_LEVEL_ERROR;
