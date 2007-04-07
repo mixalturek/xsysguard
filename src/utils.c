@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <string.h>
+#include <limits.h>
 
 /******************************************************************************
  *
@@ -104,6 +105,98 @@ bool xsg_str_has_suffix(const char *str, const char *suffix) {
 		return FALSE;
 
 	return strcmp(str + str_len - suffix_len, suffix) == 0;
+}
+
+char *xsg_str_without_suffix(const char *str, const char *suffix) {
+	int str_len;
+	int suffix_len;
+
+	if (unlikely(str == NULL))
+		return NULL;
+	if (unlikely(suffix == NULL))
+		return strdup(str);
+
+	str_len = strlen(str);
+	suffix_len = strlen(suffix);
+
+	if (str_len < suffix_len)
+		return strdup(str);
+
+	if (strcmp(str + str_len - suffix_len, suffix) != 0)
+		return strdup(str);
+
+	return strndup(str, str_len - suffix_len);
+}
+
+char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens) {
+	bool delim_table[256];
+	xsg_list_t *tokens, *list;
+	int n_tokens;
+	const char *s;
+	const char *current;
+	char *token;
+	char **result;
+
+	if (unlikely(string == NULL))
+		return NULL;
+	if (unlikely(delimiters == NULL))
+		return NULL;
+
+	if (max_tokens < 1)
+		max_tokens = INT_MAX;
+
+	if (*string == '\0') {
+		result = xsg_new(char *, 1);
+		result[0] = NULL;
+		return result;
+	}
+
+	memset(delim_table, FALSE, sizeof(delim_table));
+	for (s = delimiters; *s != '\0'; ++s)
+		delim_table[*(unsigned char *)s] = TRUE;
+
+	tokens = NULL;
+	n_tokens = 0;
+
+	s = current = string;
+	while (*s != '\0') {
+		if (delim_table[*(unsigned char *)s] && n_tokens + 1 < max_tokens) {
+			char *token;
+
+			token = strndup(current, s - current);
+			tokens = xsg_list_prepend(tokens, token);
+			++n_tokens;
+
+			current = s + 1;
+		}
+
+		++s;
+	}
+
+	token = strndup(current, s - current);
+	tokens = xsg_list_prepend(tokens, token);
+	++n_tokens;
+
+	result = xsg_new(char *, n_tokens + 1);
+
+	result[n_tokens] = NULL;
+	for (list = tokens; list != NULL; list = list->next)
+		result[--n_tokens] = list->data;
+
+	xsg_list_free(tokens);
+
+	return result;
+}
+
+void xsg_strfreev(char **str_array) {
+	if (str_array) {
+		int i;
+
+		for (i = 0; str_array[i] != NULL; i++)
+			xsg_free(str_array[i]);
+
+		xsg_free(str_array);
+	}
 }
 
 /******************************************************************************
@@ -207,5 +300,120 @@ double xsg_double_le(double d) {
 	} else {
 		return d;
 	}
+}
+
+/******************************************************************************
+ *
+ * misc
+ *
+ ******************************************************************************/
+
+static char *xsg_build_path_va(const char *separator, const char *first_element, va_list *args, char **str_array) {
+	xsg_string_t *result;
+	int separator_len = strlen(separator);
+	bool is_first = TRUE;
+	bool have_leading = FALSE;
+	const char *single_element = NULL;
+	const char *next_element;
+	const char *last_trailing = NULL;
+	int i = 0;
+
+	result = xsg_string_new(NULL);
+
+	if (str_array)
+		next_element = str_array[i++];
+	else
+		next_element = first_element;
+
+	while (TRUE) {
+		const char *element;
+		const char *start;
+		const char *end;
+
+		if (next_element) {
+			element = next_element;
+			if (str_array)
+				next_element = str_array[i++];
+			else
+				next_element = va_arg(*args, char *);
+		} else {
+			break;
+		}
+
+		/* Ignore empty elements */
+		if (!*element)
+			continue;
+
+		start = element;
+
+		if (separator_len) {
+			while (start && strncmp(start, separator, separator_len) == 0)
+				start += separator_len;
+		}
+
+		end = start + strlen (start);
+
+		if (separator_len) {
+			while (end >= start + separator_len && strncmp(end - separator_len, separator, separator_len) == 0)
+				end -= separator_len;
+
+			last_trailing = end;
+			while (last_trailing >= element + separator_len && strncmp(last_trailing - separator_len, separator, separator_len) == 0)
+				last_trailing -= separator_len;
+
+			if (!have_leading) {
+				/* If the leading and trailing separator strings are in the
+				 * same element and overlap, the result is exactly that element
+				 */
+				if (last_trailing <= start)
+					single_element = element;
+
+				xsg_string_append_len(result, element, start - element);
+				have_leading = TRUE;
+			} else {
+				single_element = NULL;
+			}
+		}
+
+		if (end == start)
+			continue;
+
+		if (!is_first)
+			xsg_string_append(result, separator);
+
+		xsg_string_append_len(result, start, end - start);
+		is_first = FALSE;
+	}
+
+	if (single_element) {
+		xsg_string_free(result, TRUE);
+		return strdup(single_element);
+	} else {
+		if (last_trailing)
+			xsg_string_append(result, last_trailing);
+
+		return xsg_string_free(result, FALSE);
+	}
+}
+
+char *xsg_build_filename(const char *first_element, ...) {
+	char *str;
+	va_list args;
+
+	va_start(args, first_element);
+
+	str = xsg_build_path_va("/", first_element, &args, NULL);
+
+	va_end(args);
+
+	return str;
+}
+
+static const char *home_dir = NULL;
+
+const char *xsg_get_home_dir(void) {
+	if (!home_dir)
+		home_dir = strdup(getenv("HOME"));
+	return home_dir;
 }
 

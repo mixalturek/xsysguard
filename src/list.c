@@ -86,3 +86,14 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	return new_list;
 }
 
+void xsg_list_free(xsg_list_t *list) {
+	xsg_list_t *next;
+
+	while (list != NULL) {
+		next = list->next;
+		xsg_free(list);
+		list = next;
+	}
+}
+
+

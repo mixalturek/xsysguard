@@ -116,6 +116,7 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_last(xsg_list_t *list);
 unsigned int xsg_list_length(xsg_list_t *list);
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
+void xsg_list_free(xsg_list_t *list);
 
 /******************************************************************************
  * string.c
@@ -146,6 +147,9 @@ char *xsg_string_free(xsg_string_t *string, bool free_segment);
 
 /* strfuncs */
 bool xsg_str_has_suffix(const char *str, const char *suffix);
+char *xsg_str_without_suffix(const char *str, const char *suffix);
+char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens);
+void xsg_strfreev(char **str_array);
 
 /* byte order */
 uint16_t xsg_uint16_be(uint16_t u);
@@ -169,6 +173,10 @@ void xsg_free(void *mem);
 	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
 #define xsg_renew(struct_type, mem, n_structs) \
 	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+
+/* misc */
+char *xsg_build_filename(const char *first_element, ...);
+const char *xsg_get_home_dir(void);
 
 /******************************************************************************
  * logging

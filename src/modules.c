@@ -31,7 +31,7 @@
 /******************************************************************************/
 
 #ifndef HOME_MODULE_DIR
-#define HOME_MODULE_DIR g_build_filename(g_get_home_dir(), ".xsysguard", "modules", NULL)
+#define HOME_MODULE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "modules", NULL)
 #endif
 
 #ifndef MODULE_DIR
@@ -42,7 +42,6 @@
 
 typedef struct {
 	char *name;
-//	char *dir;
 	char *file;
 } module_t;
 
@@ -51,14 +50,6 @@ typedef struct {
 static xsg_list_t *modules_list = NULL;
 
 /******************************************************************************/
-
-// TODO move to utils.c
-static char *remove_suffix(const char *string, const char *suffix) {
-	if (!xsg_str_has_suffix(string, suffix))
-		return NULL;
-
-	return strndup(string, strlen(string) - strlen(suffix));
-}
 
 static void init() {
 	GDir *dir;
@@ -71,10 +62,10 @@ static void init() {
 	env = g_getenv("XSYSGUARD_MODULE_PATH");
 
 	if (env) {
-		pathv = g_strsplit_set(env, ":", 0);
+		pathv = xsg_strsplit_set(env, ":", 0);
 		for (p = pathv; *p; p++)
 			if (*p[0] == '~')
-				*p = g_build_filename(g_get_home_dir(), *p, NULL);
+				*p = xsg_build_filename(xsg_get_home_dir(), *p, NULL);
 	} else {
 		pathv = xsg_new0(char *, 3);
 		pathv[0] = HOME_MODULE_DIR;
@@ -88,10 +79,10 @@ static void init() {
 		if ((dir = g_dir_open(*p, 0, NULL)) == NULL)
 			continue;
 		while ((filename = g_dir_read_name(dir)) != NULL) {
-			if ((name = remove_suffix(filename, ".so")) != NULL) {
+			if ((name = xsg_str_without_suffix(filename, ".so")) != NULL) {
 				module_t *m = xsg_new0(module_t, 1);
 				m->name = name;
-				m->file = g_build_filename(*p, filename, NULL);
+				m->file = xsg_build_filename(*p, filename, NULL);
 				modules_list = xsg_list_prepend(modules_list, m);
 				xsg_message("Found module file \"%s\"", filename);
 			}
