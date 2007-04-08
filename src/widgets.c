@@ -842,7 +842,7 @@ static void scroll_and_update(uint64_t count) {
 		if (widget->update && (count % widget->update) == 0) {
 
 			(widget->scroll_func)(widget);
-			(widget->update_func)(widget, 0);
+			(widget->update_func)(widget, 0xffffffff);
 
 			window.updates = imlib_update_append_rect(window.updates,
 					widget->xoffset, widget->yoffset,
@@ -1791,7 +1791,7 @@ static void update_barchart(widget_t *widget, uint32_t var_id) {
 	for (l = barchart->var_list; l; l = l->next) {
 		barchart_var = l->data;
 
-		if ((var_id == 0) || (barchart_var->var_id == var_id)) {
+		if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
 			barchart_var->value = xsg_var_get_double(barchart_var->var_id);
 			if (barchart_var->add_prev)
 				barchart_var->value += prev;
@@ -2042,7 +2042,7 @@ static void update_linechart(widget_t *widget, uint32_t var_id) {
 	for (l = linechart->var_list; l; l = l->next) {
 		linechart_var = l->data;
 
-		if ((var_id == 0) || (linechart_var->var_id == var_id)) {
+		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id)) {
 			linechart_var->values[i] = xsg_var_get_double(linechart_var->var_id);
 			if (linechart_var->add_prev)
 				linechart_var->values[i] += prev;
@@ -2196,7 +2196,7 @@ static void update_areachart(widget_t *widget, uint32_t var_id) {
 	for (l = areachart->var_list; l ; l = l->next) {
 		areachart_var = l->data;
 
-		if ((var_id == 0) || (areachart_var->var_id == var_id)) {
+		if ((var_id == 0xffffffff) || (areachart_var->var_id == var_id)) {
 			areachart_var->values[i] = xsg_var_get_double(areachart_var->var_id);
 			if (areachart_var->add_prev)
 				areachart_var->values[i] += prev;
@@ -2371,7 +2371,7 @@ static void update_text(widget_t *widget, uint32_t var_id) {
 		if (text_var->type == 0)
 			parse_format(text->format, text->var_list);
 
-		if ((var_id == 0) || (var_id == text_var->var_id)) {
+		if ((var_id == 0xffffffff) || (var_id == text_var->var_id)) {
 			switch (text_var->type) {
 				case XSG_INT:
 					text_var->value.i = xsg_var_get_int(text_var->var_id);
@@ -2504,7 +2504,7 @@ static void update_imagetext(widget_t *widget, uint32_t var_id) {
 		if (text_var->type == 0)
 			parse_format(imagetext->format, imagetext->var_list);
 
-		if ((var_id == 0) || (var_id == text_var->var_id)) {
+		if ((var_id == 0xffffffff) || (var_id == text_var->var_id)) {
 			switch (text_var->type) {
 				case XSG_INT:
 					text_var->value.i = xsg_var_get_int(text_var->var_id);
