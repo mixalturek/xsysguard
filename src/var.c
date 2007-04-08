@@ -46,8 +46,16 @@ static var_t **var_array = NULL;
 /******************************************************************************/
 
 static var_t *get_var(uint32_t var_id) {
-	if (unlikely(var_array == NULL))
-		xsg_error("var_array is NULL");
+	if (unlikely(var_array == NULL)) {
+		var_t *var;
+
+		xsg_debug("var_array is NULL, using var_list...");
+		var = xsg_list_nth_data(var_list, var_id);
+		if (var == NULL)
+			xsg_error("invalid var_id: %"PRIu32, var_id);
+		else
+			return var;
+	}
 
 	if (var_id > var_count)
 		xsg_error("invalid var_id: %"PRIu32, var_id);
@@ -117,7 +125,7 @@ double xsg_var_get_double(uint32_t var_id) {
 
 	var = get_var(var_id);
 
-	if (unlikely(var->string_func))
+	if (unlikely(var->string_func != NULL))
 		xsg_error("called xsg_var_get_double for string var: %"PRIu32, var_id);
 
 	return xsg_rpn_calc(var->rpn_id);
@@ -128,9 +136,25 @@ char *xsg_var_get_string(uint32_t var_id) {
 
 	var = get_var(var_id);
 
-	if (unlikely(!var->string_func))
+	if (unlikely(var->string_func == NULL))
 		xsg_error("called xsg_var_get_string for double var: %"PRIu32, var_id);
 
 	return var->string_func(var->string_arg);
 }
+
+bool xsg_var_is_double(uint32_t var_id) {
+	var_t *var;
+
+	var = get_var(var_id);
+
+	if (var->string_func != NULL)
+		return FALSE;
+	else
+		return TRUE;
+}
+
+bool xsg_var_is_string(uint32_t var_id) {
+	return !xsg_var_is_double(var_id);
+}
+
 

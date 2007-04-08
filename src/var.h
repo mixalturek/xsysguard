@@ -37,6 +37,9 @@ uint32_t xsg_var_parse_string(uint32_t id, uint64_t update);
 double xsg_var_get_double(uint32_t var_id);
 char *xsg_var_get_string(uint32_t var_id);
 
+bool xsg_var_is_double(uint32_t var_id);
+bool xsg_var_is_string(uint32_t var_id);
+
 /*****************************************************************************/
 
 #endif /* __VAR_H__ */
