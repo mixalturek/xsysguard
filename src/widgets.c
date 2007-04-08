@@ -1643,7 +1643,7 @@ void xsg_widgets_parse_image() {
 /******************************************************************************
  *
  * BarChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Mask <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Mult <mult>] [Add <add>] [AddPrev]
+ * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [AddPrev]
  *
  ******************************************************************************/
 
@@ -1652,8 +1652,6 @@ typedef struct {
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double angle;
-	double mult;
-	double add;
 	bool add_prev;
 	double value;
 } barchart_var_t;
@@ -1795,8 +1793,6 @@ static void update_barchart(widget_t *widget, uint32_t var_id) {
 
 		if ((var_id == 0) || (barchart_var->var_id == var_id)) {
 			barchart_var->value = xsg_var_get_double(barchart_var->var_id);
-			barchart_var->value *= barchart_var->mult;
-			barchart_var->value += barchart_var->add;
 			if (barchart_var->add_prev)
 				barchart_var->value += prev;
 		}
@@ -1870,8 +1866,6 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 	barchart_var->color = uint2color(xsg_conf_read_color());
 	barchart_var->range = NULL;
 	barchart_var->angle = 0.0;
-	barchart_var->mult = 1.0;
-	barchart_var->add = 0.0;
 	barchart_var->add_prev = FALSE;
 	barchart_var->value = DNAN;
 
@@ -1902,12 +1896,8 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 			}
 		} else if (xsg_conf_find_command("AddPrev")) {
 			barchart_var->add_prev = TRUE;
-		} else if (xsg_conf_find_command("Add")) {
-			barchart_var->add = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Mult")) {
-			barchart_var->mult = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("ColorRange, AddPrev, Add or Mult");
+			xsg_conf_error("ColorRange or AddPrev");
 		}
 	}
 
@@ -1919,15 +1909,13 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 /******************************************************************************
  *
  * LineChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [Mult <mult>] [Add <add>] [AddPrev]
+ * + <variable> <color> [AddPrev]
  *
  ******************************************************************************/
 
 typedef struct {
 	uint32_t var_id;
 	Imlib_Color color;
-	double mult;
-	double add;
 	bool add_prev;
 	double *values;
 } linechart_var_t;
@@ -2056,8 +2044,6 @@ static void update_linechart(widget_t *widget, uint32_t var_id) {
 
 		if ((var_id == 0) || (linechart_var->var_id == var_id)) {
 			linechart_var->values[i] = xsg_var_get_double(linechart_var->var_id);
-			linechart_var->values[i] *= linechart_var->mult;
-			linechart_var->values[i] += linechart_var->add;
 			if (linechart_var->add_prev)
 				linechart_var->values[i] += prev;
 		}
@@ -2149,8 +2135,6 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 
 	linechart_var->var_id = var_id;
 	linechart_var->color = uint2color(xsg_conf_read_color());
-	linechart_var->mult = 1.0;
-	linechart_var->add = 0.0;
 	linechart_var->add_prev = FALSE;
 	linechart_var->values = xsg_new0(double, width);
 
@@ -2160,12 +2144,8 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("AddPrev")) {
 			linechart_var->add_prev = TRUE;
-		} else if (xsg_conf_find_command("Add")) {
-			linechart_var->add = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Mult")) {
-			linechart_var->mult = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("AddPrev, Add or Mult");
+			xsg_conf_error("AddPrev");
 		}
 	}
 }
@@ -2173,7 +2153,7 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 /******************************************************************************
  *
  * AreaChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [Mult <mult>] [Add <add>] [AddPrev]
+ * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [AddPrev]
  *
  ******************************************************************************/
 
@@ -2184,8 +2164,6 @@ typedef struct {
 	double angle;
 	unsigned int top_height;
 	Imlib_Color top_color;
-	double mult;
-	double add;
 	bool add_prev;
 	double *values;
 } areachart_var_t;
@@ -2220,8 +2198,6 @@ static void update_areachart(widget_t *widget, uint32_t var_id) {
 
 		if ((var_id == 0) || (areachart_var->var_id == var_id)) {
 			areachart_var->values[i] = xsg_var_get_double(areachart_var->var_id);
-			areachart_var->values[i] *= areachart_var->mult;
-			areachart_var->values[i] += areachart_var->add;
 			if (areachart_var->add_prev)
 				areachart_var->values[i] += prev;
 		}
@@ -2316,8 +2292,6 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 	areachart_var->range = NULL;
 	areachart_var->angle = 0.0;
 	areachart_var->top_height = 0;
-	areachart_var->mult = 1.0;
-	areachart_var->add = 0.0;
 	areachart_var->add_prev = FALSE;
 	areachart_var->values = xsg_new0(double, width);
 
@@ -2354,12 +2328,8 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 			areachart_var->top_color = uint2color(xsg_conf_read_color());
 		} else if (xsg_conf_find_command("AddPrev")) {
 			areachart_var->add_prev = TRUE;
-		} else if (xsg_conf_find_command("Add")) {
-			areachart_var->add = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Mult")) {
-			areachart_var->mult = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("ColorRange, Top, AddPrev, Add or Mult");
+			xsg_conf_error("ColorRange, Top or AddPrev");
 		}
 	}
 }
@@ -2367,7 +2337,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 /******************************************************************************
  *
  * Text <update> <x> <y> <width> <height> <color> <font> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable> [Mult <mult>] [Add <add>]
+ * + <variable>
  *
  ******************************************************************************/
 
@@ -2484,8 +2454,6 @@ void xsg_widgets_parse_text_var(uint32_t var_id) {
 	text->var_list = xsg_list_append(text->var_list, text_var);
 
 	text_var->var_id = var_id;
-	text_var->mult = 1.0;
-	text_var->add = 0.0;
 	text_var->type = 0;
 	text_var->value.u = 0;
 
@@ -2504,7 +2472,7 @@ void xsg_widgets_parse_text_var(uint32_t var_id) {
 /******************************************************************************
  *
  * ImageText <update> <x> <y> <width> <height> <filemask> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable> [Mult <mult>] [Add <add>]
+ * + <variable>
  *
  ******************************************************************************/
 
@@ -2618,8 +2586,6 @@ void xsg_widgets_parse_imagetext_var(uint32_t var_id) {
 	imagetext->var_list = xsg_list_append(imagetext->var_list, text_var);
 
 	text_var->var_id = var_id;
-	text_var->mult = 1.0;
-	text_var->add = 0.0;
 	text_var->type = 0;
 	text_var->value.u = 0;
 
