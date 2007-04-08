@@ -161,23 +161,23 @@ static void parse_config(char *config_buffer) {
 		} else if (xsg_conf_find_command("BarChart")) {
 			xsg_widgets_parse_barchart(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_barchart_val(var_id);
+				xsg_widgets_parse_barchart_var(var_id);
 		} else if (xsg_conf_find_command("LineChart")) {
 			xsg_widgets_parse_linechart(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_linechart_val(var_id);
+				xsg_widgets_parse_linechart_var(var_id);
 		} else if (xsg_conf_find_command("AreaChart")) {
 			xsg_widgets_parse_areachart(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_areachart_val(var_id);
+				xsg_widgets_parse_areachart_var(var_id);
 		} else if (xsg_conf_find_command("Text")) {
 			xsg_widgets_parse_text(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_text_val(var_id);
+				xsg_widgets_parse_text_var(var_id);
 		} else if (xsg_conf_find_command("ImageText")) {
 			xsg_widgets_parse_imagetext(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_imagetext_val(var_id);
+				xsg_widgets_parse_imagetext_var(var_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart, Text or ImageText");
