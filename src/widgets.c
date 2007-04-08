@@ -1860,6 +1860,9 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 
+	if (!xsg_var_is_double(var_id))
+		xsg_error("BarChart allows double vars only");
+
 	barchart_var = xsg_new0(barchart_var_t, 1);
 
 	barchart_var->var_id = var_id;
@@ -2123,6 +2126,9 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 	linechart_var_t * linechart_var;
 	unsigned int width, i;
 
+	if (!xsg_var_is_double(var_id))
+		xsg_error("LineChart allows double vars only");
+
 	widget = xsg_list_last(widget_list)->data;
 	linechart = widget->data;
 	linechart_var = xsg_new0(linechart_var_t, 1);
@@ -2276,6 +2282,9 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	unsigned int width, i;
+
+	if (!xsg_var_is_double(var_id))
+		xsg_error("AreaChart allows double vars only");
 
 	widget = xsg_list_last(widget_list)->data;
 	areachart = widget->data;
