@@ -2155,7 +2155,7 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 	linechart_var->values = xsg_new0(double, width);
 
 	for (i = 0; i < width; i++)
-		linechart_var->values[i] = nan("");
+		linechart_var->values[i] = DNAN;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("AddPrev")) {
@@ -2322,7 +2322,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 	areachart_var->values = xsg_new0(double, width);
 
 	for (i = 0; i < width; i++)
-		areachart_var->values[i] = nan("");
+		areachart_var->values[i] = DNAN;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
