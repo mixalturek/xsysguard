@@ -114,7 +114,11 @@ uint32_t xsg_var_parse_string(uint32_t widget_id, uint64_t update) {
 
 double xsg_var_get_double(uint32_t var_id) {
 	var_t *var;
+
 	var = get_var(var_id);
+
+	if (unlikely(var->string_func))
+		xsg_error("called xsg_var_get_double for string var: %"PRIu32, var_id);
 
 	return xsg_rpn_calc(var->rpn_id);
 }
@@ -123,6 +127,10 @@ char *xsg_var_get_string(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
+
+	if (unlikely(!var->string_func))
+		xsg_error("called xsg_var_get_string for double var: %"PRIu32, var_id);
+
 	return var->string_func(var->string_arg);
 }
 
