@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #ifdef ENABLE_XRENDER
 #include <X11/extensions/Xrender.h>
@@ -36,12 +37,10 @@
 #include "conf.h"
 #include "var.h"
 
-#include <glib.h> // FIXME
-
 /******************************************************************************/
 
 #ifndef HOME_IMAGE_DIR
-#define HOME_IMAGE_DIR g_build_filename(g_get_home_dir(), ".xsysguard", "modules", NULL)
+#define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "modules", NULL)
 #endif
 
 #ifndef IMAGE_DIR
@@ -194,13 +193,13 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 	char *file;
 
 	if (!pathv) {
-		env = g_getenv("XSYSGUARD_IMAGE_PATH");
+		env = getenv("XSYSGUARD_IMAGE_PATH");
 
 		if (env) {
-			pathv = g_strsplit_set(env, ":", 0);
+			pathv = xsg_strsplit_set(env, ":", 0);
 			for (p = pathv; *p; p++)
 				if (*p[0] == '~')
-					*p = g_build_filename(g_get_home_dir(), *p, NULL);
+					*p = xsg_build_filename(xsg_get_home_dir(), *p, NULL);
 		} else {
 			pathv = xsg_new0(char *, 3);
 			pathv[0] = HOME_IMAGE_DIR;
@@ -211,10 +210,10 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 
 	for (p = pathv; *p; p++) {
 		xsg_message("Searching for image '%s' in '%s'.", filename, *p);
-		file = g_build_filename(*p, filename, NULL);
-		if (g_file_test(file, G_FILE_TEST_IS_REGULAR)) {
+		file = xsg_build_filename(*p, filename, NULL);
+//		if (g_file_test(file, G_FILE_TEST_IS_REGULAR)) {
 			image = imlib_load_image(file);
-		}
+//		}
 		if (image) {
 			xsg_message("Found image '%s'.", file);
 			xsg_free(file);
@@ -427,7 +426,7 @@ static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *wi
 	double arc, sa, ca;
 	unsigned int w, h;
 
-	arc = a / 180.0 * G_PI;
+	arc = a / 180.0 * M_PI;
 
 	sa = sin(arc);
 	ca = cos(arc);
@@ -924,8 +923,8 @@ void hide_decorations() {
 	Atom hints_atom;
 	Atom type;
 	int format;
-	gulong nitems;
-	gulong bytes_after;
+	unsigned long nitems;
+	unsigned long bytes_after;
 	MotifWmHints *hints;
 	MotifWmHints **hints_pointer = &hints;
 	MotifWmHints new_hints = { 0 };
@@ -943,7 +942,7 @@ void hide_decorations() {
 	hints->decorations = 0;
 
 	XChangeProperty(window.display, window.id, hints_atom, hints_atom, 32,
-			PropModeReplace, (guchar *) hints, sizeof(MotifWmHints)/sizeof(long));
+			PropModeReplace, (unsigned char *) hints, sizeof(MotifWmHints)/sizeof(long));
 
 	if (hints != &new_hints)
 		XFree(hints);
@@ -1640,24 +1639,24 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	if (barchart->const_min) {
 		min = barchart->min;
 	} else {
-		min = G_MAXDOUBLE;
+		min = DBL_MAX;
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 			min = MIN(min, barchart_var->value);
 		}
-		if (min == G_MAXDOUBLE)
+		if (min == DBL_MAX)
 			return;
 	}
 
 	if (barchart->const_max) {
 		max = barchart->max;
 	} else {
-		max = G_MINDOUBLE;
+		max = DBL_MIN;
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 			max = MAX(max, barchart_var->value);
 		}
-		if (max == G_MINDOUBLE)
+		if (max == DBL_MIN)
 			return;
 	}
 
@@ -1915,26 +1914,26 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	if (linechart->const_min) {
 		min = linechart->min;
 	} else {
-		min = G_MAXDOUBLE;
+		min = DBL_MAX;
 		for (l = linechart->var_list; l; l = l->next) {
 			linechart_var = l->data;
 			for (i = 0; i < width; i++)
 				min = MIN(min, linechart_var->values[i]);
 		}
-		if (min == G_MAXDOUBLE)
+		if (min == DBL_MAX)
 			return;
 	}
 
 	if (linechart->const_max) {
 		max = linechart->max;
 	} else {
-		max = G_MINDOUBLE;
+		max = DBL_MIN;
 		for (l = linechart->var_list; l; l = l->next) {
 			linechart_var = l->data;
 			for (i = 0; i < width; i++)
 				max = MAX(max, linechart_var->values[i]);
 		}
-		if (max == G_MINDOUBLE)
+		if (max == DBL_MIN)
 			return;
 	}
 
