@@ -51,13 +51,13 @@ static var_t *get_var(uint32_t var_id) {
 
 		xsg_debug("var_array is NULL, using var_list...");
 		var = xsg_list_nth_data(var_list, var_id);
-		if (var == NULL)
+		if (unlikely(var == NULL))
 			xsg_error("invalid var_id: %"PRIu32, var_id);
 		else
 			return var;
 	}
 
-	if (var_id > var_count)
+	if (unlikely(var_id >= var_count))
 		xsg_error("invalid var_id: %"PRIu32, var_id);
 
 	return var_array[var_id];

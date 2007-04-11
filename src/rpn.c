@@ -53,7 +53,7 @@ static rpn_t *get_rpn(uint32_t rpn_id) {
 	if (unlikely(rpn_array == NULL))
 		xsg_error("rpn_array is NULL");
 
-	if (unlikely(rpn_id > rpn_count))
+	if (unlikely(rpn_id >= rpn_count))
 		xsg_error("invalid rpn_id: %"PRIu32, rpn_id);
 
 	return rpn_array[rpn_id];
