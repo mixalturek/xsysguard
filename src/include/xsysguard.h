@@ -95,9 +95,21 @@ void xsg_var_update(uint32_t id);
  ******************************************************************************/
 
 uint64_t xsg_main_get_counter(void);
+
 void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
+
+typedef enum _xsg_main_poll_t xsg_main_poll_t;
+
+enum _xsg_main_poll_t {
+	XSG_MAIN_POLL_READ   = 0x1,
+	XSG_MAIN_POLL_WRITE  = 0x2,
+	XSG_MAIN_POLL_EXCEPT = 0x4,
+};
+
+void xsg_main_add_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
+void xsg_main_remove_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
 
 /******************************************************************************
  * list.c
@@ -117,6 +129,7 @@ xsg_list_t *xsg_list_last(xsg_list_t *list);
 unsigned int xsg_list_length(xsg_list_t *list);
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
 void xsg_list_free(xsg_list_t *list);
+xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link);
 
 /******************************************************************************
  * string.c

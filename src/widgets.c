@@ -992,11 +992,11 @@ static void set_class_hints() {
 
 /******************************************************************************
  *
- * X11 GSource
+ * X11 event handler
  *
  ******************************************************************************/
 
-static void handle_xevents() {
+static void handle_xevents(void *arg, xsg_main_poll_t events) {
 	XEvent event;
 
 	while (XPending(window.display)) {
@@ -1012,53 +1012,9 @@ static void handle_xevents() {
 			xsg_message("XEvent (type=%d)", event.type);
 		}
 	}
-}
 
-static bool prepare_source(GSource *source, int *timeout) {
-
-	handle_xevents();
-	return (window.updates != NULL);
-}
-
-static bool check_source(GSource *source) {
-
-	handle_xevents();
-	return (window.updates != NULL);
-}
-
-static bool dispatch_source(GSource *source, GSourceFunc callback, gpointer user_data) {
-
-	handle_xevents();
 	if (window.updates)
 		render();
-	return TRUE;
-}
-
-static void attach_source(int fd) {
-	GSourceFuncs *source_funcs;
-	GSource *source;
-	GPollFD* pollfd;
-
-	pollfd = xsg_new0(GPollFD, 1);
-	pollfd->fd = fd;
-	pollfd->events = G_IO_IN | G_IO_HUP | G_IO_ERR;
-	pollfd->revents = 0;
-
-	source_funcs = xsg_new0(GSourceFuncs, 1);
-
-	source_funcs->prepare = prepare_source;
-	source_funcs->check = check_source;
-	source_funcs->dispatch = dispatch_source;
-	source_funcs->finalize = NULL;
-	source_funcs->closure_callback = 0;
-	source_funcs->closure_marshal = 0;
-
-	source = g_source_new(source_funcs, sizeof(GSource));
-
-	g_source_add_poll(source, pollfd);
-	g_source_set_priority(source, G_PRIORITY_HIGH_IDLE + 20);
-
-	g_source_attach(source, NULL);
 }
 
 /******************************************************************************
@@ -1160,12 +1116,10 @@ void xsg_widgets_init() {
 		imlib_context_set_mask(window.mask);
 	}
 
-	handle_xevents();
 	window.updates = imlib_update_append_rect(window.updates, 0, 0, window.width, window.height);
-	scroll_and_update(0);
 
 	xsg_main_add_update_func(scroll_and_update);
-	attach_source(ConnectionNumber(window.display));
+	xsg_main_add_poll_func(ConnectionNumber(window.display), handle_xevents, NULL, XSG_MAIN_POLL_READ | XSG_MAIN_POLL_EXCEPT);
 }
 
 /******************************************************************************
