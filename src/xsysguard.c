@@ -21,6 +21,12 @@
 #include <xsysguard.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <getopt.h>
 
 #include "modules.h"
 #include "widgets.h"
@@ -28,16 +34,14 @@
 #include "main.h"
 #include "var.h"
 
-#include <glib.h>
-
 /******************************************************************************/
 
 #ifndef DEFAULT_CONFIG_FILE
-#define DEFAULT_CONFIG_FILE g_build_filename(g_get_home_dir(), ".xsysguard", "configs",	"default", NULL)
+#define DEFAULT_CONFIG_FILE xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "configs", "default", NULL)
 #endif
 
 #ifndef HOME_CONFIG_DIR
-#define HOME_CONFIG_DIR g_build_filename(g_get_home_dir(), ".xsysguard", "configs", NULL)
+#define HOME_CONFIG_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "configs", NULL)
 #endif
 
 #ifndef CONFIG_DIR
@@ -82,7 +86,7 @@ static void parse_env() {
 
 	xsg_message("Setting environment variable %s = %s", variable, value);
 
-	if (!g_setenv(variable, value, overwrite))
+	if (!setenv(variable, value, overwrite))
 		xsg_warning("Cannot set environment variable %s = %s", variable, value);
 }
 
@@ -188,16 +192,72 @@ static void parse_config(char *config_buffer) {
 static char *find_config_file(char *name) {
 	char *file = NULL;
 
-	file = g_build_filename(HOME_CONFIG_DIR, name, NULL);
-	if (g_file_test(file, G_FILE_TEST_IS_REGULAR))
+	file = xsg_build_filename(HOME_CONFIG_DIR, name, NULL);
+	if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
 		return file;
 
-	file = g_build_filename(CONFIG_DIR, name, NULL);
-	if (g_file_test(file, G_FILE_TEST_IS_REGULAR))
+	file = xsg_build_filename(CONFIG_DIR, name, NULL);
+	if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
 		return file;
 
 	xsg_error("Cannot find file \"%s\"", name);
 	return 0;
+}
+
+static char *get_config_file(const char *filename) {
+	struct stat stat_buf;
+	char *buffer;
+	size_t size, bytes_read;
+	int fd;
+
+	fd = open(filename, O_RDONLY);
+
+	if (fd < 0)
+		xsg_error("cannot read config file: %s: %s", filename, strerror(errno));
+
+	if (fstat(fd, &stat_buf) < 0)
+		xsg_error("cannot read config file: %s: fstat failed", filename);
+
+	size = stat_buf.st_size;
+
+	if (size <= 0)
+		xsg_error("cannot red config file: %s: null byte size", filename);
+
+	if (!S_ISREG(stat_buf.st_mode))
+		xsg_error("cannot read config file: %s: not a regular file", filename);
+
+	buffer = xsg_malloc(size + 1);
+
+	bytes_read = 0;
+	while (bytes_read < size) {
+		ssize_t rc;
+
+		rc = read(fd, buffer + bytes_read, size - bytes_read);
+		if (rc < 0) {
+			if (errno != EINTR)
+				xsg_error("cannot read config file: %s: %s", filename, strerror(errno));
+		} else if (rc == 0) {
+			break;
+		} else {
+			bytes_read += rc;
+		}
+	}
+
+	buffer[bytes_read] = '\0';
+
+	close(fd);
+
+	return buffer;
+}
+
+static void usage(void) {
+	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@sf.net>\n\n"
+		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
+		"Arguments:\n"
+		"  -h, --help          Show help options\n"
+		"  -l, --log=N         Set loglevel to N = 0 ... 5 (DEBUG)\n"
+		"  -f, --file=FILE     Read configuration from FILE (absolute path)\n"
+		"  -m, --modules       Print a list of all available modules to stdout\n\n");
 }
 
 /******************************************************************************
@@ -208,51 +268,72 @@ static char *find_config_file(char *name) {
 
 int main(int argc, char **argv) {
 	int log = 0;
-	char *file = NULL;
+	char *filename = NULL;
 	bool list_modules = FALSE;
-	char **args = NULL;
-	GOptionContext *context;
+	bool print_usage = FALSE;
 	char *config_buffer = NULL;
-	GError *error = NULL;
 
-	GOptionEntry option_entries[] = {
-		{ "log", 'l', 0, G_OPTION_ARG_INT, &log,
-			"Set loglevel to N = 0 ... 5 (DEBUG)", "N" },
-		{ "file", 'f', 0, G_OPTION_ARG_FILENAME, &file,
-			"Read configuration from FILE (absolute path)", "FILE" },
-		{ "modules", 'm', 0, G_OPTION_ARG_NONE, &list_modules,
-			"Print a list of all available modules to stdout", NULL },
-		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &args, 0, 0, },
-		{ NULL }
+	struct option long_options[] = {
+		{ "help",    0, NULL, 'h' },
+		{ "log",     1, NULL, 'l' },
+		{ "file",    1, NULL, 'f' },
+		{ "modules", 0, NULL, 'm' },
+		{ NULL,      0, NULL,  0  }
 	};
 
-	context = g_option_context_new("[CONFIG]");
-	g_option_context_add_main_entries(context, option_entries, NULL);
-	g_option_context_parse(context, &argc, &argv, &error);
-	g_option_context_free(context);
+	opterr = 0;
+	while (1) {
+		int option, option_index = 0;
 
-	if (error)
-		xsg_error("%s", error->message);
+		option = getopt_long(argc, argv, "hl:f:m", long_options, &option_index);
+
+		if (option == EOF)
+			break;
+
+		switch (option) {
+			case 'h':
+				print_usage = TRUE;
+				break;
+			case 'f':
+				if (optarg)
+					filename = strdup(optarg);
+				break;
+			case 'l':
+				if (optarg)
+					log = atoi(optarg);
+				break;
+			case 'm':
+				list_modules = TRUE;
+				break;
+			case '?':
+				print_usage = TRUE;
+				break;
+			default:
+				break;
+		}
+	}
 
 	log_level = log;
+
+	if (print_usage) {
+		usage();
+		exit(0);
+	}
 
 	if (list_modules) {
 		xsg_modules_list();
 		exit(0);
 	}
 
-	if (!file) {
-		if (args)
-			file = find_config_file(args[0]);
+	if (!filename) {
+		if (optind < argc)
+			filename = find_config_file(argv[optind]);
 		else
-			file = DEFAULT_CONFIG_FILE;
+			filename = DEFAULT_CONFIG_FILE;
 	}
 
-	if (!g_file_get_contents(file, &config_buffer, NULL, &error))
-		xsg_error("%s", error->message);
-
+	config_buffer = get_config_file(filename);
 	parse_config(config_buffer);
-
 	xsg_free(config_buffer);
 
 	xsg_var_init();
@@ -260,6 +341,6 @@ int main(int argc, char **argv) {
 
 	xsg_main_loop();
 
-	return 0;;
+	return 0;
 }
 

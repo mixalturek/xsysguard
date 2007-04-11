@@ -53,8 +53,8 @@ CFLAGS      += -Wall
 CFLAGS      += -O3
 CFLAGS      += -g
 
-ALL_CFLAGS  := $(shell pkg-config --cflags glib-2.0) -Iinclude -rdynamic
-ALL_LDFLAGS := $(shell pkg-config --libs glib-2.0) -ldl
+ALL_CFLAGS  := -Iinclude -rdynamic
+ALL_LDFLAGS := -lm -ldl
 
 ifndef DISABLE_XRENDER
 XSG_LDFLAGS += -lXrender -lXcomposite
@@ -77,20 +77,19 @@ all: xsysguardd xsysguard
 
 xsysguard: $(XSYSGUARD_SRC)
 	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) \
-	$(ALL_CFLAGS) $(XSG_CFLAGS) $(CFLAGS) \
-	$(ALL_LDFLAGS) $(XSG_LDFLAGS) $(LDFLAGS) \
+	$(ALL_CFLAGS) $(XSG_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(XSG_LDFLAGS) $(LDFLAGS) \
 	$(filter %.c,$^) \
 	-D CONFIG_DIR=\"$(CONFIG_DIR)\" \
 	-D IMAGE_DIR=\"$(IMAGE_DIR)\" \
 	-D FONT_DIR=\"$(FONT_DIR)\" \
-	-include include/xsysguard.h
+	-D VERSION=\"$(VERSION)\"
 
 xsysguardd: $(XSYSGUARDD_SRC)
 	$(CC) -o $@ \
 	$(ALL_CFLAGS) $(CFLAGS) \
 	$(ALL_LDFLAGS) $(LDFLAGS) \
 	$(filter %.c,$^) \
-	-include include/xsysguard.h
+	-D VERSION=\"$(VERSION)\"
 
 clean:
 	rm -f xsysguardd
