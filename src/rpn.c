@@ -257,6 +257,31 @@ static double *op_atan2(double *stptr) {
 	return stptr - 1;
 }
 
+static double *op_floor(double *stptr) {
+	stptr[0] = floor(stptr[0]);
+	return stptr;
+}
+
+static double *op_ceil(double *stptr) {
+	stptr[0] = ceil(stptr[0]);
+	return stptr;
+}
+
+static double *op_deg2rad(double *stptr) {
+	stptr[0] *= 0.0174532952;
+	return stptr;
+}
+
+static double *op_rad2deg(double *stptr) {
+	stptr[0] *= 57.29577951;
+	return stptr;
+}
+
+static double *op_abs(double *stptr) {
+	stptr[0] = fabs(stptr[0]);
+	return stptr;
+}
+
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
@@ -353,6 +378,16 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 		} else if (xsg_conf_find_command("ATAN2")) {
 			op->op = op_atan2;
 			stack_size -= 1;
+		} else if (xsg_conf_find_command("FLOOR")) {
+			op->op = op_floor;
+		} else if (xsg_conf_find_command("CEIL")) {
+			op->op = op_ceil;
+		} else if (xsg_conf_find_command("DEG2RAD")) {
+			op->op = op_deg2rad;
+		} else if (xsg_conf_find_command("RAD2DEG")) {
+			op->op = op_rad2deg;
+		} else if (xsg_conf_find_command("ABS")) {
+			op->op = op_abs;
 		} else {
 			xsg_modules_parse_double(var_id, update, &op->func, &op->arg);
 			stack_size += 1;
