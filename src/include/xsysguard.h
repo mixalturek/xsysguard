@@ -100,13 +100,11 @@ void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
 
-typedef enum _xsg_main_poll_t xsg_main_poll_t;
-
-enum _xsg_main_poll_t {
-	XSG_MAIN_POLL_READ   = 0x1,
-	XSG_MAIN_POLL_WRITE  = 0x2,
-	XSG_MAIN_POLL_EXCEPT = 0x4,
-};
+typedef enum {
+	XSG_MAIN_POLL_READ   = 1 << 0,
+	XSG_MAIN_POLL_WRITE  = 1 << 1,
+	XSG_MAIN_POLL_EXCEPT = 1 << 2,
+} xsg_main_poll_t;
 
 void xsg_main_add_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
 void xsg_main_remove_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
@@ -190,6 +188,16 @@ void xsg_free(void *mem);
 /* misc */
 char *xsg_build_filename(const char *first_element, ...);
 const char *xsg_get_home_dir(void);
+
+typedef enum {
+	XSG_FILE_TEST_IS_REGULAR    = 1 << 0,
+	XSG_FILE_TEST_IS_SYMLINK    = 1 << 1,
+	XSG_FILE_TEST_IS_DIR        = 1 << 2,
+	XSG_FILE_TEST_IS_EXECUTABLE = 1 << 3,
+	XSG_FILE_TEST_EXISTS        = 1 << 4
+} xsg_file_test_t;
+
+bool xsg_file_test(const char *filename, xsg_file_test_t test);
 
 /******************************************************************************
  * logging

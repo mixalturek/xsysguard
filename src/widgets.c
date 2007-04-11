@@ -211,9 +211,9 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 	for (p = pathv; *p; p++) {
 		xsg_message("Searching for image '%s' in '%s'.", filename, *p);
 		file = xsg_build_filename(*p, filename, NULL);
-//		if (g_file_test(file, G_FILE_TEST_IS_REGULAR)) {
+		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
 			image = imlib_load_image(file);
-//		}
+		}
 		if (image) {
 			xsg_message("Found image '%s'.", file);
 			xsg_free(file);

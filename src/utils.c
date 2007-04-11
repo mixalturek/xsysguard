@@ -21,6 +21,8 @@
 #include <xsysguard.h>
 #include <string.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /******************************************************************************
  *
@@ -415,5 +417,41 @@ const char *xsg_get_home_dir(void) {
 	if (!home_dir)
 		home_dir = strdup(getenv("HOME"));
 	return home_dir;
+}
+
+bool xsg_file_test(const char *filename, xsg_file_test_t test) {
+	if ((test & XSG_FILE_TEST_EXISTS) && (access(filename, F_OK) == 0))
+		return TRUE;
+
+	if ((test & XSG_FILE_TEST_IS_EXECUTABLE) && (access(filename, X_OK) == 0)) {
+		if (getuid() != 0)
+			return TRUE;
+	} else {
+		test &= ~XSG_FILE_TEST_IS_EXECUTABLE;
+	}
+
+	if (test & XSG_FILE_TEST_IS_SYMLINK) {
+		struct stat s;
+
+		if ((lstat(filename, &s) == 0) && S_ISLNK(s.st_mode))
+			return TRUE;
+	}
+
+	if (test & (XSG_FILE_TEST_IS_REGULAR | XSG_FILE_TEST_IS_DIR | XSG_FILE_TEST_IS_EXECUTABLE)) {
+		struct stat s;
+
+		if (stat(filename, &s) == 0) {
+			if ((test & XSG_FILE_TEST_IS_REGULAR) && S_ISREG(s.st_mode))
+				return TRUE;
+
+			if ((test & XSG_FILE_TEST_IS_DIR) && S_ISDIR(s.st_mode))
+				return TRUE;
+
+			if ((test & XSG_FILE_TEST_IS_EXECUTABLE) && ((s.st_mode & S_IXOTH) || (s.st_mode & S_IXUSR) || (s.st_mode & S_IXGRP)))
+				return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
