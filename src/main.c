@@ -194,14 +194,17 @@ static void loop(void) {
 				break; // timeout
 
 			for (l = poll_list; l; l = l->next) {
+				xsg_main_poll_t events = 0;
 				poll_t *p;
 
 				p = l->data;
 				if ((p->events & XSG_MAIN_POLL_READ) && (FD_ISSET(p->fd, &read_fds)))
-					(p->func)(p->arg, p->events);
-				else if ((p->events & XSG_MAIN_POLL_WRITE) && (FD_ISSET(p->fd, &write_fds)))
-					(p->func)(p->arg, p->events);
-				else if ((p->events & XSG_MAIN_POLL_EXCEPT) && (FD_ISSET(p->fd, &except_fds)))
+					events |= XSG_MAIN_POLL_READ;
+				if ((p->events & XSG_MAIN_POLL_WRITE) && (FD_ISSET(p->fd, &write_fds)))
+					events |= XSG_MAIN_POLL_WRITE;
+				if ((p->events & XSG_MAIN_POLL_EXCEPT) && (FD_ISSET(p->fd, &except_fds)))
+					events |= XSG_MAIN_POLL_EXCEPT;
+				if (events)
 					(p->func)(p->arg, p->events);
 			}
 		}
