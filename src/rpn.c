@@ -222,6 +222,41 @@ static double *op_mod(double *stptr) {
 	return stptr - 1;
 }
 
+static double *op_sin(double *stptr) {
+	stptr[0] = sin(stptr[0]);
+	return stptr;
+}
+
+static double *op_cos(double *stptr) {
+	stptr[0] = cos(stptr[0]);
+	return stptr;
+}
+
+static double *op_log(double *stptr) {
+	stptr[0] = log(stptr[0]);
+	return stptr;
+}
+
+static double *op_exp(double *stptr) {
+	stptr[0] = exp(stptr[0]);
+	return stptr;
+}
+
+static double *op_sqrt(double *stptr) {
+	stptr[0] = sqrt(stptr[0]);
+	return stptr;
+}
+
+static double *op_atan(double *stptr) {
+	stptr[0] = atan(stptr[0]);
+	return stptr;
+}
+
+static double *op_atan2(double *stptr) {
+	stptr[-1] = atan2(stptr[-1], stptr[0]);
+	return stptr - 1;
+}
+
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
@@ -265,10 +300,8 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			stack_size -= 1;
 		} else if (xsg_conf_find_command("UN")) {
 			op->op = op_un;
-			stack_size += 0;
 		} else if (xsg_conf_find_command("ISINF")) {
 			op->op = op_isinf;
-			stack_size += 0;
 		} else if (xsg_conf_find_command("IF")) {
 			op->op = op_if;
 			stack_size -= 2;
@@ -304,6 +337,21 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			stack_size -= 1;
 		} else if (xsg_conf_find_command("MOD")) {
 			op->op = op_mod;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("SIN")) {
+			op->op = op_sin;
+		} else if (xsg_conf_find_command("COS")) {
+			op->op = op_cos;
+		} else if (xsg_conf_find_command("LOG")) {
+			op->op = op_log;
+		} else if (xsg_conf_find_command("EXP")) {
+			op->op = op_exp;
+		} else if (xsg_conf_find_command("SQRT")) {
+			op->op = op_sqrt;
+		} else if (xsg_conf_find_command("ATAN")) {
+			op->op = op_atan;
+		} else if (xsg_conf_find_command("ATAN2")) {
+			op->op = op_atan2;
 			stack_size -= 1;
 		} else {
 			xsg_modules_parse_double(var_id, update, &op->func, &op->arg);
