@@ -22,11 +22,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <dlfcn.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "modules.h"
 #include "conf.h"
-
-#include <glib.h> // FIXME
 
 /******************************************************************************/
 
@@ -51,15 +51,34 @@ static xsg_list_t *modules_list = NULL;
 
 /******************************************************************************/
 
+static const char *read_dir_name(DIR *dir) {
+	struct dirent *entry;
+
+	if (unlikely(dir == NULL))
+		return NULL;
+
+	entry = readdir(dir);
+
+	while (entry && (0 == strcmp(entry->d_name, ".") || 0 == strcmp(entry->d_name, "..")))
+		entry = readdir(dir);
+
+	if (entry)
+		return entry->d_name;
+	else
+		return NULL;
+}
+
+/******************************************************************************/
+
 static void init() {
-	GDir *dir;
+	DIR *dir;
 	char **pathv;
 	char **p;
 	const char *env;
 	char *name;
 	const char *filename;
 
-	env = g_getenv("XSYSGUARD_MODULE_PATH");
+	env = getenv("XSYSGUARD_MODULE_PATH");
 
 	if (env) {
 		pathv = xsg_strsplit_set(env, ":", 0);
@@ -76,9 +95,9 @@ static void init() {
 	xsg_message("Searching for modules...");
 	for (p = pathv; *p; p++) {
 		xsg_message("Searching for modules in \"%s\"", *p);
-		if ((dir = g_dir_open(*p, 0, NULL)) == NULL)
+		if ((dir = opendir(*p)) == NULL)
 			continue;
-		while ((filename = g_dir_read_name(dir)) != NULL) {
+		while ((filename = read_dir_name(dir)) != NULL) {
 			if ((name = xsg_str_without_suffix(filename, ".so")) != NULL) {
 				module_t *m = xsg_new0(module_t, 1);
 				m->name = name;
@@ -87,7 +106,7 @@ static void init() {
 				xsg_message("Found module file \"%s\"", filename);
 			}
 		}
-		g_dir_close(dir);
+		closedir(dir);
 	}
 }
 
