@@ -282,6 +282,23 @@ static double *op_abs(double *stptr) {
 	return stptr;
 }
 
+static double *op_dup(double *stptr) {
+	stptr[+1] = stptr[0];
+	return stptr + 1;
+}
+
+static double *op_pop(double *stptr) {
+	return stptr - 1;
+}
+
+static double *op_exc(double *stptr) {
+	double tmp;
+	tmp = stptr[0];
+	stptr[0] = stptr[-1];
+	stptr[-1] = tmp;
+	return stptr;
+}
+
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
@@ -388,6 +405,16 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			op->op = op_rad2deg;
 		} else if (xsg_conf_find_command("ABS")) {
 			op->op = op_abs;
+		} else if (xsg_conf_find_command("DUP")) {
+			op->op = op_dup;
+			stack_size += 1;
+		} else if (xsg_conf_find_command("POP")) {
+			op->op = op_pop;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("EXC")) {
+			op->op = op_exc;
+			if (stack_size < 2)
+				xsg_error("EXC: stack_size < 2");
 		} else {
 			xsg_modules_parse_double(var_id, update, &op->func, &op->arg);
 			stack_size += 1;
