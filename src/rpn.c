@@ -53,7 +53,7 @@ static rpn_t *get_rpn(uint32_t rpn_id) {
 	if (unlikely(rpn_array == NULL))
 		xsg_error("rpn_array is NULL");
 
-	if (rpn_id > rpn_count)
+	if (unlikely(rpn_id > rpn_count))
 		xsg_error("invalid rpn_id: %"PRIu32, rpn_id);
 
 	return rpn_array[rpn_id];
@@ -72,6 +72,66 @@ static void build_rpn_array(void) {
 }
 
 /******************************************************************************/
+
+static double *op_lt(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] < stptr[0] ? 1.0 : 0.0;
+	return stptr - 1;
+}
+
+static double *op_le(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] <= stptr[0] ? 1.0 : 0.0;
+	return stptr - 1;
+}
+
+static double *op_gt(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] > stptr[0] ? 1.0 : 0.0;
+	return stptr - 1;
+}
+
+static double *op_ge(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] >= stptr[0] ? 1.0 : 0.0;
+	return stptr - 1;
+}
+
+static double *op_eq(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] == stptr[0] ? 1.0 : 0.0;
+	return stptr - 1;
+}
+
+static double *op_ne(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else
+		stptr[-1] = stptr[-1] == stptr[0] ? 0.0 : 1.0;
+	return stptr - 1;
+}
 
 static double *op_unkn(double *stptr) {
 	stptr[+1] = DNAN;
@@ -136,7 +196,25 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 		op->func = NULL;
 		op->arg = NULL;
 
-		if (xsg_conf_find_command("UNKN")) {
+		if (xsg_conf_find_command("LT")) {
+			op->op = op_lt;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("LE")) {
+			op->op = op_le;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("GT")) {
+			op->op = op_gt;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("GE")) {
+			op->op = op_ge;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("EQ")) {
+			op->op = op_eq;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("NE")) {
+			op->op = op_ne;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("UNKN")) {
 			op->op = op_unkn;
 			stack_size += 1;
 		} else if (xsg_conf_find_command("INF")) {
