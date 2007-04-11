@@ -133,6 +133,21 @@ static double *op_ne(double *stptr) {
 	return stptr - 1;
 }
 
+static double *op_un(double *stptr) {
+	stptr[0] = isnan(stptr[0]) ? 1.0 : 0.0;
+	return stptr;
+}
+
+static double *op_isinf(double *stptr) {
+	stptr[0] = isinf(stptr[0]) ? 1.0 : 0.0;
+	return stptr;
+}
+
+static double *op_if(double *stptr) {
+	stptr[-2] = stptr[-2] != 0.0 ? stptr[-1] : stptr[0];
+	return stptr - 2;
+}
+
 static double *op_unkn(double *stptr) {
 	stptr[+1] = DNAN;
 	return stptr + 1;
@@ -214,6 +229,15 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 		} else if (xsg_conf_find_command("NE")) {
 			op->op = op_ne;
 			stack_size -= 1;
+		} else if (xsg_conf_find_command("UN")) {
+			op->op = op_un;
+			stack_size += 0;
+		} else if (xsg_conf_find_command("ISINF")) {
+			op->op = op_isinf;
+			stack_size += 0;
+		} else if (xsg_conf_find_command("IF")) {
+			op->op = op_if;
+			stack_size -= 2;
 		} else if (xsg_conf_find_command("UNKN")) {
 			op->op = op_unkn;
 			stack_size += 1;
