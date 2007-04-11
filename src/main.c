@@ -205,7 +205,7 @@ static void loop(void) {
 				if ((p->events & XSG_MAIN_POLL_EXCEPT) && (FD_ISSET(p->fd, &except_fds)))
 					events |= XSG_MAIN_POLL_EXCEPT;
 				if (events)
-					(p->func)(p->arg, p->events);
+					(p->func)(p->arg, events);
 			}
 		}
 		counter++;
