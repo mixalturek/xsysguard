@@ -148,6 +148,40 @@ static double *op_if(double *stptr) {
 	return stptr - 2;
 }
 
+static double *op_min(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else if (stptr[-1] > stptr[0])
+		stptr[-1] = stptr[0];
+	return stptr - 1;
+}
+
+static double *op_max(double *stptr) {
+	if (isnan(stptr[-1]))
+		;
+	else if (isnan(stptr[0]))
+		stptr[-1] = stptr[0];
+	else if (stptr[-1] < stptr[0])
+		stptr[-1] = stptr[0];
+	return stptr - 1;
+}
+
+static double *op_limit(double *stptr) {
+	if (isnan(stptr[-2]))
+		;
+	else if (isnan(stptr[-1]))
+		stptr[-2] = stptr[-1];
+	else if (isnan(stptr[0]))
+		stptr[-2] = stptr[0];
+	else if (stptr[-2] < stptr[-1])
+		stptr[-2] = DNAN;
+	else if (stptr[-2] > stptr[0])
+		stptr[-2] = DNAN;
+	return stptr - 2;
+}
+
 static double *op_unkn(double *stptr) {
 	stptr[+1] = DNAN;
 	return stptr + 1;
@@ -237,6 +271,15 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			stack_size += 0;
 		} else if (xsg_conf_find_command("IF")) {
 			op->op = op_if;
+			stack_size -= 2;
+		} else if (xsg_conf_find_command("MIN")) {
+			op->op = op_min;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("MAX")) {
+			op->op = op_max;
+			stack_size -= 1;
+		} else if (xsg_conf_find_command("LIMIT")) {
+			op->op = op_limit;
 			stack_size -= 2;
 		} else if (xsg_conf_find_command("UNKN")) {
 			op->op = op_unkn;
