@@ -317,12 +317,12 @@ int main(int argc, char **argv) {
 
 	if (print_usage) {
 		usage();
-		exit(0);
+		exit(EXIT_SUCCESS);
 	}
 
 	if (list_modules) {
 		xsg_modules_list();
-		exit(0);
+		exit(EXIT_SUCCESS);
 	}
 
 	if (!filename) {
