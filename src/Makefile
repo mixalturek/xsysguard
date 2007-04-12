@@ -85,9 +85,7 @@ xsysguard: $(XSYSGUARD_SRC)
 	-D VERSION=\"$(VERSION)\"
 
 xsysguardd: $(XSYSGUARDD_SRC)
-	$(CC) -o $@ \
-	$(ALL_CFLAGS) $(CFLAGS) \
-	$(ALL_LDFLAGS) $(LDFLAGS) \
+	$(CC) -o $@ $(ALL_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(LDFLAGS) \
 	$(filter %.c,$^) \
 	-D VERSION=\"$(VERSION)\"
 
