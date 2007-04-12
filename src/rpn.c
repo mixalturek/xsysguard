@@ -63,6 +63,8 @@ static void build_rpn_array(void) {
 	xsg_list_t *l;
 	uint32_t rpn_id = 0;
 
+	xsg_debug("Building rpn_array (rpn_count=%u)", rpn_count);
+
 	rpn_array = xsg_new0(rpn_t *, rpn_count);
 
 	for (l = rpn_list; l; l = l->next) {
@@ -458,6 +460,9 @@ double xsg_rpn_calc(uint32_t rpn_id) {
 			stptr++;
 		}
 	}
+
+	xsg_debug("rpn_calc(%u): %f", rpn_id, *stack);
+
 	return *stack;
 }
 
