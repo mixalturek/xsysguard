@@ -21,6 +21,7 @@
 #include <xsysguard.h>
 #include <sys/time.h>
 #include <time.h>
+#include <signal.h>
 
 #include "main.h"
 
@@ -212,20 +213,50 @@ static void loop(void) {
 	}
 }
 
+static void termination_handler(int signum) {
+	xsg_list_t *l;
+	void (*func)(void);
+
+	xsg_warning("Received signal %d: %s", signum, sys_siglist[signum]);
+	xsg_warning("Terminating...");
+
+	for (l = shutdown_list; l; l = l->next) {
+		func = l->data;
+		func();
+	}
+
+	xsg_warning("Exiting...");
+	exit(EXIT_SUCCESS);
+}
+
+
 void xsg_main_loop() {
 	xsg_list_t *l;
 	void (*func)(void);
+	struct sigaction new_action, old_action;
 
 	for (l = init_list; l; l = l->next) {
 		func = l->data;
 		func();
 	}
 
-	loop();
+	new_action.sa_handler = termination_handler;
+	sigemptyset(&new_action.sa_mask);
+	new_action.sa_flags = 0;
 
-	for (l = shutdown_list; l; l = l->next) {
-		func = l->data;
-		func();
-	}
+	sigaction(SIGINT, NULL, &old_action);
+	if (old_action.sa_handler != SIG_IGN)
+		sigaction(SIGINT, &new_action, NULL);
+	sigaction(SIGHUP, NULL, &old_action);
+	if (old_action.sa_handler != SIG_IGN)
+		sigaction(SIGHUP, &new_action, NULL);
+	sigaction(SIGTERM, NULL, &old_action);
+	if (old_action.sa_handler != SIG_IGN)
+		sigaction(SIGTERM, &new_action, NULL);
+	sigaction(SIGPIPE, NULL, &old_action);
+	if (old_action.sa_handler != SIG_IGN)
+		sigaction(SIGPIPE, &new_action, NULL);
+
+	loop();
 }
 
