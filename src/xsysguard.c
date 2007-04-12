@@ -251,13 +251,13 @@ static char *get_config_file(const char *filename) {
 }
 
 static void usage(void) {
-	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@sf.net>\n\n"
+	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Show help options\n"
-		"  -l, --log=N         Set loglevel to N = 0 ... 5 (DEBUG)\n"
-		"  -f, --file=FILE     Read configuration from FILE (absolute path)\n"
-		"  -m, --modules       Print a list of all available modules to stdout\n\n");
+		"  -l, --log=N         Set loglevel to N = 0 ... 5 (debug)\n"
+		"  -f, --file=FILE     Read configuration from FILE\n"
+		"  -m, --modules       Print a list of all available modules\n\n");
 }
 
 /******************************************************************************
