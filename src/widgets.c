@@ -40,7 +40,7 @@
 /******************************************************************************/
 
 #ifndef HOME_IMAGE_DIR
-#define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "modules", NULL)
+#define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "images", NULL)
 #endif
 
 #ifndef IMAGE_DIR
