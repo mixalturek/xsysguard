@@ -195,6 +195,14 @@ void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
 	va_end(args);
 }
 
+void xsg_string_append_printf(xsg_string_t *string, const char *format, ...) {
+	va_list args;
+
+	va_start(args, format);
+	xsg_string_append_printf_internal(string, format, args);
+	va_end(args);
+}
+
 char *xsg_string_free(xsg_string_t *string, bool free_segment) {
 	char *segment;
 

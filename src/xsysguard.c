@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "main.h"
 #include "var.h"
+#include "printf.h"
 
 /******************************************************************************/
 
@@ -337,6 +338,7 @@ int main(int argc, char **argv) {
 	xsg_free(config_buffer);
 
 	xsg_var_init();
+	xsg_printf_init();
 	xsg_widgets_init();
 
 	xsg_main_loop();

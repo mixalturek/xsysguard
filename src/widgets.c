@@ -36,6 +36,7 @@
 #include "widgets.h"
 #include "conf.h"
 #include "var.h"
+#include "printf.h"
 
 /******************************************************************************/
 
@@ -2306,12 +2307,11 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 typedef struct {
 	Imlib_Color color;
 	char *font;
-	char *format;
+	uint32_t printf_id;
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list_t *var_list;
-	xsg_string_t *buffer;
+	const char *string;
 } text_t;
 
 static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2320,38 +2320,10 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 }
 
 static void update_text(widget_t *widget, uint32_t var_id) {
-/* FIXME
 	text_t *text;
-	text_var_t *text_var;
-	xsg_list_t *l;
 
-	text = (text_t *)widget->data;
-
-	for (l = text->var_list; l; l = l->next) {
-		text_var = l->data;
-
-		if (text_var->type == 0)
-			parse_format(text->format, text->var_list);
-
-		if ((var_id == 0xffffffff) || (var_id == text_var->var_id)) {
-			switch (text_var->type) {
-				case XSG_INT:
-					text_var->value.i = xsg_var_get_int(text_var->var_id);
-					break;
-				case XSG_DOUBLE:
-					text_var->value.d = xsg_var_get_double(text_var->var_id);
-					break;
-				case XSG_STRING:
-					text_var->value.s = xsg_var_get_string(text_var->var_id);
-					break;
-				default:
-					g_error("Unexpected type");
-			}
-		}
-	}
-
-	string_format(text->buffer, text->format, text->var_list);
-*/
+	text = widget->data;
+	text->string = xsg_printf(text->printf_id);
 }
 
 static void scroll_text(widget_t *widget) {
@@ -2377,18 +2349,15 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 
 	text->color = uint2color(xsg_conf_read_color());
 	text->font = xsg_conf_read_string();
-	text->format = xsg_conf_read_string();
+	text->printf_id = xsg_printf_new(xsg_conf_read_string());
 	text->angle = NULL;
 	text->alignment = CENTER; /* FIXME */
 	text->tab_width = 0;
-	text->var_list = NULL;
-	text->buffer = xsg_string_new("");
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
 			double a = xsg_conf_read_double();
-			text->angle = parse_angle(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			text->angle = parse_angle(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Alignment")) {
 			text->alignment = parse_alignment();
 		} else if (xsg_conf_find_command("TabWidth")) {
@@ -2405,30 +2374,15 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 }
 
 void xsg_widgets_parse_text_var(uint32_t var_id) {
-/* FIXME
 	widget_t *widget;
 	text_t *text;
-	text_var_t *text_var;
 
 	widget = xsg_list_last(widget_list)->data;
 	text = widget->data;
-	text_var = xsg_new0(text_var_t, 1);
-	text->var_list = xsg_list_append(text->var_list, text_var);
 
-	text_var->var_id = var_id;
-	text_var->type = 0;
-	text_var->value.u = 0;
-
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Add")) {
-			text_var->add = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Mult")) {
-			text_var->mult = xsg_conf_read_double();
-		} else {
-			xsg_conf_error("Add or Mult");
-		}
-	}
-*/
+	xsg_printf_add_var(text->printf_id, var_id);
+	if (!xsg_conf_find_newline())
+		xsg_conf_error("newline");
 }
 
 /******************************************************************************

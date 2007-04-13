@@ -150,6 +150,7 @@ xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val);
 xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len);
 xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len);
 void xsg_string_printf(xsg_string_t *string, const char *format, ...);
+void xsg_string_append_printf(xsg_string_t *string, const char *format, ...);
 char *xsg_string_free(xsg_string_t *string, bool free_segment);
 
 /******************************************************************************
