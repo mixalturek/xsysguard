@@ -203,40 +203,40 @@ bool xsg_file_test(const char *filename, xsg_file_test_t test);
  * logging
  ******************************************************************************/
 
-#ifndef LOG_DOMAIN
-#define LOG_DOMAIN ((char *) 0)
-#endif /* LOG_DOMAIN */
+#ifndef XSG_LOG_DOMAIN
+#define XSG_LOG_DOMAIN ((char *) 0)
+#endif /* XSG_LOG_DOMAIN */
 
-#define LOG_LEVEL_ERROR   0x00
-#define LOG_LEVEL_WARNING 0x01
-#define LOG_LEVEL_MESSAGE 0x02
-#define LOG_LEVEL_DEBUG   0x03
+#define XSG_LOG_LEVEL_ERROR   1
+#define XSG_LOG_LEVEL_WARNING 2
+#define XSG_LOG_LEVEL_MESSAGE 3
+#define XSG_LOG_LEVEL_DEBUG   4
 
 void xsg_log(const char *domain, uint32_t level, const char *format, va_list args);
 
 static void xsg_error(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	xsg_log(LOG_DOMAIN, LOG_LEVEL_ERROR, format, args);
+	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, format, args);
 	va_end(args);
 	abort();
 }
 static void xsg_warning(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	xsg_log(LOG_DOMAIN, LOG_LEVEL_WARNING, format, args);
+	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, format, args);
 	va_end(args);
 }
 static void xsg_message(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	xsg_log(LOG_DOMAIN, LOG_LEVEL_MESSAGE, format, args);
+	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, format, args);
 	va_end(args);
 }
 static void xsg_debug(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
-	xsg_log(LOG_DOMAIN, LOG_LEVEL_DEBUG, format, args);
+	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, format, args);
 	va_end(args);
 }
 

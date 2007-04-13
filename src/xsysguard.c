@@ -50,19 +50,19 @@
 
 /******************************************************************************/
 
-static uint32_t log_level = LOG_LEVEL_ERROR;
+static uint32_t log_level = XSG_LOG_LEVEL_ERROR;
 
 void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
 	if (log_level < level)
 		return;
 
-	if (level == LOG_LEVEL_ERROR)
+	if (level == XSG_LOG_LEVEL_ERROR)
 		fprintf(stderr, "ERROR: ");
-	else if (level == LOG_LEVEL_WARNING)
+	else if (level == XSG_LOG_LEVEL_WARNING)
 		fprintf(stderr, "WARNING: ");
-	else if (level == LOG_LEVEL_MESSAGE)
+	else if (level == XSG_LOG_LEVEL_MESSAGE)
 		fprintf(stderr, "MESSAGE: ");
-	else if (level == LOG_LEVEL_DEBUG)
+	else if (level == XSG_LOG_LEVEL_DEBUG)
 		fprintf(stderr, "DEBUG: ");
 
 	if (domain != NULL)
