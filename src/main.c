@@ -150,10 +150,13 @@ static void loop(void) {
 	time_out.tv_sec = interval / 1000;
 	time_out.tv_usec = (interval % 1000) * 1000;
 
+	xsg_message("Starting main loop");
+
 	while (1) {
 		sgettimeofday(&time_start, 0);
 
 		xsg_message("Tick %"PRIu64, counter);
+
 		for (l = update_list; l; l = l->next) {
 			void (*func)(uint64_t) = l->data;
 			func(counter);
@@ -189,10 +192,14 @@ static void loop(void) {
 				}
 			}
 
+			xsg_message("Sleeping for %u.%06us", (unsigned) time_sleep.tv_sec, (unsigned) time_sleep.tv_usec);
+
 			fd_count = select(fd_max + 1, &read_fds, &write_fds, &except_fds, &time_sleep);
 
 			if (fd_count == 0)
 				break; // timeout
+
+			xsg_message("Interrupted by file descriptor");
 
 			for (l = poll_list; l; l = l->next) {
 				xsg_main_poll_t events = 0;
@@ -217,15 +224,15 @@ static void termination_handler(int signum) {
 	xsg_list_t *l;
 	void (*func)(void);
 
-	xsg_warning("Received signal %d: %s", signum, sys_siglist[signum]);
-	xsg_warning("Terminating...");
+	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
+	xsg_message("Terminating...");
 
 	for (l = shutdown_list; l; l = l->next) {
 		func = l->data;
 		func();
 	}
 
-	xsg_warning("Exiting...");
+	xsg_message("Exiting...");
 	exit(EXIT_SUCCESS);
 }
 
