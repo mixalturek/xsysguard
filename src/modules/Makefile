@@ -53,7 +53,7 @@ CFLAGS  += -Wall
 CFLAGS  += -O3
 CFLAGS  += -g
 
-ALL_CFLAGS  += $(shell pkg-config --cflags glib-2.0) -I../include
+ALL_CFLAGS  += -I../include
 ALL_LDFLAGS := -fPIC -shared -nostartfiles
 
 MODULES := $(patsubst %.Makefile,%.Module,$(wildcard *.Makefile))
