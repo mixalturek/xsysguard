@@ -31,7 +31,13 @@ struct strftime_args {
 /******************************************************************************/
 
 static double get_time(void *arg) {
-	return (double) time(NULL);
+	double d;
+
+	d = (double) time(NULL);
+
+	xsg_debug("get_time: %f", d);
+
+	return d;
 }
 
 static char *get_strftime(void *arg) {
@@ -55,6 +61,8 @@ static char *get_strftime(void *arg) {
 
 		args->buffer = xsg_string_set_size(args->buffer, (buf_len + 1) * 2);
 	}
+
+	xsg_debug("get_strftime: \"%s\"", args->buffer->str);
 
 	return args->buffer->str;
 }
