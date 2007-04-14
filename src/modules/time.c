@@ -45,11 +45,15 @@ static char *get_strftime(void *arg) {
 	loctime = localtime(&curtime);
 
 	while (1) {
-		size_t len;
-		len = strftime(args->buffer->str, args->buffer->len, args->format, loctime);
-		if (likely(len < args->buffer->len))
+		size_t len, buf_len;
+
+		buf_len = args->buffer->allocated_len;
+		len = strftime(args->buffer->str, buf_len, args->format, loctime);
+
+		if (likely(len != 0))
 			break;
-		args->buffer = xsg_string_set_size(args->buffer, args->buffer->len + 8);
+
+		args->buffer = xsg_string_set_size(args->buffer, (buf_len + 1) * 2);
 	}
 
 	return args->buffer->str;
@@ -68,7 +72,7 @@ void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **
 	args = xsg_new0(struct strftime_args, 1);
 
 	args->format = xsg_conf_read_string();
-	args->buffer = xsg_string_sized_new(8);
+	args->buffer = xsg_string_new(NULL);
 
 	*func = get_strftime;
 	*arg = args;
