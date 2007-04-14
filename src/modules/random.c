@@ -183,9 +183,16 @@ static double rand_double(rand_t *rand) {
 /******************************************************************************/
 
 static double get_random(void *arg) {
+	double d;
+
 	if (!global_random)
 		global_random = rand_new();
-	return rand_double(global_random);
+
+	d = rand_double(global_random);
+
+	xsg_debug("get_random: %f", d);
+
+	return d;
 }
 
 /******************************************************************************/
