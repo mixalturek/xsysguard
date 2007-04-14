@@ -58,13 +58,13 @@ void xsg_log(const char *domain, uint32_t level, const char *format, va_list arg
 		return;
 
 	if (level == XSG_LOG_LEVEL_ERROR)
-		fprintf(stderr, "ERROR: ");
+		fprintf(stderr, "ERR: ");
 	else if (level == XSG_LOG_LEVEL_WARNING)
-		fprintf(stderr, "WARNING: ");
+		fprintf(stderr, "WRN: ");
 	else if (level == XSG_LOG_LEVEL_MESSAGE)
-		fprintf(stderr, "MESSAGE: ");
+		fprintf(stderr, "MSG: ");
 	else if (level == XSG_LOG_LEVEL_DEBUG)
-		fprintf(stderr, "DEBUG: ");
+		fprintf(stderr, "DBG: ");
 
 	if (domain != NULL)
 		fprintf(stderr, "[%s] ", domain);
