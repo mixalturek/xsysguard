@@ -23,10 +23,22 @@
 /******************************************************************************/
 
 static double get_double(void *arg) {
-	return * (double *) arg;
+	double d;
+
+	d = * (double *) arg;
+
+	xsg_debug("get_double: %f", d);
+
+	return d;
 }
 
 static char *get_string(void *arg) {
+	char *s;
+
+	s = (char *) arg;
+
+	xsg_debug("get_string: \"%s\"", s);
+
 	return (char *) arg;
 }
 
