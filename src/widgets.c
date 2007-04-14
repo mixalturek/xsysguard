@@ -2351,8 +2351,9 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	text->font = xsg_conf_read_string();
 	text->printf_id = xsg_printf_new(xsg_conf_read_string());
 	text->angle = NULL;
-	text->alignment = CENTER; /* FIXME */
+	text->alignment = TOP_LEFT;
 	text->tab_width = 0;
+	text->string = NULL;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
@@ -2394,12 +2395,11 @@ void xsg_widgets_parse_text_var(uint32_t var_id) {
 
 typedef struct {
 	char *file_mask;
-	char *format;
+	uint32_t printf_id;
 	angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
-	xsg_list_t *var_list;
-	xsg_string_t *buffer;
+	const char *string;
 } imagetext_t;
 
 static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
@@ -2408,37 +2408,10 @@ static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int
 }
 
 static void update_imagetext(widget_t *widget, uint32_t var_id) {
-/* FIXME
 	imagetext_t *imagetext;
-	text_var_t *text_var;
-	xsg_list_t *l;
 
-	imagetext = (imagetext_t *)widget->data;
-	for (l = imagetext->var_list; l; l = l->next) {
-		text_var = l->data;
-
-		if (text_var->type == 0)
-			parse_format(imagetext->format, imagetext->var_list);
-
-		if ((var_id == 0xffffffff) || (var_id == text_var->var_id)) {
-			switch (text_var->type) {
-				case XSG_INT:
-					text_var->value.i = xsg_var_get_int(text_var->var_id);
-					break;
-				case XSG_DOUBLE:
-					text_var->value.d = xsg_var_get_double(text_var->var_id);
-					break;
-				case XSG_STRING:
-					text_var->value.s = xsg_var_get_string(text_var->var_id);
-					break;
-				default:
-					g_error("Unexpected type");
-			}
-		}
-	}
-
-	string_format(imagetext->buffer, imagetext->format, imagetext->var_list);
-*/
+	imagetext = widget->data;
+	imagetext->string = xsg_printf(imagetext->printf_id);
 }
 
 static void scroll_imagetext(widget_t *widget) {
@@ -2463,18 +2436,16 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint32_t *widget_id) {
 	widget->data = (void *) imagetext;
 
 	imagetext->file_mask = xsg_conf_read_string();
-	imagetext->format = xsg_conf_read_string();
+	imagetext->printf_id = xsg_printf_new(xsg_conf_read_string());
 	imagetext->angle = NULL;
-	imagetext->alignment = CENTER; /* FIXME */
+	imagetext->alignment = TOP_LEFT;
 	imagetext->tab_width = 0;
-	imagetext->var_list = NULL;
-	imagetext->buffer = xsg_string_new("");
+	imagetext->string = NULL;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
 			double a = xsg_conf_read_double();
-			imagetext->angle = parse_angle(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			imagetext->angle = parse_angle(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Alignment")) {
 			imagetext->alignment = parse_alignment();
 		} else if (xsg_conf_find_command("TabWidth")) {
@@ -2491,29 +2462,14 @@ void xsg_widgets_parse_imagetext(uint64_t *update, uint32_t *widget_id) {
 }
 
 void xsg_widgets_parse_imagetext_var(uint32_t var_id) {
-/* FIXME
 	widget_t *widget;
 	imagetext_t *imagetext;
-	text_var_t *text_var;
 
 	widget = xsg_list_last(widget_list)->data;
 	imagetext = widget->data;
-	text_var = xsg_new0(text_var_t, 1);
-	imagetext->var_list = xsg_list_append(imagetext->var_list, text_var);
 
-	text_var->var_id = var_id;
-	text_var->type = 0;
-	text_var->value.u = 0;
-
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Add")) {
-			text_var->add = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Mult")) {
-			text_var->mult = xsg_conf_read_double();
-		} else {
-			xsg_conf_error("Add or Mult");
-		}
-	}
-*/
+	xsg_printf_add_var(imagetext->printf_id, var_id);
+	if (!xsg_conf_find_newline())
+		xsg_conf_error("newline");
 }
 
