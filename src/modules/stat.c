@@ -2675,6 +2675,7 @@ static void parse_process_count_string(char * (**func)(void *), void **arg) {
 static void init_stats(void) {
 	sg_init();
 	sg_snapshot();
+	update_stats(0);
 }
 
 static void shutdown_stats(void) {
