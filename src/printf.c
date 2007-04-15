@@ -21,6 +21,7 @@
 #include <xsysguard.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "printf.h"
 #include "var.h"
@@ -288,34 +289,36 @@ const char *xsg_printf(uint32_t printf_id) {
 		var_t *var = l->data;
 		if (var->type == VAR_INT) {
 			// d, i
-			int64_t i;
-			i = xsg_var_get_double(var->var_id);
-			xsg_string_append_printf(p->buffer, var->format, i);
+			double d = xsg_var_get_double(var->var_id);
+			if (isnan(d) || isinf(d))
+				d = 0.0;
+			xsg_string_append_printf(p->buffer, var->format, (int64_t) d);
 		} else if (var->type == VAR_UINT) {
 			// o, u, x, X
-			uint64_t u;
-			u = xsg_var_get_double(var->var_id);
-			xsg_string_append_printf(p->buffer, var->format, u);
+			double d = xsg_var_get_double(var->var_id);
+			if (isnan(d) || isinf(d))
+				d = 0.0;
+			xsg_string_append_printf(p->buffer, var->format, (uint64_t) d);
 		} else if (var->type == VAR_DOUBLE) {
 			// e, E, f, F, g, G, a, A
-			double d;
-			d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_double(var->var_id);
 			xsg_string_append_printf(p->buffer, var->format, d);
 		} else if (var->type == VAR_CHAR) {
 			// c
-			int c;
-			c = xsg_var_get_double(var->var_id);
-			xsg_string_append_printf(p->buffer, var->format, c);
+			double d = xsg_var_get_double(var->var_id);
+			if (isnan(d) || isinf(d))
+				d = (double) ' ';
+			xsg_string_append_printf(p->buffer, var->format, (int) d);
 		} else if (var->type == VAR_STRING) {
 			// s
-			char *s;
-			s = xsg_var_get_string(var->var_id);
+			char *s = xsg_var_get_string(var->var_id);
 			xsg_string_append_printf(p->buffer, var->format, s);
 		} else if (var->type == VAR_POINTER) {
 			// p
-			unsigned u;
-			u = xsg_var_get_double(var->var_id);
-			xsg_string_append_printf(p->buffer, var->format, u);
+			double d = xsg_var_get_double(var->var_id);
+			if (isnan(d) || isinf(d))
+				d = 0.0;
+			xsg_string_append_printf(p->buffer, var->format, (unsigned) d);
 		} else {
 			xsg_error("printf: unknown var type");
 		}
