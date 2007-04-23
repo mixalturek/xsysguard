@@ -2382,8 +2382,7 @@ void xsg_widgets_parse_text_var(uint32_t var_id) {
 	text = widget->data;
 
 	xsg_printf_add_var(text->printf_id, var_id);
-	if (!xsg_conf_find_newline())
-		xsg_conf_error("newline");
+	xsg_conf_read_newline();
 }
 
 /******************************************************************************
@@ -2469,7 +2468,6 @@ void xsg_widgets_parse_imagetext_var(uint32_t var_id) {
 	imagetext = widget->data;
 
 	xsg_printf_add_var(imagetext->printf_id, var_id);
-	if (!xsg_conf_find_newline())
-		xsg_conf_error("newline");
+	xsg_conf_read_newline();
 }
 
