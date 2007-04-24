@@ -265,7 +265,7 @@ void xsg_printf_add_var(uint32_t printf_id, uint32_t var_id) {
 	if (var->type == VAR_STRING) {
 		if (!xsg_var_is_string(var_id))
 			xsg_conf_error("string variable");
-	} else if (var->type == VAR_INT || var->type == VAR_UINT || var->type == VAR_DOUBLE) {
+	} else if (var->type == VAR_INT || var->type == VAR_UINT || var->type == VAR_DOUBLE || var->type == VAR_CHAR || var->type == VAR_POINTER) {
 		if (!xsg_var_is_double(var_id))
 			xsg_conf_error("double variable");
 	} else {
