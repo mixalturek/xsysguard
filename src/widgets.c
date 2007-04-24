@@ -408,7 +408,7 @@ static ImlibPolygon poly_copy(ImlibPolygon polygon, int xoffset, int yoffset) {
 
 /******************************************************************************
  *
- * angle stuff
+ * parse_angle
  *
  ******************************************************************************/
 
@@ -461,35 +461,9 @@ static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *wi
 	return angle;
 }
 
-static bool blend_at_angle(Imlib_Image buffer, Imlib_Image image, angle_t *angle, int up_x, int up_y) {
-	imlib_context_set_image(image);
-
-	if (angle->angle == 0.0) {
-		return FALSE;
-	} else if (angle->angle == 90.0) {
-		imlib_image_orientate(1);
-		return FALSE;
-	} else if (angle->angle == 180.0) {
-		imlib_image_orientate(2);
-		return FALSE;
-	} else if (angle->angle == 270.0) {
-		imlib_image_orientate(3);
-		return FALSE;
-	}
-
-	imlib_context_set_image(buffer);
-
-	imlib_blend_image_onto_image_at_angle(image, 1, 0, 0,
-			angle->width, angle->height,
-			angle->xoffset - up_x, angle->yoffset - up_y,
-			angle->angle_x, angle->angle_y);
-
-	return TRUE;
-}
-
 /******************************************************************************
  *
- * text alignment
+ * parse_alignment
  *
  ******************************************************************************/
 
@@ -1139,7 +1113,7 @@ typedef struct {
 static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	line_t *line;
 
-	xsg_message("Render Line");
+	xsg_debug("render_line");
 
 	line = (line_t *) widget->data;
 
@@ -1174,7 +1148,6 @@ void xsg_widgets_parse_line() {
 	line->color = uint2color(xsg_conf_read_color());
 	xsg_conf_read_newline();
 
-
 	widget->update = 0;
 	widget->xoffset = MIN(line->x1, line->x2);
 	widget->yoffset = MIN(line->y1, line->y2);
@@ -1190,7 +1163,7 @@ void xsg_widgets_parse_line() {
 
 /******************************************************************************
  *
- * Rectangle <x> <y> <width> <height> <color> [ColorRange <angle> <count> <distance> <color> ...] [Direction <angle>] [Filled]
+ * Rectangle <x> <y> <width> <height> <color> [Angle <angle>] [ColorRange <angle> <count> <distance> <color> ...] [Filled]
  *
  ******************************************************************************/
 
@@ -1208,7 +1181,7 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	int xoffset, yoffset;
 	unsigned int width, height;
 
-	xsg_message("Render Rectangle");
+	xsg_debug("render_rectangle");
 
 	rectangle = (rectangle_t *) widget->data;
 
@@ -1220,7 +1193,7 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 		tmp = imlib_create_image(width, height);
 		imlib_context_set_image(tmp);
 		imlib_image_set_has_alpha(1);
-		image_set_color(window.background);
+		imlib_image_clear();
 	} else {
 		xoffset = widget->xoffset - up_x;
 		yoffset = widget->yoffset - up_y;
@@ -1244,13 +1217,12 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	}
 
 	if (rectangle->angle) {
-		if (!blend_at_angle(buffer, tmp, rectangle->angle, up_x, up_y)) {
-			imlib_context_set_image(buffer);
-			imlib_blend_image_onto_image(tmp, 1, 0, 0,
-					widget->width, widget->height,
-					widget->xoffset - up_x, widget->yoffset - up_y,
-					widget->width, widget->height);
-		}
+		imlib_context_set_image(buffer);
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+				rectangle->angle->width, rectangle->angle->height,
+				rectangle->angle->xoffset - up_x, rectangle->angle->yoffset - up_y,
+				rectangle->angle->angle_x, rectangle->angle->angle_y);
+
 		imlib_context_set_image(tmp);
 		imlib_free_image();
 	}
@@ -1313,7 +1285,7 @@ void xsg_widgets_parse_rectangle() {
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
-			xsg_conf_error("Skew, ColorRange or Filled");
+			xsg_conf_error("Angle, ColorRange or Filled");
 		}
 	}
 
@@ -1338,7 +1310,7 @@ typedef struct {
 static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	ellipse_t *ellipse;
 
-	xsg_message("Render Ellipse");
+	xsg_debug("render_ellipse");
 
 	ellipse = (ellipse_t *) widget->data;
 
@@ -1414,7 +1386,7 @@ static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int u
 	polygon_t *polygon;
 	ImlibPolygon poly;
 
-	xsg_message("Render Polygon");
+	xsg_debug("render_polygon");
 
 	polygon = (polygon_t *) widget->data;
 
@@ -1503,7 +1475,7 @@ typedef struct {
 static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
 	image_t *image;
 
-	xsg_message("Render Image");
+	xsg_debug("render_image");
 
 	image = (image_t *) widget->data;
 
@@ -1633,7 +1605,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	unsigned int width;
 	unsigned int height;
 
-	xsg_message("Render BarChart");
+	xsg_debug("render_barchart");
 
 	barchart = (barchart_t *) widget->data;
 
@@ -1716,20 +1688,16 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	if (barchart->mask)
 		blend_mask(buffer, barchart->mask);
 
-	if (barchart->angle) {
-		if (!blend_at_angle(buffer, tmp, barchart->angle, up_x, up_y)) {
-			imlib_context_set_image(buffer);
-			imlib_blend_image_onto_image(tmp, 1, 0, 0,
-					widget->width, widget->height,
-					widget->xoffset - up_x, widget->yoffset - up_y,
-					widget->width, widget->height);
-		}
-	} else {
-		imlib_context_set_image(buffer);
+	imlib_context_set_image(buffer);
+	if (barchart->angle)
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+				barchart->angle->width, barchart->angle->height,
+				barchart->angle->xoffset - up_x, barchart->angle->yoffset - up_y,
+				barchart->angle->angle_x, barchart->angle->angle_y);
+	else
 		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
 				widget->xoffset - up_x, widget->yoffset - up_y,
 				widget->width, widget->height);
-	}
 
 	imlib_context_set_image(tmp);
 	imlib_free_image();
@@ -1900,7 +1868,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	unsigned int height;
 	unsigned int i;
 
-	xsg_message("Render LineChart");
+	xsg_debug("render_linechart");
 
 	linechart = (linechart_t *) widget->data;
 
@@ -1968,20 +1936,17 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 		imlib_polygon_free(poly);
 	}
 
-	if (linechart->angle) {
-		if (!blend_at_angle(buffer, tmp, linechart->angle, up_x, up_y)) {
-			imlib_context_set_image(buffer);
-			imlib_blend_image_onto_image(tmp, 1, 0, 0,
-					widget->width, widget->height,
-					widget->xoffset - up_x, widget->yoffset - up_y,
-					widget->width, widget->height);
-		}
-	} else {
-		imlib_context_set_image(buffer);
+	imlib_context_set_image(buffer);
+
+	if (linechart->angle)
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+				linechart->angle->width, linechart->angle->height,
+				linechart->angle->xoffset - up_x, linechart->angle->yoffset - up_y,
+				linechart->angle->angle_x, linechart->angle->angle_y);
+	else
 		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
 				widget->xoffset - up_x, widget->yoffset - up_y,
 				widget->width, widget->height);
-	}
 
 	imlib_context_set_image(tmp);
 	imlib_free_image();
@@ -2140,7 +2105,7 @@ typedef struct {
 } areachart_t;
 
 static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	xsg_message("Render AreaChart");
+	xsg_debug("render_areachart");
 	/* TODO */
 }
 
@@ -2306,7 +2271,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 
 typedef struct {
 	Imlib_Color color;
-	char *font;
+	Imlib_Font font;
 	uint32_t printf_id;
 	angle_t *angle;
 	alignment_t alignment;
@@ -2315,8 +2280,43 @@ typedef struct {
 } text_t;
 
 static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	xsg_message("Render Text");
-	/* TODO */
+	text_t *text;
+	int width = 0;
+	int height = 0;
+	int horizontal_advance = 0;
+	int vertical_advance = 0;
+	Imlib_Image tmp;
+
+	xsg_debug("render_text");
+
+	text = widget->data;
+
+	imlib_context_set_font(text->font);
+
+	imlib_get_text_size(text->string, &width, &height);
+	imlib_get_text_advance(text->string, &horizontal_advance, &vertical_advance);
+
+	tmp = imlib_create_image(text->angle->width, text->angle->height);
+	imlib_context_set_image(tmp);
+	imlib_image_clear();
+
+	imlib_text_draw(0, 0, text->string);
+
+	// TODO
+
+	imlib_context_set_image(buffer);
+	if (text->angle)
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+				text->angle->width, text->angle->height,
+				text->angle->xoffset - up_x, text->angle->yoffset - up_y,
+				text->angle->angle_x, text->angle->angle_y);
+	else
+		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
+				widget->xoffset - up_x, widget->yoffset - up_y,
+				widget->width, widget->height);
+
+	imlib_context_set_image(tmp);
+	imlib_free_image();
 }
 
 static void update_text(widget_t *widget, uint32_t var_id) {
@@ -2333,6 +2333,7 @@ static void scroll_text(widget_t *widget) {
 void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	text_t *text;
+	char *font_name;
 
 	widget = xsg_new0(widget_t, 1);
 	text = xsg_new0(text_t, 1);
@@ -2348,7 +2349,13 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	widget->data = (void *) text;
 
 	text->color = uint2color(xsg_conf_read_color());
-	text->font = xsg_conf_read_string();
+
+	font_name = xsg_conf_read_string();
+	text->font = imlib_load_font(font_name);
+	if (unlikely(text->font == NULL))
+		xsg_error("Cannot load font: \"%s\"", font_name);
+	xsg_free(font_name);
+
 	text->printf_id = xsg_printf_new(xsg_conf_read_string());
 	text->angle = NULL;
 	text->alignment = TOP_LEFT;
@@ -2402,7 +2409,7 @@ typedef struct {
 } imagetext_t;
 
 static void render_imagetext(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
-	xsg_message("Render ImageText");
+	xsg_debug("render_imagetext");
 	/* TODO */
 }
 
