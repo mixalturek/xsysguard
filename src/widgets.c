@@ -251,10 +251,10 @@ static void blend_mask(Imlib_Image image, Imlib_Image mask) {
 			image = (unsigned char *) image_data + x + y * image_height;
 			mask = (unsigned char *) mask_data + x + y * mask_height;
 
-			image[0] *= mask[0] / 0xff;
-			image[1] *= mask[1] / 0xff;
-			image[2] *= mask[2] / 0xff;
-			image[3] *= mask[3] / 0xff;
+			image[0] = (image[0] * mask[0]) / 0xff;
+			image[1] = (image[1] * mask[1]) / 0xff;
+			image[2] = (image[2] * mask[2]) / 0xff;
+			image[3] = (image[3] * mask[3]) / 0xff;
 		}
 	}
 
