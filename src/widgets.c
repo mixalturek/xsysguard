@@ -103,7 +103,7 @@ typedef struct {
 	bool skip_pager;
 	int layer;
 	bool decorations;
-	uint32_t background;
+	Imlib_Color background;
 	bool copy_from_parent;
 	bool copy_from_root;
 	unsigned int cache_size;
@@ -138,7 +138,7 @@ static window_t window = {
 	skip_pager: FALSE,
 	layer: 0,
 	decorations: TRUE,
-	background: 0x00000000,
+	background: { 0 },
 	copy_from_parent: FALSE,
 	copy_from_root: FALSE,
 	cache_size: 1024,
@@ -158,22 +158,6 @@ static window_t window = {
  * misc functions
  *
  ******************************************************************************/
-
-static void image_set_color(DATA32 color) {
-	DATA32 *data;
-	unsigned int width;
-	unsigned int height;
-	unsigned int i;
-
-	width = imlib_image_get_width();
-	height = imlib_image_get_height();
-	data = imlib_image_get_data();
-
-	for (i = 0; i < (width * height); i++)
-		data[i] = color;
-
-	imlib_image_put_back_data(data);
-}
 
 static widget_t *get_widget(uint32_t widget_id) {
 	widget_t *widget;
@@ -230,7 +214,7 @@ static Imlib_Image load_image(const char *filename, bool throw_error) {
 }
 
 static Imlib_Color uint2color(uint32_t u) {
-	Imlib_Color color = { 0, 0, 0 };
+	Imlib_Color color;
 	color_t c;
 
 	c.uint = u;
@@ -346,7 +330,7 @@ void xsg_widgets_parse_background() {
 	else if (xsg_conf_find_command("CopyFromRoot"))
 		window.copy_from_root = TRUE;
 	else if (xsg_conf_find_command("Color"))
-		window.background = xsg_conf_read_color();
+		window.background = uint2color(xsg_conf_read_color());
 	else
 		xsg_conf_error("CopyFromParent, CopyFromRoot or Color");
 	xsg_conf_read_newline();
@@ -772,7 +756,7 @@ static void render() {
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
 		imlib_image_set_has_alpha(1);
-		image_set_color(window.background);
+		imlib_image_clear_color(window.background.red, window.background.green, window.background.blue, window.background.alpha);
 		/* TODO grab_root / parent */
 
 		solid_bg = TRUE;
@@ -1644,7 +1628,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	tmp = imlib_create_image(width, height);
 	imlib_context_set_image(tmp);
 	imlib_image_set_has_alpha(1);
-	image_set_color(0);
+	imlib_image_clear();
 
 	pixel_h = (max - min) / (double) height;
 
@@ -1909,7 +1893,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	tmp = imlib_create_image(width, height);
 	imlib_context_set_image(tmp);
 	imlib_image_set_has_alpha(1);
-	image_set_color(0);
+	imlib_image_clear();
 
 	/* TODO background image */
 
