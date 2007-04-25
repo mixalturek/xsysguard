@@ -200,6 +200,8 @@ typedef enum {
 
 bool xsg_file_test(const char *filename, xsg_file_test_t test);
 
+char **xsg_get_path_from_env(const char *env_name, const char *default_path);
+
 /******************************************************************************
  * logging
  ******************************************************************************/

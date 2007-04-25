@@ -459,3 +459,31 @@ bool xsg_file_test(const char *filename, xsg_file_test_t test) {
 	return FALSE;
 }
 
+char **xsg_get_path_from_env(const char *env_name, const char *default_path) {
+	const char *path;
+	char **pathv;
+	char **p;
+
+	path = getenv(env_name);
+
+	if (path == NULL)
+		path = default_path;
+
+	if (path == NULL)
+		return NULL;
+
+	pathv = xsg_strsplit_set(path, ":", 0);
+
+	for (p = pathv; *p; p++) {
+		if (*p[0] == '~') {
+			char *q;
+
+			q = xsg_build_filename(xsg_get_home_dir(), (*p) + 1, NULL);
+			xsg_free(*p);
+			*p = q;
+		}
+	}
+
+	return pathv;
+}
+
