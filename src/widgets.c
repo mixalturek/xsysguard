@@ -41,11 +41,17 @@
 /******************************************************************************/
 
 #ifndef HOME_IMAGE_DIR
-#define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "images", NULL)
+# define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "images", NULL)
 #endif
 
 #ifndef IMAGE_DIR
-#define IMAGE_DIR "/usr/local/share/xsysguard/images"
+# define IMAGE_DIR "/usr/local/share/xsysguard/images"
+#endif
+
+/******************************************************************************/
+
+#ifndef XSYSGUARD_FONT_PATH
+# define XSYSGUARD_FONT_PATH "~/.xsysguard/fonts:/usr/local/share/xsysguard/fonts:~/.fonts:/usr/share/fonts/truetype:/usr/X11R6/lib/X11/fonts/TrueType"
 #endif
 
 /******************************************************************************/
@@ -2277,10 +2283,16 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 	imlib_get_text_size(text->string, &width, &height);
 	imlib_get_text_advance(text->string, &horizontal_advance, &vertical_advance);
 
-	tmp = imlib_create_image(text->angle->width, text->angle->height);
+	if (text->angle)
+		tmp = imlib_create_image(text->angle->width, text->angle->height);
+	else
+		tmp = imlib_create_image(widget->width, widget->height);
+
 	imlib_context_set_image(tmp);
+	imlib_image_set_has_alpha(1);
 	imlib_image_clear();
 
+	imlib_context_set_color(text->color.red, text->color.green, text->color.blue, text->color.alpha);
 	imlib_text_draw(0, 0, text->string);
 
 	// TODO
@@ -2315,6 +2327,7 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	widget_t *widget;
 	text_t *text;
 	char *font_name;
+	char **pathv = NULL;
 
 	widget = xsg_new0(widget_t, 1);
 	text = xsg_new0(text_t, 1);
@@ -2332,6 +2345,21 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 	text->color = uint2color(xsg_conf_read_color());
 
 	font_name = xsg_conf_read_string();
+
+	if (unlikely(pathv == NULL)) {
+		char **p;
+
+		pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
+
+		if (unlikely(pathv == NULL))
+			xsg_error("Cannot get XSYSGUARD_FONT_PATH");
+
+		for (p = pathv; *p; p++) {
+			xsg_message("Adding path to font path: \"%s\"", *p);
+			imlib_add_path_to_font_path(*p);
+		}
+	}
+
 	text->font = imlib_load_font(font_name);
 	if (unlikely(text->font == NULL))
 		xsg_error("Cannot load font: \"%s\"", font_name);
