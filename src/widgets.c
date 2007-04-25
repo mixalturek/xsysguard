@@ -48,24 +48,21 @@
 #define IMAGE_DIR "/usr/local/share/xsysguard/images"
 #endif
 
-#define ARGB_ALPHA_IDX	3
-#define ARGB_RED_IDX	2
-#define ARGB_GREEN_IDX	1
-#define ARGB_BLUE_IDX	0
+/******************************************************************************/
 
 typedef union {
 	uint32_t uint;
 	struct {
-		unsigned char a;
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
+		unsigned char alpha;
+		unsigned char red;
+		unsigned char green;
+		unsigned char blue;
 	} argb;
 	struct {
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
-		unsigned char a;
+		unsigned char red;
+		unsigned char green;
+		unsigned char blue;
+		unsigned char alpha;
 	} rgba;
 } color_t;
 
@@ -218,10 +215,10 @@ static Imlib_Color uint2color(uint32_t u) {
 	color_t c;
 
 	c.uint = u;
-	color.alpha = c.argb.a & 0xff;
-	color.red = c.argb.r & 0xff;
-	color.green = c.argb.g & 0xff;
-	color.blue = c.argb.b & 0xff;
+	color.alpha = c.argb.alpha & 0xff;
+	color.red = c.argb.red & 0xff;
+	color.green = c.argb.green & 0xff;
+	color.blue = c.argb.blue & 0xff;
 
 	return color;
 }
@@ -254,10 +251,10 @@ static void blend_mask(Imlib_Image image, Imlib_Image mask) {
 			image = (unsigned char *) image_data + x + y * image_height;
 			mask = (unsigned char *) mask_data + x + y * mask_height;
 
-			image[ARGB_BLUE_IDX] *= mask[ARGB_BLUE_IDX] / 0xff;
-			image[ARGB_GREEN_IDX] *= mask[ARGB_BLUE_IDX] / 0xff;
-			image[ARGB_RED_IDX] *= mask[ARGB_RED_IDX] / 0xff;
-			image[ARGB_ALPHA_IDX] *= mask[ARGB_ALPHA_IDX] / 0xff;
+			image[0] *= mask[0] / 0xff;
+			image[1] *= mask[1] / 0xff;
+			image[2] *= mask[2] / 0xff;
+			image[3] *= mask[3] / 0xff;
 		}
 	}
 
@@ -574,9 +571,9 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 	XImage *mask_image = NULL;
 	unsigned int width;
 	unsigned int height;
-	unsigned char *c;
-	unsigned char *colors_c;
-	unsigned char *alpha_c;
+	color_t c;
+	color_t colors_c;
+	color_t alpha_c;
 	unsigned char a, r, g, b;
 	int i;
 	GC gc, mask_gc;
@@ -621,23 +618,23 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 
 	for (i = 0; i < (width * height); i++) {
 
-		c = (unsigned char *) (data + i);
-		b = c[ARGB_BLUE_IDX];
-		g = c[ARGB_GREEN_IDX];
-		r = c[ARGB_RED_IDX];
-		a = c[ARGB_ALPHA_IDX];
+		c.uint = data[i];
+		a = c.argb.alpha;
+		r = c.argb.red;
+		g = c.argb.green;
+		b = c.argb.blue;
 
-		colors_c = (unsigned char *) (colors_data + i);
-		colors_c[ARGB_BLUE_IDX] = b;
-		colors_c[ARGB_GREEN_IDX] = g;
-		colors_c[ARGB_RED_IDX] = r;
-		colors_c[ARGB_ALPHA_IDX] = 0xff;
+		colors_c.argb.alpha = 0xff;
+		colors_c.argb.red = r;
+		colors_c.argb.green = g;
+		colors_c.argb.blue = b;
+		colors_data[i] = colors_c.uint;
 
-		alpha_c = (unsigned char *) (alpha_data + i);
-		alpha_c[ARGB_BLUE_IDX] = 0;
-		alpha_c[ARGB_GREEN_IDX] = 0;
-		alpha_c[ARGB_RED_IDX] = 0;
-		alpha_c[ARGB_ALPHA_IDX] = a;
+		alpha_c.argb.alpha = a;
+		alpha_c.argb.red = 0;
+		alpha_c.argb.green = 0;
+		alpha_c.argb.blue = 0;
+		alpha_data[i] = alpha_c.uint;
 
 		if (window.xshape)
 			mask_data[i] = (a == 0) ? 0 : 1;
