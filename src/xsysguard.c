@@ -58,13 +58,13 @@ void xsg_log(const char *domain, uint32_t level, const char *format, va_list arg
 		return;
 
 	if (level == XSG_LOG_LEVEL_ERROR)
-		fprintf(stderr, "ERR: ");
+		fprintf(stderr, "xsysguard[ERR]: ");
 	else if (level == XSG_LOG_LEVEL_WARNING)
-		fprintf(stderr, "WRN: ");
+		fprintf(stderr, "xsysguard[WRN]: ");
 	else if (level == XSG_LOG_LEVEL_MESSAGE)
-		fprintf(stderr, "MSG: ");
+		fprintf(stderr, "xsysguard[MSG]: ");
 	else if (level == XSG_LOG_LEVEL_DEBUG)
-		fprintf(stderr, "DBG: ");
+		fprintf(stderr, "xsysguard[DBG]: ");
 
 	if (domain != NULL)
 		fprintf(stderr, "[%s] ", domain);
@@ -252,13 +252,44 @@ static char *get_config_file(const char *filename) {
 }
 
 static void usage(void) {
+	char **pathv;
+	char **p;
+
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Show help options\n"
 		"  -l, --log=N         Set loglevel to N = 0 ... 5 (debug)\n"
 		"  -f, --file=FILE     Read configuration from FILE\n"
-		"  -m, --modules       Print a list of all available modules\n\n");
+		"  -m, --modules       Print a list of all available modules\n\n\n");
+
+	printf("Config path:\n");
+	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
+	if (pathv != NULL)
+		for (p = pathv; *p; p++)
+			printf("  %s\n", *p);
+	printf("\n");
+
+	printf("Module path:\n");
+	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
+	if (pathv != NULL)
+		for (p = pathv; *p; p++)
+			printf("  %s\n", *p);
+	printf("\n");
+
+	printf("Image path:\n");
+	pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
+	if (pathv != NULL)
+		for (p = pathv; *p; p++)
+			printf("  %s\n", *p);
+	printf("\n");
+
+	printf("Font path:\n");
+	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
+	if (pathv != NULL)
+		for (p = pathv; *p; p++)
+			printf("  %s\n", *p);
+	printf("\n");
 }
 
 /******************************************************************************

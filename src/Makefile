@@ -44,10 +44,16 @@ VERSION := $(VERSION).r$(SVNVERSION)
 endif
 
 DATA_DIR    := $(datadir)/xsysguard
+
 CONFIG_DIR  := $(DATA_DIR)/configs
 IMAGE_DIR   := $(DATA_DIR)/images
 FONT_DIR    := $(DATA_DIR)/fonts
 MODULE_DIR  := $(libdir)/xsysguard
+
+CONFIG_PATH ?= ~/.xsysguard/configs:$(CONFIG_DIR)
+IMAGE_PATH  ?= ~/.xsysguard/images:$(IMAGE_DIR)
+FONT_PATH   ?= ~/.xsysguard/fonts:$(FONT_DIR):~/.fonts:/usr/share/fonts/truetype:/usr/X11R6/lib/X11/fonts/TrueType
+MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 CFLAGS      += -Wall
 CFLAGS      += -O3
@@ -79,14 +85,16 @@ xsysguard: $(XSYSGUARD_SRC)
 	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) \
 	$(ALL_CFLAGS) $(XSG_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(XSG_LDFLAGS) $(LDFLAGS) \
 	$(filter %.c,$^) \
-	-D CONFIG_DIR=\"$(CONFIG_DIR)\" \
-	-D IMAGE_DIR=\"$(IMAGE_DIR)\" \
-	-D FONT_DIR=\"$(FONT_DIR)\" \
+	-D XSYSGUARD_CONFIG_PATH=\"$(CONFIG_PATH)\" \
+	-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
+	-D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\" \
+	-D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\" \
 	-D VERSION=\"$(VERSION)\"
 
 xsysguardd: $(XSYSGUARDD_SRC)
 	$(CC) -o $@ $(ALL_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(LDFLAGS) \
 	$(filter %.c,$^) \
+	-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
 	-D VERSION=\"$(VERSION)\"
 
 clean:
