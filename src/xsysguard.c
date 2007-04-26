@@ -215,18 +215,18 @@ static char *get_config_file(const char *filename) {
 	fd = open(filename, O_RDONLY);
 
 	if (fd < 0)
-		xsg_error("cannot read config file: %s: %s", filename, strerror(errno));
+		xsg_error("Cannot read config file: %s: %s", filename, strerror(errno));
 
 	if (fstat(fd, &stat_buf) < 0)
-		xsg_error("cannot read config file: %s: fstat failed", filename);
+		xsg_error("Cannot read config file: %s: fstat failed", filename);
 
 	size = stat_buf.st_size;
 
 	if (size <= 0)
-		xsg_error("cannot red config file: %s: null byte size", filename);
+		xsg_error("Cannot read config file: %s: null byte size", filename);
 
 	if (!S_ISREG(stat_buf.st_mode))
-		xsg_error("cannot read config file: %s: not a regular file", filename);
+		xsg_error("Cannot read config file: %s: not a regular file", filename);
 
 	buffer = xsg_malloc(size + 1);
 
@@ -237,7 +237,7 @@ static char *get_config_file(const char *filename) {
 		rc = read(fd, buffer + bytes_read, size - bytes_read);
 		if (rc < 0) {
 			if (errno != EINTR)
-				xsg_error("cannot read config file: %s: %s", filename, strerror(errno));
+				xsg_error("Cannot read config file: %s: %s", filename, strerror(errno));
 		} else if (rc == 0) {
 			break;
 		} else {
