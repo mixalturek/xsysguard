@@ -37,20 +37,6 @@
 
 /******************************************************************************/
 
-#ifndef DEFAULT_CONFIG_FILE
-#define DEFAULT_CONFIG_FILE xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "configs", "default", NULL)
-#endif
-
-#ifndef HOME_CONFIG_DIR
-#define HOME_CONFIG_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "configs", NULL)
-#endif
-
-#ifndef CONFIG_DIR
-#define CONFIG_DIR "/usr/share/xsysguard/configs"
-#endif
-
-/******************************************************************************/
-
 static uint32_t log_level = XSG_LOG_LEVEL_ERROR;
 
 void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
@@ -192,16 +178,28 @@ static void parse_config(char *config_buffer) {
 
 static char *find_config_file(char *name) {
 	char *file = NULL;
+	char **pathv;
+	char **p;
 
-	file = xsg_build_filename(HOME_CONFIG_DIR, name, NULL);
-	if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
-		return file;
+	if (unlikely(name == NULL))
+		name = "default";
 
-	file = xsg_build_filename(CONFIG_DIR, name, NULL);
-	if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
-		return file;
+	if (unlikely(strlen(name) < 1))
+		name = "default";
 
-	xsg_error("Cannot find file \"%s\"", name);
+	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
+
+	if (unlikely(pathv == NULL))
+		xsg_error("Cannot get XSYSGUARD_CONFIG_PATH");
+
+	for (p = pathv; *p; p++) {
+		file = xsg_build_filename(*p, name, NULL);
+		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
+			return file;
+		xsg_free(file);
+	}
+
+	xsg_error("Cannot find file: \"%s\"", name);
 	return 0;
 }
 
@@ -361,7 +359,7 @@ int main(int argc, char **argv) {
 		if (optind < argc)
 			filename = find_config_file(argv[optind]);
 		else
-			filename = DEFAULT_CONFIG_FILE;
+			filename = find_config_file("default");
 	}
 
 	config_buffer = get_config_file(filename);
