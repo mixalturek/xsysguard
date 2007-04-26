@@ -30,16 +30,6 @@
 
 /******************************************************************************/
 
-#ifndef HOME_MODULE_DIR
-#define HOME_MODULE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "modules", NULL)
-#endif
-
-#ifndef MODULE_DIR
-#define MODULE_DIR "/usr/lib/xsysguard"
-#endif
-
-/******************************************************************************/
-
 typedef struct {
 	char *name;
 	char *file;
@@ -74,23 +64,13 @@ static void init() {
 	DIR *dir;
 	char **pathv;
 	char **p;
-	const char *env;
 	char *name;
 	const char *filename;
 
-	env = getenv("XSYSGUARD_MODULE_PATH");
+	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
 
-	if (env) {
-		pathv = xsg_strsplit_set(env, ":", 0);
-		for (p = pathv; *p; p++)
-			if (*p[0] == '~')
-				*p = xsg_build_filename(xsg_get_home_dir(), *p, NULL);
-	} else {
-		pathv = xsg_new0(char *, 3);
-		pathv[0] = HOME_MODULE_DIR;
-		pathv[1] = MODULE_DIR;
-		pathv[2] = NULL;
-	}
+	if (unlikely(pathv == NULL))
+		xsg_error("Cannot get XSYSGUARD_MODULE_PATH");
 
 	xsg_message("Searching for modules...");
 	for (p = pathv; *p; p++) {
