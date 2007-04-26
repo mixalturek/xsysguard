@@ -192,10 +192,13 @@ static char *find_config_file(char *name) {
 	if (unlikely(pathv == NULL))
 		xsg_error("Cannot get XSYSGUARD_CONFIG_PATH");
 
+	xsg_message("Searching for config...");
 	for (p = pathv; *p; p++) {
 		file = xsg_build_filename(*p, name, NULL);
-		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR))
+		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
+			xsg_message("Found config file \"%s\"", file);
 			return file;
+		}
 		xsg_free(file);
 	}
 
