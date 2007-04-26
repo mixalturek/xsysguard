@@ -40,22 +40,6 @@
 
 /******************************************************************************/
 
-#ifndef HOME_IMAGE_DIR
-# define HOME_IMAGE_DIR xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "images", NULL)
-#endif
-
-#ifndef IMAGE_DIR
-# define IMAGE_DIR "/usr/local/share/xsysguard/images"
-#endif
-
-/******************************************************************************/
-
-#ifndef XSYSGUARD_FONT_PATH
-# define XSYSGUARD_FONT_PATH "~/.xsysguard/fonts:/usr/local/share/xsysguard/fonts:~/.fonts:/usr/share/fonts/truetype:/usr/X11R6/lib/X11/fonts/TrueType"
-#endif
-
-/******************************************************************************/
-
 typedef union {
 	uint32_t uint;
 	struct {
@@ -173,45 +157,32 @@ static widget_t *get_widget(uint32_t widget_id) {
 	return widget;
 }
 
-static Imlib_Image load_image(const char *filename, bool throw_error) {
+static Imlib_Image load_image(const char *filename) {
 	Imlib_Image image = NULL;
 	static char **pathv = NULL;
 	char **p;
-	const char *env;
 	char *file;
 
-	if (!pathv) {
-		env = getenv("XSYSGUARD_IMAGE_PATH");
+	if (unlikely(pathv == NULL)) {
+		pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
 
-		if (env) {
-			pathv = xsg_strsplit_set(env, ":", 0);
-			for (p = pathv; *p; p++)
-				if (*p[0] == '~')
-					*p = xsg_build_filename(xsg_get_home_dir(), *p, NULL);
-		} else {
-			pathv = xsg_new0(char *, 3);
-			pathv[0] = HOME_IMAGE_DIR;
-			pathv[1] = IMAGE_DIR;
-			pathv[2] = NULL;
-		}
+		if (pathv == NULL)
+			xsg_error("Cannot get XSYSGUARD_IMAGE_PATH");
 	}
 
 	for (p = pathv; *p; p++) {
-		xsg_message("Searching for image '%s' in '%s'.", filename, *p);
+		xsg_message("Searching for image \"%s\" in \"%s\"", filename, *p);
 		file = xsg_build_filename(*p, filename, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
 			image = imlib_load_image(file);
 		}
 		if (image) {
-			xsg_message("Found image '%s'.", file);
+			xsg_message("Found image \"%s\"", file);
 			xsg_free(file);
 			return image;
 		}
 		xsg_free(file);
 	}
-
-	if (throw_error)
-		xsg_error("Cannot find image '%s'.", filename);
 
 	return NULL;
 }
@@ -1510,7 +1481,10 @@ void xsg_widgets_parse_image() {
 	image->image = NULL;
 	image->scale = FALSE;
 
-	image->image = load_image(image->filename, TRUE);
+	image->image = load_image(image->filename);
+	if (unlikely(image->image == NULL))
+		xsg_error("Cannot load image \"%s\"", image->filename);
+
 	imlib_context_set_image(image->image);
 
 	widget->width = imlib_image_get_width();
@@ -1751,7 +1725,9 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id) {
 			barchart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Mask")) {
 			char *filename = xsg_conf_read_string();
-			barchart->mask = load_image(filename, TRUE);
+			barchart->mask = load_image(filename);
+			if (unlikely(barchart->mask == NULL))
+				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Mask");
@@ -2013,7 +1989,9 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id) {
 			linechart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
-			linechart->background = load_image(filename, TRUE);
+			linechart->background = load_image(filename);
+			if (unlikely(linechart->background == NULL))
+				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Background");
@@ -2170,7 +2148,9 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id) {
 			areachart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
-			areachart->background = load_image(filename, TRUE);
+			areachart->background = load_image(filename);
+			if (unlikely(areachart->background == NULL))
+				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
 		} else {
 			xsg_conf_error("Angle, Min, Max or Background");
