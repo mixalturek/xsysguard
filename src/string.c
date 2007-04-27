@@ -21,6 +21,7 @@
 #include <xsysguard.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #define MY_MAXSIZE ((size_t)-1)
 

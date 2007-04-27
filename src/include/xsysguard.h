@@ -24,7 +24,6 @@
 #define _GNU_SOURCE 1
 
 #include <stdlib.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <inttypes.h>
 

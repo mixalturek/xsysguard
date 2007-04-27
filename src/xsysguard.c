@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <getopt.h>
+#include <stdarg.h>
 
 #include "modules.h"
 #include "widgets.h"
