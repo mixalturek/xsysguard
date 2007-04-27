@@ -122,13 +122,13 @@ uint32_t xsg_printf_new(const char *format) {
 		} else {
 			// found % -> flush buf
 			if (p->begin == NULL) {
-				p->begin = strdup(buf->str);
+				p->begin = xsg_strdup(buf->str);
 				xsg_debug("printf_new: begin: \"%s\"", buf->str);
 			} else {
 				var_t *var = xsg_new0(var_t, 1);
 				var->var_id = 0;
 				var->type = type;
-				var->format = strdup(buf->str);
+				var->format = xsg_strdup(buf->str);
 
 				p->var_list = xsg_list_append(p->var_list, var);
 				xsg_debug("printf_new: format: \"%s\"", buf->str);
@@ -230,13 +230,13 @@ uint32_t xsg_printf_new(const char *format) {
 	}
 	// flush buf
 	if (p->begin == NULL) {
-		p->begin = strdup(buf->str);
+		p->begin = xsg_strdup(buf->str);
 		xsg_debug("printf_new: begin: \"%s\"", buf->str);
 	} else {
 		var_t *var = xsg_new0(var_t, 1);
 		var->var_id = 0;
 		var->type = type;
-		var->format = strdup(buf->str);
+		var->format = xsg_strdup(buf->str);
 
 		p->var_list = xsg_list_append(p->var_list, var);
 		xsg_debug("printf_new: format: \"%s\"", buf->str);

@@ -352,7 +352,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'f':
 				if (optarg)
-					filename = strdup(optarg);
+					filename = xsg_strdup(optarg);
 				break;
 			case 'l':
 				if (optarg)

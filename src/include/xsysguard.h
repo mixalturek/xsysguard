@@ -161,6 +161,8 @@ bool xsg_str_has_suffix(const char *str, const char *suffix);
 char *xsg_str_without_suffix(const char *str, const char *suffix);
 char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens);
 void xsg_strfreev(char **str_array);
+char *xsg_strdup(const char *str);
+char *xsg_strndup(const char *str, size_t n);
 
 /* byte order */
 uint16_t xsg_uint16_be(uint16_t u);

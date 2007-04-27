@@ -121,18 +121,18 @@ char *xsg_str_without_suffix(const char *str, const char *suffix) {
 	if (unlikely(str == NULL))
 		return NULL;
 	if (unlikely(suffix == NULL))
-		return strdup(str);
+		return xsg_strdup(str);
 
 	str_len = strlen(str);
 	suffix_len = strlen(suffix);
 
 	if (str_len < suffix_len)
-		return strdup(str);
+		return xsg_strdup(str);
 
 	if (strcmp(str + str_len - suffix_len, suffix) != 0)
-		return strdup(str);
+		return xsg_strdup(str);
 
-	return strndup(str, str_len - suffix_len);
+	return xsg_strndup(str, str_len - suffix_len);
 }
 
 char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens) {
@@ -170,7 +170,7 @@ char **xsg_strsplit_set(const char *string, const char *delimiters, int max_toke
 		if (delim_table[*(unsigned char *)s] && n_tokens + 1 < max_tokens) {
 			char *token;
 
-			token = strndup(current, s - current);
+			token = xsg_strndup(current, s - current);
 			tokens = xsg_list_prepend(tokens, token);
 			++n_tokens;
 
@@ -180,7 +180,7 @@ char **xsg_strsplit_set(const char *string, const char *delimiters, int max_toke
 		++s;
 	}
 
-	token = strndup(current, s - current);
+	token = xsg_strndup(current, s - current);
 	tokens = xsg_list_prepend(tokens, token);
 	++n_tokens;
 
@@ -204,6 +204,35 @@ void xsg_strfreev(char **str_array) {
 
 		xsg_free(str_array);
 	}
+}
+
+char *xsg_strdup(const char *str) {
+	char *new_str;
+	size_t length;
+
+	if (str) {
+		length = strlen(str) + 1;
+		new_str = xsg_new(char, length);
+		memcpy(new_str, str, length);
+	} else {
+		new_str = NULL;
+	}
+
+	return new_str;
+}
+
+char *xsg_strndup(const char *str, size_t n) {
+	char *new_str;
+
+	if (str) {
+		new_str = xsg_new(char, n+ 1);
+		strncpy(new_str, str, n);
+		new_str[n] = '\0';
+	} else {
+		new_str = NULL;
+	}
+
+	return new_str;
 }
 
 /******************************************************************************
@@ -394,7 +423,7 @@ static char *xsg_build_path_va(const char *separator, const char *first_element,
 
 	if (single_element) {
 		xsg_string_free(result, TRUE);
-		return strdup(single_element);
+		return xsg_strdup(single_element);
 	} else {
 		if (last_trailing)
 			xsg_string_append(result, last_trailing);
@@ -420,7 +449,7 @@ static const char *home_dir = NULL;
 
 const char *xsg_get_home_dir(void) {
 	if (!home_dir)
-		home_dir = strdup(getenv("HOME"));
+		home_dir = xsg_strdup(getenv("HOME"));
 	return home_dir;
 }
 
