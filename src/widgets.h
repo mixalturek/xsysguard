@@ -25,7 +25,7 @@
 
 /*****************************************************************************/
 
-void xsg_widgets_init();
+void xsg_widgets_init(void);
 void xsg_widgets_update(uint32_t widget_id, uint32_t var_id);
 
 /*****************************************************************************/
@@ -42,6 +42,7 @@ void xsg_widgets_parse_decorations(void);
 void xsg_widgets_parse_background(void);
 void xsg_widgets_parse_grab_root(void);
 void xsg_widgets_parse_cache_size(void);
+void xsg_widgets_parse_font_cache_size(void);
 void xsg_widgets_parse_xshape(void);
 void xsg_widgets_parse_argb_visual(void);
 

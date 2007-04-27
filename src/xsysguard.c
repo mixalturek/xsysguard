@@ -127,6 +127,8 @@ static void parse_config(char *config_buffer) {
 				xsg_widgets_parse_background();
 			} else if (xsg_conf_find_command("CacheSize")) {
 				xsg_widgets_parse_cache_size();
+			} else if (xsg_conf_find_command("FontCacheSize")) {
+				xsg_widgets_parse_font_cache_size();
 			} else if (xsg_conf_find_command("XShape")) {
 				xsg_widgets_parse_xshape();
 			} else if (xsg_conf_find_command("ARGBVisual")) {

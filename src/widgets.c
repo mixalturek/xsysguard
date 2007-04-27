@@ -94,6 +94,7 @@ typedef struct {
 	bool copy_from_parent;
 	bool copy_from_root;
 	unsigned int cache_size;
+	unsigned int font_cache_size;
 	bool xshape;
 	bool argb_visual;
 	Display *display;
@@ -128,7 +129,8 @@ static window_t window = {
 	background: { 0 },
 	copy_from_parent: FALSE,
 	copy_from_root: FALSE,
-	cache_size: 1024,
+	cache_size: 4194304,
+	font_cache_size: 2097152,
 	xshape: FALSE,
 	argb_visual: FALSE,
 	display: NULL,
@@ -312,6 +314,11 @@ void xsg_widgets_parse_background() {
 
 void xsg_widgets_parse_cache_size() {
 	window.cache_size = xsg_conf_read_uint();
+	xsg_conf_read_newline();
+}
+
+void xsg_widgets_parse_font_cache_size() {
+	window.font_cache_size = xsg_conf_read_uint();
 	xsg_conf_read_newline();
 }
 
@@ -1041,6 +1048,7 @@ void xsg_widgets_init() {
 	imlib_context_set_colormap(colormap);
 	imlib_context_set_drawable(window.id);
 	imlib_set_cache_size(window.cache_size);
+	imlib_set_font_cache_size(window.font_cache_size);
 
 	if (window.xshape) {
 		window.mask = XCreatePixmap(window.display, window.id,
