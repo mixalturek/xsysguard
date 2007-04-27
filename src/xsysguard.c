@@ -288,6 +288,7 @@ static void usage(void) {
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
 			printf("  %s\n", *p);
+	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("Module path:\n");
@@ -295,6 +296,7 @@ static void usage(void) {
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
 			printf("  %s\n", *p);
+	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("Image path:\n");
@@ -302,6 +304,7 @@ static void usage(void) {
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
 			printf("  %s\n", *p);
+	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("Font path:\n");
@@ -309,6 +312,7 @@ static void usage(void) {
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
 			printf("  %s\n", *p);
+	xsg_strfreev(pathv);
 	printf("\n");
 }
 
