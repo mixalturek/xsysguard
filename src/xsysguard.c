@@ -37,7 +37,7 @@
 
 /******************************************************************************/
 
-static uint32_t log_level = XSG_LOG_LEVEL_ERROR;
+static uint32_t log_level = XSG_LOG_LEVEL_WARNING;
 
 void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
 	if (log_level < level)
@@ -259,10 +259,13 @@ static void usage(void) {
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
-		"  -h, --help          Show help options\n"
-		"  -l, --log=N         Set loglevel to N = 0 ... 5 (debug)\n"
-		"  -f, --file=FILE     Read configuration from FILE\n"
-		"  -m, --modules       Print a list of all available modules\n\n\n");
+		"  -h, --help       Print help options to stdout\n"
+		"  -m, --modules    Print a list of all available modules to stdout\n"
+		"  -f, --file=FILE  Read configuration from FILE\n"
+		"  -l, --log=N      Set loglevel to N: "
+		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
+			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
+	printf("\n\n");
 
 	printf("Config path:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
