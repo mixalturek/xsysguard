@@ -210,12 +210,14 @@ static char *find_config_file(char *name) {
 	for (p = pathv; *p; p++) {
 		file = xsg_build_filename(*p, name, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
+			xsg_strfreev(pathv);
 			xsg_message("Found config file \"%s\"", file);
 			return file;
 		}
 		xsg_free(file);
 	}
 
+	xsg_strfreev(pathv);
 	xsg_error("Cannot find file: \"%s\"", name);
 	return 0;
 }
