@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <sys/time.h>
 
 /******************************************************************************/
 
@@ -202,6 +203,9 @@ typedef enum {
 bool xsg_file_test(const char *filename, xsg_file_test_t test);
 
 char **xsg_get_path_from_env(const char *env_name, const char *default_path);
+
+int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y);
+int xsg_gettimeofday(struct timeval *tv, void *tz);
 
 /******************************************************************************
  * logging

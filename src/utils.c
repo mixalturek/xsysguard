@@ -517,3 +517,32 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path) {
 	return pathv;
 }
 
+int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y) {
+	if (x->tv_usec < y->tv_usec) {
+		int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+		y->tv_usec -= 1000000 * nsec;
+		y->tv_sec += nsec;
+	}
+	if (x->tv_usec - y->tv_usec > 1000000) {
+		int nsec = (y->tv_usec - x->tv_usec) / 1000000;
+		y->tv_usec += 1000000 * nsec;
+		y->tv_sec -= nsec;
+	}
+	result->tv_sec = x->tv_sec - y->tv_sec;
+	result->tv_usec = x->tv_usec - y->tv_usec;
+
+	return x->tv_sec < y->tv_sec;
+}
+
+int xsg_gettimeofday(struct timeval *tv, void *tz) {
+	int ret;
+
+	ret = gettimeofday(tv, tz);
+
+	if (unlikely(ret))
+		xsg_error("gettimeofday(%p, %p) failed", tv, tz);
+
+	return ret;
+}
+
+

@@ -48,36 +48,6 @@ static uint64_t interval = 1000;
 
 /******************************************************************************/
 
-static int timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y) {
-	if (x->tv_usec < y->tv_usec) {
-		int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-		y->tv_usec -= 1000000 * nsec;
-		y->tv_sec += nsec;
-	}
-	if (x->tv_usec - y->tv_usec > 1000000) {
-		int nsec = (y->tv_usec - x->tv_usec) / 1000000;
-		y->tv_usec += 1000000 * nsec;
-		y->tv_sec -= nsec;
-	}
-	result->tv_sec = x->tv_sec - y->tv_sec;
-	result->tv_usec = x->tv_usec - y->tv_usec;
-
-	return x->tv_sec < y->tv_sec;
-}
-
-static int sgettimeofday(struct timeval *tv, void *tz) {
-	int ret;
-
-	ret = gettimeofday(tv, tz);
-
-	if (unlikely(ret))
-		xsg_error("gettimeofday(%p, %p) failed", tv, tz);
-
-	return ret;
-}
-
-/******************************************************************************/
-
 void xsg_main_set_interval(uint64_t i) {
 	interval = i;
 }
@@ -153,7 +123,7 @@ static void loop(void) {
 	xsg_message("Starting main loop");
 
 	while (1) {
-		sgettimeofday(&time_start, 0);
+		xsg_gettimeofday(&time_start, 0);
 
 		xsg_message("Tick %"PRIu64, counter);
 
@@ -163,10 +133,10 @@ static void loop(void) {
 		}
 
 		while (1) {
-			sgettimeofday(&time_end, 0);
-			timeval_sub(&time_diff, &time_end, &time_start);
+			xsg_gettimeofday(&time_end, 0);
+			xsg_timeval_sub(&time_diff, &time_end, &time_start);
 
-			if (timeval_sub(&time_sleep, &time_out, &time_diff))
+			if (xsg_timeval_sub(&time_sleep, &time_out, &time_diff))
 				break; // timeout
 
 			fd_max = 0;
