@@ -24,8 +24,8 @@
 #define _GNU_SOURCE 1
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdarg.h>
+#include <unistd.h>
 #include <inttypes.h>
 
 /******************************************************************************/
@@ -210,38 +210,21 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path);
 #define XSG_LOG_DOMAIN ((char *) 0)
 #endif /* XSG_LOG_DOMAIN */
 
-#define XSG_LOG_LEVEL_ERROR   1
-#define XSG_LOG_LEVEL_WARNING 2
-#define XSG_LOG_LEVEL_MESSAGE 3
-#define XSG_LOG_LEVEL_DEBUG   4
+typedef enum {
+	XSG_LOG_LEVEL_ERROR   = 1,
+	XSG_LOG_LEVEL_WARNING = 2,
+	XSG_LOG_LEVEL_MESSAGE = 3,
+	XSG_LOG_LEVEL_DEBUG   = 4
+} xsg_log_level_t;
 
-void xsg_log(const char *domain, uint32_t level, const char *format, va_list args);
+extern xsg_log_level_t xsg_log_level;
 
-static void xsg_error(const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, format, args);
-	va_end(args);
-	abort();
-}
-static void xsg_warning(const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, format, args);
-	va_end(args);
-}
-static void xsg_message(const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, format, args);
-	va_end(args);
-}
-static void xsg_debug(const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-	xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, format, args);
-	va_end(args);
-}
+void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...);
+
+#define xsg_error(...) likely(xsg_log_level < XSG_LOG_LEVEL_ERROR) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define xsg_warning(...) likely(xsg_log_level < XSG_LOG_LEVEL_WARNING) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__)
+#define xsg_message(...) likely(xsg_log_level < XSG_LOG_LEVEL_MESSAGE) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__)
+#define xsg_debug(...) likely(xsg_log_level < XSG_LOG_LEVEL_DEBUG) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 /******************************************************************************/
 

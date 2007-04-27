@@ -37,11 +37,9 @@
 
 /******************************************************************************/
 
-static uint32_t log_level = XSG_LOG_LEVEL_WARNING;
+xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
-void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
-	if (log_level < level)
-		return;
+static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
 
 	if (level == XSG_LOG_LEVEL_ERROR)
 		fprintf(stderr, "xsysguard[ERR]: ");
@@ -51,6 +49,8 @@ void xsg_log(const char *domain, uint32_t level, const char *format, va_list arg
 		fprintf(stderr, "xsysguard[MSG]: ");
 	else if (level == XSG_LOG_LEVEL_DEBUG)
 		fprintf(stderr, "xsysguard[DBG]: ");
+	else
+		fprintf(stderr, "xsysguard[???]: ");
 
 	if (domain != NULL)
 		fprintf(stderr, "[%s] ", domain);
@@ -58,6 +58,17 @@ void xsg_log(const char *domain, uint32_t level, const char *format, va_list arg
 	vfprintf(stderr, format, args);
 
 	fprintf(stderr, "\n");
+
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+		abort();
+}
+
+void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
+	va_list args;
+
+	va_start(args, format);
+	xsg_logv(domain, level, format, args);
+	va_end(args);
 }
 
 /******************************************************************************/
@@ -351,7 +362,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	log_level = log;
+	xsg_log_level = log;
 
 	if (print_usage) {
 		usage();
