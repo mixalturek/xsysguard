@@ -29,14 +29,34 @@
 #include <float.h>
 
 #ifdef ENABLE_XRENDER
-#include <X11/extensions/Xrender.h>
-#include <X11/extensions/Xcomposite.h>
+# include <X11/extensions/Xrender.h>
+# include <X11/extensions/Xcomposite.h>
 #endif
 
 #include "widgets.h"
 #include "conf.h"
 #include "var.h"
 #include "printf.h"
+
+/******************************************************************************/
+
+#ifndef TRACE
+# define T(func) func
+#else
+# define T(func) { \
+	struct timeval timeval_begin, timeval_end, timeval_diff; \
+	xsg_gettimeofday(&timeval_begin, NULL); \
+	func; \
+	xsg_gettimeofday(&timeval_end, NULL); \
+	xsg_timeval_sub(&timeval_diff, &timeval_end, &timeval_begin); \
+	xsg_debug("T %u.%06us [%04d] %s: %s", \
+			(unsigned) timeval_diff.tv_sec, \
+			(unsigned) timeval_diff.tv_usec, \
+			__LINE__, \
+			__FUNCTION__, \
+			#func); \
+}
+#endif
 
 /******************************************************************************/
 
@@ -72,6 +92,8 @@ struct _widget_t {
 	void *data;
 };
 
+static xsg_list_t *widget_list = NULL;
+
 /******************************************************************************/
 
 typedef struct {
@@ -105,10 +127,6 @@ typedef struct {
 	Imlib_Updates updates;
 	Pixmap mask;
 } window_t;
-
-/******************************************************************************/
-
-static xsg_list_t *widget_list = NULL;
 
 static window_t window = {
 	name: "xsysguard",
@@ -753,17 +771,19 @@ static void render() {
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(0);
 
-		if (window.argb_visual)
+		if (window.argb_visual) {
 			xrender(up_x, up_y);
-		else
-			imlib_render_image_on_drawable(up_x, up_y);
+		} else {
+			T(imlib_render_image_on_drawable(up_x, up_y));
+		}
 
 		imlib_context_set_blend(1);
 		imlib_free_image();
 	}
 
-	if (window.updates)
+	if (window.updates) {
 		imlib_updates_free(window.updates);
+	}
 
 	window.updates = 0;
 }
@@ -2268,33 +2288,35 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 
 	imlib_context_set_font(text->font);
 
-	imlib_get_text_size(text->string, &width, &height);
-	imlib_get_text_advance(text->string, &horizontal_advance, &vertical_advance);
+	T(imlib_get_text_size(text->string, &width, &height));
+	T(imlib_get_text_advance(text->string, &horizontal_advance, &vertical_advance));
 
-	if (text->angle)
+	if (text->angle) {
 		tmp = imlib_create_image(text->angle->width, text->angle->height);
-	else
+	} else {
 		tmp = imlib_create_image(widget->width, widget->height);
+	}
 
 	imlib_context_set_image(tmp);
 	imlib_image_set_has_alpha(1);
-	imlib_image_clear();
+	T(imlib_image_clear());
 
 	imlib_context_set_color(text->color.red, text->color.green, text->color.blue, text->color.alpha);
-	imlib_text_draw(0, 0, text->string);
+	T(imlib_text_draw(0, 0, text->string));
 
 	// TODO
 
 	imlib_context_set_image(buffer);
-	if (text->angle)
-		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+	if (text->angle) {
+		T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
 				text->angle->width, text->angle->height,
 				text->angle->xoffset - up_x, text->angle->yoffset - up_y,
-				text->angle->angle_x, text->angle->angle_y);
-	else
-		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
+				text->angle->angle_x, text->angle->angle_y));
+	} else {
+		T(imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
 				widget->xoffset - up_x, widget->yoffset - up_y,
-				widget->width, widget->height);
+				widget->width, widget->height));
+	}
 
 	imlib_context_set_image(tmp);
 	imlib_free_image();
