@@ -61,8 +61,6 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id);
 void xsg_widgets_parse_areachart_var(uint32_t var_id);
 void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id);
 void xsg_widgets_parse_text_var(uint32_t var_id);
-void xsg_widgets_parse_imagetext(uint64_t *update, uint32_t *widget_id);
-void xsg_widgets_parse_imagetext_var(uint32_t var_id);
 
 /******************************************************************************/
 

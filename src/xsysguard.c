@@ -179,13 +179,9 @@ static void parse_config(char *config_buffer) {
 			xsg_widgets_parse_text(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
 				xsg_widgets_parse_text_var(var_id);
-		} else if (xsg_conf_find_command("ImageText")) {
-			xsg_widgets_parse_imagetext(&update, &widget_id);
-			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_imagetext_var(var_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
-					"Image, BarChart, LineChart, AreaChart, Text or ImageText");
+					"Image, BarChart, LineChart, AreaChart or Text");
 		}
 	}
 }
