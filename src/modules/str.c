@@ -1,4 +1,4 @@
-/* const.c
+/* str.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
@@ -22,16 +22,6 @@
 
 /******************************************************************************/
 
-static double get_double(void *arg) {
-	double d;
-
-	d = * (double *) arg;
-
-	xsg_debug("get_double: %f", d);
-
-	return d;
-}
-
 static char *get_string(void *arg) {
 	char *s;
 
@@ -39,19 +29,10 @@ static char *get_string(void *arg) {
 
 	xsg_debug("get_string: \"%s\"", s);
 
-	return (char *) arg;
+	return s;
 }
 
 /******************************************************************************/
-
-void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
-	double *d;
-
-	d = xsg_new0(double, 1);
-	*d = xsg_conf_read_double();
-	*arg = (void *) d;
-	*func = get_double;
-}
 
 void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **arg) {
 	*arg = xsg_conf_read_string();
@@ -59,6 +40,6 @@ void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **
 }
 
 char *info() {
-	return "always returns the same constant value";
+	return "always returns the same string";
 }
 
