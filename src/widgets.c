@@ -446,57 +446,6 @@ static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *wi
 
 /******************************************************************************
  *
- * parse_alignment
- *
- ******************************************************************************/
-
-typedef enum {
-	TOP_LEFT      = 1 << 0,
-	TOP_CENTER    = 1 << 1,
-	TOP_RIGHT     = 1 << 2,
-	CENTER_LEFT   = 1 << 3,
-	CENTER        = 1 << 4,
-	CENTER_RIGHT  = 1 << 5,
-	BOTTOM_LEFT   = 1 << 6,
-	BOTTOM_CENTER = 1 << 8,
-	BOTTOM_RIGHT  = 1 << 9,
-	TOP           = TOP_LEFT    | TOP_CENTER    | TOP_RIGHT,
-	Y_CENTER      = CENTER_LEFT | CENTER        | CENTER_RIGHT,
-	BOTTOM        = BOTTOM_LEFT | BOTTOM_CENTER | BOTTOM_RIGHT,
-	LEFT          = TOP_LEFT    | CENTER_LEFT   | BOTTOM_LEFT,
-	X_CENTER      = TOP_CENTER  | CENTER        | BOTTOM_CENTER,
-	RIGHT         = TOP_RIGHT   | CENTER_RIGHT  | BOTTOM_RIGHT
-} alignment_t;
-
-static alignment_t parse_alignment() {
-
-	if (xsg_conf_find_command("TopLeft"))
-		return TOP_LEFT;
-	else if (xsg_conf_find_command("TopCenter"))
-		return TOP_CENTER;
-	else if (xsg_conf_find_command("TopRight"))
-		return TOP_RIGHT;
-	else if (xsg_conf_find_command("CenterLeft"))
-		return CENTER_LEFT;
-	else if (xsg_conf_find_command("Center"))
-		return CENTER;
-	else if (xsg_conf_find_command("CenterRight"))
-		return CENTER_RIGHT;
-	else if (xsg_conf_find_command("BottomLeft"))
-		return BOTTOM_LEFT;
-	else if (xsg_conf_find_command("BottomCenter"))
-		return BOTTOM_CENTER;
-	else if (xsg_conf_find_command("BottomRight"))
-		return BOTTOM_RIGHT;
-	else
-		xsg_conf_error("TopLeft, TopCenter, TopRight, CenterLeft, Center, "
-				"CenterRight, BottomLeft, BottomCenter or BottomRight");
-
-	return CENTER;
-}
-
-/******************************************************************************
- *
  * XRender
  *
  ******************************************************************************/
@@ -2270,6 +2219,24 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
  *
  ******************************************************************************/
 
+typedef enum {
+	TOP_LEFT      = 1 << 0,
+	TOP_CENTER    = 1 << 1,
+	TOP_RIGHT     = 1 << 2,
+	CENTER_LEFT   = 1 << 3,
+	CENTER        = 1 << 4,
+	CENTER_RIGHT  = 1 << 5,
+	BOTTOM_LEFT   = 1 << 6,
+	BOTTOM_CENTER = 1 << 8,
+	BOTTOM_RIGHT  = 1 << 9,
+	TOP           = TOP_LEFT    | TOP_CENTER    | TOP_RIGHT,
+	Y_CENTER      = CENTER_LEFT | CENTER        | CENTER_RIGHT,
+	BOTTOM        = BOTTOM_LEFT | BOTTOM_CENTER | BOTTOM_RIGHT,
+	LEFT          = TOP_LEFT    | CENTER_LEFT   | BOTTOM_LEFT,
+	X_CENTER      = TOP_CENTER  | CENTER        | BOTTOM_CENTER,
+	RIGHT         = TOP_RIGHT   | CENTER_RIGHT  | BOTTOM_RIGHT
+} alignment_t;
+
 typedef struct {
 	Imlib_Color color;
 	Imlib_Font font;
@@ -2552,7 +2519,27 @@ void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
 			double a = xsg_conf_read_double();
 			text->angle = parse_angle(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Alignment")) {
-			text->alignment = parse_alignment();
+			if (xsg_conf_find_command("TopLeft"))
+				text->alignment = TOP_LEFT;
+			else if (xsg_conf_find_command("TopCenter"))
+				text->alignment = TOP_CENTER;
+			else if (xsg_conf_find_command("TopRight"))
+				text->alignment = TOP_RIGHT;
+			else if (xsg_conf_find_command("CenterLeft"))
+				text->alignment = CENTER_LEFT;
+			else if (xsg_conf_find_command("Center"))
+				text->alignment = CENTER;
+			else if (xsg_conf_find_command("CenterRight"))
+				text->alignment = CENTER_RIGHT;
+			else if (xsg_conf_find_command("BottomLeft"))
+				text->alignment = BOTTOM_LEFT;
+			else if (xsg_conf_find_command("BottomCenter"))
+				text->alignment = BOTTOM_CENTER;
+			else if (xsg_conf_find_command("BottomRight"))
+				text->alignment = BOTTOM_RIGHT;
+			else
+				xsg_conf_error("TopLeft, TopCenter, TopRight, CenterLeft, Center, "
+						"CenterRight, BottomLeft, BottomCenter or BottomRight");
 		} else if (xsg_conf_find_command("TabWidth")) {
 			text->tab_width = xsg_conf_read_uint();
 		} else {
@@ -2576,5 +2563,4 @@ void xsg_widgets_parse_text_var(uint32_t var_id) {
 	xsg_printf_add_var(text->printf_id, var_id);
 	xsg_conf_read_newline();
 }
-
 
