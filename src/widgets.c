@@ -2493,9 +2493,76 @@ static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 		imlib_context_set_cliprect(0, 0, 0, 0);
 
 	} else if (text->angle->angle == 270.0) {
+		int line_x = 0;
+
 		imlib_context_set_direction(IMLIB_TEXT_TO_UP);
+
 		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
-		// TODO
+
+		if (text->alignment & TOP)
+			line_x = widget->xoffset - up_x;
+		else if (text->alignment & Y_CENTER)
+			line_x = widget->xoffset - up_x + ((widget->width - (line_advance * line_count)) / 2);
+		else if (text->alignment & BOTTOM)
+			line_x = widget->xoffset - up_x + (widget->width - (line_advance * line_count));
+		else
+			xsg_error("unknown alignment: %x", text->alignment);
+
+		for (line_index = 0; line_index < line_count; line_index++) {
+			char **columns, **columnv;
+			int yoffset = 0;
+			int height = 0;
+
+			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
+
+			if ((text->alignment & X_CENTER) || (text->alignment & LEFT)) {
+				for (columnv = columns; *columnv != NULL; columnv++) {
+					int column_advance;
+
+					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+
+					height += column_advance;
+
+					if (columnv[1] != NULL) {
+						height += space_advance;
+
+						if (text->tab_width > 0)
+							height += text->tab_width - (height % text->tab_width);
+					}
+				}
+			}
+
+			if (text->alignment & LEFT)
+				yoffset = widget->yoffset - up_y + ((int) widget->height - height);
+			else if (text->alignment & X_CENTER)
+				yoffset = widget->yoffset - up_y + (((int) widget->height - height) / 2);
+			else if (text->alignment & RIGHT)
+				yoffset = widget->yoffset - up_y;
+			else
+				xsg_error("unknown alignment: %x", text->alignment);
+
+			height = 0;
+
+			for (columnv = columns; *columnv != NULL; columnv++) {
+				int column_advance;
+
+				T(imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
+
+				height += column_advance;
+
+				if (columnv[1] != NULL) {
+					height += space_advance;
+
+					if (text->tab_width > 0)
+						height += text->tab_width - (height % text->tab_width);
+				}
+			}
+
+			xsg_strfreev(columns);
+
+			line_x += line_advance;
+		}
+
 		imlib_context_set_cliprect(0, 0, 0, 0);
 	} else {
 		Imlib_Image tmp;
