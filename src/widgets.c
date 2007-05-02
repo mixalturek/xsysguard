@@ -86,7 +86,7 @@ struct _widget_t {
 	int yoffset;
 	unsigned int width;
 	unsigned int height;
-	void (*render_func)(widget_t *widget, Imlib_Image buffer, int x, int y, bool solid_bg);
+	void (*render_func)(widget_t *widget, Imlib_Image buffer, int x, int y);
 	void (*update_func)(widget_t *widget, uint32_t var_id);
 	void (*scroll_func)(widget_t *widget);
 	void *data;
@@ -695,7 +695,6 @@ static void render() {
 	int up_x, up_y, up_w, up_h;
 	Imlib_Updates update;
 	Imlib_Image buffer;
-	bool solid_bg;
 	xsg_list_t *l;
 
 	window.updates = imlib_updates_merge_for_rendering(window.updates,
@@ -713,13 +712,11 @@ static void render() {
 		imlib_image_clear_color(window.background.red, window.background.green, window.background.blue, window.background.alpha);
 		/* TODO grab_root / parent */
 
-		solid_bg = TRUE;
 
 		for (l = widget_list; l; l = l->next) {
 			widget_t *widget = l->data;
 			if (widget_rect(widget, up_x, up_y, up_w, up_h)) {
-				(widget->render_func)(widget, buffer, up_x, up_y, solid_bg);
-				solid_bg = FALSE;
+				(widget->render_func)(widget, buffer, up_x, up_y);
 			}
 		}
 
@@ -1051,7 +1048,7 @@ typedef struct {
 	Imlib_Color color;
 } line_t;
 
-static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	line_t *line;
 
 	xsg_debug("render_line");
@@ -1116,7 +1113,7 @@ typedef struct {
 	bool filled;
 } rectangle_t;
 
-static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	rectangle_t *rectangle;
 	Imlib_Image tmp = NULL;
 	int xoffset, yoffset;
@@ -1248,7 +1245,7 @@ typedef struct {
 	bool filled;
 } ellipse_t;
 
-static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	ellipse_t *ellipse;
 
 	xsg_debug("render_ellipse");
@@ -1323,7 +1320,7 @@ typedef struct {
 	bool closed;
 } polygon_t;
 
-static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	polygon_t *polygon;
 	ImlibPolygon poly;
 
@@ -1413,7 +1410,7 @@ typedef struct {
 	bool scale;
 } image_t;
 
-static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	image_t *image;
 
 	xsg_debug("render_image");
@@ -1536,7 +1533,7 @@ typedef struct {
 	xsg_list_t *var_list;
 } barchart_t;
 
-static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	double min, max;
@@ -1802,7 +1799,7 @@ typedef struct {
 	unsigned int value_index;
 } linechart_t;
 
-static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	double min, max;
@@ -2052,7 +2049,7 @@ typedef struct {
 	unsigned int value_index;
 } areachart_t;
 
-static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	xsg_debug("render_areachart");
 	/* TODO */
 }
@@ -2247,7 +2244,7 @@ typedef struct {
 	char **lines;
 } text_t;
 
-static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y, bool solid_bg) {
+static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	text_t *text;
 	unsigned line_count, line_index;
 	int line_advance, space_advance;
