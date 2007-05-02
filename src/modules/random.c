@@ -24,12 +24,9 @@
 #include <stdio.h>
 #include <errno.h>
 
-// TODO no rand_double() for async events
-// TODO use drand48
-
 /******************************************************************************/
 
-/* NOTE: the following functions are c&p from glib/grand.c */
+/* NOTE: functions are c&p from glib/grand.c */
 
 #define N 624
 #define M 397
@@ -197,7 +194,7 @@ static double get_random(void *arg) {
 
 /******************************************************************************/
 
-void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+void parse_number(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
 	*func = get_random;
 	*arg = NULL;
 }

@@ -22,25 +22,25 @@
 
 /******************************************************************************/
 
-static double get_double(void *arg) {
+static double get_number(void *arg) {
 	double d;
 
 	d = * (double *) arg;
 
-	xsg_debug("get_double: %f", d);
+	xsg_debug("get_number: %f", d);
 
 	return d;
 }
 
 /******************************************************************************/
 
-void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+void parse_number(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
 	double *d;
 
 	d = xsg_new0(double, 1);
 	*d = xsg_conf_read_double();
 	*arg = (void *) d;
-	*func = get_double;
+	*func = get_number;
 }
 
 char *info() {

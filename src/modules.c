@@ -93,8 +93,8 @@ static void init() {
 
 /******************************************************************************/
 
-void xsg_modules_parse_double(uint32_t var_id, uint64_t update, double (**func)(void *), void **arg) {
-	xsg_modules_parse_double_t *parse_double;
+void xsg_modules_parse_number(uint32_t var_id, uint64_t update, double (**func)(void *), void **arg) {
+	xsg_modules_parse_number_t *parse_number;
 	char *filename = NULL;
 	void *module;
 	module_t *m = NULL;
@@ -119,15 +119,15 @@ void xsg_modules_parse_double(uint32_t var_id, uint64_t update, double (**func)(
 	if (!module)
 		xsg_error("cannot load module \"%s\": %s", m->name, dlerror());
 
-	parse_double = dlsym(module, "parse_double");
+	parse_number = dlsym(module, "parse_number");
 
-	if (!parse_double)
-		xsg_error("cannot find \"parse_double\" symbol in module \"%s\": %s", m->name, dlerror());
+	if (!parse_number)
+		xsg_error("cannot find \"parse_number\" symbol in module \"%s\": %s", m->name, dlerror());
 
 	*func = NULL;
 	*arg = NULL;
 
-	parse_double(var_id, update, func, arg);
+	parse_number(var_id, update, func, arg);
 
 	if (*func == NULL)
 		xsg_error("module \"%s\" must set func != NULL", m->name);
@@ -174,7 +174,7 @@ void xsg_modules_parse_string(uint32_t var_id, uint64_t update, char * (**func)(
 }
 
 void xsg_modules_list() {
-	xsg_modules_parse_double_t *parse_double;
+	xsg_modules_parse_number_t *parse_number;
 	xsg_modules_parse_string_t *parse_string;
 	xsg_modules_info_t *info;
 	char *filename;
@@ -195,10 +195,10 @@ void xsg_modules_list() {
 		if (!module)
 			continue;
 
-		parse_double = dlsym(module, "parse_double");
+		parse_number = dlsym(module, "parse_number");
 		parse_string = dlsym(module, "parse_string");
 
-		if ((!parse_double) && (!parse_string))
+		if ((!parse_number) && (!parse_string))
 			continue;
 
 		info = dlsym(module, "info");

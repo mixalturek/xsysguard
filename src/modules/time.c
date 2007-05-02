@@ -69,7 +69,7 @@ static char *get_strftime(void *arg) {
 
 /******************************************************************************/
 
-void parse_double(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+void parse_number(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
 	*func = get_time;
 	*arg = NULL;
 }

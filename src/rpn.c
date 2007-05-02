@@ -418,7 +418,7 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			if (stack_size < 2)
 				xsg_error("EXC: stack_size < 2");
 		} else {
-			xsg_modules_parse_double(var_id, update, &op->func, &op->arg);
+			xsg_modules_parse_number(var_id, update, &op->func, &op->arg);
 			stack_size += 1;
 		}
 
