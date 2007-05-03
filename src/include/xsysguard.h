@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include <inttypes.h>
 #include <sys/time.h>
 
@@ -187,6 +188,9 @@ void xsg_free(void *mem);
 	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
 #define xsg_renew(struct_type, mem, n_structs) \
 	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+
+int xsg_vasprintf(char **strp, const char *fmt, va_list ap);
+int xsg_asprintf(char **strp, const char *fmt, ...);
 
 /* misc */
 char *xsg_build_filename(const char *first_element, ...);

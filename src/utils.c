@@ -23,7 +23,7 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <stdarg.h>
+#include <stdio.h>
 
 /******************************************************************************
  *
@@ -88,6 +88,35 @@ void *xsg_realloc(void *mem, size_t size) {
 void xsg_free(void *mem) {
 	xsg_debug("free: %9p", mem);
 	free(mem);
+}
+
+/******************************************************************************/
+
+int xsg_vasprintf(char **strp, const char *fmt, va_list ap) {
+	int len;
+
+	if (unlikely(strp == NULL))
+		return -1;
+
+	len = vasprintf(strp, fmt, ap);
+
+	if (len < 0)
+		*strp = NULL;
+
+	xsg_debug("vasprintf: %2d bytes / %9p", len, *strp);
+
+	return len;
+}
+
+int xsg_asprintf(char **strp, const char *fmt, ...) {
+	va_list args;
+	int len;
+
+	va_start(args, fmt);
+	len = xsg_vasprintf(strp, fmt, args);
+	va_end(args);
+
+	return len;
 }
 
 /******************************************************************************

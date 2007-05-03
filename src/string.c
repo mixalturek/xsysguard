@@ -181,7 +181,7 @@ static void xsg_string_append_printf_internal(xsg_string_t *string, const char *
 	char *buffer;
 	int length;
 
-	length = vasprintf(&buffer, fmt, args);
+	length = xsg_vasprintf(&buffer, fmt, args);
 	xsg_string_append_len(string, buffer, length);
 	xsg_free(buffer);
 }
