@@ -93,17 +93,22 @@ void xsg_free(void *mem) {
 /******************************************************************************/
 
 int xsg_vasprintf(char **strp, const char *fmt, va_list ap) {
+	va_list ap2;
 	int len;
+	char c;
 
 	if (unlikely(strp == NULL))
 		return -1;
 
-	len = vasprintf(strp, fmt, ap);
+	va_copy(ap2, ap);
 
-	if (len < 0)
-		*strp = NULL;
+	len = vsnprintf(&c, 1, fmt, ap) + 1;
 
-	xsg_debug("vasprintf: %2d bytes / %9p", len, *strp);
+	*strp = xsg_new(char, len);
+
+	len = vsprintf(*strp, fmt, ap2);
+
+	va_end(ap2);
 
 	return len;
 }

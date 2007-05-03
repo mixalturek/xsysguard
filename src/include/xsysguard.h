@@ -21,8 +21,6 @@
 #ifndef __XSYSGUARD_H__
 #define __XSYSGUARD_H__ 1
 
-#define _GNU_SOURCE 1
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -30,10 +28,6 @@
 #include <sys/time.h>
 
 /******************************************************************************/
-
-#if defined(__GNUC__) && (__GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
-#pragma GCC system_header
-#endif
 
 #if defined(__GNUC__) && (__GNUC__ > 2)
 #define likely(x) __builtin_expect((x), 1)

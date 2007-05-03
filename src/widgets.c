@@ -38,6 +38,8 @@
 #include "var.h"
 #include "printf.h"
 
+long long int llround(double x);
+
 /******************************************************************************/
 
 #ifndef TRACE
