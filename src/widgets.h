@@ -69,7 +69,11 @@ xsg_widget_t *xsg_widgets_last();
 
 Imlib_Color xsg_widgets_uint2color(uint32_t u);
 
+Imlib_Image xsg_widgets_load_image(const char *filename);
+
 xsg_widget_angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *widht, unsigned int *height);
+
+void xsg_widgets_blend_mask(Imlib_Image image, Imlib_Image mask);
 
 /******************************************************************************/
 

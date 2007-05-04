@@ -35,6 +35,14 @@
 #include "var.h"
 #include "printf.h"
 #include "widgets.h"
+#include "widget_line.h"
+#include "widget_rectangle.h"
+#include "widget_ellipse.h"
+#include "widget_polygon.h"
+#include "widget_image.h"
+#include "widget_barchart.h"
+#include "widget_linechart.h"
+#include "widget_areachart.h"
 #include "widget_text.h"
 
 /******************************************************************************/
@@ -155,27 +163,27 @@ static void parse_config(char *config_buffer) {
 		} else if (xsg_conf_find_command("SetEnv")) {
 			parse_env();
 		} else if (xsg_conf_find_command("Line")) {
-			xsg_widgets_parse_line();
+			xsg_widget_line_parse();
 		} else if (xsg_conf_find_command("Rectangle")) {
-			xsg_widgets_parse_rectangle();
+			xsg_widget_rectangle_parse();
 		} else if (xsg_conf_find_command("Ellipse")) {
-			xsg_widgets_parse_ellipse();
+			xsg_widget_ellipse_parse();
 		} else if (xsg_conf_find_command("Polygon")) {
-			xsg_widgets_parse_polygon();
+			xsg_widget_polygon_parse();
 		} else if (xsg_conf_find_command("Image")) {
-			xsg_widgets_parse_image();
+			xsg_widget_image_parse();
 		} else if (xsg_conf_find_command("BarChart")) {
-			xsg_widgets_parse_barchart(&update, &widget_id);
+			xsg_widget_barchart_parse(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_barchart_var(var_id);
+				xsg_widget_barchart_parse_var(var_id);
 		} else if (xsg_conf_find_command("LineChart")) {
-			xsg_widgets_parse_linechart(&update, &widget_id);
+			xsg_widget_linechart_parse(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_linechart_var(var_id);
+				xsg_widget_linechart_parse_var(var_id);
 		} else if (xsg_conf_find_command("AreaChart")) {
-			xsg_widgets_parse_areachart(&update, &widget_id);
+			xsg_widget_areachart_parse(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_areachart_var(var_id);
+				xsg_widget_areachart_parse_var(var_id);
 		} else if (xsg_conf_find_command("Text")) {
 			xsg_widget_text_parse(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
