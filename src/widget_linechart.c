@@ -194,6 +194,7 @@ static void scroll_linechart(xsg_widget_t *widget) {
 void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 	xsg_widget_t *widget;
 	linechart_t *linechart;
+	double angle = 0.0;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	linechart = xsg_new0(linechart_t, 1);
@@ -219,9 +220,7 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			linechart->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
 			linechart->min = xsg_conf_read_double();
 			linechart->const_min = TRUE;
@@ -238,6 +237,9 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 			xsg_conf_error("Angle, Min, Max or Background");
 		}
 	}
+
+	if (angle != 0.0)
+		linechart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
 	*update = widget->update;
 	*widget_id = xsg_widgets_add(widget);

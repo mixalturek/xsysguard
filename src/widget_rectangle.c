@@ -107,6 +107,7 @@ static void scroll_rectangle(xsg_widget_t *widget) {
 void xsg_widget_rectangle_parse() {
 	xsg_widget_t *widget;
 	rectangle_t *rectangle;
+	double angle = 0.0;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	rectangle = xsg_new(rectangle_t, 1);
@@ -147,15 +148,16 @@ void xsg_widget_rectangle_parse() {
 				imlib_add_color_to_color_range(distance);
 			}
 		} else if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			rectangle->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
 			xsg_conf_error("Angle, ColorRange or Filled");
 		}
 	}
+
+	if (angle != 0.0)
+		rectangle->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
 	xsg_widgets_add(widget);
 }

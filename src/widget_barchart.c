@@ -200,6 +200,7 @@ static void scroll_barchart(xsg_widget_t *widget) {
 void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 	xsg_widget_t *widget;
 	barchart_t *barchart;
+	double angle = 0.0;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	barchart = xsg_new0(barchart_t, 1);
@@ -224,9 +225,7 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			barchart->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
 			barchart->min = xsg_conf_read_double();
 			barchart->const_min = TRUE;
@@ -243,6 +242,9 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 			xsg_conf_error("Angle, Min, Max or Mask");
 		}
 	}
+
+	if (angle != 0.0)
+		barchart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
 	*update = widget->update;
 	*widget_id = xsg_widgets_add(widget);

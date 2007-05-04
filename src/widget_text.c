@@ -493,6 +493,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	text_t *text;
 	char *font_name;
 	char **pathv = NULL;
+	double angle = 0.0;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	text = xsg_new0(text_t, 1);
@@ -538,8 +539,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			text->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {
 			if (xsg_conf_find_command("TopLeft"))
 				text->alignment = TOP_LEFT;
@@ -568,6 +568,9 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 			xsg_conf_error("Angle, Alignment or TabWidth");
 		}
 	}
+
+	if (angle != 0.0)
+		text->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
 	*update = widget->update;
 	*widget_id = xsg_widgets_add(widget);

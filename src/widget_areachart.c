@@ -107,6 +107,7 @@ static void scroll_areachart(xsg_widget_t *widget) {
 void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 	xsg_widget_t *widget;
 	areachart_t *areachart;
+	double angle = 0.0;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	areachart = xsg_new(areachart_t, 1);
@@ -132,9 +133,7 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			areachart->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
-					&widget->width, &widget->height);
+			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
 			areachart->min = xsg_conf_read_double();
 			areachart->const_min = TRUE;
@@ -151,6 +150,9 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 			xsg_conf_error("Angle, Min, Max or Background");
 		}
 	}
+
+	if (angle != 0.0)
+		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
 	*update = widget->update;
 	*widget_id = xsg_widgets_add(widget);
