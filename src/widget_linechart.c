@@ -35,6 +35,7 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
+#include "rpn.h"
 
 /******************************************************************************/
 
@@ -169,7 +170,7 @@ static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
 		linechart_var = l->data;
 
 		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id)) {
-			linechart_var->values[i] = xsg_var_get_double(linechart_var->var_id);
+			linechart_var->values[i] = xsg_rpn_calc(linechart_var->var_id);
 			if (linechart_var->add_prev)
 				linechart_var->values[i] += prev;
 		}
