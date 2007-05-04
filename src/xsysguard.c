@@ -34,7 +34,7 @@
 #include "main.h"
 #include "var.h"
 #include "printf.h"
-#include "widgets.h"
+#include "window.h"
 #include "widget_line.h"
 #include "widget_rectangle.h"
 #include "widget_ellipse.h"
@@ -127,33 +127,33 @@ static void parse_config(char *config_buffer) {
 				xsg_main_set_interval(interval);
 				xsg_conf_read_newline();
 			} else if (xsg_conf_find_command("Name")) {
-				xsg_widgets_parse_name();
+				xsg_window_parse_name();
 			} else if (xsg_conf_find_command("Class")) {
-				xsg_widgets_parse_class();
+				xsg_window_parse_class();
 			} else if (xsg_conf_find_command("Resource")) {
-				xsg_widgets_parse_resource();
+				xsg_window_parse_resource();
 			} else if (xsg_conf_find_command("Geometry")) {
-				xsg_widgets_parse_geometry();
+				xsg_window_parse_geometry();
 			} else if (xsg_conf_find_command("Sticky")) {
-				xsg_widgets_parse_sticky();
+				xsg_window_parse_sticky();
 			} else if (xsg_conf_find_command("SkipTaskbar")) {
-				xsg_widgets_parse_skip_taskbar();
+				xsg_window_parse_skip_taskbar();
 			} else if (xsg_conf_find_command("SkipPager")) {
-				xsg_widgets_parse_skip_pager();
+				xsg_window_parse_skip_pager();
 			} else if (xsg_conf_find_command("Layer")) {
-				xsg_widgets_parse_layer();
+				xsg_window_parse_layer();
 			} else if (xsg_conf_find_command("Decorations")) {
-				xsg_widgets_parse_decorations();
+				xsg_window_parse_decorations();
 			} else if (xsg_conf_find_command("Background")) {
-				xsg_widgets_parse_background();
+				xsg_window_parse_background();
 			} else if (xsg_conf_find_command("CacheSize")) {
-				xsg_widgets_parse_cache_size();
+				xsg_window_parse_cache_size();
 			} else if (xsg_conf_find_command("FontCacheSize")) {
-				xsg_widgets_parse_font_cache_size();
+				xsg_window_parse_font_cache_size();
 			} else if (xsg_conf_find_command("XShape")) {
-				xsg_widgets_parse_xshape();
+				xsg_window_parse_xshape();
 			} else if (xsg_conf_find_command("ARGBVisual")) {
-				xsg_widgets_parse_argb_visual();
+				xsg_window_parse_argb_visual();
 			} else {
 				xsg_conf_error("Interval, IconName, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "
@@ -399,7 +399,7 @@ int main(int argc, char **argv) {
 
 	xsg_var_init();
 	xsg_printf_init();
-	xsg_widgets_init();
+	xsg_window_init();
 
 	xsg_main_loop();
 

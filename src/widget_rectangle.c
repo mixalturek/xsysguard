@@ -28,6 +28,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "conf.h"
 
 /******************************************************************************/
@@ -121,7 +122,7 @@ void xsg_widget_rectangle_parse() {
 	widget->data = (void *) rectangle;
 
 	rectangle->angle = NULL;
-	rectangle->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	rectangle->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	rectangle->range = NULL;
 	rectangle->range_angle = 0.0;
 	rectangle->filled = FALSE;
@@ -140,7 +141,7 @@ void xsg_widget_rectangle_parse() {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_widgets_uint2color(xsg_conf_read_color());
+				color = xsg_imlib_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);

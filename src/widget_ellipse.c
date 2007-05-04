@@ -27,6 +27,7 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "imlib.h"
 #include "conf.h"
 
 /******************************************************************************/
@@ -81,7 +82,7 @@ void xsg_widget_ellipse_parse() {
 	ellipse->yc = xsg_conf_read_int();
 	ellipse->a = xsg_conf_read_uint();
 	ellipse->b = xsg_conf_read_uint();
-	ellipse->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	ellipse->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	ellipse->filled = FALSE;
 
 	while (!xsg_conf_find_newline()) {

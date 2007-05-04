@@ -28,6 +28,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "conf.h"
 
 /******************************************************************************/
@@ -92,7 +93,7 @@ void xsg_widget_image_parse() {
 	image->image = NULL;
 	image->scale = FALSE;
 
-	image->image = xsg_widgets_load_image(image->filename);
+	image->image = xsg_imlib_load_image(image->filename);
 	if (unlikely(image->image == NULL))
 		xsg_error("Cannot load image \"%s\"", image->filename);
 

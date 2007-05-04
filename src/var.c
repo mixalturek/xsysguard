@@ -21,7 +21,7 @@
 #include <xsysguard.h>
 #include <math.h>
 
-#include "widgets.h"
+#include "window.h"
 #include "modules.h"
 #include "var.h"
 #include "rpn.h"
@@ -86,7 +86,7 @@ void xsg_var_update(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
-	xsg_widgets_update(var->widget_id, var_id);
+	xsg_window_update_widget(var->widget_id, var_id);
 }
 
 uint32_t xsg_var_parse_double(uint32_t widget_id, uint64_t update) {

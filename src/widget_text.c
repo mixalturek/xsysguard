@@ -29,6 +29,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "printf.h"
 #include "conf.h"
 
@@ -506,7 +507,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	widget->scroll_func = scroll_text;
 	widget->data = (void *) text;
 
-	text->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 
 	font_name = xsg_conf_read_string();
 

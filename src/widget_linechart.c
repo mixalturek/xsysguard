@@ -32,6 +32,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "conf.h"
 #include "var.h"
 
@@ -229,7 +230,7 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 			linechart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
-			linechart->background = xsg_widgets_load_image(filename);
+			linechart->background = xsg_imlib_load_image(filename);
 			if (unlikely(linechart->background == NULL))
 				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
@@ -262,7 +263,7 @@ void xsg_widget_linechart_parse_var(uint32_t var_id) {
 		width = widget->width;
 
 	linechart_var->var_id = var_id;
-	linechart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	linechart_var->add_prev = FALSE;
 	linechart_var->values = xsg_new0(double, width);
 

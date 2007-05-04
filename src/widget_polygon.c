@@ -27,6 +27,7 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "imlib.h"
 #include "conf.h"
 
 /******************************************************************************/
@@ -115,7 +116,7 @@ void xsg_widget_polygon_parse() {
 	widget = xsg_new0(xsg_widget_t, 1);
 	polygon = xsg_new0(polygon_t, 1);
 
-	polygon->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	polygon->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	polygon->polygon = imlib_polygon_new();
 	polygon->filled = FALSE;
 	polygon->closed = FALSE;

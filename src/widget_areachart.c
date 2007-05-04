@@ -32,6 +32,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "conf.h"
 #include "var.h"
 
@@ -142,7 +143,7 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 			areachart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Background")) {
 			char *filename = xsg_conf_read_string();
-			areachart->background = xsg_widgets_load_image(filename);
+			areachart->background = xsg_imlib_load_image(filename);
 			if (unlikely(areachart->background == NULL))
 				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
@@ -175,7 +176,7 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 		width = widget->width;
 
 	areachart_var->var_id = var_id;
-	areachart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	areachart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	areachart_var->range = NULL;
 	areachart_var->angle = 0.0;
 	areachart_var->top_height = 0;
@@ -202,7 +203,7 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_widgets_uint2color(xsg_conf_read_color());
+				color = xsg_imlib_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(
 						color.red,
 						color.green,
@@ -212,7 +213,7 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 			}
 		} else if (xsg_conf_find_command("Top")) {
 			areachart_var->top_height = xsg_conf_read_uint();
-			areachart_var->top_color = xsg_widgets_uint2color(xsg_conf_read_color());
+			areachart_var->top_color = xsg_imlib_uint2color(xsg_conf_read_color());
 		} else if (xsg_conf_find_command("AddPrev")) {
 			areachart_var->add_prev = TRUE;
 		} else {

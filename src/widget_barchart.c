@@ -32,6 +32,7 @@
 
 #include "widgets.h"
 #include "angle.h"
+#include "imlib.h"
 #include "conf.h"
 #include "var.h"
 
@@ -156,7 +157,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	imlib_context_set_image(tmp);
 
 	if (barchart->mask)
-		xsg_widgets_blend_mask(buffer, barchart->mask);
+		xsg_imlib_blend_mask(buffer, barchart->mask);
 
 	imlib_context_set_image(buffer);
 	if (barchart->angle)
@@ -234,7 +235,7 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 			barchart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Mask")) {
 			char *filename = xsg_conf_read_string();
-			barchart->mask = xsg_widgets_load_image(filename);
+			barchart->mask = xsg_imlib_load_image(filename);
 			if (unlikely(barchart->mask == NULL))
 				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
@@ -258,7 +259,7 @@ void xsg_widget_barchart_parse_var(uint32_t var_id) {
 	barchart_var = xsg_new0(barchart_var_t, 1);
 
 	barchart_var->var_id = var_id;
-	barchart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
+	barchart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	barchart_var->range = NULL;
 	barchart_var->angle = 0.0;
 	barchart_var->add_prev = FALSE;
@@ -281,7 +282,7 @@ void xsg_widget_barchart_parse_var(uint32_t var_id) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_widgets_uint2color(xsg_conf_read_color());
+				color = xsg_imlib_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(
 						color.red,
 						color.green,

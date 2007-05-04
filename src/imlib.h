@@ -1,4 +1,4 @@
-/* widgets.h
+/* imlib.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
@@ -18,26 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __WIDGETS_H__
-#define __WIDGETS_H__ 1
+#ifndef __IMLIB_H__
+#define __IMLIB_H__ 1
 
 #include <xsysguard.h>
 
-#include "widget.h"
-
 /*****************************************************************************/
 
-void xsg_widgets_init(void);
-
-void xsg_widgets_update(uint32_t widget_id, uint32_t var_id);
-
-uint32_t xsg_widgets_add(xsg_widget_t *widget);
-
-xsg_widget_t *xsg_widgets_last();
-
-void xsg_widgets_render(Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
+Imlib_Color xsg_imlib_uint2color(uint32_t u);
+Imlib_Image xsg_imlib_load_image(const char *filename);
+void xsg_imlib_blend_mask(Imlib_Image image, Imlib_Image mask);
 
 /******************************************************************************/
 
-#endif /* __WIDGETS_H__ */
+#endif /* __IMLIB_H__ */
 
