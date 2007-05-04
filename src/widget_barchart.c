@@ -31,6 +31,7 @@
 #include <float.h>
 
 #include "widgets.h"
+#include "angle.h"
 #include "conf.h"
 #include "var.h"
 
@@ -50,7 +51,7 @@ typedef struct {
 /******************************************************************************/
 
 typedef struct {
-	xsg_widget_angle_t *angle;
+	xsg_angle_t *angle;
 	double min;
 	double max;
 	bool const_min;
@@ -223,7 +224,7 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
 			double a = xsg_conf_read_double();
-			barchart->angle = parse_angle(a, widget->xoffset, widget->yoffset,
+			barchart->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
 					&widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Min")) {
 			barchart->min = xsg_conf_read_double();

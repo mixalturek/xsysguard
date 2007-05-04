@@ -339,51 +339,6 @@ void xsg_widgets_parse_argb_visual() {
 
 /******************************************************************************
  *
- * parse_angle
- *
- ******************************************************************************/
-
-xsg_widget_angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height) {
-	xsg_widget_angle_t *angle;
-	double arc, sa, ca;
-	unsigned int w, h;
-
-	arc = a / 180.0 * M_PI;
-
-	sa = sin(arc);
-	ca = cos(arc);
-
-	w = *width;
-	h = *height;
-
-	if (sa > 0.0)
-		xoffset += sa * h;
-	else
-		yoffset -= sa * w;
-
-	if (ca < 0.0) {
-		xoffset -= ca * w;
-		yoffset -= ca * h;
-	}
-
-	angle = xsg_new0(xsg_widget_angle_t, 1);
-
-	angle->xoffset = xoffset;
-	angle->yoffset = yoffset;
-	angle->width = *width;
-	angle->height = *height;
-	angle->angle = a;
-	angle->angle_x = w * ca;
-	angle->angle_y = w * sa;
-
-	*width = ceil(fabs(sa * h) + fabs(ca * w));
-	*height = ceil(fabs(ca * h) + fabs(sa *w));
-
-	return angle;
-}
-
-/******************************************************************************
- *
  * XRender
  *
  ******************************************************************************/

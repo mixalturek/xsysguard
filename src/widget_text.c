@@ -28,6 +28,7 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "angle.h"
 #include "printf.h"
 #include "conf.h"
 
@@ -57,7 +58,7 @@ typedef struct {
 	Imlib_Color color;
 	Imlib_Font font;
 	uint32_t printf_id;
-	xsg_widget_angle_t *angle;
+	xsg_angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
 	char **lines;
@@ -537,7 +538,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Angle")) {
 			double a = xsg_conf_read_double();
-			text->angle = parse_angle(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+			text->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Alignment")) {
 			if (xsg_conf_find_command("TopLeft"))
 				text->alignment = TOP_LEFT;

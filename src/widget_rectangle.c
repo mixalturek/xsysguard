@@ -27,12 +27,13 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "angle.h"
 #include "conf.h"
 
 /******************************************************************************/
 
 typedef struct {
-	xsg_widget_angle_t *angle;
+	xsg_angle_t *angle;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double range_angle;
@@ -146,7 +147,7 @@ void xsg_widget_rectangle_parse() {
 			}
 		} else if (xsg_conf_find_command("Angle")) {
 			double a = xsg_conf_read_double();
-			rectangle->angle = parse_angle(a, widget->xoffset, widget->yoffset,
+			rectangle->angle = xsg_angle_parse(a, widget->xoffset, widget->yoffset,
 					&widget->width, &widget->height);
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;

@@ -27,12 +27,13 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "angle.h"
 #include "conf.h"
 
 /******************************************************************************/
 
 typedef struct {
-	xsg_widget_angle_t *angle;
+	xsg_angle_t *angle;
 	char *filename;
 	Imlib_Image image;
 	bool scale;
@@ -119,7 +120,7 @@ void xsg_widget_image_parse() {
 	}
 
 	if (angle != 0.0) {
-		image->angle = parse_angle(angle, widget->xoffset, widget->yoffset,
+		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset,
 					&widget->width, &widget->height);
 
 		if (image->angle->angle == 90.0) {

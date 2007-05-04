@@ -76,6 +76,7 @@ COMMON_SRC     += string.c list.c utils.c
 COMMON_SRC     += var.h
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c var.c widget.h
 XSYSGUARD_SRC  += printf.c printf.h
+XSYSGUARD_SRC  += angle.c angle.h
 XSYSGUARD_SRC  += widgets.c widgets.h
 XSYSGUARD_SRC  += widget_line.c widget_line.h
 XSYSGUARD_SRC  += widget_rectangle.c widget_rectangle.h

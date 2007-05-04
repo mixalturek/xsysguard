@@ -50,28 +50,12 @@ void xsg_widgets_parse_argb_visual(void);
 
 /*****************************************************************************/
 
-void xsg_widgets_parse_line(void);
-void xsg_widgets_parse_rectangle(void);
-void xsg_widgets_parse_ellipse(void);
-void xsg_widgets_parse_polygon(void);
-void xsg_widgets_parse_image(void);
-void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id);
-void xsg_widgets_parse_barchart_var(uint32_t var_id);
-void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id);
-void xsg_widgets_parse_linechart_var(uint32_t var_id);
-void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id);
-void xsg_widgets_parse_areachart_var(uint32_t var_id);
-
-/******************************************************************************/
-
 uint32_t xsg_widgets_add(xsg_widget_t *widget);
 xsg_widget_t *xsg_widgets_last();
 
 Imlib_Color xsg_widgets_uint2color(uint32_t u);
 
 Imlib_Image xsg_widgets_load_image(const char *filename);
-
-xsg_widget_angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *widht, unsigned int *height);
 
 void xsg_widgets_blend_mask(Imlib_Image image, Imlib_Image mask);
 
