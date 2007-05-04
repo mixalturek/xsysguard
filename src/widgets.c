@@ -34,31 +34,11 @@
 #endif
 
 #include "widgets.h"
+#include "widget.h"
 #include "conf.h"
 #include "var.h"
-#include "printf.h"
 
 long long int llround(double x);
-
-/******************************************************************************/
-
-#ifndef TRACE
-# define T(func) func
-#else
-# define T(func) { \
-	struct timeval timeval_begin, timeval_end, timeval_diff; \
-	xsg_gettimeofday(&timeval_begin, NULL); \
-	func; \
-	xsg_gettimeofday(&timeval_end, NULL); \
-	xsg_timeval_sub(&timeval_diff, &timeval_end, &timeval_begin); \
-	xsg_debug("T %u.%06us [%04d] %s: %s", \
-			(unsigned) timeval_diff.tv_sec, \
-			(unsigned) timeval_diff.tv_usec, \
-			__LINE__, \
-			__FUNCTION__, \
-			#func); \
-}
-#endif
 
 /******************************************************************************/
 
@@ -79,20 +59,6 @@ typedef union {
 } color_t;
 
 /******************************************************************************/
-
-typedef struct _widget_t widget_t;
-
-struct _widget_t {
-	uint64_t update;
-	int xoffset;
-	int yoffset;
-	unsigned int width;
-	unsigned int height;
-	void (*render_func)(widget_t *widget, Imlib_Image buffer, int x, int y);
-	void (*update_func)(widget_t *widget, uint32_t var_id);
-	void (*scroll_func)(widget_t *widget);
-	void *data;
-};
 
 static xsg_list_t *widget_list = NULL;
 
@@ -168,8 +134,29 @@ static window_t window = {
  *
  ******************************************************************************/
 
-static widget_t *get_widget(uint32_t widget_id) {
-	widget_t *widget;
+uint32_t xsg_widgets_add(xsg_widget_t *widget) {
+	uint32_t id;
+
+	id = xsg_list_length(widget_list);
+
+	widget_list = xsg_list_append(widget_list, widget);
+
+	return id;
+}
+
+xsg_widget_t *xsg_widgets_last() {
+	xsg_list_t *l;
+
+	l = xsg_list_last(widget_list);
+
+	if (unlikely(l == NULL))
+		xsg_error("No widgets available");
+
+	return l->data;
+}
+
+static xsg_widget_t *get_widget(uint32_t widget_id) {
+	xsg_widget_t *widget;
 
 	widget = xsg_list_nth_data(widget_list, (unsigned int) widget_id);
 
@@ -209,7 +196,7 @@ static Imlib_Image load_image(const char *filename) {
 	return NULL;
 }
 
-static Imlib_Color uint2color(uint32_t u) {
+Imlib_Color xsg_widgets_uint2color(uint32_t u) {
 	Imlib_Color color;
 	color_t c;
 
@@ -326,7 +313,7 @@ void xsg_widgets_parse_background() {
 	else if (xsg_conf_find_command("CopyFromRoot"))
 		window.copy_from_root = TRUE;
 	else if (xsg_conf_find_command("Color"))
-		window.background = uint2color(xsg_conf_read_color());
+		window.background = xsg_widgets_uint2color(xsg_conf_read_color());
 	else
 		xsg_conf_error("CopyFromParent, CopyFromRoot or Color");
 	xsg_conf_read_newline();
@@ -397,18 +384,8 @@ static ImlibPolygon poly_copy(ImlibPolygon polygon, int xoffset, int yoffset) {
  *
  ******************************************************************************/
 
-typedef struct {
-	int xoffset;
-	int yoffset;
-	unsigned int width;
-	unsigned int height;
-	double angle;
-	int angle_x;
-	int angle_y;
-} angle_t;
-
-static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height) {
-	angle_t *angle;
+xsg_widget_angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height) {
+	xsg_widget_angle_t *angle;
 	double arc, sa, ca;
 	unsigned int w, h;
 
@@ -430,7 +407,7 @@ static angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *wi
 		yoffset -= ca * h;
 	}
 
-	angle = xsg_new0(angle_t, 1);
+	angle = xsg_new0(xsg_widget_angle_t, 1);
 
 	angle->xoffset = xoffset;
 	angle->yoffset = yoffset;
@@ -673,7 +650,7 @@ static void xrender(int xoffset, int yoffset) {
  *
  ******************************************************************************/
 
-static bool widget_rect(widget_t *widget, int x, int y, unsigned int w, unsigned int h) {
+static bool widget_rect(xsg_widget_t *widget, int x, int y, unsigned int w, unsigned int h) {
 	int x1_1, x2_1, y1_1, y2_1, x1_2, x2_2, y1_2, y2_2;
 	bool x_overlap, y_overlap;
 
@@ -716,7 +693,7 @@ static void render() {
 
 
 		for (l = widget_list; l; l = l->next) {
-			widget_t *widget = l->data;
+			xsg_widget_t *widget = l->data;
 			if (widget_rect(widget, up_x, up_y, up_w, up_h)) {
 				(widget->render_func)(widget, buffer, up_x, up_y);
 			}
@@ -745,7 +722,7 @@ static void render() {
 /******************************************************************************/
 
 static void scroll_and_update(uint64_t count) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	xsg_list_t *l;
 
 	for (l = widget_list; l; l = l->next) {
@@ -771,7 +748,7 @@ static void scroll_and_update(uint64_t count) {
 }
 
 void xsg_widgets_update(uint32_t widget_id, uint32_t var_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 
 	widget = get_widget(widget_id);
 
@@ -1050,7 +1027,7 @@ typedef struct {
 	Imlib_Color color;
 } line_t;
 
-static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	line_t *line;
 
 	xsg_debug("render_line");
@@ -1066,26 +1043,26 @@ static void render_line(widget_t *widget, Imlib_Image buffer, int up_x, int up_y
 			line->x2 - up_x, line->y2 - up_y, 0);
 }
 
-static void update_line(widget_t *widget, uint32_t var_id) {
+static void update_line(xsg_widget_t *widget, uint32_t var_id) {
 	return;
 }
 
-static void scroll_line(widget_t *widget) {
+static void scroll_line(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_line() {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	line_t *line;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	line = xsg_new(line_t, 1);
 
 	line->x1 = xsg_conf_read_int();
 	line->y1 = xsg_conf_read_int();
 	line->x2 = xsg_conf_read_int();
 	line->y2 = xsg_conf_read_int();
-	line->color = uint2color(xsg_conf_read_color());
+	line->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	xsg_conf_read_newline();
 
 	widget->update = 0;
@@ -1108,14 +1085,14 @@ void xsg_widgets_parse_line() {
  ******************************************************************************/
 
 typedef struct {
-	angle_t *angle;
+	xsg_widget_angle_t *angle;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double range_angle;
 	bool filled;
 } rectangle_t;
 
-static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	rectangle_t *rectangle;
 	Imlib_Image tmp = NULL;
 	int xoffset, yoffset;
@@ -1168,19 +1145,19 @@ static void render_rectangle(widget_t *widget, Imlib_Image buffer, int up_x, int
 	}
 }
 
-static void update_rectangle(widget_t *widget, uint32_t var_id) {
+static void update_rectangle(xsg_widget_t *widget, uint32_t var_id) {
 	return;
 }
 
-static void scroll_rectangle(widget_t *widget) {
+static void scroll_rectangle(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_rectangle() {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	rectangle_t *rectangle;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	rectangle = xsg_new(rectangle_t, 1);
 
 	widget->update = 0;
@@ -1194,7 +1171,7 @@ void xsg_widgets_parse_rectangle() {
 	widget->data = (void *) rectangle;
 
 	rectangle->angle = NULL;
-	rectangle->color = uint2color(xsg_conf_read_color());
+	rectangle->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	rectangle->range = NULL;
 	rectangle->range_angle = 0.0;
 	rectangle->filled = FALSE;
@@ -1213,7 +1190,7 @@ void xsg_widgets_parse_rectangle() {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = uint2color(xsg_conf_read_color());
+				color = xsg_widgets_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);
@@ -1247,7 +1224,7 @@ typedef struct {
 	bool filled;
 } ellipse_t;
 
-static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	ellipse_t *ellipse;
 
 	xsg_debug("render_ellipse");
@@ -1267,26 +1244,26 @@ static void render_ellipse(widget_t *widget, Imlib_Image buffer, int up_x, int u
 				ellipse->a, ellipse->b);
 }
 
-static void update_ellipse(widget_t *widget, uint32_t var_id) {
+static void update_ellipse(xsg_widget_t *widget, uint32_t var_id) {
 	return;
 }
 
-static void scroll_ellipse(widget_t *widget) {
+static void scroll_ellipse(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_ellipse() {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	ellipse_t *ellipse;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	ellipse = xsg_new0(ellipse_t, 1);
 
 	ellipse->xc = xsg_conf_read_int();
 	ellipse->yc = xsg_conf_read_int();
 	ellipse->a = xsg_conf_read_uint();
 	ellipse->b = xsg_conf_read_uint();
-	ellipse->color = uint2color(xsg_conf_read_color());
+	ellipse->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	ellipse->filled = FALSE;
 
 	while (!xsg_conf_find_newline()) {
@@ -1322,7 +1299,7 @@ typedef struct {
 	bool closed;
 } polygon_t;
 
-static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	polygon_t *polygon;
 	ImlibPolygon poly;
 
@@ -1345,24 +1322,24 @@ static void render_polygon(widget_t *widget, Imlib_Image buffer, int up_x, int u
 	imlib_polygon_free(poly);
 }
 
-static void update_polygon(widget_t *widget, uint32_t var_id) {
+static void update_polygon(xsg_widget_t *widget, uint32_t var_id) {
 	return;
 }
 
-static void scroll_polygon(widget_t *widget) {
+static void scroll_polygon(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_polygon() {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	polygon_t *polygon;
 	unsigned int count, i;
 	int x1, y1, x2, y2;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	polygon = xsg_new0(polygon_t, 1);
 
-	polygon->color = uint2color(xsg_conf_read_color());
+	polygon->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	polygon->polygon = imlib_polygon_new();
 	polygon->filled = FALSE;
 	polygon->closed = FALSE;
@@ -1406,13 +1383,13 @@ void xsg_widgets_parse_polygon() {
  ******************************************************************************/
 
 typedef struct {
-	angle_t *angle;
+	xsg_widget_angle_t *angle;
 	char *filename;
 	Imlib_Image image;
 	bool scale;
 } image_t;
 
-static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	image_t *image;
 
 	xsg_debug("render_image");
@@ -1432,20 +1409,20 @@ static void render_image(widget_t *widget, Imlib_Image buffer, int up_x, int up_
 				widget->yoffset - up_y, widget->width, widget->height);
 }
 
-static void update_image(widget_t *widget, uint32_t var_id) {
+static void update_image(xsg_widget_t *widget, uint32_t var_id) {
 	return;
 }
 
-static void scroll_image(widget_t *widget) {
+static void scroll_image(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_image() {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	image = xsg_new0(image_t, 1);
 
 	widget->update = 0;
@@ -1526,7 +1503,7 @@ typedef struct {
 } barchart_var_t;
 
 typedef struct {
-	angle_t *angle;
+	xsg_widget_angle_t *angle;
 	double min;
 	double max;
 	bool const_min;
@@ -1535,7 +1512,7 @@ typedef struct {
 	xsg_list_t *var_list;
 } barchart_t;
 
-static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	double min, max;
@@ -1646,7 +1623,7 @@ static void render_barchart(widget_t *widget, Imlib_Image buffer, int up_x, int 
 	imlib_free_image();
 }
 
-static void update_barchart(widget_t *widget, uint32_t var_id) {
+static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	xsg_list_t *l;
@@ -1665,15 +1642,15 @@ static void update_barchart(widget_t *widget, uint32_t var_id) {
 	}
 }
 
-static void scroll_barchart(widget_t *widget) {
+static void scroll_barchart(xsg_widget_t *widget) {
 	return;
 }
 
 void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	barchart_t *barchart;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	barchart = xsg_new0(barchart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
@@ -1723,7 +1700,7 @@ void xsg_widgets_parse_barchart(uint64_t *update, uint32_t *widget_id) {
 }
 
 void xsg_widgets_parse_barchart_var(uint32_t var_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 
@@ -1733,7 +1710,7 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 	barchart_var = xsg_new0(barchart_var_t, 1);
 
 	barchart_var->var_id = var_id;
-	barchart_var->color = uint2color(xsg_conf_read_color());
+	barchart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	barchart_var->range = NULL;
 	barchart_var->angle = 0.0;
 	barchart_var->add_prev = FALSE;
@@ -1756,7 +1733,7 @@ void xsg_widgets_parse_barchart_var(uint32_t var_id) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = uint2color(xsg_conf_read_color());
+				color = xsg_widgets_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(
 						color.red,
 						color.green,
@@ -1791,7 +1768,7 @@ typedef struct {
 } linechart_var_t;
 
 typedef struct {
-	angle_t *angle;
+	xsg_widget_angle_t *angle;
 	double min;
 	double max;
 	bool const_min;
@@ -1801,7 +1778,7 @@ typedef struct {
 	unsigned int value_index;
 } linechart_t;
 
-static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	double min, max;
@@ -1897,7 +1874,7 @@ static void render_linechart(widget_t *widget, Imlib_Image buffer, int up_x, int
 	imlib_free_image();
 }
 
-static void update_linechart(widget_t *widget, uint32_t var_id) {
+static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	xsg_list_t *l;
@@ -1918,7 +1895,7 @@ static void update_linechart(widget_t *widget, uint32_t var_id) {
 	}
 }
 
-static void scroll_linechart(widget_t *widget) {
+static void scroll_linechart(xsg_widget_t *widget) {
 	linechart_t *linechart;
 	unsigned int width;
 
@@ -1933,10 +1910,10 @@ static void scroll_linechart(widget_t *widget) {
 }
 
 void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	linechart_t *linechart;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	linechart = xsg_new0(linechart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
@@ -1987,7 +1964,7 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id) {
 }
 
 void xsg_widgets_parse_linechart_var(uint32_t var_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	linechart_t *linechart;
 	linechart_var_t * linechart_var;
 	unsigned int width, i;
@@ -2006,7 +1983,7 @@ void xsg_widgets_parse_linechart_var(uint32_t var_id) {
 		width = widget->width;
 
 	linechart_var->var_id = var_id;
-	linechart_var->color = uint2color(xsg_conf_read_color());
+	linechart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	linechart_var->add_prev = FALSE;
 	linechart_var->values = xsg_new0(double, width);
 
@@ -2041,7 +2018,7 @@ typedef struct {
 } areachart_var_t;
 
 typedef struct {
-	angle_t *angle;
+	xsg_widget_angle_t *angle;
 	double min;
 	double max;
 	bool const_min;
@@ -2051,12 +2028,12 @@ typedef struct {
 	unsigned int value_index;
 } areachart_t;
 
-static void render_areachart(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	xsg_debug("render_areachart");
 	/* TODO */
 }
 
-static void update_areachart(widget_t *widget, uint32_t var_id) {
+static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	xsg_list_t *l;
@@ -2077,7 +2054,7 @@ static void update_areachart(widget_t *widget, uint32_t var_id) {
 	}
 }
 
-static void scroll_areachart(widget_t *widget) {
+static void scroll_areachart(xsg_widget_t *widget) {
 	areachart_t *areachart;
 	unsigned int width;
 
@@ -2092,10 +2069,10 @@ static void scroll_areachart(widget_t *widget) {
 }
 
 void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	areachart_t *areachart;
 
-	widget = xsg_new0(widget_t, 1);
+	widget = xsg_new0(xsg_widget_t, 1);
 	areachart = xsg_new(areachart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
@@ -2146,7 +2123,7 @@ void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id) {
 }
 
 void xsg_widgets_parse_areachart_var(uint32_t var_id) {
-	widget_t *widget;
+	xsg_widget_t *widget;
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	unsigned int width, i;
@@ -2165,7 +2142,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 		width = widget->width;
 
 	areachart_var->var_id = var_id;
-	areachart_var->color = uint2color(xsg_conf_read_color());
+	areachart_var->color = xsg_widgets_uint2color(xsg_conf_read_color());
 	areachart_var->range = NULL;
 	areachart_var->angle = 0.0;
 	areachart_var->top_height = 0;
@@ -2192,7 +2169,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = uint2color(xsg_conf_read_color());
+				color = xsg_widgets_uint2color(xsg_conf_read_color());
 				imlib_context_set_color(
 						color.red,
 						color.green,
@@ -2202,7 +2179,7 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 			}
 		} else if (xsg_conf_find_command("Top")) {
 			areachart_var->top_height = xsg_conf_read_uint();
-			areachart_var->top_color = uint2color(xsg_conf_read_color());
+			areachart_var->top_color = xsg_widgets_uint2color(xsg_conf_read_color());
 		} else if (xsg_conf_find_command("AddPrev")) {
 			areachart_var->add_prev = TRUE;
 		} else {
@@ -2211,557 +2188,4 @@ void xsg_widgets_parse_areachart_var(uint32_t var_id) {
 	}
 }
 
-/******************************************************************************
- *
- * Text <update> <x> <y> <width> <height> <color> <font> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable>
- *
- ******************************************************************************/
-
-typedef enum {
-	TOP_LEFT      = 1 << 0,
-	TOP_CENTER    = 1 << 1,
-	TOP_RIGHT     = 1 << 2,
-	CENTER_LEFT   = 1 << 3,
-	CENTER        = 1 << 4,
-	CENTER_RIGHT  = 1 << 5,
-	BOTTOM_LEFT   = 1 << 6,
-	BOTTOM_CENTER = 1 << 8,
-	BOTTOM_RIGHT  = 1 << 9,
-	TOP           = TOP_LEFT    | TOP_CENTER    | TOP_RIGHT,
-	Y_CENTER      = CENTER_LEFT | CENTER        | CENTER_RIGHT,
-	BOTTOM        = BOTTOM_LEFT | BOTTOM_CENTER | BOTTOM_RIGHT,
-	LEFT          = TOP_LEFT    | CENTER_LEFT   | BOTTOM_LEFT,
-	X_CENTER      = TOP_CENTER  | CENTER        | BOTTOM_CENTER,
-	RIGHT         = TOP_RIGHT   | CENTER_RIGHT  | BOTTOM_RIGHT
-} alignment_t;
-
-typedef struct {
-	Imlib_Color color;
-	Imlib_Font font;
-	uint32_t printf_id;
-	angle_t *angle;
-	alignment_t alignment;
-	unsigned int tab_width;
-	char **lines;
-} text_t;
-
-static void render_text(widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
-	text_t *text;
-	unsigned line_count, line_index;
-	int line_advance, space_advance;
-	char **linev;
-
-	xsg_debug("render_text");
-
-	text = widget->data;
-
-	// count lines
-	line_count = 0;
-	for (linev = text->lines; *linev != NULL; linev++)
-		line_count++;
-
-	imlib_context_set_font(text->font);
-	imlib_context_set_color(text->color.red, text->color.green, text->color.blue, text->color.alpha);
-
-	imlib_get_text_advance(" ", &space_advance, &line_advance);
-
-	if (unlikely(line_advance < 1))
-		xsg_error("line_advance must be greater than 0");
-	if (unlikely(space_advance < 1))
-		xsg_error("space_advance must be greater than 0");
-
-
-	if ((text->angle == NULL) || (text->angle->angle == 0.0)) {
-		int line_y = 0;
-
-		imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
-
-		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
-
-		if (text->alignment & TOP)
-			line_y = widget->yoffset - up_y;
-		else if (text->alignment & Y_CENTER)
-			line_y = widget->yoffset - up_y + ((widget->height - (line_advance * line_count)) / 2);
-		else if (text->alignment & BOTTOM)
-			line_y = widget->yoffset - up_y + (widget->height - (line_advance * line_count));
-		else
-			xsg_error("unknown alignment: %x", text->alignment);
-
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
-			int xoffset = 0;
-			int width = 0;
-
-			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
-
-			if ((text->alignment & X_CENTER) || (text->alignment & RIGHT)) {
-				for (columnv = columns; *columnv != NULL; columnv++) {
-					int column_advance;
-
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
-
-					width += column_advance;
-
-					if (columnv[1] != NULL) {
-						width += space_advance;
-
-						if (text->tab_width > 0)
-							width += text->tab_width - (width % text->tab_width);
-					}
-				}
-			}
-
-			if (text->alignment & LEFT)
-				xoffset = widget->xoffset - up_x;
-			else if (text->alignment & X_CENTER)
-				xoffset = widget->xoffset - up_x + (((int) widget->width - width) / 2);
-			else if (text->alignment & RIGHT)
-				xoffset = widget->xoffset - up_x + ((int) widget->width - width);
-			else
-				xsg_error("unknown alignment: %x", text->alignment);
-
-			width = 0;
-
-			for (columnv = columns; *columnv != NULL; columnv++) {
-				int column_advance;
-
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
-
-				width += column_advance;
-
-				if (columnv[1] != NULL) {
-					width += space_advance;
-
-					if (text->tab_width > 0)
-						width += text->tab_width - (width % text->tab_width);
-				}
-			}
-
-			xsg_strfreev(columns);
-
-			line_y += line_advance;
-		}
-
-		imlib_context_set_cliprect(0, 0, 0, 0);
-
-	} else if (text->angle->angle == 90.0) {
-		int line_x = 0;
-
-		imlib_context_set_direction(IMLIB_TEXT_TO_DOWN);
-
-		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
-
-		if (text->alignment & TOP)
-			line_x = widget->xoffset - up_x + widget->width - line_advance;
-		else if (text->alignment & Y_CENTER)
-			line_x = widget->xoffset - up_x + widget->width - line_advance - ((widget->width - (line_advance * line_count)) / 2);
-		else if (text->alignment & BOTTOM)
-			line_x = widget->xoffset - up_x + widget->width - line_advance - (widget->width - (line_advance * line_count));
-		else
-			xsg_error("unknown alignment: %x", text->alignment);
-
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
-			int yoffset = 0;
-			int height = 0;
-
-			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
-
-			if ((text->alignment & X_CENTER) || (text->alignment & RIGHT)) {
-				for (columnv = columns; *columnv != NULL; columnv++) {
-					int column_advance;
-
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
-
-					height += column_advance;
-
-					if (columnv[1] != NULL) {
-						height += space_advance;
-
-						if (text->tab_width > 0)
-							height += text->tab_width - (height % text->tab_width);
-					}
-				}
-			}
-
-			if (text->alignment & LEFT)
-				yoffset = widget->yoffset - up_y;
-			else if (text->alignment & X_CENTER)
-				yoffset = widget->yoffset - up_y + (((int) widget->height - height) / 2);
-			else if (text->alignment & RIGHT)
-				yoffset = widget->yoffset - up_y + ((int) widget->height - height);
-			else
-				xsg_error("unknown alignment: %x", text->alignment);
-
-			height = 0;
-
-			for (columnv = columns; *columnv != NULL; columnv++) {
-				int column_advance;
-
-				T(imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
-
-				height += column_advance;
-
-				if (columnv[1] != NULL) {
-					height += space_advance;
-
-					if (text->tab_width > 0)
-						height += text->tab_width - (height % text->tab_width);
-				}
-			}
-
-			xsg_strfreev(columns);
-
-			line_x -= line_advance;
-		}
-
-		imlib_context_set_cliprect(0, 0, 0, 0);
-
-	} else if (text->angle->angle == 180.0) {
-		int line_y = 0;
-
-		imlib_context_set_direction(IMLIB_TEXT_TO_LEFT);
-
-		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
-
-		if (text->alignment & TOP)
-			line_y = widget->yoffset - up_y + widget->height - line_advance;
-		else if (text->alignment & Y_CENTER)
-			line_y = widget->yoffset - up_y + widget->height - line_advance - ((widget->height - (line_advance * line_count)) / 2);
-		else if (text->alignment & BOTTOM)
-			line_y = widget->yoffset - up_y + widget->height - line_advance - (widget->height - (line_advance * line_count));
-		else
-			xsg_error("unknown alignment: %x", text->alignment);
-
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
-			int xoffset = 0;
-			int width = 0;
-
-			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
-
-			if ((text->alignment & X_CENTER) || (text->alignment & LEFT)) {
-				for (columnv = columns; *columnv != NULL; columnv++) {
-					int column_advance;
-
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
-
-					width += column_advance;
-
-					if (columnv[1] != NULL) {
-						width += space_advance;
-
-						if (text->tab_width > 0)
-							width += text->tab_width - (width % text->tab_width);
-					}
-				}
-			}
-
-			if (text->alignment & LEFT)
-				xoffset = widget->xoffset - up_x + ((int) widget->width - width);
-			else if (text->alignment & X_CENTER)
-				xoffset = widget->xoffset - up_x + (((int) widget->width - width) / 2);
-			else if (text->alignment & RIGHT)
-				xoffset = widget->xoffset - up_x;
-			else
-				xsg_error("unknown alignment: %x", text->alignment);
-
-			width = 0;
-
-			for (columnv = columns; *columnv != NULL; columnv++) {
-				int column_advance;
-
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
-
-				width += column_advance;
-
-				if (columnv[1] != NULL) {
-					width += space_advance;
-
-					if (text->tab_width > 0)
-						width += text->tab_width - (width % text->tab_width);
-				}
-			}
-
-			xsg_strfreev(columns);
-
-			line_y -= line_advance;
-		}
-
-		imlib_context_set_cliprect(0, 0, 0, 0);
-
-	} else if (text->angle->angle == 270.0) {
-		int line_x = 0;
-
-		imlib_context_set_direction(IMLIB_TEXT_TO_UP);
-
-		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
-
-		if (text->alignment & TOP)
-			line_x = widget->xoffset - up_x;
-		else if (text->alignment & Y_CENTER)
-			line_x = widget->xoffset - up_x + ((widget->width - (line_advance * line_count)) / 2);
-		else if (text->alignment & BOTTOM)
-			line_x = widget->xoffset - up_x + (widget->width - (line_advance * line_count));
-		else
-			xsg_error("unknown alignment: %x", text->alignment);
-
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
-			int yoffset = 0;
-			int height = 0;
-
-			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
-
-			if ((text->alignment & X_CENTER) || (text->alignment & LEFT)) {
-				for (columnv = columns; *columnv != NULL; columnv++) {
-					int column_advance;
-
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
-
-					height += column_advance;
-
-					if (columnv[1] != NULL) {
-						height += space_advance;
-
-						if (text->tab_width > 0)
-							height += text->tab_width - (height % text->tab_width);
-					}
-				}
-			}
-
-			if (text->alignment & LEFT)
-				yoffset = widget->yoffset - up_y + ((int) widget->height - height);
-			else if (text->alignment & X_CENTER)
-				yoffset = widget->yoffset - up_y + (((int) widget->height - height) / 2);
-			else if (text->alignment & RIGHT)
-				yoffset = widget->yoffset - up_y;
-			else
-				xsg_error("unknown alignment: %x", text->alignment);
-
-			height = 0;
-
-			for (columnv = columns; *columnv != NULL; columnv++) {
-				int column_advance;
-
-				T(imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
-
-				height += column_advance;
-
-				if (columnv[1] != NULL) {
-					height += space_advance;
-
-					if (text->tab_width > 0)
-						height += text->tab_width - (height % text->tab_width);
-				}
-			}
-
-			xsg_strfreev(columns);
-
-			line_x += line_advance;
-		}
-
-		imlib_context_set_cliprect(0, 0, 0, 0);
-	} else {
-		Imlib_Image tmp;
-		int line_y = 0;
-
-		tmp = imlib_create_image(text->angle->width, text->angle->height);
-
-		imlib_context_set_image(tmp);
-		imlib_image_set_has_alpha(1);
-		T(imlib_image_clear());
-
-		imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
-
-		if (text->alignment & TOP)
-			line_y = 0;
-		else if (text->alignment & Y_CENTER)
-			line_y = (text->angle->height - (line_advance * line_count)) / 2;
-		else if (text->alignment & BOTTOM)
-			line_y = text->angle->height - (line_advance * line_count);
-		else
-			xsg_error("unknown alignment: %x", text->alignment);
-
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
-			int xoffset = 0;
-			int width = 0;
-
-			columns = xsg_strsplit_set(text->lines[line_index], "\t", 0);
-
-			if ((text->alignment & X_CENTER) || (text->alignment & RIGHT)) {
-				for (columnv = columns; *columnv != NULL; columnv++) {
-					int column_advance;
-
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
-
-					width += column_advance;
-
-					if (columnv[1] != NULL) {
-						width += space_advance;
-
-						if (text->tab_width > 0)
-							width += text->tab_width - (width % text->tab_width);
-					}
-				}
-			}
-
-			if (text->alignment & LEFT)
-				xoffset = 0;
-			else if (text->alignment & X_CENTER)
-				xoffset = ((int) text->angle->width - width) / 2;
-			else if (text->alignment & RIGHT)
-				xoffset = (int) text->angle->width - width;
-			else
-				xsg_error("unknown alignment: %x", text->alignment);
-
-			width = 0;
-
-			for (columnv = columns; *columnv != NULL; columnv++) {
-				int column_advance;
-
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
-
-				width += column_advance;
-
-				if (columnv[1] != NULL) {
-					width += space_advance;
-
-					if (text->tab_width > 0)
-						width += text->tab_width - (width % text->tab_width);
-				}
-			}
-
-			xsg_strfreev(columns);
-
-			line_y += line_advance;
-		}
-
-		imlib_context_set_image(buffer);
-
-		T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
-				text->angle->width, text->angle->height,
-				text->angle->xoffset - up_x, text->angle->yoffset - up_y,
-				text->angle->angle_x, text->angle->angle_y));
-
-		imlib_context_set_image(tmp);
-		imlib_free_image();
-	}
-
-}
-
-static void update_text(widget_t *widget, uint32_t var_id) {
-	text_t *text;
-
-	text = widget->data;
-
-	if (text->lines != NULL)
-		xsg_strfreev(text->lines);
-
-	text->lines = xsg_strsplit_set(xsg_printf(text->printf_id), "\n", 0);
-}
-
-static void scroll_text(widget_t *widget) {
-	return;
-}
-
-void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id) {
-	widget_t *widget;
-	text_t *text;
-	char *font_name;
-	char **pathv = NULL;
-
-	widget = xsg_new0(widget_t, 1);
-	text = xsg_new0(text_t, 1);
-
-	widget->update = xsg_conf_read_uint();
-	widget->xoffset = xsg_conf_read_int();
-	widget->yoffset = xsg_conf_read_int();
-	widget->width = xsg_conf_read_uint();
-	widget->height = xsg_conf_read_uint();
-	widget->render_func = render_text;
-	widget->update_func = update_text;
-	widget->scroll_func = scroll_text;
-	widget->data = (void *) text;
-
-	text->color = uint2color(xsg_conf_read_color());
-
-	font_name = xsg_conf_read_string();
-
-	if (unlikely(pathv == NULL)) {
-		char **p;
-
-		pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
-
-		if (unlikely(pathv == NULL))
-			xsg_error("Cannot get XSYSGUARD_FONT_PATH");
-
-		for (p = pathv; *p; p++) {
-			xsg_message("Adding path to font path: \"%s\"", *p);
-			imlib_add_path_to_font_path(*p);
-		}
-	}
-
-	text->font = imlib_load_font(font_name);
-	if (unlikely(text->font == NULL))
-		xsg_error("Cannot load font: \"%s\"", font_name);
-	xsg_free(font_name);
-
-	text->printf_id = xsg_printf_new(xsg_conf_read_string());
-	text->angle = NULL;
-	text->alignment = TOP_LEFT;
-	text->tab_width = 0;
-	text->lines = NULL;
-
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Angle")) {
-			double a = xsg_conf_read_double();
-			text->angle = parse_angle(a, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
-		} else if (xsg_conf_find_command("Alignment")) {
-			if (xsg_conf_find_command("TopLeft"))
-				text->alignment = TOP_LEFT;
-			else if (xsg_conf_find_command("TopCenter"))
-				text->alignment = TOP_CENTER;
-			else if (xsg_conf_find_command("TopRight"))
-				text->alignment = TOP_RIGHT;
-			else if (xsg_conf_find_command("CenterLeft"))
-				text->alignment = CENTER_LEFT;
-			else if (xsg_conf_find_command("Center"))
-				text->alignment = CENTER;
-			else if (xsg_conf_find_command("CenterRight"))
-				text->alignment = CENTER_RIGHT;
-			else if (xsg_conf_find_command("BottomLeft"))
-				text->alignment = BOTTOM_LEFT;
-			else if (xsg_conf_find_command("BottomCenter"))
-				text->alignment = BOTTOM_CENTER;
-			else if (xsg_conf_find_command("BottomRight"))
-				text->alignment = BOTTOM_RIGHT;
-			else
-				xsg_conf_error("TopLeft, TopCenter, TopRight, CenterLeft, Center, "
-						"CenterRight, BottomLeft, BottomCenter or BottomRight");
-		} else if (xsg_conf_find_command("TabWidth")) {
-			text->tab_width = xsg_conf_read_uint();
-		} else {
-			xsg_conf_error("Angle, Alignment or TabWidth");
-		}
-	}
-
-	*update = widget->update;
-	*widget_id = xsg_list_length(widget_list);
-
-	widget_list = xsg_list_append(widget_list, widget);
-}
-
-void xsg_widgets_parse_text_var(uint32_t var_id) {
-	widget_t *widget;
-	text_t *text;
-
-	widget = xsg_list_last(widget_list)->data;
-	text = widget->data;
-
-	xsg_printf_add_var(text->printf_id, var_id);
-	xsg_conf_read_newline();
-}
 

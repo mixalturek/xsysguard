@@ -23,6 +23,8 @@
 
 #include <xsysguard.h>
 
+#include "widget.h"
+
 /*****************************************************************************/
 
 void xsg_widgets_init(void);
@@ -59,8 +61,15 @@ void xsg_widgets_parse_linechart(uint64_t *update, uint32_t *widget_id);
 void xsg_widgets_parse_linechart_var(uint32_t var_id);
 void xsg_widgets_parse_areachart(uint64_t *update, uint32_t *widget_id);
 void xsg_widgets_parse_areachart_var(uint32_t var_id);
-void xsg_widgets_parse_text(uint64_t *update, uint32_t *widget_id);
-void xsg_widgets_parse_text_var(uint32_t var_id);
+
+/******************************************************************************/
+
+uint32_t xsg_widgets_add(xsg_widget_t *widget);
+xsg_widget_t *xsg_widgets_last();
+
+Imlib_Color xsg_widgets_uint2color(uint32_t u);
+
+xsg_widget_angle_t *parse_angle(double a, int xoffset, int yoffset, unsigned int *widht, unsigned int *height);
 
 /******************************************************************************/
 

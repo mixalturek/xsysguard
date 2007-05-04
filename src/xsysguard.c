@@ -30,11 +30,12 @@
 #include <stdarg.h>
 
 #include "modules.h"
-#include "widgets.h"
 #include "conf.h"
 #include "main.h"
 #include "var.h"
 #include "printf.h"
+#include "widgets.h"
+#include "widget_text.h"
 
 /******************************************************************************/
 
@@ -176,9 +177,9 @@ static void parse_config(char *config_buffer) {
 			while (parse_var(widget_id, update, &var_id) != 0)
 				xsg_widgets_parse_areachart_var(var_id);
 		} else if (xsg_conf_find_command("Text")) {
-			xsg_widgets_parse_text(&update, &widget_id);
+			xsg_widget_text_parse(&update, &widget_id);
 			while (parse_var(widget_id, update, &var_id) != 0)
-				xsg_widgets_parse_text_var(var_id);
+				xsg_widget_text_parse_var(var_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart or Text");
