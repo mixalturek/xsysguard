@@ -29,6 +29,7 @@
 #include "widgets.h"
 #include "imlib.h"
 #include "conf.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -69,9 +70,14 @@ static void scroll_line(xsg_widget_t *widget) {
 void xsg_widget_line_parse() {
 	xsg_widget_t *widget;
 	line_t *line;
+	uint64_t update;
+	uint32_t widget_id;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	line = xsg_new(line_t, 1);
+
+	update = xsg_conf_read_uint();
+	widget_id = xsg_widgets_add(widget);
 
 	line->x1 = xsg_conf_read_int();
 	line->y1 = xsg_conf_read_int();
@@ -80,17 +86,25 @@ void xsg_widget_line_parse() {
 	line->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	xsg_conf_read_newline();
 
-	widget->update = 0;
+	widget->update = update;
 	widget->xoffset = MIN(line->x1, line->x2);
 	widget->yoffset = MIN(line->y1, line->y2);
 	widget->width = MAX(line->x1, line->x2) - widget->xoffset + 1;
 	widget->height = MAX(line->y1, line->y2) - widget->yoffset + 1;
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_line;
 	widget->update_func = update_line;
 	widget->scroll_func = scroll_line;
 	widget->data = (void *) line;
 
-	xsg_widgets_add(widget);
+	while (!xsg_conf_find_newline()) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show_var_id = xsg_var_parse_double(widget_id, update);
+		} else {
+			xsg_conf_error("Show");
+		}
+	}
 }
 
 

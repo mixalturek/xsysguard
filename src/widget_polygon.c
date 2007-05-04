@@ -29,6 +29,7 @@
 #include "widgets.h"
 #include "imlib.h"
 #include "conf.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -112,9 +113,14 @@ void xsg_widget_polygon_parse() {
 	polygon_t *polygon;
 	unsigned int count, i;
 	int x1, y1, x2, y2;
+	uint64_t update;
+	uint32_t widget_id;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	polygon = xsg_new0(polygon_t, 1);
+
+	update = xsg_conf_read_uint();
+	widget_id = xsg_widgets_add(widget);
 
 	polygon->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	polygon->polygon = imlib_polygon_new();
@@ -129,28 +135,32 @@ void xsg_widget_polygon_parse() {
 		imlib_polygon_add_point(polygon->polygon, x, y);
 	}
 
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Filled"))
-			polygon->filled = TRUE;
-		else if (xsg_conf_find_command("Closed"))
-			polygon->closed = TRUE;
-		else
-			xsg_conf_error("Filled or Closed");
-	}
-
 	imlib_polygon_get_bounds(polygon->polygon, &x1, &y1, &x2, &y2);
 
-	widget->update = 0;
+	widget->update = update;
 	widget->xoffset = x1;
 	widget->yoffset = y1;
 	widget->width = x2 - x1;
 	widget->height = y2 - y1;
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_polygon;
 	widget->update_func = update_polygon;
 	widget->scroll_func = scroll_polygon;
 	widget->data = (void *) polygon;
 
-	xsg_widgets_add(widget);
+	while (!xsg_conf_find_newline()) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show_var_id = xsg_var_parse_double(widget_id, update);
+		} else if (xsg_conf_find_command("Filled")) {
+			polygon->filled = TRUE;
+		} else if (xsg_conf_find_command("Closed")) {
+			polygon->closed = TRUE;
+		} else {
+			xsg_conf_error("Show, Filled or Closed");
+		}
+	}
+
 }
 
 

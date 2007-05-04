@@ -30,6 +30,7 @@
 #include "angle.h"
 #include "imlib.h"
 #include "conf.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -84,15 +85,20 @@ void xsg_widget_image_parse() {
 	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
+	uint32_t widget_id;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	image = xsg_new0(image_t, 1);
 
-	widget->update = 0;
+	widget_id = xsg_widgets_add(widget);
+
+	widget->update = xsg_conf_read_uint();;
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_image;
 	widget->update_func = update_image;
 	widget->scroll_func = scroll_image;
@@ -102,17 +108,18 @@ void xsg_widget_image_parse() {
 	image->filename = xsg_conf_read_string();
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Angle")) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show_var_id = xsg_var_parse_double(widget_id, widget->update);
+		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("Angle");
+			xsg_conf_error("Show or Angle");
 		}
 	}
 
 	if (angle != 0.0)
 		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
-	xsg_widgets_add(widget);
 }
 
 

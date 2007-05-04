@@ -22,6 +22,7 @@
 
 #include "widgets.h"
 #include "window.h"
+#include "rpn.h"
 
 /******************************************************************************/
 
@@ -92,9 +93,8 @@ void xsg_widgets_render(Imlib_Image buffer, int up_x, int up_y, int up_w, int up
 
 	for (l = widget_list; l; l = l->next) {
 		xsg_widget_t *widget = l->data;
-		if (widget_rect(widget, up_x, up_y, up_w, up_h)) {
+		if (widget->show && widget_rect(widget, up_x, up_y, up_w, up_h))
 			(widget->render_func)(widget, buffer, up_x, up_y);
-		}
 	}
 }
 
@@ -105,7 +105,10 @@ void xsg_widgets_update(uint32_t widget_id, uint32_t var_id) {
 
 	widget = get_widget(widget_id);
 
-	(widget->update_func)(widget, var_id);
+	if (widget->show_var_id == var_id)
+		widget->show = xsg_rpn_calc(var_id);
+	else
+		(widget->update_func)(widget, var_id);
 
 	xsg_window_update_append_rect(widget->xoffset, widget->yoffset, widget->width, widget->height);
 
@@ -122,6 +125,9 @@ static void scroll_and_update(uint64_t count) {
 		widget = l->data;
 
 		if (widget->update && (count % widget->update) == 0) {
+
+			if (widget->show_var_id != 0xffffffff)
+				widget->show = xsg_rpn_calc(widget->show_var_id);
 
 			(widget->scroll_func)(widget);
 			(widget->update_func)(widget, 0xffffffff);

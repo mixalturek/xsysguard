@@ -30,6 +30,7 @@
 #include "angle.h"
 #include "imlib.h"
 #include "conf.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -108,15 +109,20 @@ void xsg_widget_rectangle_parse() {
 	xsg_widget_t *widget;
 	rectangle_t *rectangle;
 	double angle = 0.0;
+	uint32_t widget_id;
 
 	widget = xsg_new0(xsg_widget_t, 1);
 	rectangle = xsg_new(rectangle_t, 1);
 
-	widget->update = 0;
+	widget_id = xsg_widgets_add(widget);
+
+	widget->update = xsg_conf_read_uint();;
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_rectangle;
 	widget->update_func = update_rectangle;
 	widget->scroll_func = scroll_rectangle;
@@ -129,7 +135,9 @@ void xsg_widget_rectangle_parse() {
 	rectangle->filled = FALSE;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("ColorRange")) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show_var_id = xsg_var_parse_double(widget_id, widget->update);
+		} else if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
 
 			if (rectangle->range != NULL) {
@@ -158,14 +166,12 @@ void xsg_widget_rectangle_parse() {
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
-			xsg_conf_error("Angle, ColorRange or Filled");
+			xsg_conf_error("Show, Angle, ColorRange or Filled");
 		}
 	}
 
 	if (angle != 0.0)
 		rectangle->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
-
-	xsg_widgets_add(widget);
 }
 
 

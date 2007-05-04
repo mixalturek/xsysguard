@@ -54,6 +54,8 @@ struct _xsg_widget_t {
 	int yoffset;
 	unsigned int width;
 	unsigned int height;
+	uint32_t show_var_id; // none: 0xffffffff
+	bool show;
 	void (*render_func)(xsg_widget_t *widget, Imlib_Image buffer, int x, int y);
 	void (*update_func)(xsg_widget_t *widget, uint32_t var_id);
 	void (*scroll_func)(xsg_widget_t *widget);

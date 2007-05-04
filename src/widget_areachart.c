@@ -117,10 +117,15 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_areachart;
 	widget->update_func = update_areachart;
 	widget->scroll_func = scroll_areachart;
 	widget->data = (void *) areachart;
+
+	*update = widget->update;
+	*widget_id = xsg_widgets_add(widget);
 
 	areachart->angle = NULL;
 	areachart->min = 0.0;
@@ -132,7 +137,9 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 	areachart->value_index = 0;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Angle")) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show = xsg_var_parse_double(*widget_id, *update);
+		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
 			areachart->min = xsg_conf_read_double();
@@ -147,15 +154,12 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 				xsg_error("Cannot load image \"%s\"", filename);
 			xsg_free(filename);
 		} else {
-			xsg_conf_error("Angle, Min, Max or Background");
+			xsg_conf_error("Show, Angle, Min, Max or Background");
 		}
 	}
 
 	if (angle != 0.0)
 		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
-
-	*update = widget->update;
-	*widget_id = xsg_widgets_add(widget);
 }
 
 void xsg_widget_areachart_parse_var(uint32_t var_id) {

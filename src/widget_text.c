@@ -32,6 +32,7 @@
 #include "imlib.h"
 #include "printf.h"
 #include "conf.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -503,10 +504,15 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
+	widget->show_var_id = 0xffffffff;
+	widget->show = TRUE;
 	widget->render_func = render_text;
 	widget->update_func = update_text;
 	widget->scroll_func = scroll_text;
 	widget->data = (void *) text;
+
+	*update = widget->update;
+	*widget_id = xsg_widgets_add(widget);
 
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 
@@ -538,7 +544,9 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	text->lines = NULL;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Angle")) {
+		if (xsg_conf_find_command("Show")) {
+			widget->show_var_id = xsg_var_parse_double(*widget_id, *update);
+		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {
 			if (xsg_conf_find_command("TopLeft"))
@@ -565,15 +573,12 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 		} else if (xsg_conf_find_command("TabWidth")) {
 			text->tab_width = xsg_conf_read_uint();
 		} else {
-			xsg_conf_error("Angle, Alignment or TabWidth");
+			xsg_conf_error("Show, Angle, Alignment or TabWidth");
 		}
 	}
 
 	if (angle != 0.0)
 		text->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
-
-	*update = widget->update;
-	*widget_id = xsg_widgets_add(widget);
 }
 
 void xsg_widget_text_parse_var(uint32_t var_id) {
