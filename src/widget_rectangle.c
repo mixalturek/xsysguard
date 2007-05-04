@@ -131,6 +131,12 @@ void xsg_widget_rectangle_parse() {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
+
+			if (rectangle->range != NULL) {
+				imlib_context_set_color_range(rectangle->range);
+				imlib_free_color_range();
+			}
+
 			rectangle->range = imlib_create_color_range();
 			imlib_context_set_color_range(rectangle->range);
 			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
