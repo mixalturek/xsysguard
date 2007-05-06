@@ -1,3 +1,3 @@
 include Makefile
-all: str.so
+all: s.so
 

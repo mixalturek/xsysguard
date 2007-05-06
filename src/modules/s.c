@@ -1,4 +1,4 @@
-/* str.c
+/* s.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
