@@ -46,6 +46,7 @@ void xsg_window_parse_cache_size(void);
 void xsg_window_parse_font_cache_size(void);
 void xsg_window_parse_xshape(void);
 void xsg_window_parse_argb_visual(void);
+void xsg_window_parse_show(void);
 
 /*****************************************************************************/
 

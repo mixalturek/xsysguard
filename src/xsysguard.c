@@ -154,6 +154,8 @@ static void parse_config(char *config_buffer) {
 				xsg_window_parse_xshape();
 			} else if (xsg_conf_find_command("ARGBVisual")) {
 				xsg_window_parse_argb_visual();
+			} else if (xsg_conf_find_command("Show")) {
+				xsg_window_parse_show();
 			} else {
 				xsg_conf_error("Interval, IconName, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "

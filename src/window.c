@@ -33,6 +33,8 @@
 #include "widgets.h"
 #include "imlib.h"
 #include "conf.h"
+#include "var.h"
+#include "rpn.h"
 
 /******************************************************************************/
 
@@ -84,6 +86,9 @@ typedef struct {
 	Window id;
 	Imlib_Updates updates;
 	Pixmap mask;
+	bool show;
+	uint64_t show_update;
+	uint32_t show_var_id;
 } window_t;
 
 static window_t window = {
@@ -116,6 +121,9 @@ static window_t window = {
 	id: 0,
 	updates: 0,
 	mask: 0,
+	show: FALSE,
+	show_update: 0,
+	show_var_id: 0xffffffff,
 };
 
 /******************************************************************************
@@ -208,6 +216,11 @@ void xsg_window_parse_xshape() {
 void xsg_window_parse_argb_visual() {
 	window.argb_visual = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
+}
+
+void xsg_window_parse_show() {
+	window.show_update = xsg_conf_read_uint();
+	window.show_var_id = xsg_var_parse_double(0xffffffff, window.show_update);
 }
 
 /******************************************************************************
@@ -483,14 +496,58 @@ void xsg_window_render(void) {
 
 void xsg_window_render_xshape(void) {
 	if (window.xshape)
-		XShapeCombineMask(window.display, window.id, ShapeBounding,
-				0, 0, window.mask, ShapeSet);
+		XShapeCombineMask(window.display, window.id, ShapeBounding, 0, 0, window.mask, ShapeSet);
 }
 
 /******************************************************************************/
 
+static void update_show(void) {
+	bool show;
+
+	show = window.show;
+
+	if (window.show_update != 0)
+		window.show = (xsg_rpn_calc(window.show_var_id) == 0.0) ? FALSE : TRUE;
+	else
+		window.show = TRUE;
+
+	if (window.show != show) {
+		if (window.show) {
+			xsg_debug("XMapWindow");
+			XMapWindow(window.display, window.id);
+		} else {
+			xsg_debug("XUnmapWindow");
+			XUnmapWindow(window.display, window.id);
+		}
+	}
+}
+
+/******************************************************************************
+ *
+ * async events
+ *
+ ******************************************************************************/
+
 void xsg_window_update_widget(uint32_t widget_id, uint32_t var_id) {
-	xsg_widgets_update(widget_id, var_id);
+	if (widget_id == 0xffffffff) {
+		update_show();
+		xsg_window_update_append_rect(0, 0, window.width, window.height);
+		xsg_window_render();
+		xsg_window_render_xshape();
+	} else {
+		xsg_widgets_update(widget_id, var_id);
+	}
+}
+
+/******************************************************************************
+ *
+ * update func
+ *
+ ******************************************************************************/
+
+static void update(uint64_t count) {
+	if (window.show_update && (count % window.show_update) == 0)
+		update_show();
 }
 
 /******************************************************************************/
@@ -690,11 +747,12 @@ void xsg_window_init() {
 
 	attrs.background_pixel = 0;
 	attrs.colormap = colormap;
+	attrs.override_redirect = 1;
 
 	window.id = XCreateWindow(window.display, XRootWindow(window.display, window.screen),
 			window.xoffset, window.yoffset, window.width, window.height, 0,
 			window.depth, InputOutput, window.visual,
-			CWBackPixel | CWColormap, &attrs);
+			CWBackPixel | CWColormap | CWOverrideRedirect, &attrs);
 
 	set_size_hints();
 	set_class_hints();
@@ -709,7 +767,6 @@ void xsg_window_init() {
 	if (!window.decorations)
 		hide_decorations();
 
-	XMapWindow(window.display, window.id);
 
 	if (window.sticky)
 		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_STICKY");
@@ -744,9 +801,13 @@ void xsg_window_init() {
 
 	window.updates = imlib_update_append_rect(window.updates, 0, 0, window.width, window.height);
 
+	xsg_main_add_update_func(update);
+
 	xsg_widgets_init();
 
 	xsg_main_add_poll_func(ConnectionNumber(window.display), handle_xevents, NULL, XSG_MAIN_POLL_READ | XSG_MAIN_POLL_EXCEPT);
+
+	update_show();
 }
 
 
