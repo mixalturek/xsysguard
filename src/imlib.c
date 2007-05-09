@@ -42,7 +42,6 @@ typedef union {
 /******************************************************************************/
 
 Imlib_Image xsg_imlib_load_image(const char *filename) {
-	Imlib_Image image = NULL;
 	static char **pathv = NULL;
 	char **p;
 	char *file;
@@ -56,15 +55,75 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 
 	for (p = pathv; *p; p++) {
 		xsg_message("Searching for image \"%s\" in \"%s\"", filename, *p);
+
 		file = xsg_build_filename(*p, filename, NULL);
+
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
-			image = imlib_load_image(file);
+			Imlib_Image image;
+			Imlib_Load_Error error;
+			char *error_str = NULL;
+
+			xsg_message("Found image in \"%s\". Loading...", file);
+
+			image = imlib_load_image_with_error_return(file, &error);
+
+			if (image) {
+				xsg_message("Loaded image \"%s\"", file);
+				xsg_free(file);
+				return image;
+			} else {
+				switch (error) {
+					case IMLIB_LOAD_ERROR_NONE:
+						error_str = "IMLIB_LOAD_ERROR_NONE";
+						break;
+					case IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST:
+						error_str = "IMLIB_LOAD_ERROR_FILE_DOES_NOT_EXIST";
+						break;
+					case IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY:
+						error_str = "IMLIB_LOAD_ERROR_FILE_IS_DIRECTORY";
+						break;
+					case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ:
+						error_str = "IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_READ";
+						break;
+					case IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT:
+						error_str = "IMLIB_LOAD_ERROR_NO_LOADER_FOR_FILE_FORMAT";
+						break;
+					case IMLIB_LOAD_ERROR_PATH_TOO_LONG:
+						error_str = "IMLIB_LOAD_ERROR_PATH_TOO_LONG";
+						break;
+					case IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT:
+						error_str = "IMLIB_LOAD_ERROR_PATH_COMPONENT_NON_EXISTANT";
+						break;
+					case IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY:
+						error_str = "IMLIB_LOAD_ERROR_PATH_COMPONENT_NOT_DIRECTORY";
+						break;
+					case IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE:
+						error_str = "IMLIB_LOAD_ERROR_PATH_POINTS_OUTSIDE_ADDRESS_SPACE";
+						break;
+					case IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS:
+						error_str = "IMLIB_LOAD_ERROR_TOO_MANY_SYMBOLIC_LINKS";
+						break;
+					case IMLIB_LOAD_ERROR_OUT_OF_MEMORY:
+						error_str = "IMLIB_LOAD_ERROR_OUT_OF_MEMORY";
+						break;
+					case IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS:
+						error_str = "IMLIB_LOAD_ERROR_OUT_OF_FILE_DESCRIPTORS";
+						break;
+					case IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE:
+						error_str = "IMLIB_LOAD_ERROR_PERMISSION_DENIED_TO_WRITE";
+						break;
+					case IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE:
+						error_str = "IMLIB_LOAD_ERROR_OUT_OF_DISK_SPACE";
+						break;
+					case IMLIB_LOAD_ERROR_UNKNOWN:
+					default:
+						error_str = "IMLIB_LOAD_ERROR_UNKNOWN";
+						break;
+				}
+				xsg_warning("Loading image \"%s\" failed: %s", file, error_str);
+			}
 		}
-		if (image) {
-			xsg_message("Found image \"%s\"", file);
-			xsg_free(file);
-			return image;
-		}
+
 		xsg_free(file);
 	}
 
