@@ -97,6 +97,8 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 	if ((text->angle == NULL) || (text->angle->angle == 0.0)) {
 		int line_y = 0;
 
+		imlib_context_set_image(buffer);
+
 		imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
 
 		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
@@ -169,6 +171,8 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 	} else if (text->angle->angle == 90.0) {
 		int line_x = 0;
+
+		imlib_context_set_image(buffer);
 
 		imlib_context_set_direction(IMLIB_TEXT_TO_DOWN);
 
@@ -243,6 +247,8 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 	} else if (text->angle->angle == 180.0) {
 		int line_y = 0;
 
+		imlib_context_set_image(buffer);
+
 		imlib_context_set_direction(IMLIB_TEXT_TO_LEFT);
 
 		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
@@ -315,6 +321,8 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 	} else if (text->angle->angle == 270.0) {
 		int line_x = 0;
+
+		imlib_context_set_image(buffer);
 
 		imlib_context_set_direction(IMLIB_TEXT_TO_UP);
 
