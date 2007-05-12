@@ -37,15 +37,13 @@
 #include "var.h"
 #include "rpn.h"
 
-long long int llround(double x); // TODO remove
-
 /******************************************************************************/
 
 typedef struct {
 	uint32_t var_id;
 	Imlib_Color color;
 	Imlib_Color_Range range;
-	double angle;
+	double range_angle;
 	bool add_prev;
 	double value;
 } barchart_var_t;
@@ -66,131 +64,499 @@ typedef struct {
 
 static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	barchart_t *barchart;
-	barchart_var_t *barchart_var;
-	double min, max;
 	xsg_list_t *l;
-	int clip_x, clip_y, clip_w, clip_h;
-	int last_h = 0;
-	double value;
-	double pixel_h;
-	Imlib_Image tmp;
-	unsigned int width;
-	unsigned int height;
+	Imlib_Image mask_img;
 
 	xsg_debug("render_barchart");
 
 	barchart = (barchart_t *) widget->data;
 
-	if (barchart->const_min) {
-		min = barchart->min;
-	} else {
-		min = DBL_MAX;
+	if (barchart->min >= barchart->max)
+		return;
+
+	// load mask image
+	mask_img = NULL;
+	if (barchart->mask) {
+		mask_img = xsg_imlib_load_image(barchart->mask);
+
+		if (unlikely(mask_img == NULL))
+			xsg_warning("Cannot load image \"%s\"", barchart->mask);
+	}
+
+	if ((mask_img == NULL) && ((barchart->angle == NULL) || (barchart->angle->angle == 0.0))) {
+		int clip_x, clip_y, clip_w, clip_h;
+		int null_y, prev_pos_h, prev_neg_h;
+		double pixel_mult;
+
+		imlib_context_set_image(buffer);
+
+		pixel_mult = ((double) widget->height) / (barchart->max - barchart->min);
+
+		clip_x = widget->xoffset - up_x;
+		clip_w = widget->width;
+
+		null_y = widget->yoffset - up_y + ((int) (barchart->max * pixel_mult));
+
+		prev_pos_h = 0;
+		prev_neg_h = 0;
+
 		for (l = barchart->var_list; l; l = l->next) {
-			barchart_var = l->data;
-			min = MIN(min, barchart_var->value);
-		}
-		if (min == DBL_MAX)
-			return;
-	}
+			barchart_var_t *barchart_var;
 
-	if (barchart->const_max) {
-		max = barchart->max;
-	} else {
-		max = DBL_MIN;
+			barchart_var = l->data;
+
+			if (isnan(barchart_var->value))
+				continue;
+
+			if (barchart_var->value > 0.0) {
+				clip_h = barchart_var->value * pixel_mult;
+				if (barchart_var->add_prev) {
+					clip_y = null_y - clip_h - prev_pos_h;
+					prev_pos_h += clip_h;
+				} else {
+					clip_y = null_y - clip_h;
+					prev_pos_h = clip_h;
+				}
+			} else {
+				clip_h = barchart_var->value * pixel_mult * (- 1.0);
+				if (barchart_var->add_prev) {
+					clip_y = null_y + prev_neg_h;
+					prev_neg_h += clip_h;
+				} else {
+					clip_y = null_y;
+					prev_neg_h = clip_h;
+				}
+			}
+
+			if (clip_y < (widget->yoffset - up_y)) {
+				clip_h -= widget->yoffset - up_y - clip_y;
+				clip_y = widget->yoffset - up_y;
+			}
+
+			if ((clip_y + clip_h) > (widget->yoffset - up_y + widget->height))
+				clip_h -= (clip_y + clip_h) - (widget->yoffset - up_y + widget->height);
+
+			if (clip_h <= 0)
+				continue;
+
+			if (barchart_var->range != NULL) {
+				double range_angle = barchart_var->range_angle;
+				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_color_range(barchart_var->range);
+				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, range_angle));
+				imlib_context_set_cliprect(0, 0, 0, 0);
+			} else {
+				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+						barchart_var->color.blue, barchart_var->color.alpha);
+				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+			}
+		}
+	} else if ((mask_img == NULL) && (barchart->angle->angle == 90.0)) {
+		int clip_x, clip_y, clip_w, clip_h;
+		int null_x, prev_pos_w, prev_neg_w;
+		double pixel_mult;
+
+		imlib_context_set_image(buffer);
+
+		pixel_mult = ((double) widget->width) / (barchart->max - barchart->min);
+
+		clip_y = widget->yoffset - up_y;
+		clip_h = widget->height;
+
+		null_x = widget->xoffset - up_x + widget->width - ((int) (barchart->max * pixel_mult));
+
+		prev_pos_w = 0;
+		prev_neg_w = 0;
+
 		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var_t *barchart_var;
+
 			barchart_var = l->data;
-			max = MAX(max, barchart_var->value);
+
+			if (isnan(barchart_var->value))
+				continue;
+
+			if (barchart_var->value > 0.0) {
+				clip_w = barchart_var->value * pixel_mult;
+				if (barchart_var->add_prev) {
+					clip_x = null_x + prev_pos_w;
+					prev_pos_w += clip_w;
+				} else {
+					clip_x = null_x;
+					prev_pos_w = clip_w;
+				}
+			} else {
+				clip_w = barchart_var->value * pixel_mult * (- 1.0);
+				if (barchart_var->add_prev) {
+					clip_x = null_x - clip_w - prev_neg_w;
+					prev_neg_w += clip_w;
+				} else {
+					clip_x = null_x - clip_w;
+					prev_neg_w = clip_w;
+				}
+			}
+
+			if (clip_x < (widget->xoffset - up_x)) {
+				clip_w -= widget->xoffset - up_x - clip_x;
+				clip_x = widget->xoffset - up_x;
+			}
+
+			if ((clip_x + clip_w) > (widget->xoffset - up_x + widget->width))
+				clip_w -= (clip_x + clip_w) - (widget->xoffset - up_x + widget->width);
+
+			if (clip_w <= 0)
+				continue;
+
+			if (barchart_var->range != NULL) {
+				double range_angle = barchart_var->range_angle + 90.0;
+				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_color_range(barchart_var->range);
+				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+							widget->width, widget->height, range_angle));
+				imlib_context_set_cliprect(0, 0, 0, 0);
+			} else {
+				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+						barchart_var->color.blue, barchart_var->color.alpha);
+				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+			}
 		}
-		if (max == DBL_MIN)
-			return;
-	}
+	} else if ((mask_img == NULL) && (barchart->angle->angle == 180.0)) {
+		int clip_x, clip_y, clip_w, clip_h;
+		int null_y, prev_pos_h, prev_neg_h;
+		double pixel_mult;
 
-	if (barchart->angle) {
-		width = barchart->angle->width;
-		height = barchart->angle->height;
+		imlib_context_set_image(buffer);
+
+		pixel_mult = ((double) widget->height) / (barchart->max - barchart->min);
+
+		clip_x = widget->xoffset - up_x;
+		clip_w = widget->width;
+
+		null_y = widget->yoffset - up_y + widget->height - ((int) (barchart->max * pixel_mult));
+
+		prev_pos_h = 0;
+		prev_neg_h = 0;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var_t *barchart_var;
+
+			barchart_var = l->data;
+
+			if (isnan(barchart_var->value))
+				continue;
+
+			if (barchart_var->value > 0.0) {
+				clip_h = barchart_var->value * pixel_mult;
+				if (barchart_var->add_prev) {
+					clip_y = null_y + prev_pos_h;
+					prev_pos_h += clip_h;
+				} else {
+					clip_y = null_y;
+					prev_pos_h = clip_h;
+				}
+			} else {
+				clip_h = barchart_var->value * pixel_mult * -1;
+				if (barchart_var->add_prev) {
+					clip_y = null_y - clip_h - prev_neg_h;
+					prev_neg_h += clip_h;
+				} else {
+					clip_y = null_y - clip_h;
+					prev_neg_h = clip_h;
+				}
+			}
+
+			if (clip_y < (widget->yoffset - up_y)) {
+				clip_h -= widget->yoffset - up_y - clip_y;
+				clip_y = widget->yoffset - up_y;
+			}
+
+			if ((clip_y + clip_h) > (widget->yoffset - up_y + widget->height))
+				clip_h -= (clip_y + clip_h) - (widget->yoffset - up_y + widget->height);
+
+			if (clip_h <= 0)
+				continue;
+
+			if (barchart_var->range != NULL) {
+				double range_angle = barchart_var->range_angle + 180.0;
+				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_color_range(barchart_var->range);
+				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, range_angle));
+				imlib_context_set_cliprect(0, 0, 0, 0);
+			} else {
+				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+						barchart_var->color.blue, barchart_var->color.alpha);
+				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+			}
+		}
+	} else if ((mask_img == NULL) && (barchart->angle->angle == 270.0)) {
+		int clip_x, clip_y, clip_w, clip_h;
+		int null_x, prev_pos_w, prev_neg_w;
+		double pixel_mult;
+
+		imlib_context_set_image(buffer);
+
+		pixel_mult = ((double) widget->width) / (barchart->max - barchart->min);
+
+		clip_y = widget->yoffset - up_y;
+		clip_h = widget->height;
+
+		null_x = widget->xoffset - up_x + ((int) (barchart->max * pixel_mult));
+
+		prev_pos_w = 0;
+		prev_neg_w = 0;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var_t *barchart_var;
+
+			barchart_var = l->data;
+
+			if (isnan(barchart_var->value))
+				continue;
+
+			if (barchart_var->value > 0.0) {
+				clip_w = barchart_var->value * pixel_mult;
+				if (barchart_var->add_prev) {
+					clip_x = null_x - clip_w - prev_pos_w;
+					prev_pos_w += clip_w;
+				} else {
+					clip_x = null_x - clip_w;
+					prev_pos_w = clip_w;
+				}
+			} else {
+				clip_w = barchart_var->value * pixel_mult * (- 1.0);
+				if (barchart_var->add_prev) {
+					clip_x = null_x + prev_neg_w;
+					prev_neg_w += clip_w;
+				} else {
+					clip_x = null_x;
+					prev_neg_w = clip_w;
+				}
+			}
+
+			if (clip_x < (widget->xoffset - up_x)) {
+				clip_w -= widget->xoffset - up_x - clip_x;
+				clip_x = widget->xoffset - up_x;
+			}
+
+			if ((clip_x + clip_w) > (widget->xoffset - up_x + widget->width))
+				clip_w -= (clip_x + clip_h) - (widget->xoffset - up_x + widget->width);
+
+			if (clip_w <= 0)
+				continue;
+
+			if (barchart_var->range != NULL) {
+				double range_angle = barchart_var->range_angle + 270.0;
+				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_color_range(barchart_var->range);
+				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+							widget->width, widget->height, range_angle));
+				imlib_context_set_cliprect(0, 0, 0, 0);
+			} else {
+				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+						barchart_var->color.blue, barchart_var->color.alpha);
+				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+			}
+		}
 	} else {
-		width = widget->width;
-		height = widget->height;
-	}
+		int clip_x, clip_y, clip_w, clip_h;
+		int null_y, prev_pos_h, prev_neg_h;
+		double pixel_mult;
+		unsigned int width, height;
+		Imlib_Image tmp;
 
-	tmp = imlib_create_image(width, height);
-	imlib_context_set_image(tmp);
-	imlib_image_set_has_alpha(1);
-	imlib_image_clear();
+		if (barchart->angle) {
+			width = barchart->angle->width;
+			height = barchart->angle->height;
+		} else {
+			width = widget->width;
+			height = widget->height;
+		}
 
-	pixel_h = (max - min) / (double) height;
+		tmp = imlib_create_image(width, height);
+		imlib_context_set_image(tmp);
+		imlib_image_set_has_alpha(1);
+		imlib_image_clear();
 
-	for (l = barchart->var_list; l; l = l->next) {
-		barchart_var = l->data;
-		value = barchart_var->value;
-		if (isnan(value))
-			continue;
+		pixel_mult = ((double) height) / (barchart->max - barchart->min);
 
 		clip_x = 0;
-		clip_y = last_h;
 		clip_w = width;
 
-		if (barchart_var->add_prev) {
-			clip_h = last_h + llround(value / pixel_h);
-			last_h = clip_h + clip_y;
-		} else {
-			clip_h = llround(value / pixel_h);
-			last_h = clip_h;
+		null_y = (int) (barchart->max * pixel_mult);
+
+		prev_pos_h = 0;
+		prev_neg_h = 0;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var_t *barchart_var;
+
+			barchart_var = l->data;
+
+			if (isnan(barchart_var->value))
+				continue;
+
+			if (barchart_var->value > 0.0) {
+				clip_h = barchart_var->value * pixel_mult;
+				if (barchart_var->add_prev) {
+					clip_y = null_y - clip_h - prev_pos_h;
+					prev_pos_h += clip_h;
+				} else {
+					clip_y = null_y - clip_h;
+					prev_pos_h = clip_h;
+				}
+			} else {
+				clip_h = barchart_var->value * pixel_mult * (- 1.0);
+				if (barchart_var->add_prev) {
+					clip_y = null_y + prev_neg_h;
+					prev_neg_h += clip_h;
+				} else {
+					clip_y = null_y;
+					prev_neg_h = clip_h;
+				}
+			}
+
+			if (clip_y < 0) {
+				clip_h -= -clip_y;
+				clip_y = 0;
+			}
+
+			if (clip_y + clip_h > height)
+				clip_h -= (clip_y + clip_h) - height;
+
+			if (clip_h <= 0)
+				continue;
+
+			if (barchart_var->range != NULL) {
+				double range_angle = barchart_var->range_angle;
+				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_color_range(barchart_var->range);
+				T(imlib_image_fill_color_range_rectangle(0, 0, width, height, range_angle));
+				imlib_context_set_cliprect(0, 0, 0, 0);
+			} else {
+				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+						barchart_var->color.blue, barchart_var->color.alpha);
+				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+			}
 		}
 
-		clip_y = height - clip_h - clip_y;
+		if (mask_img)
+			T(xsg_imlib_blend_mask(mask_img));
 
-		if ((clip_w <= 0) || (clip_h <= 0))
-			continue;
-		imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
-		if (barchart_var->range) {
-			imlib_context_set_color_range(barchart_var->range);
-			imlib_image_fill_color_range_rectangle(0, 0,
-					width, height, barchart_var->angle);
+		imlib_context_set_image(buffer);
+		if (barchart->angle) {
+			T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, width, height,
+					barchart->angle->xoffset - up_x, barchart->angle->yoffset - up_y,
+					barchart->angle->angle_x, barchart->angle->angle_y));
 		} else {
-			imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
-					barchart_var->color.blue, barchart_var->color.alpha);
-			imlib_image_fill_rectangle(0, 0, width, height);
+			T(imlib_blend_image_onto_image(tmp, 1, 0, 0, width, height,
+					widget->xoffset - up_x, widget->yoffset - up_y,
+					width, height));
 		}
+
+		imlib_context_set_image(tmp);
+		imlib_free_image();
 	}
-
-	imlib_context_set_cliprect(0, 0, 0, 0);
-	imlib_context_set_image(tmp);
-
-	if (barchart->mask)
-		xsg_imlib_blend_mask(buffer, barchart->mask);
-
-	imlib_context_set_image(buffer);
-	if (barchart->angle)
-		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
-				barchart->angle->width, barchart->angle->height,
-				barchart->angle->xoffset - up_x, barchart->angle->yoffset - up_y,
-				barchart->angle->angle_x, barchart->angle->angle_y);
-	else
-		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
-				widget->xoffset - up_x, widget->yoffset - up_y,
-				widget->width, widget->height);
-
-	imlib_context_set_image(tmp);
-	imlib_free_image();
 }
 
 static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	xsg_list_t *l;
-	double prev = 0.0;
 
 	barchart = (barchart_t *) widget->data;
-	for (l = barchart->var_list; l; l = l->next) {
-		barchart_var = l->data;
 
-		if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
-			barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
-			if (barchart_var->add_prev)
-				barchart_var->value += prev;
+	if (barchart->const_min && barchart->const_max) {
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var = l->data;
+
+			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
+				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
 		}
-		prev = barchart_var->value;
+	} else if (barchart->const_min) {
+		double pos = 0.0;
+		double neg = 0.0;
+
+		barchart->max = DBL_MIN;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var = l->data;
+
+			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
+				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+
+			if (barchart_var->value > 0.0) {
+				if (barchart_var->add_prev)
+					pos += barchart_var->value;
+				else
+					pos = barchart_var->value;
+				barchart->max = MAX(barchart->max, pos);
+			} else {
+				if (barchart_var->add_prev)
+					neg += barchart_var->value;
+				else
+					neg = barchart_var->value;
+				barchart->max = MAX(barchart->max, neg);
+			}
+		}
+
+	} else if (barchart->const_max) {
+		double pos = 0.0;
+		double neg = 0.0;
+
+		barchart->min = DBL_MAX;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var = l->data;
+
+			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
+				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+
+			if (barchart_var->value > 0.0) {
+				if (barchart_var->add_prev)
+					pos += barchart_var->value;
+				else
+					pos = barchart_var->value;
+				barchart->min = MIN(barchart->min, pos);
+			} else {
+				if (barchart_var->add_prev)
+					neg += barchart_var->value;
+				else
+					neg = barchart_var->value;
+				barchart->min = MIN(barchart->min, neg);
+			}
+		}
+
+	} else {
+		double pos = 0.0;
+		double neg = 0.0;
+
+		barchart->min = DBL_MAX;
+		barchart->max = DBL_MIN;
+
+		for (l = barchart->var_list; l; l = l->next) {
+			barchart_var = l->data;
+
+			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
+				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+
+			if (barchart_var->value > 0.0) {
+				if (barchart_var->add_prev)
+					pos += barchart_var->value;
+				else
+					pos = barchart_var->value;
+				barchart->min = MIN(barchart->min, pos);
+				barchart->max = MAX(barchart->max, pos);
+			} else {
+				if (barchart_var->add_prev)
+					neg += barchart_var->value;
+				else
+					neg = barchart_var->value;
+				barchart->min = MIN(barchart->min, neg);
+				barchart->max = MAX(barchart->max, neg);
+			}
+		}
 	}
 }
 
@@ -241,11 +607,9 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 			barchart->max = xsg_conf_read_double();
 			barchart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Mask")) {
-			char *filename = xsg_conf_read_string();
-			barchart->mask = xsg_imlib_load_image(filename);
-			if (unlikely(barchart->mask == NULL))
-				xsg_error("Cannot load image \"%s\"", filename);
-			xsg_free(filename);
+			if (barchart->mask != NULL)
+				xsg_free(barchart->mask);
+			barchart->mask = xsg_conf_read_string();
 		} else {
 			xsg_conf_error("Angle, Min, Max or Mask");
 		}
@@ -268,33 +632,33 @@ void xsg_widget_barchart_parse_var(uint32_t var_id) {
 	barchart_var->var_id = var_id;
 	barchart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	barchart_var->range = NULL;
-	barchart_var->angle = 0.0;
+	barchart_var->range_angle = 0.0;
 	barchart_var->add_prev = FALSE;
 	barchart_var->value = DNAN;
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
+
+			if (barchart_var->range != NULL) {
+				imlib_context_set_color_range(barchart_var->range);
+				imlib_free_color_range();
+			}
+
 			barchart_var->range = imlib_create_color_range();
 			imlib_context_set_color_range(barchart_var->range);
-			imlib_context_set_color(
-					barchart_var->color.red,
-					barchart_var->color.green,
-					barchart_var->color.blue,
-					barchart_var->color.alpha);
+			imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
+					barchart_var->color.blue, barchart_var->color.alpha);
 			imlib_add_color_to_color_range(0);
-			barchart_var->angle = xsg_conf_read_double();
+			barchart_var->range_angle = xsg_conf_read_double();
 			count = xsg_conf_read_uint();
 			for (i = 0; i < count; i++) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
 				color = xsg_imlib_uint2color(xsg_conf_read_color());
-				imlib_context_set_color(
-						color.red,
-						color.green,
-						color.blue,
-						color.alpha);
+				imlib_context_set_color(color.red, color.green,
+						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);
 			}
 		} else if (xsg_conf_find_command("AddPrev")) {

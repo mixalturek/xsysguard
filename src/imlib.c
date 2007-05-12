@@ -143,13 +143,16 @@ Imlib_Color xsg_imlib_uint2color(uint32_t u) {
 	return color;
 }
 
-void xsg_imlib_blend_mask(Imlib_Image image, Imlib_Image mask) {
+void xsg_imlib_blend_mask(Imlib_Image mask) {
+	Imlib_Image image;
 	DATA32 *image_data;
 	DATA32 *mask_data;
 	unsigned int image_width, image_height;
 	unsigned int mask_width, mask_height;
 	unsigned int width, height;
 	unsigned int x, y;
+
+	image = imlib_context_get_image();
 
 	imlib_context_set_image(mask);
 	mask_width = imlib_image_get_width();
