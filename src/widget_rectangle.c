@@ -48,7 +48,7 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	rectangle_t *rectangle;
 	int xoffset, yoffset;
 	unsigned int width, height;
-	double range_angle, angle;
+	double angle;
 
 	xsg_debug("render_rectangle");
 
@@ -64,18 +64,20 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		yoffset = widget->yoffset - up_y;
 		width = widget->width;
 		height = widget->height;
-		range_angle = rectangle->range_angle + angle;
 
 		imlib_context_set_image(buffer);
 
 		if (rectangle->range) {
+			double range_angle = rectangle->range_angle + angle;
 			imlib_context_set_color_range(rectangle->range);
 			T(imlib_image_fill_color_range_rectangle(xoffset, yoffset, width, height, range_angle));
 		} else if (rectangle->filled) {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green, rectangle->color.blue, rectangle->color.alpha);
+			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
+					rectangle->color.blue, rectangle->color.alpha);
 			T(imlib_image_fill_rectangle(xoffset, yoffset, width, height));
 		} else {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green, rectangle->color.blue, rectangle->color.alpha);
+			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
+					rectangle->color.blue, rectangle->color.alpha);
 			T(imlib_image_draw_rectangle(xoffset, yoffset, width, height));
 		}
 	} else {
@@ -85,7 +87,6 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		yoffset = 0;
 		width = rectangle->angle->width;
 		height = rectangle->angle->height;
-		range_angle = rectangle->range_angle;
 
 		tmp = imlib_create_image(width, height);
 
@@ -94,13 +95,16 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		T(imlib_image_clear());
 
 		if (rectangle->range) {
+			double range_angle = rectangle->range_angle;
 			imlib_context_set_color_range(rectangle->range);
 			T(imlib_image_fill_color_range_rectangle(xoffset, yoffset, width, height, range_angle));
 		} else if (rectangle->filled) {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green, rectangle->color.blue, rectangle->color.alpha);
+			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
+					rectangle->color.blue, rectangle->color.alpha);
 			T(imlib_image_fill_rectangle(xoffset, yoffset, width, height));
 		} else {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green, rectangle->color.blue, rectangle->color.alpha);
+			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
+					rectangle->color.blue, rectangle->color.alpha);
 			T(imlib_image_draw_rectangle(xoffset, yoffset, width, height));
 		}
 
