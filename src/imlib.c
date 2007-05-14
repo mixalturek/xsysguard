@@ -21,23 +21,7 @@
 #include <xsysguard.h>
 #include <Imlib2.h>
 
-/******************************************************************************/
-
-typedef union {
-	uint32_t uint;
-	struct {
-		unsigned char alpha;
-		unsigned char red;
-		unsigned char green;
-		unsigned char blue;
-	} argb;
-	struct {
-		unsigned char red;
-		unsigned char green;
-		unsigned char blue;
-		unsigned char alpha;
-	} rgba;
-} color_t;
+#include "imlib.h"
 
 /******************************************************************************/
 
@@ -132,13 +116,11 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 
 Imlib_Color xsg_imlib_uint2color(uint32_t u) {
 	Imlib_Color color;
-	color_t c;
 
-	c.uint = u;
-	color.alpha = c.argb.alpha & 0xff;
-	color.red = c.argb.red & 0xff;
-	color.green = c.argb.green & 0xff;
-	color.blue = c.argb.blue & 0xff;
+	color.alpha = A_VAL(u);
+	color.red = R_VAL(u);
+	color.green = G_VAL(u);
+	color.blue = G_VAL(u);
 
 	return color;
 }

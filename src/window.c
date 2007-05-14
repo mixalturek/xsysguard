@@ -38,24 +38,6 @@
 
 /******************************************************************************/
 
-typedef union {
-	uint32_t uint;
-	struct {
-		unsigned char alpha;
-		unsigned char red;
-		unsigned char green;
-		unsigned char blue;
-	} argb;
-	struct {
-		unsigned char red;
-		unsigned char green;
-		unsigned char blue;
-		unsigned char alpha;
-	} rgba;
-} color_t;
-
-/******************************************************************************/
-
 typedef struct {
 	char *name;
 	char *class;
@@ -307,10 +289,6 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 	XImage *mask_image = NULL;
 	unsigned int width;
 	unsigned int height;
-	color_t c;
-	color_t colors_c;
-	color_t alpha_c;
-	unsigned char a, r, g, b;
 	int i;
 	GC gc, mask_gc;
 
@@ -354,26 +332,18 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 
 	for (i = 0; i < (width * height); i++) {
 
-		c.uint = data[i];
-		a = c.argb.alpha;
-		r = c.argb.red;
-		g = c.argb.green;
-		b = c.argb.blue;
+		A_VAL(colors_data[i]) = 0xff;
+		R_VAL(colors_data[i]) = R_VAL(data[i]);
+		G_VAL(colors_data[i]) = G_VAL(data[i]);
+		B_VAL(colors_data[i]) = B_VAL(data[i]);
 
-		colors_c.argb.alpha = 0xff;
-		colors_c.argb.red = r;
-		colors_c.argb.green = g;
-		colors_c.argb.blue = b;
-		colors_data[i] = colors_c.uint;
-
-		alpha_c.argb.alpha = a;
-		alpha_c.argb.red = 0;
-		alpha_c.argb.green = 0;
-		alpha_c.argb.blue = 0;
-		alpha_data[i] = alpha_c.uint;
+		A_VAL(alpha_data[i]) = A_VAL(data[i]);
+		R_VAL(alpha_data[i]) = 0;
+		G_VAL(alpha_data[i]) = 0;
+		B_VAL(alpha_data[i]) = 0;
 
 		if (window.xshape)
-			mask_data[i] = (a == 0) ? 0 : 1;
+			mask_data[i] = (A_VAL(data[i]) == 0) ? 0 : 1;
 	}
 
 	*colors = XCreatePixmap(window.display, window.id, width, height, 32);

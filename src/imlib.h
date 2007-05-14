@@ -22,8 +22,23 @@
 #define __IMLIB_H__ 1
 
 #include <xsysguard.h>
+#include <endian.h>
 
-/*****************************************************************************/
+/******************************************************************************/
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+# define A_VAL(p) ((DATA8 *)(p))[0]
+# define R_VAL(p) ((DATA8 *)(p))[1]
+# define G_VAL(p) ((DATA8 *)(p))[2]
+# define B_VAL(p) ((DATA8 *)(p))[3]
+#elif __BYTE_ORDER == __BIG_ENDIAN
+# define A_VAL(p) ((DATA8 *)(p))[3]
+# define R_VAL(p) ((DATA8 *)(p))[2]
+# define G_VAL(p) ((DATA8 *)(p))[1]
+# define B_VAL(p) ((DATA8 *)(p))[0]
+#endif
+
+/******************************************************************************/
 
 Imlib_Color xsg_imlib_uint2color(uint32_t u);
 Imlib_Image xsg_imlib_load_image(const char *filename);
