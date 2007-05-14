@@ -458,6 +458,11 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 		imlib_context_set_image(tmp);
 		imlib_free_image();
 	}
+
+	if (mask_img) {
+		imlib_context_set_image(mask_img);
+		imlib_free_image();
+	}
 }
 
 static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
