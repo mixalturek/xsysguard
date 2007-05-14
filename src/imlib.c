@@ -117,10 +117,10 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 Imlib_Color xsg_imlib_uint2color(uint32_t u) {
 	Imlib_Color color;
 
-	color.alpha = A_VAL(u);
-	color.red = R_VAL(u);
-	color.green = G_VAL(u);
-	color.blue = G_VAL(u);
+	color.alpha = A_VAL(&u);
+	color.red = R_VAL(&u);
+	color.green = G_VAL(&u);
+	color.blue = B_VAL(&u);
 
 	return color;
 }

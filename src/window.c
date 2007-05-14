@@ -332,18 +332,18 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 
 	for (i = 0; i < (width * height); i++) {
 
-		A_VAL(colors_data[i]) = 0xff;
-		R_VAL(colors_data[i]) = R_VAL(data[i]);
-		G_VAL(colors_data[i]) = G_VAL(data[i]);
-		B_VAL(colors_data[i]) = B_VAL(data[i]);
+		A_VAL(colors_data + i) = 0xff;
+		R_VAL(colors_data + i) = R_VAL(data + i);
+		G_VAL(colors_data + i) = G_VAL(data + i);
+		B_VAL(colors_data + i) = B_VAL(data + i);
 
-		A_VAL(alpha_data[i]) = A_VAL(data[i]);
-		R_VAL(alpha_data[i]) = 0;
-		G_VAL(alpha_data[i]) = 0;
-		B_VAL(alpha_data[i]) = 0;
+		A_VAL(alpha_data + i) = A_VAL(data + i);
+		R_VAL(alpha_data + i) = 0;
+		G_VAL(alpha_data + i) = 0;
+		B_VAL(alpha_data + i) = 0;
 
 		if (window.xshape)
-			mask_data[i] = (A_VAL(data[i]) == 0) ? 0 : 1;
+			mask_data[i] = (A_VAL(data + i) == 0) ? 0 : 1;
 	}
 
 	*colors = XCreatePixmap(window.display, window.id, width, height, 32);
