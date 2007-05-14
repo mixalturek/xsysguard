@@ -27,7 +27,7 @@
 xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height) {
 	xsg_angle_t *angle;
 	double arc, sa, ca;
-	unsigned int w, h;
+	double w, h;
 
 	arc = a / 180.0 * M_PI;
 
@@ -57,8 +57,8 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *w
 	angle->angle_x = w * ca;
 	angle->angle_y = w * sa;
 
-	*width = ceil(fabs(sa * h) + fabs(ca * w));
-	*height = ceil(fabs(ca * h) + fabs(sa *w));
+	*width = fabs(sa * h) + fabs(ca * w);
+	*height = fabs(ca * h) + fabs(sa *w);
 
 	return angle;
 }
