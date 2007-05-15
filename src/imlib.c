@@ -166,42 +166,71 @@ void xsg_imlib_blend_mask(Imlib_Image mask) {
 	imlib_image_put_back_data(image_data);
 }
 
-void xsg_imlib_blend_background(Imlib_Image bg, int x, int y, unsigned width, unsigned height, int xoffset, int yoffset) {
-	Imlib_Image image;
-	int bg_width, bg_height;
+void xsg_imlib_blend_background(const char *bg, int x, int y, unsigned w, unsigned h, int orientation, uint64_t update) {
 	int clip_x, clip_y, clip_w, clip_h;
+	Imlib_Image image, bg_img;
+	int bg_width, bg_height;
 	int xx, yy, x_count, y_count;
+	uint64_t tick;
+
+	bg_img = xsg_imlib_load_image(bg);
+
+	if (unlikely(bg_img == NULL)) {
+		xsg_warning("Cannot load image \"%s\"", bg);
+		return;
+	}
 
 	image = imlib_context_get_image();
-
 	imlib_context_get_cliprect(&clip_x, &clip_y, &clip_w, &clip_h);
 
-	imlib_context_set_image(bg);
+	imlib_context_set_image(bg_img);
+
+	imlib_image_orientate(orientation);
 
 	bg_width = imlib_image_get_width();
 	bg_height = imlib_image_get_height();
 
 	imlib_context_set_image(image);
 
-	imlib_context_set_cliprect(x, y, width, height);
+	imlib_context_set_cliprect(x, y, w, h);
 
-	xoffset %= bg_width;
-	yoffset %= bg_height;
+	tick = xsg_main_get_counter();
 
-	x_count = width / bg_width;
-	y_count = height / bg_height;
+	switch (orientation) {
+		case 0:
+			x += (tick / update) % bg_width;
+			break;
+		case 1:
+			y += (tick / update) % bg_height;
+			break;
+		case 2:
+			x -= (tick / update) % bg_width;
+			break;
+		case 3:
+			y -= (tick / update) % bg_height;
+			break;
+		default:
+			xsg_error("unknown orientation");
+	}
+
+	x_count = 1 + w / bg_width;
+	y_count = 1 + h / bg_height;
 
 	for (xx = - 1; xx <= x_count; xx++) {
 		for (yy = - 1; yy <= y_count; yy++) {
 			int dest_x, dest_y;
 
-			dest_x = x + xoffset + xx * bg_width;
-			dest_y = y + yoffset + yy * bg_height;
+			dest_x = x + xx * bg_width;
+			dest_y = y + yy * bg_height;
 
-			imlib_blend_image_onto_image(bg, 1, 0, 0, bg_width, bg_height, dest_x, dest_y, bg_width, bg_height);
+			imlib_blend_image_onto_image(bg_img, 1, 0, 0, bg_width, bg_height, dest_x, dest_y, bg_width, bg_height);
 		}
 	}
 
+	imlib_context_set_image(bg_img);
+	imlib_free_image();
+
+	imlib_context_set_image(image);
 	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
 }
 
