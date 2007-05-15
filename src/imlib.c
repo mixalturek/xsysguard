@@ -166,3 +166,42 @@ void xsg_imlib_blend_mask(Imlib_Image mask) {
 	imlib_image_put_back_data(image_data);
 }
 
+void xsg_imlib_blend_background(Imlib_Image bg, int x, int y, unsigned width, unsigned height, int xoffset, int yoffset) {
+	Imlib_Image image;
+	int bg_width, bg_height;
+	int clip_x, clip_y, clip_w, clip_h;
+	int xx, yy, x_count, y_count;
+
+	image = imlib_context_get_image();
+
+	imlib_context_get_cliprect(&clip_x, &clip_y, &clip_w, &clip_h);
+
+	imlib_context_set_image(bg);
+
+	bg_width = imlib_image_get_width();
+	bg_height = imlib_image_get_height();
+
+	imlib_context_set_image(image);
+
+	imlib_context_set_cliprect(x, y, width, height);
+
+	xoffset %= bg_width;
+	yoffset %= bg_height;
+
+	x_count = width / bg_width;
+	y_count = height / bg_height;
+
+	for (xx = - 1; xx <= x_count; xx++) {
+		for (yy = - 1; yy <= y_count; yy++) {
+			int dest_x, dest_y;
+
+			dest_x = x + xoffset + xx * bg_width;
+			dest_y = y + yoffset + yy * bg_height;
+
+			imlib_blend_image_onto_image(bg, 1, 0, 0, bg_width, bg_height, dest_x, dest_y, bg_width, bg_height);
+		}
+	}
+
+	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+}
+
