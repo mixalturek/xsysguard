@@ -37,7 +37,6 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
-#include "rpn.h"
 
 /******************************************************************************/
 
@@ -569,7 +568,7 @@ static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 		areachart_var = l->data;
 
 		if ((var_id == 0xffffffff) || (areachart_var->var_id == var_id))
-			areachart_var->values[i] = xsg_rpn_calc(areachart_var->var_id);
+			areachart_var->values[i] = xsg_var_get_double(areachart_var->var_id);
 	}
 
 	if (areachart->const_min && areachart->const_max)
