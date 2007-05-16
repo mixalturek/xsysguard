@@ -116,7 +116,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y - clip_h;
 					prev_pos_h = clip_h;
 				}
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				clip_h = barchart_var->value * pixel_mult * (- 1.0);
 				if (barchart_var->add_prev) {
 					clip_y = null_y + prev_neg_h;
@@ -125,6 +125,12 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y;
 					prev_neg_h = clip_h;
 				}
+			} else {
+				if (!barchart_var->add_prev) {
+					prev_pos_h = 0;
+					prev_neg_h = 0;
+				}
+				continue;
 			}
 
 			if (clip_y < (widget->yoffset - up_y)) {
@@ -185,7 +191,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_x = null_x;
 					prev_pos_w = clip_w;
 				}
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				clip_w = barchart_var->value * pixel_mult * (- 1.0);
 				if (barchart_var->add_prev) {
 					clip_x = null_x - clip_w - prev_neg_w;
@@ -194,6 +200,12 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_x = null_x - clip_w;
 					prev_neg_w = clip_w;
 				}
+			} else {
+				if (!barchart_var->add_prev) {
+					prev_pos_w = 0;
+					prev_neg_w = 0;
+				}
+				continue;
 			}
 
 			if (clip_x < (widget->xoffset - up_x)) {
@@ -254,7 +266,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y;
 					prev_pos_h = clip_h;
 				}
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				clip_h = barchart_var->value * pixel_mult * -1;
 				if (barchart_var->add_prev) {
 					clip_y = null_y - clip_h - prev_neg_h;
@@ -263,6 +275,12 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y - clip_h;
 					prev_neg_h = clip_h;
 				}
+			} else {
+				if (!barchart_var->add_prev) {
+					prev_pos_h = 0;
+					prev_neg_h = 0;
+				}
+				continue;
 			}
 
 			if (clip_y < (widget->yoffset - up_y)) {
@@ -323,7 +341,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_x = null_x - clip_w;
 					prev_pos_w = clip_w;
 				}
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				clip_w = barchart_var->value * pixel_mult * (- 1.0);
 				if (barchart_var->add_prev) {
 					clip_x = null_x + prev_neg_w;
@@ -332,6 +350,12 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_x = null_x;
 					prev_neg_w = clip_w;
 				}
+			} else {
+				if (!barchart_var->add_prev) {
+					prev_pos_w = 0;
+					prev_neg_w = 0;
+				}
+				continue;
 			}
 
 			if (clip_x < (widget->xoffset - up_x)) {
@@ -405,7 +429,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y - clip_h;
 					prev_pos_h = clip_h;
 				}
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				clip_h = barchart_var->value * pixel_mult * (- 1.0);
 				if (barchart_var->add_prev) {
 					clip_y = null_y + prev_neg_h;
@@ -414,6 +438,12 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 					clip_y = null_y;
 					prev_neg_h = clip_h;
 				}
+			} else {
+				if (!barchart_var->add_prev) {
+					prev_pos_h = 0;
+					prev_neg_h = 0;
+				}
+				continue;
 			}
 
 			if (clip_y < 0) {
@@ -496,15 +526,20 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 				else
 					pos = barchart_var->value;
 				barchart->max = MAX(barchart->max, pos);
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				if (barchart_var->add_prev)
 					neg += barchart_var->value;
 				else
 					neg = barchart_var->value;
 				barchart->max = MAX(barchart->max, neg);
+			} else {
+				if (!barchart_var->add_prev) {
+					pos = 0.0;
+					neg = 0.0;
+				}
+				barchart->max = MAX(barchart->max, 0.0);
 			}
 		}
-
 	} else if (barchart->const_max) {
 		double pos = 0.0;
 		double neg = 0.0;
@@ -523,15 +558,20 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 				else
 					pos = barchart_var->value;
 				barchart->min = MIN(barchart->min, pos);
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				if (barchart_var->add_prev)
 					neg += barchart_var->value;
 				else
 					neg = barchart_var->value;
 				barchart->min = MIN(barchart->min, neg);
+			} else {
+				if (!barchart_var->add_prev) {
+					pos = 0.0;
+					neg = 0.0;
+				}
+				barchart->min = MIN(barchart->min, 0.0);
 			}
 		}
-
 	} else {
 		double pos = 0.0;
 		double neg = 0.0;
@@ -552,13 +592,20 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 					pos = barchart_var->value;
 				barchart->min = MIN(barchart->min, pos);
 				barchart->max = MAX(barchart->max, pos);
-			} else {
+			} else if (barchart_var->value < 0.0) {
 				if (barchart_var->add_prev)
 					neg += barchart_var->value;
 				else
 					neg = barchart_var->value;
 				barchart->min = MIN(barchart->min, neg);
 				barchart->max = MAX(barchart->max, neg);
+			} else {
+				if (!barchart_var->add_prev) {
+					pos = 0.0;
+					neg = 0.0;
+				}
+				barchart->min = MIN(barchart->min, 0.0);
+				barchart->max = MAX(barchart->max, 0.0);
 			}
 		}
 	}
