@@ -34,63 +34,38 @@
 /******************************************************************************/
 
 typedef struct {
+	int x;
+	int y;
+} point_t;
+
+typedef struct {
 	Imlib_Color color;
-	ImlibPolygon polygon;
+	unsigned int point_count;
+	point_t *points;
 	bool filled;
 	bool closed;
 } polygon_t;
 
 /******************************************************************************/
 
-typedef struct {
-	int x, y;
-} point_t;
-
-typedef struct {
-	point_t *points;
-	int pointcount;
-	int lx, rx;
-	int ty, by;
-} poly_t;
-
-static ImlibPolygon poly_copy(ImlibPolygon polygon, int xoffset, int yoffset) {
-	poly_t *poly;
-	poly_t *new_poly;
-	int i;
-
-	poly = (poly_t *) polygon;
-	new_poly = (poly_t *) xsg_malloc(sizeof(poly_t));
-	new_poly->points = (point_t *) xsg_malloc(sizeof(point_t) * poly->pointcount);
-	new_poly->pointcount = poly->pointcount;
-	new_poly->lx = poly->lx + xoffset;
-	new_poly->rx = poly->rx + xoffset;
-	new_poly->ty = poly->ty + yoffset;
-	new_poly->by = poly->by + yoffset;
-
-	for (i = 0; i < poly->pointcount; i++) {
-		new_poly->points[i].x = poly->points[i].x + xoffset;
-		new_poly->points[i].y = poly->points[i].y + yoffset;
-	}
-
-	return (ImlibPolygon) new_poly;
-}
-
-/******************************************************************************/
-
 static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	polygon_t *polygon;
 	ImlibPolygon poly;
+	unsigned int i;
 
 	xsg_debug("render_polygon");
 
 	polygon = (polygon_t *) widget->data;
 
+	poly = imlib_polygon_new();
+
+	for (i = 0; i < polygon->point_count; i++)
+		imlib_polygon_add_point(poly, polygon->points[i].x - up_x, polygon->points[i].y - up_y);
+
 	imlib_context_set_image(buffer);
 
 	imlib_context_set_color(polygon->color.red, polygon->color.green,
 			polygon->color.blue, polygon->color.alpha);
-
-	poly = poly_copy(polygon->polygon, -up_x, -up_y);
 
 	if (polygon->filled)
 		imlib_image_fill_polygon(poly);
@@ -111,7 +86,8 @@ static void scroll_polygon(xsg_widget_t *widget) {
 void xsg_widget_polygon_parse() {
 	xsg_widget_t *widget;
 	polygon_t *polygon;
-	unsigned int count, i;
+	ImlibPolygon poly;
+	unsigned int i;
 	int x1, y1, x2, y2;
 	uint64_t update;
 	uint32_t widget_id;
@@ -123,19 +99,21 @@ void xsg_widget_polygon_parse() {
 	widget_id = xsg_widgets_add(widget);
 
 	polygon->color = xsg_imlib_uint2color(xsg_conf_read_color());
-	polygon->polygon = imlib_polygon_new();
+	polygon->point_count = xsg_conf_read_uint();
+	polygon->points = xsg_new(point_t, polygon->point_count);;
 	polygon->filled = FALSE;
 	polygon->closed = FALSE;
 
-	count = xsg_conf_read_uint();
-	for (i = 0; i < count; i++) {
-		int x, y;
-		x = xsg_conf_read_int();
-		y = xsg_conf_read_int();
-		imlib_polygon_add_point(polygon->polygon, x, y);
+	poly = imlib_polygon_new();
+
+	for (i = 0; i < polygon->point_count; i++) {
+		polygon->points[i].x = xsg_conf_read_int();
+		polygon->points[i].y = xsg_conf_read_int();
+		imlib_polygon_add_point(poly, polygon->points[i].x, polygon->points[i].y);
 	}
 
-	imlib_polygon_get_bounds(polygon->polygon, &x1, &y1, &x2, &y2);
+	imlib_polygon_get_bounds(poly, &x1, &y1, &x2, &y2);
+	imlib_polygon_free(poly);
 
 	widget->update = update;
 	widget->xoffset = x1;
@@ -160,7 +138,6 @@ void xsg_widget_polygon_parse() {
 			xsg_conf_error("Show, Filled or Closed");
 		}
 	}
-
 }
 
 
