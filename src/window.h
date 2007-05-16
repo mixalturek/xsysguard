@@ -40,6 +40,7 @@ void xsg_window_parse_skip_taskbar(void);
 void xsg_window_parse_skip_pager(void);
 void xsg_window_parse_layer(void);
 void xsg_window_parse_decorations(void);
+void xsg_window_parse_override_redirect(void);
 void xsg_window_parse_background(void);
 void xsg_window_parse_grab_root(void);
 void xsg_window_parse_cache_size(void);

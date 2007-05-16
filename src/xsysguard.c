@@ -144,6 +144,8 @@ static void parse_config(char *config_buffer) {
 				xsg_window_parse_layer();
 			} else if (xsg_conf_find_command("Decorations")) {
 				xsg_window_parse_decorations();
+			} else if (xsg_conf_find_command("OverrideRedirect")) {
+				xsg_window_parse_override_redirect();
 			} else if (xsg_conf_find_command("Background")) {
 				xsg_window_parse_background();
 			} else if (xsg_conf_find_command("CacheSize")) {
@@ -159,7 +161,7 @@ static void parse_config(char *config_buffer) {
 			} else {
 				xsg_conf_error("Interval, IconName, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "
-						"Decorations, Background, CacheSize, XShape "
+						"Decorations, OverrideRedirect, Background, CacheSize, XShape "
 						"or ARGBVisual");
 			}
 		} else if (xsg_conf_find_command("SetEnv")) {

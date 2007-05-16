@@ -53,6 +53,7 @@ typedef struct {
 	bool skip_pager;
 	int layer;
 	bool decorations;
+	bool override_redirect;
 	Imlib_Color background;
 	bool copy_from_parent;
 	bool copy_from_root;
@@ -88,6 +89,7 @@ static window_t window = {
 	skip_pager: FALSE,
 	layer: 0,
 	decorations: TRUE,
+	override_redirect: FALSE,
 	background: { 0 },
 	copy_from_parent: FALSE,
 	copy_from_root: FALSE,
@@ -163,6 +165,11 @@ void xsg_window_parse_layer() {
 
 void xsg_window_parse_decorations() {
 	window.decorations = xsg_conf_read_boolean();
+	xsg_conf_read_newline();
+}
+
+void xsg_window_parse_override_redirect() {
+	window.override_redirect = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
@@ -696,6 +703,7 @@ static void handle_xevents(void *arg, xsg_main_poll_t events) {
 void xsg_window_init() {
 	Colormap colormap;
 	XSetWindowAttributes attrs;
+	unsigned long valuemask;
 
 	if ((window.display = XOpenDisplay(NULL)) == NULL)
 		xsg_error("Cannot open display");
@@ -731,13 +739,16 @@ void xsg_window_init() {
 
 	attrs.background_pixel = 0;
 	attrs.colormap = colormap;
-//	attrs.override_redirect = 0;
+	valuemask = CWBackPixel | CWColormap;
+
+	if (window.override_redirect) {
+		attrs.override_redirect = 1;
+		valuemask |= CWOverrideRedirect;
+	}
 
 	window.id = XCreateWindow(window.display, XRootWindow(window.display, window.screen),
 			window.xoffset, window.yoffset, window.width, window.height, 0,
-			window.depth, InputOutput, window.visual,
-			CWBackPixel | CWColormap, &attrs);
-//			CWBackPixel | CWColormap | CWOverrideRedirect, &attrs);
+			window.depth, InputOutput, window.visual, valuemask, &attrs);
 
 	set_size_hints();
 	set_class_hints();
