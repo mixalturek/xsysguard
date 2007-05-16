@@ -34,7 +34,6 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
-#include "rpn.h"
 
 /******************************************************************************/
 
@@ -132,8 +131,7 @@ void xsg_window_parse_resource() {
 void xsg_window_parse_geometry() {
 	window.geometry = xsg_conf_read_string();
 	xsg_conf_read_newline();
-	window.flags = XParseGeometry(window.geometry, &window.xoffset,
-			&window.yoffset, &window.width, &window.height);
+	window.flags = XParseGeometry(window.geometry, &window.xoffset, &window.yoffset, &window.width, &window.height);
 }
 
 void xsg_window_parse_sticky() {
@@ -207,18 +205,56 @@ void xsg_window_parse_show() {
 
 /******************************************************************************
  *
+ * set xatom
+ *
+ ******************************************************************************/
+
+void set_xatom(const char *type, const char *property) {
+	XEvent xev;
+	Atom type_atom;
+	Atom property_atom;
+
+	type_atom = XInternAtom(window.display, type, FALSE);
+	property_atom = XInternAtom(window.display, property, FALSE);
+
+	xsg_message("Setting Xatom \"%s\": \"%s\"", type, property);
+
+	xev.type = ClientMessage;
+	xev.xclient.type = ClientMessage;
+	xev.xclient.window = window.id;
+	xev.xclient.message_type = type_atom;
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = 1;
+	xev.xclient.data.l[1] = property_atom;
+	xev.xclient.data.l[2] = 0;
+
+	XSendEvent(window.display, XRootWindow(window.display, window.screen), FALSE, SubstructureNotifyMask, &xev);
+}
+
+/******************************************************************************
+ *
  * XRender
  *
  ******************************************************************************/
 
 #ifndef ENABLE_XRENDER
 
-#define XRENDER_ERROR xsg_error("Compiled without XRender support")
+static Visual *find_argb_visual() {
+	xsg_error("Compiled without XRender support")
+	return NULL;
+}
 
-static Visual *find_argb_visual() { XRENDER_ERROR; return NULL; }
-static void xrender_check() { XRENDER_ERROR; }
-static void xrender_init() { XRENDER_ERROR; }
-static void xrender(int xoffset, int yoffset) { XRENDER_ERROR; }
+static void xrender_check() {
+	xsg_error("Compiled without XRender support")
+}
+
+static void xrender_init() {
+	xsg_error("Compiled without XRender support")
+}
+
+static void xrender(int xoffset, int yoffset) {
+	xsg_error("Compiled without XRender support")
+}
 
 #else
 
@@ -233,8 +269,7 @@ static Visual *find_argb_visual() {
 	template.depth = 32;
 	template.class = TrueColor;
 
-	xvi = XGetVisualInfo(window.display, VisualScreenMask | VisualDepthMask | VisualClassMask,
-			&template, &nvi);
+	xvi = XGetVisualInfo(window.display, VisualScreenMask | VisualDepthMask | VisualClassMask, &template, &nvi);
 
 	if (xvi == NULL)
 		xsg_error("Cannot find an argb visual.");
@@ -299,12 +334,10 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 	colors_data = xsg_new(DATA32, width * height);
 	alpha_data = xsg_new(DATA32, width * height);
 
-	colors_image = XCreateImage(window.display, window.visual,
-			32, ZPixmap, 0,	(char *) colors_data,
+	colors_image = XCreateImage(window.display, window.visual, 32, ZPixmap, 0, (char *) colors_data,
 			width, height, 32, width * 4);
 
-	alpha_image = XCreateImage(window.display, window.visual,
-			32, ZPixmap, 0, (char *) alpha_data,
+	alpha_image = XCreateImage(window.display, window.visual, 32, ZPixmap, 0, (char *) alpha_data,
 			width, height, 32, width * 4);
 
 	if (window.xshape) {
@@ -391,18 +424,14 @@ static void xrender(int xoffset, int yoffset) {
 
 	root_pict_attrs.subwindow_mode = IncludeInferiors;
 
-	root_picture = XRenderCreatePicture(window.display, window.id,
-			XRenderFindVisualFormat(window.display, window.visual),
+	root_picture = XRenderCreatePicture(window.display, window.id, XRenderFindVisualFormat(window.display, window.visual),
 			CPSubwindowMode, &root_pict_attrs);
 
-	colors_picture = XRenderCreatePicture(window.display, colors,
-			pict_format, 0, 0);
+	colors_picture = XRenderCreatePicture(window.display, colors, pict_format, 0, 0);
 
-	alpha_picture = XRenderCreatePicture(window.display, alpha,
-			pict_format, 0, 0);
+	alpha_picture = XRenderCreatePicture(window.display, alpha, pict_format, 0, 0);
 
-	XRenderComposite(window.display, PictOpSrc, colors_picture,
-			alpha_picture, root_picture, 0, 0, 0, 0,
+	XRenderComposite(window.display, PictOpSrc, colors_picture, alpha_picture, root_picture, 0, 0, 0, 0,
 			xoffset, yoffset, width, height);
 
 	XRenderFreePicture(window.display, colors_picture);
@@ -416,7 +445,7 @@ static void xrender(int xoffset, int yoffset) {
 
 /******************************************************************************
  *
- * render
+ * render onto window
  *
  ******************************************************************************/
 
@@ -425,8 +454,7 @@ void xsg_window_render(void) {
 	Imlib_Updates update;
 	Imlib_Image buffer;
 
-	window.updates = imlib_updates_merge_for_rendering(window.updates,
-			window.width, window.height);
+	window.updates = imlib_updates_merge_for_rendering(window.updates, window.width, window.height);
 
 	for (update = window.updates; update; update = imlib_updates_get_next(update)) {
 
@@ -437,7 +465,8 @@ void xsg_window_render(void) {
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
 		imlib_image_set_has_alpha(1);
-		imlib_image_clear_color(window.background.red, window.background.green, window.background.blue, window.background.alpha);
+		imlib_image_clear_color(window.background.red, window.background.green,
+				window.background.blue, window.background.alpha);
 		/* TODO grab_root / parent */
 
 		xsg_widgets_render(buffer, up_x, up_y, up_w, up_h);
@@ -445,19 +474,18 @@ void xsg_window_render(void) {
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(0);
 
-		if (window.argb_visual) {
+		if (window.argb_visual)
 			xrender(up_x, up_y);
-		} else {
+		else
 			T(imlib_render_image_on_drawable(up_x, up_y));
-		}
 
+		imlib_context_set_image(buffer);
 		imlib_context_set_blend(1);
 		imlib_free_image();
 	}
 
-	if (window.updates) {
+	if (window.updates)
 		imlib_updates_free(window.updates);
-	}
 
 	window.updates = 0;
 }
@@ -477,16 +505,33 @@ static void update_show(void) {
 	show = window.show;
 
 	if (window.show_update != 0)
-		window.show = (xsg_rpn_calc(window.show_var_id) == 0.0) ? FALSE : TRUE;
+		window.show = (xsg_var_get_double(window.show_var_id) == 0.0) ? FALSE : TRUE;
 	else
 		window.show = TRUE;
 
 	if (window.show != show) {
 		if (window.show) {
 			xsg_debug("XMapWindow");
+
 			XMapWindow(window.display, window.id);
+
+			if (window.sticky)
+				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_STICKY");
+
+			if (window.skip_taskbar)
+				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR");
+
+			if (window.skip_pager)
+				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_PAGER");
+
+			if (window.layer > 0)
+				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_ABOVE");
+			else if (window.layer < 0)
+				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_BELOW");
+
 		} else {
 			xsg_debug("XUnmapWindow");
+
 			XUnmapWindow(window.display, window.id);
 		}
 	}
@@ -523,37 +568,7 @@ static void update(uint64_t count) {
 /******************************************************************************/
 
 void xsg_window_update_append_rect(int xoffset, int yoffset, int width, int height) {
-	window.updates = imlib_update_append_rect(window.updates,
-				xoffset, yoffset, width, height);
-}
-
-/******************************************************************************
- *
- * set xatom
- *
- ******************************************************************************/
-
-void set_xatom(const char *type, const char *property) {
-	XEvent xev;
-	Atom type_atom;
-	Atom property_atom;
-
-	type_atom = XInternAtom(window.display, type, FALSE);
-	property_atom = XInternAtom(window.display, property, FALSE);
-
-	xsg_message("Setting Xatom \"%s\" = \"%s\"", type, property);
-
-	xev.type = ClientMessage;
-	xev.xclient.type = ClientMessage;
-	xev.xclient.window = window.id;
-	xev.xclient.message_type = type_atom;
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = 1;
-	xev.xclient.data.l[1] = property_atom;
-	xev.xclient.data.l[2] = 0;
-
-	XSendEvent(window.display, XRootWindow(window.display, window.screen),
-			FALSE, SubstructureNotifyMask, &xev);
+	window.updates = imlib_update_append_rect(window.updates, xoffset, yoffset, width, height);
 }
 
 /******************************************************************************
@@ -561,8 +576,6 @@ void set_xatom(const char *type, const char *property) {
  * hide window decorations
  *
  ******************************************************************************/
-
-#define MWM_HINTS_DECORATIONS (1L << 1)
 
 typedef struct {
 	unsigned long flags;
@@ -584,14 +597,13 @@ void hide_decorations() {
 
 	hints_atom = XInternAtom(window.display, "_MOTIF_WM_HINTS", FALSE);
 
-	XGetWindowProperty(window.display, window.id, hints_atom, 0,
-			sizeof(MotifWmHints)/sizeof(long), False, AnyPropertyType,
+	XGetWindowProperty(window.display, window.id, hints_atom, 0, sizeof(MotifWmHints)/sizeof(long), False, AnyPropertyType,
 			&type, &format, &nitems, &bytes_after, (unsigned char **) hints_pointer);
 
 	if (type == None)
 		hints = &new_hints;
 
-	hints->flags |= MWM_HINTS_DECORATIONS;
+	hints->flags |= (1L << 1);
 	hints->decorations = 0;
 
 	XChangeProperty(window.display, window.id, hints_atom, hints_atom, 32,
@@ -603,7 +615,7 @@ void hide_decorations() {
 
 /******************************************************************************
  *
- * hints
+ * size hints
  *
  ******************************************************************************/
 
@@ -628,6 +640,12 @@ static void set_size_hints() {
 
 	XFree(size_hints);
 }
+
+/******************************************************************************
+ *
+ * class hints
+ *
+ ******************************************************************************/
 
 static void set_class_hints() {
 	XClassHint *class_hint;
@@ -691,8 +709,7 @@ void xsg_window_init() {
 
 	if (window.flags & YNegative) {
 		window.yoffset += DisplayHeight(window.display, window.screen) - window.height;
-		window.win_gravity = (window.win_gravity == NorthEastGravity ?
-				SouthEastGravity : SouthWestGravity);
+		window.win_gravity = (window.win_gravity == NorthEastGravity ? SouthEastGravity : SouthWestGravity);
 	}
 
 	if (window.argb_visual) {
@@ -700,8 +717,7 @@ void xsg_window_init() {
 		window.visual = find_argb_visual();
 		window.depth = 32;
 	} else {
-		window.visual = imlib_get_best_visual(window.display,
-				window.screen, &window.depth);
+		window.visual = imlib_get_best_visual(window.display, window.screen, &window.depth);
 	}
 
 	if (window.xshape) {
@@ -711,18 +727,17 @@ void xsg_window_init() {
 			xsg_error("No xshape extension found");
 	}
 
-	colormap = XCreateColormap(window.display,
-			RootWindow(window.display, window.screen),
-			window.visual, AllocNone);
+	colormap = XCreateColormap(window.display, RootWindow(window.display, window.screen), window.visual, AllocNone);
 
 	attrs.background_pixel = 0;
 	attrs.colormap = colormap;
-	attrs.override_redirect = 1;
+//	attrs.override_redirect = 0;
 
 	window.id = XCreateWindow(window.display, XRootWindow(window.display, window.screen),
 			window.xoffset, window.yoffset, window.width, window.height, 0,
 			window.depth, InputOutput, window.visual,
-			CWBackPixel | CWColormap | CWOverrideRedirect, &attrs);
+			CWBackPixel | CWColormap, &attrs);
+//			CWBackPixel | CWColormap | CWOverrideRedirect, &attrs);
 
 	set_size_hints();
 	set_class_hints();
@@ -737,21 +752,6 @@ void xsg_window_init() {
 	if (!window.decorations)
 		hide_decorations();
 
-
-	if (window.sticky)
-		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_STICKY");
-
-	if (window.skip_taskbar)
-		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR");
-
-	if (window.skip_pager)
-		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_PAGER");
-
-	if (window.layer > 0)
-		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_ABOVE");
-	else if (window.layer < 0)
-		set_xatom("_NET_WM_STATE", "_NET_WM_STATE_BELOW");
-
 	imlib_context_set_blend(1);
 	imlib_context_set_dither(0);
 	imlib_context_set_dither_mask(0);
@@ -764,8 +764,7 @@ void xsg_window_init() {
 	imlib_set_font_cache_size(window.font_cache_size);
 
 	if (window.xshape) {
-		window.mask = XCreatePixmap(window.display, window.id,
-				window.width, window.height, 1);
+		window.mask = XCreatePixmap(window.display, window.id, window.width, window.height, 1);
 		imlib_context_set_mask(window.mask);
 	}
 
@@ -775,7 +774,8 @@ void xsg_window_init() {
 
 	xsg_widgets_init();
 
-	xsg_main_add_poll_func(ConnectionNumber(window.display), handle_xevents, NULL, XSG_MAIN_POLL_READ | XSG_MAIN_POLL_EXCEPT);
+	xsg_main_add_poll_func(ConnectionNumber(window.display), handle_xevents, NULL,
+			XSG_MAIN_POLL_READ | XSG_MAIN_POLL_EXCEPT);
 
 	update_show();
 }
