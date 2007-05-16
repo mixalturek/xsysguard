@@ -142,7 +142,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y - height;
 						prev_pos_h[value_index] = height;
 					}
-				} else {
+				} else if (areachart_var->values[value_index] < 0.0) {
 					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
 					if (areachart_var->add_prev) {
 						yoffset = null_y + prev_neg_h[value_index];
@@ -151,6 +151,12 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y;
 						prev_neg_h[value_index] = height;
 					}
+				} else {
+					if (!areachart_var->add_prev) {
+						prev_pos_h[value_index] = 0;
+						prev_neg_h[value_index] = 0;
+					}
+					continue;
 				}
 
 				for (i = 0; i < areachart_var->top_height && height > 0; i++) {
@@ -232,7 +238,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						xoffset = null_x;
 						prev_pos_w[value_index] = width;
 					}
-				} else {
+				} else if (areachart_var->values[value_index] < 0.0) {
 					width = areachart_var->values[value_index] * pixel_mult * (- 1.0);
 					if (areachart_var->add_prev) {
 						xoffset = null_x - width - prev_neg_w[value_index];
@@ -241,6 +247,12 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						xoffset = null_x - width;
 						prev_neg_w[value_index] = width;
 					}
+				} else {
+					if (!areachart_var->add_prev) {
+						prev_pos_w[value_index] = 0;
+						prev_neg_w[value_index] = 0;
+					}
+					continue;
 				}
 
 				for (i = 0; i < areachart_var->top_height && width > 0; i++) {
@@ -321,7 +333,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y;
 						prev_pos_h[value_index] = height;
 					}
-				} else {
+				} else if (areachart_var->values[value_index] < 0.0) {
 					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
 					if (areachart_var->add_prev) {
 						yoffset = null_y - height - prev_neg_h[value_index];
@@ -330,6 +342,12 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y - height;
 						prev_neg_h[value_index] = height;
 					}
+				} else {
+					if (!areachart_var->add_prev) {
+						prev_pos_h[value_index] = 0;
+						prev_neg_h[value_index] = 0;
+					}
+					continue;
 				}
 
 				for (i = 0; i < areachart_var->top_height && height > 0; i++) {
@@ -410,7 +428,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						xoffset = null_x - width;
 						prev_pos_w[value_index] = width;
 					}
-				} else {
+				} else if (areachart_var->values[value_index] < 0.0) {
 					width = areachart_var->values[value_index] * pixel_mult * (- 1.0);
 					if (areachart_var->add_prev) {
 						xoffset = null_x + prev_neg_w[value_index];
@@ -419,6 +437,12 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						xoffset = null_x;
 						prev_neg_w[value_index] = width;
 					}
+				} else {
+					if (!areachart_var->add_prev) {
+						prev_pos_w[value_index] = 0;
+						prev_neg_w[value_index] = 0;
+					}
+					continue;
 				}
 
 				for (i = 0; i < areachart_var->top_height && width > 0; i++) {
@@ -507,7 +531,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y - height;
 						prev_pos_h[value_index] = height;
 					}
-				} else {
+				} else if (areachart_var->values[value_index] < 0.0) {
 					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
 					if (areachart_var->add_prev) {
 						yoffset = null_y + prev_neg_h[value_index];
@@ -516,6 +540,12 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 						yoffset = null_y;
 						prev_neg_h[value_index] = height;
 					}
+				} else {
+					if (!areachart_var->add_prev) {
+						prev_pos_h[value_index] = 0;
+						prev_neg_h[value_index] = 0;
+					}
+					continue;
 				}
 
 				for (i = 0; i < areachart_var->top_height && height > 0; i++) {
@@ -597,13 +627,20 @@ static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 						pos = areachart_var->values[i];
 					areachart->min = MIN(areachart->min, pos);
 					areachart->max = MAX(areachart->max, pos);
-				} else {
+				} else if (areachart_var->values[i] < 0.0) {
 					if (areachart_var->add_prev)
 						neg += areachart_var->values[i];
 					else
 						neg = areachart_var->values[i];
 					areachart->min = MIN(areachart->min, neg);
 					areachart->max = MAX(areachart->max, neg);
+				} else {
+					if (!areachart_var->add_prev) {
+						pos = 0.0;
+						neg = 0.0;
+					}
+					areachart->min = MIN(areachart->min, 0.0);
+					areachart->max = MAX(areachart->max, 0.0);
 				}
 			}
 		}
@@ -623,12 +660,18 @@ static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 					else
 						pos = areachart_var->values[i];
 					areachart->max = MAX(areachart->max, pos);
-				} else {
+				} else if (areachart_var->values[i] < 0.0) {
 					if (areachart_var->add_prev)
 						neg += areachart_var->values[i];
 					else
 						neg = areachart_var->values[i];
 					areachart->max = MAX(areachart->max, neg);
+				} else {
+					if (!areachart_var->add_prev) {
+						pos = 0.0;
+						neg = 0.0;
+					}
+					areachart->max = MAX(areachart->max, 0.0);
 				}
 			}
 		}
@@ -648,12 +691,18 @@ static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 					else
 						pos = areachart_var->values[i];
 					areachart->min = MIN(areachart->min, pos);
-				} else {
+				} else if (areachart_var->values[i] < 0.0) {
 					if (areachart_var->add_prev)
 						neg += areachart_var->values[i];
 					else
 						neg = areachart_var->values[i];
 					areachart->min = MIN(areachart->min, neg);
+				} else {
+					if (!areachart_var->add_prev) {
+						pos = 0.0;
+						neg = 0.0;
+					}
+					areachart->min = MIN(areachart->min, 0.0);
 				}
 			}
 		}
