@@ -22,7 +22,7 @@
 
 #include "widgets.h"
 #include "window.h"
-#include "rpn.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -106,7 +106,7 @@ void xsg_widgets_update(uint32_t widget_id, uint32_t var_id) {
 	widget = get_widget(widget_id);
 
 	if (widget->show_var_id == var_id)
-		widget->show = xsg_rpn_calc(var_id);
+		widget->show = xsg_var_get_double(var_id);
 	else
 		(widget->update_func)(widget, var_id);
 
@@ -127,7 +127,7 @@ static void scroll_and_update(uint64_t count) {
 		if (widget->update && (count % widget->update) == 0) {
 
 			if (widget->show_var_id != 0xffffffff)
-				widget->show = xsg_rpn_calc(widget->show_var_id);
+				widget->show = xsg_var_get_double(widget->show_var_id);
 
 			(widget->scroll_func)(widget);
 			(widget->update_func)(widget, 0xffffffff);
