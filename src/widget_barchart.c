@@ -35,7 +35,6 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
-#include "rpn.h"
 
 /******************************************************************************/
 
@@ -477,7 +476,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
 		}
 	} else if (barchart->const_min) {
 		double pos = 0.0;
@@ -489,7 +488,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
@@ -516,7 +515,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
@@ -544,7 +543,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_rpn_calc(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
