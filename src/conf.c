@@ -21,26 +21,9 @@
 #include <xsysguard.h>
 #include <stdio.h>
 #include <string.h>
+#include <endian.h>
 
 #include "conf.h"
-
-/******************************************************************************/
-
-typedef union {
-	uint32_t uint;
-	struct {
-		unsigned char a;
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
-	} argb;
-	struct {
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
-		unsigned char a;
-	} rgba;
-} color_t;
 
 /******************************************************************************/
 
@@ -199,7 +182,7 @@ int64_t xsg_conf_read_int() {
 
 	skip_space();
 
-	sscanf(ptr, "%" SCNd64 "%n", &i, &n);
+	sscanf(ptr, "%"SCNd64"%n", &i, &n);
 
 	if (n < 1)
 		xsg_conf_error("integer");
@@ -214,7 +197,7 @@ uint64_t xsg_conf_read_uint() {
 
 	skip_space();
 
-	sscanf(ptr, "%" SCNu64 "%n", &u, &n);
+	sscanf(ptr, "%"SCNu64"%n", &u, &n);
 
 	if (n < 1)
 		xsg_conf_error("unsigned integer");
@@ -224,26 +207,74 @@ uint64_t xsg_conf_read_uint() {
 }
 
 uint32_t xsg_conf_read_color() {
-	color_t c, tmp;
+	uint32_t color = 0;
+	uint32_t argb = 0;
+	uint8_t a = 0;
+	uint8_t r = 0;
+	uint8_t g = 0;
+	uint8_t b = 0;
 	int n = 0;
 
 	skip_space();
 
-	sscanf(ptr, "%"SCNx32"%n", &c.uint, &n);
+	if (!is('#'))
+		xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA)");
 
-	if (n < 1)
-		xsg_conf_error("color");
+	ptr++;
+
+	sscanf(ptr, "%"SCNx32"%n", &color, &n);
+
+	switch (n) {
+		case 3: // rgb
+			r = (color >> 8) & 0xf;
+			g = (color >> 4) & 0xf;
+			b = color & 0xf;
+			r |= r << 4;
+			g |= g << 4;
+			b |= b << 4;
+			a = 0xff;
+			break;
+		case 4: // rgba
+			r = (color >> 12) & 0xf;
+			g = (color >> 8) & 0xf;
+			b = (color >> 4) & 0xf;
+			a = color & 0xf;
+			r |= r << 4;
+			g |= g << 4;
+			b |= b << 4;
+			a |= a << 4;
+			break;
+		case 6: // rrggbb
+			r = (color >> 16) & 0xff;
+			g = (color >> 8) & 0xff;
+			b = color & 0xff;
+			a = 0xff;
+			break;
+		case 8: // rrggbbaa
+			r = (color >> 24) & 0xff;
+			g = (color >> 16) & 0xff;
+			b = (color >> 8) & 0xff;
+			a = color & 0xff;
+			break;
+		default:
+			xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA)");
+	}
 
 	ptr += n;
 
-	tmp.uint = xsg_uint32_be(c.uint);
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	((uint8_t *)(&argb))[0] = a;
+	((uint8_t *)(&argb))[1] = r;
+	((uint8_t *)(&argb))[2] = g;
+	((uint8_t *)(&argb))[3] = b;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+	((uint8_t *)(&argb))[3] = a;
+	((uint8_t *)(&argb))[2] = r;
+	((uint8_t *)(&argb))[1] = g;
+	((uint8_t *)(&argb))[0] = b;
+#endif
 
-	c.argb.a = tmp.rgba.a;
-	c.argb.r = tmp.rgba.r;
-	c.argb.g = tmp.rgba.g;
-	c.argb.b = tmp.rgba.b;
-
-	return c.uint;
+	return argb;
 }
 
 double xsg_conf_read_double() {
@@ -275,7 +306,7 @@ static char read_escape() {
 		case 'f':
 			return '\f';
 		case 'n':
-			return '\f';
+			return '\n';
 		case 'r':
 			return '\r';
 		case 't':
@@ -300,14 +331,14 @@ static char read_escape() {
 		case '7':
 		case '8':
 		case '9':
-			sscanf(ptr, "%3" SCNo8" %n", &c, &n);
+			sscanf(ptr, "%3"SCNo8"%n", &c, &n);
 			ptr += n - 1;
 			return c;
 		case 'x':
 			ptr++;
 			if (*ptr == '\0')
 				return 0;
-			sscanf(ptr, "%2" SCNx8 "%n", &c, &n);
+			sscanf(ptr, "%2"SCNx8"%n", &c, &n);
 			ptr += n - 1;
 			return c;
 		case '\0':
@@ -334,7 +365,7 @@ static char *read_env() {
 
 	if (env) {
 		xsg_free(p);
-		return strdup(env);
+		return xsg_strdup(env);
 	} else {
 		return p;
 	}
