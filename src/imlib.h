@@ -45,6 +45,9 @@ Imlib_Image xsg_imlib_load_image(const char *filename);
 void xsg_imlib_blend_mask(Imlib_Image mask);
 void xsg_imlib_blend_background(const char *bg, int x, int y, unsigned w, unsigned h, int orientation, uint64_t update);
 
+void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int *width_return, int *height_return, int *horizontal_advance_return, int *vertical_advance_return);
+void xsg_imlib_text_draw(int x, int y, const char *text);
+
 /******************************************************************************/
 
 #endif /* __IMLIB_H__ */

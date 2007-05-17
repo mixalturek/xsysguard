@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <Imlib2.h>
+#include <math.h>
 
 #include "imlib.h"
 
@@ -47,7 +48,7 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 			Imlib_Load_Error error;
 			char *error_str = NULL;
 
-			xsg_message("Found image in \"%s\". Loading...", file);
+			xsg_message("Found image \"%s\". Loading...", file);
 
 			image = imlib_load_image_with_error_return(file, &error);
 
@@ -233,4 +234,285 @@ void xsg_imlib_blend_background(const char *bg, int x, int y, unsigned w, unsign
 	imlib_context_set_image(image);
 	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
 }
+
+/******************************************************************************
+ *
+ * font drawing
+ *
+ ******************************************************************************/
+
+static bool xsg_imlib_check_text_draw_bug() {
+	Imlib_Image old_image;
+	Imlib_Text_Direction old_direction;
+	int old_red = 0, old_green = 0, old_blue = 0, old_alpha = 0;
+	int old_clip_x = 0, old_clip_y = 0, old_clip_w = 0, old_clip_h = 0;
+	bool has_bug = TRUE;
+	int c;
+
+	old_image = imlib_context_get_image();
+	old_direction = imlib_context_get_direction();
+	imlib_context_get_color(&old_red, &old_green, &old_blue, &old_alpha);
+	imlib_context_get_cliprect(&old_clip_x, &old_clip_y, &old_clip_w, &old_clip_h);
+
+	imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
+	imlib_context_set_cliprect(0, 0, 0, 0);
+
+	for (c = 1; c < 256; c++) {
+		Imlib_Image image;
+		int width = 0;
+		int height = 0;
+		char text[2];
+		int x, y;
+
+		text[0] = c;
+		text[1] = '\0';
+
+		imlib_get_text_advance(text, &width, &height);
+
+		if (width < 1 || height < 1)
+			continue;
+
+		image = imlib_create_image(width * 2, height);
+
+		if (image == NULL)
+			continue;
+
+		imlib_context_set_image(image);
+		imlib_image_clear_color(0, 0, 0, 0xff);
+		imlib_context_set_color(0xff, 0xff, 0xff, 0xff);
+		imlib_context_set_cliprect(width, 0, width, height);
+
+		imlib_text_draw(width, 0, text);
+
+		for (x = 0; x < width * 2; x++) {
+			for (y = 0; y < height; y++) {
+				Imlib_Color color = { 0 };
+
+				imlib_image_query_pixel(x, y, &color);
+
+				if (color.red != 0 || color.green != 0 || color.blue != 0) {
+					imlib_free_image();
+					has_bug = FALSE;
+					goto restore_context;
+				}
+			}
+		}
+
+		imlib_free_image();
+	}
+
+	restore_context:
+
+	imlib_context_set_image(old_image);
+	imlib_context_set_direction(old_direction);
+	imlib_context_set_color(old_red, old_green, old_blue, old_alpha);
+	imlib_context_set_cliprect(old_clip_x, old_clip_y, old_clip_w, old_clip_h);
+
+	if (has_bug)
+		xsg_warning("Found cliprect bug in imlib_text_draw...");
+
+	return has_bug;
+}
+
+static bool xsg_imlib_has_text_draw_bug() {
+	static bool initialized = FALSE;
+	static bool has_bug = FALSE;
+
+	if (unlikely(imlib_context_get_font() == NULL))
+		return FALSE;
+
+	if (unlikely(!initialized)) {
+		has_bug = xsg_imlib_check_text_draw_bug();
+		initialized = TRUE;
+	}
+
+	return has_bug;
+}
+
+void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int *width_return, int *height_return, int *horizontal_advance_return, int *vertical_advance_return) {
+	if (likely(!xsg_imlib_has_text_draw_bug())) {
+		imlib_text_draw_with_return_metrics(x, y, text, width_return, height_return, horizontal_advance_return, vertical_advance_return);
+	} else {
+		Imlib_Image image, tmp;
+		Imlib_Text_Direction direction;
+		double angle;
+		int clip_x = 0;
+		int clip_y = 0;
+		int clip_w = 0;
+		int clip_h = 0;
+		int width = 0;
+		int height = 0;
+		int next_x = 0;
+		int next_y = 0;
+
+		image = imlib_context_get_image();
+
+		if (image == NULL)
+			return;
+
+		direction = imlib_context_get_direction();
+		angle = imlib_context_get_angle();
+		imlib_context_get_cliprect(&clip_x, &clip_y, &clip_w, &clip_h);
+
+		imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
+		imlib_context_set_cliprect(0, 0, 0, 0);
+
+		imlib_get_text_advance(text, &width, &height);
+
+		tmp = imlib_create_image(width, height);
+
+		if (tmp == NULL) {
+			imlib_context_set_direction(direction);
+			imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+			return;
+		}
+
+		imlib_context_set_image(tmp);
+		imlib_image_set_has_alpha(1);
+		imlib_image_clear_color(0, 0, 0, 0);
+
+		imlib_text_draw_with_return_metrics(x, y, text, NULL, NULL, &next_x, &next_y);
+
+		switch (direction) {
+			case IMLIB_TEXT_TO_RIGHT:
+				angle = 0.0;
+				break;
+			case IMLIB_TEXT_TO_LEFT:
+				angle = 0.0;
+				imlib_image_orientate(1);
+				break;
+			case IMLIB_TEXT_TO_DOWN:
+				angle = 0.0;
+				imlib_image_orientate(2);
+				break;
+			case IMLIB_TEXT_TO_UP:
+				angle = 0.0;
+				imlib_image_orientate(3);
+				break;
+			default:
+				break;
+		}
+
+		imlib_context_set_direction(direction);
+		imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+		imlib_context_set_image(image);
+
+		if (angle == 0.0) {
+			imlib_blend_image_onto_image(tmp, imlib_image_has_alpha(), 0, 0, width, height, x, y, width, height);
+		} else {
+			int xx, yy;
+			double sa, ca;
+
+			sa = sin(angle);
+			ca = cos(angle);
+			xx = x;
+			yy = y;
+			if (sa > 0.0)
+				xx += sa * height;
+			else
+				yy -= sa * width;
+			if (ca < 0.0) {
+				xx -= ca * width;
+				yy -= ca * height;
+			}
+			imlib_blend_image_onto_image_skewed(tmp, imlib_image_has_alpha(), 0, 0, width, height, xx, yy,
+					(width * ca), (width * sa), 0, 0);
+		}
+
+		imlib_context_set_image(tmp);
+		imlib_free_image();
+
+		imlib_context_set_image(image);
+
+		switch (direction) {
+			case IMLIB_TEXT_TO_RIGHT:
+			case IMLIB_TEXT_TO_LEFT:
+				if (width_return)
+					*width_return = width;
+				if (height_return)
+					*height_return = height;
+				if (horizontal_advance_return)
+					*horizontal_advance_return = next_x;
+				if (vertical_advance_return)
+					*vertical_advance_return = next_y;
+				break;
+			case IMLIB_TEXT_TO_DOWN:
+			case IMLIB_TEXT_TO_UP:
+				if (width_return)
+					*width_return = height;
+				if (height_return)
+					*height_return = width;
+				if (horizontal_advance_return)
+					*horizontal_advance_return = next_y;
+				if (vertical_advance_return)
+					*vertical_advance_return = next_x;
+				break;
+			case IMLIB_TEXT_TO_ANGLE:
+				{
+					double sa, ca;
+					double x1, x2, xt;
+					double y1, y2, yt;
+
+					sa = sin(angle);
+					ca = cos(angle);
+
+					x1 = x2 = 0.0;
+					xt = ca * width;
+					if (xt < x1)
+						x1 = xt;
+					if (xt > x2)
+					x2 = xt;
+					xt = -(sa * height);
+					if (xt < x1)
+						x1 = xt;
+					if (xt > x2)
+						x2 = xt;
+					xt = ca * width - sa * height;
+					if (xt < x1)
+						x1 = xt;
+					if (xt > x2)
+					x2 = xt;
+					width = (int) (x2 - x1);
+
+					y1 = y2 = 0.0;
+					yt = sa * width;
+					if (yt < y1)
+						y1 = yt;
+					if (yt > y2)
+						y2 = yt;
+					yt = ca * height;
+					if (yt < y1)
+						y1 = yt;
+					if (yt > y2)
+						y2 = yt;
+					yt = sa * width + ca * height;
+					if (yt < y1)
+						y1 = yt;
+					if (yt > y2)
+						y2 = yt;
+					height = (int) (y2 - y1);
+				}
+				if (width_return)
+					*width_return = width;
+				if (height_return)
+					*height_return = height;
+				if (horizontal_advance_return)
+					*horizontal_advance_return = next_x;
+				if (vertical_advance_return)
+					*vertical_advance_return = next_y;
+				break;
+			default:
+				break;
+		}
+
+	}
+}
+
+void xsg_imlib_text_draw(int x, int y, const char *text) {
+	if (likely(!xsg_imlib_has_text_draw_bug()))
+		imlib_text_draw(x, y, text);
+	else
+		xsg_imlib_text_draw_with_return_metrics(x, y, text, NULL, NULL, NULL, NULL);
+}
+
 

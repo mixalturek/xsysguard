@@ -150,7 +150,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
 
 				width += column_advance;
 
@@ -225,7 +225,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
+				T(xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
 
 				height += column_advance;
 
@@ -300,7 +300,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
 
 				width += column_advance;
 
@@ -375,7 +375,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
+				T(xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
 
 				height += column_advance;
 
@@ -452,7 +452,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
 
 				width += column_advance;
 
