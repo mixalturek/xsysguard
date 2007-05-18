@@ -47,27 +47,54 @@
 
 /******************************************************************************/
 
+#define COLOR_MAGENTA "\e[35m"
+#define COLOR_YELLOW  "\e[33m"
+#define COLOR_CYAN    "\e[36m"
+#define COLOR_BLUE    "\e[34m"
+#define COLOR_DEFAULT "\e[0m"
+
+bool colored_log = FALSE;
+
+/******************************************************************************/
+
 xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
 static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
 
-	if (level == XSG_LOG_LEVEL_ERROR)
-		fprintf(stderr, "xsysguard[ERR]: ");
-	else if (level == XSG_LOG_LEVEL_WARNING)
-		fprintf(stderr, "xsysguard[WRN]: ");
-	else if (level == XSG_LOG_LEVEL_MESSAGE)
-		fprintf(stderr, "xsysguard[MSG]: ");
-	else if (level == XSG_LOG_LEVEL_DEBUG)
-		fprintf(stderr, "xsysguard[DBG]: ");
-	else
-		fprintf(stderr, "xsysguard[???]: ");
+	if (colored_log) {
+		if (level == XSG_LOG_LEVEL_ERROR)
+			fprintf(stderr, COLOR_MAGENTA"xsysguard[ERR]: ");
+		else if (level == XSG_LOG_LEVEL_WARNING)
+			fprintf(stderr, COLOR_YELLOW"xsysguard[WRN]: ");
+		else if (level == XSG_LOG_LEVEL_MESSAGE)
+			fprintf(stderr, COLOR_CYAN"xsysguard[MSG]: ");
+		else if (level == XSG_LOG_LEVEL_DEBUG)
+			fprintf(stderr, COLOR_BLUE"xsysguard[DBG]: ");
+		else
+			fprintf(stderr, "xsysguard[???]: ");
+
+	} else {
+		if (level == XSG_LOG_LEVEL_ERROR)
+			fprintf(stderr, "xsysguard[ERR]: ");
+		else if (level == XSG_LOG_LEVEL_WARNING)
+			fprintf(stderr, "xsysguard[WRN]: ");
+		else if (level == XSG_LOG_LEVEL_MESSAGE)
+			fprintf(stderr, "xsysguard[MSG]: ");
+		else if (level == XSG_LOG_LEVEL_DEBUG)
+			fprintf(stderr, "xsysguard[DBG]: ");
+		else
+			fprintf(stderr, "xsysguard[???]: ");
+	}
 
 	if (domain != NULL)
 		fprintf(stderr, "[%s] ", domain);
 
 	vfprintf(stderr, format, args);
 
-	fprintf(stderr, "\n");
+	if (colored_log)
+		fprintf(stderr, COLOR_DEFAULT"\n");
+	else
+		fprintf(stderr, "\n");
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		abort();
@@ -287,6 +314,7 @@ static void usage(void) {
 		"  -h, --help       Print help options to stdout\n"
 		"  -m, --modules    Print a list of all available modules to stdout\n"
 		"  -f, --file=FILE  Read configuration from FILE\n"
+		"  -c, --color      Enable colored logging\n"
 		"  -l, --log=N      Set loglevel to N: "
 		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
@@ -341,6 +369,7 @@ int main(int argc, char **argv) {
 	struct option long_options[] = {
 		{ "help",    0, NULL, 'h' },
 		{ "log",     1, NULL, 'l' },
+		{ "color",   0, NULL, 'c' },
 		{ "file",    1, NULL, 'f' },
 		{ "modules", 0, NULL, 'm' },
 		{ NULL,      0, NULL,  0  }
@@ -350,7 +379,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hl:f:m", long_options, &option_index);
+		option = getopt_long(argc, argv, "hl:f:mc", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -366,6 +395,9 @@ int main(int argc, char **argv) {
 			case 'l':
 				if (optarg)
 					log = atoi(optarg);
+				break;
+			case 'c':
+				colored_log = TRUE;
 				break;
 			case 'm':
 				list_modules = TRUE;
