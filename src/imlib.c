@@ -371,7 +371,7 @@ void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int
 		imlib_image_set_has_alpha(1);
 		imlib_image_clear_color(0, 0, 0, 0);
 
-		imlib_text_draw_with_return_metrics(x, y, text, NULL, NULL, &next_x, &next_y);
+		imlib_text_draw_with_return_metrics(0, 0, text, NULL, NULL, &next_x, &next_y);
 
 		switch (direction) {
 			case IMLIB_TEXT_TO_RIGHT:
