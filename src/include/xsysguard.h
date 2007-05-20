@@ -217,14 +217,15 @@ typedef enum {
 	XSG_LOG_LEVEL_ERROR   = 1,
 	XSG_LOG_LEVEL_WARNING = 2,
 	XSG_LOG_LEVEL_MESSAGE = 3,
-	XSG_LOG_LEVEL_DEBUG   = 4
+	XSG_LOG_LEVEL_DEBUG   = 4,
+	XSG_LOG_LEVEL_MEM     = 5
 } xsg_log_level_t;
 
 extern xsg_log_level_t xsg_log_level;
 
 void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...);
 
-#define xsg_error(...) likely(xsg_log_level < XSG_LOG_LEVEL_ERROR) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define xsg_error(...) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
 #define xsg_warning(...) likely(xsg_log_level < XSG_LOG_LEVEL_WARNING) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__)
 #define xsg_message(...) likely(xsg_log_level < XSG_LOG_LEVEL_MESSAGE) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__)
 #define xsg_debug(...) likely(xsg_log_level < XSG_LOG_LEVEL_DEBUG) ? : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__)

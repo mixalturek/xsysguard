@@ -51,9 +51,10 @@
 #define COLOR_YELLOW  "\e[33m"
 #define COLOR_CYAN    "\e[36m"
 #define COLOR_BLUE    "\e[34m"
+#define COLOR_RED     "\e[31m"
 #define COLOR_DEFAULT "\e[0m"
 
-bool colored_log = FALSE;
+static bool colored_log = FALSE;
 
 /******************************************************************************/
 
@@ -61,33 +62,58 @@ xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
 static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
 
-	if (colored_log) {
-		if (level == XSG_LOG_LEVEL_ERROR)
-			fprintf(stderr, COLOR_MAGENTA"xsysguard[ERR]: ");
-		else if (level == XSG_LOG_LEVEL_WARNING)
-			fprintf(stderr, COLOR_YELLOW"xsysguard[WRN]: ");
-		else if (level == XSG_LOG_LEVEL_MESSAGE)
-			fprintf(stderr, COLOR_CYAN"xsysguard[MSG]: ");
-		else if (level == XSG_LOG_LEVEL_DEBUG)
-			fprintf(stderr, COLOR_BLUE"xsysguard[DBG]: ");
-		else
-			fprintf(stderr, "xsysguard[???]: ");
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
+			abort();
 
+	if (colored_log) {
+		switch (level) {
+			case XSG_LOG_LEVEL_ERROR:
+				fprintf(stderr, COLOR_MAGENTA"[ERR]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_WARNING:
+				fprintf(stderr, COLOR_YELLOW"[WRN]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_MESSAGE:
+				fprintf(stderr, COLOR_CYAN"[MSG]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_DEBUG:
+				fprintf(stderr, COLOR_BLUE"[DBG]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_MEM:
+				fprintf(stderr, COLOR_RED"[MEM]xsysguard");
+				break;
+			default:
+				fprintf(stderr, "[???]xsysguard");
+				break;
+		}
 	} else {
-		if (level == XSG_LOG_LEVEL_ERROR)
-			fprintf(stderr, "xsysguard[ERR]: ");
-		else if (level == XSG_LOG_LEVEL_WARNING)
-			fprintf(stderr, "xsysguard[WRN]: ");
-		else if (level == XSG_LOG_LEVEL_MESSAGE)
-			fprintf(stderr, "xsysguard[MSG]: ");
-		else if (level == XSG_LOG_LEVEL_DEBUG)
-			fprintf(stderr, "xsysguard[DBG]: ");
-		else
-			fprintf(stderr, "xsysguard[???]: ");
+		switch (level) {
+			case XSG_LOG_LEVEL_ERROR:
+				fprintf(stderr, "[ERR]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_WARNING:
+				fprintf(stderr, "[WRN]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_MESSAGE:
+				fprintf(stderr, "[MSG]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_DEBUG:
+				fprintf(stderr, "[DBG]xsysguard");
+				break;
+			case XSG_LOG_LEVEL_MEM:
+				fprintf(stderr, "[MEM]xsysguard");
+				break;
+			default:
+				fprintf(stderr, "[???]xsysguard");
+				break;
+		}
 	}
 
-	if (domain != NULL)
-		fprintf(stderr, "[%s] ", domain);
+	if (domain == NULL)
+		fprintf(stderr, ": ");
+	else
+		fprintf(stderr, "/%s: ", domain);
 
 	vfprintf(stderr, format, args);
 
@@ -360,7 +386,7 @@ static void usage(void) {
  ******************************************************************************/
 
 int main(int argc, char **argv) {
-	int log = 0;
+	int log = xsg_log_level;
 	char *filename = NULL;
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;

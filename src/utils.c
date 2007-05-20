@@ -37,7 +37,8 @@ void *xsg_malloc(size_t size) {
 
 		mem = malloc(size);
 
-		xsg_debug("malloc:  %4lu bytes / %9p", size, mem);
+		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc:  %4lu bytes / %9p", size, mem);
 
 		if (likely(mem != NULL))
 			return mem;
@@ -53,7 +54,8 @@ void *xsg_malloc0(size_t size) {
 
 		mem = calloc(1, size);
 
-		xsg_debug("malloc0: %4lu bytes / %9p", size, mem);
+		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc0: %4lu bytes / %9p", size, mem);
 
 		if (likely(mem != NULL))
 			return mem;
@@ -72,7 +74,8 @@ void *xsg_realloc(void *mem, size_t size) {
 		else
 			mem = realloc(mem, size);
 
-		xsg_debug("realloc: %4lu bytes / %9p -> %9p", size, old, mem);
+		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "realloc: %4lu bytes / %9p -> %9p", size, old, mem);
 
 		if (likely(mem != NULL))
 			return mem;
@@ -86,7 +89,8 @@ void *xsg_realloc(void *mem, size_t size) {
 }
 
 void xsg_free(void *mem) {
-	xsg_debug("free: %9p", mem);
+	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
+		xsg_log(NULL, XSG_LOG_LEVEL_MEM, "free: %9p", mem);
 	free(mem);
 }
 
