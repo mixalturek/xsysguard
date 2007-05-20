@@ -75,8 +75,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	areachart = widget->data;
 
 	if ((areachart->angle == NULL) || (areachart->angle->angle == 0.0)) {
-		int xoffset, yoffset, null_y;
+		int xoffset, yoffset;
 		int *prev_pos_h, *prev_neg_h;
+		double *prev_pos, *prev_neg;
 		double pixel_mult;
 
 		if (areachart->background)
@@ -85,14 +86,16 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 		pixel_mult = ((double) widget->height) / (areachart->max - areachart->min);
 
-		null_y = (int) (areachart->max * pixel_mult);
-
 		prev_pos_h = alloca(widget->width * sizeof(int));
 		prev_neg_h = alloca(widget->width * sizeof(int));
+		prev_pos = alloca(widget->width * sizeof(double));
+		prev_neg = alloca(widget->width * sizeof(double));
 
 		for (xoffset = 0; xoffset < widget->width; xoffset++) {
 			prev_pos_h[xoffset] = 0;
 			prev_neg_h[xoffset] = 0;
+			prev_pos[xoffset] = 0.0;
+			prev_neg[xoffset] = 0.0;
 		}
 
 		for (l = areachart->var_list; l; l = l->next) {
@@ -109,32 +112,46 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 			for (xoffset = 0; xoffset < widget->width; xoffset++) {
 				int value_index, height;
+				double value;
 				unsigned int i;
 
 				value_index = ((areachart->value_index - xoffset + widget->width) % widget->width);
+				value = areachart_var->values[value_index];
 
-				if (areachart_var->values[value_index] > 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult;
+				if (value > 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y - height - prev_pos_h[value_index];
+						height = (int) (pixel_mult * (value + prev_pos[value_index]))
+								- prev_pos_h[value_index];
+						yoffset = (int) (areachart->max * pixel_mult) - height
+								- prev_pos_h[value_index];
 						prev_pos_h[value_index] += height;
+						prev_pos[value_index] += value;
 					} else {
-						yoffset = null_y - height;
+						height = (int) (pixel_mult * value);
+						yoffset = (int) (areachart->max * pixel_mult) - height;
 						prev_pos_h[value_index] = height;
+						prev_pos[value_index] = value;
 					}
-				} else if (areachart_var->values[value_index] < 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
+				} else if (value < 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y + prev_neg_h[value_index];
+						height = (int) (pixel_mult * (-value + prev_neg[value_index]))
+								- prev_neg_h[value_index];
+						yoffset = (int) (areachart->max * pixel_mult)
+								+ prev_neg_h[value_index];
 						prev_neg_h[value_index] += height;
+						prev_neg[value_index] += -value;
 					} else {
-						yoffset = null_y;
+						height = (int) (pixel_mult * -value);
+						yoffset = (int) (areachart->max * pixel_mult);
 						prev_neg_h[value_index] = height;
+						prev_neg[value_index] = -value;
 					}
 				} else {
 					if (!areachart_var->add_prev) {
 						prev_pos_h[value_index] = 0;
 						prev_neg_h[value_index] = 0;
+						prev_pos[value_index] = 0.0;
+						prev_neg[value_index] = 0.0;
 					}
 					continue;
 				}
@@ -171,8 +188,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			}
 		}
 	} else if (areachart->angle->angle == 90.0) {
-		int xoffset, yoffset, null_x;
+		int xoffset, yoffset;
 		int *prev_pos_w, *prev_neg_w;
+		double *prev_pos, *prev_neg;
 		double pixel_mult;
 
 		if (areachart->background)
@@ -181,14 +199,16 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 		pixel_mult = ((double) widget->width) / (areachart->max - areachart->min);
 
-		null_x = widget->width - ((int) (areachart->max * pixel_mult));
-
 		prev_pos_w = alloca(widget->height * sizeof(int));
 		prev_neg_w = alloca(widget->height * sizeof(int));
+		prev_pos = alloca(widget->height * sizeof(double));
+		prev_neg = alloca(widget->height * sizeof(double));
 
 		for (yoffset = 0; yoffset < widget->height; yoffset++) {
 			prev_pos_w[yoffset] = 0;
 			prev_neg_w[yoffset] = 0;
+			prev_pos[yoffset] = 0.0;
+			prev_neg[yoffset] = 0.0;
 		}
 
 		for (l = areachart->var_list; l; l = l->next) {
@@ -205,32 +225,46 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 			for (yoffset = 0; yoffset < widget->height; yoffset++) {
 				int value_index, width;
+				double value;
 				unsigned int i;
 
 				value_index = ((areachart->value_index - yoffset + widget->height) % widget->height);
+				value = areachart_var->values[value_index];
 
-				if (areachart_var->values[value_index] > 0.0) {
-					width = areachart_var->values[value_index] * pixel_mult;
+				if (value > 0.0) {
 					if (areachart_var->add_prev) {
-						xoffset = null_x + prev_pos_w[value_index];
+						width = (int) (pixel_mult * (value + prev_pos[value_index]))
+								- prev_pos_w[value_index];
+						xoffset = widget->width - (int) (areachart->max * pixel_mult)
+								+ prev_pos_w[value_index];
 						prev_pos_w[value_index] += width;
+						prev_pos[value_index] += value;
 					} else {
-						xoffset = null_x;
+						width = (int) (pixel_mult * value);
+						xoffset = widget->width - (int) (areachart->max * pixel_mult);
 						prev_pos_w[value_index] = width;
+						prev_pos[value_index] = value;
 					}
-				} else if (areachart_var->values[value_index] < 0.0) {
-					width = areachart_var->values[value_index] * pixel_mult * (- 1.0);
+				} else if (value < 0.0) {
 					if (areachart_var->add_prev) {
-						xoffset = null_x - width - prev_neg_w[value_index];
+						width = (int) (pixel_mult * (-value + prev_neg[value_index]))
+								- prev_neg_w[value_index];
+						xoffset = widget->width - (int) (areachart->max * pixel_mult) - width
+								- prev_neg_w[value_index];
 						prev_neg_w[value_index] += width;
+						prev_neg[value_index] += -value;
 					} else {
-						xoffset = null_x - width;
+						width = (int) (pixel_mult * -value);
+						xoffset = widget->width - (int) (areachart->max * pixel_mult) - width;
 						prev_neg_w[value_index] = width;
+						prev_neg[value_index] = -value;
 					}
 				} else {
 					if (!areachart_var->add_prev) {
 						prev_pos_w[value_index] = 0;
 						prev_neg_w[value_index] = 0;
+						prev_pos[value_index] = 0.0;
+						prev_neg[value_index] = 0.0;
 					}
 					continue;
 				}
@@ -266,8 +300,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			}
 		}
 	} else if (areachart->angle->angle == 180.0) {
-		int xoffset, yoffset, null_y;
+		int xoffset, yoffset;
 		int *prev_pos_h, *prev_neg_h;
+		double *prev_pos, *prev_neg;
 		double pixel_mult;
 
 		if (areachart->background)
@@ -276,14 +311,16 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 		pixel_mult = ((double) widget->height) / (areachart->max - areachart->min);
 
-		null_y = widget->height - ((int) (areachart->max * pixel_mult));
-
 		prev_pos_h = alloca(widget->width * sizeof(int));
 		prev_neg_h = alloca(widget->width * sizeof(int));
+		prev_pos = alloca(widget->width * sizeof(double));
+		prev_neg = alloca(widget->width * sizeof(double));
 
 		for (xoffset = 0; xoffset < widget->width; xoffset++) {
 			prev_pos_h[xoffset] = 0;
 			prev_neg_h[xoffset] = 0;
+			prev_pos[xoffset] = 0.0;
+			prev_neg[xoffset] = 0.0;
 		}
 
 		for (l = areachart->var_list; l; l = l->next) {
@@ -300,32 +337,46 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 			for (xoffset = 0; xoffset < widget->width; xoffset++) {
 				int value_index, height;
+				double value;
 				unsigned int i;
 
 				value_index = ((xoffset + areachart->value_index + 1) % widget->width);
+				value = areachart_var->values[value_index];
 
-				if (areachart_var->values[value_index] > 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult;
+				if (value > 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y + prev_pos_h[value_index];
+						height = (int) (pixel_mult * (value + prev_pos[value_index]))
+								- prev_pos_h[value_index];
+						yoffset = widget->height - (int) (areachart->max * pixel_mult)
+								+ prev_pos_h[value_index];
 						prev_pos_h[value_index] += height;
+						prev_pos[value_index] += value;
 					} else {
-						yoffset = null_y;
+						height = (int) (pixel_mult * value);
+						yoffset = widget->height - (int) (areachart->max * pixel_mult);
 						prev_pos_h[value_index] = height;
+						prev_pos[value_index] = value;
 					}
-				} else if (areachart_var->values[value_index] < 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
+				} else if (value < 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y - height - prev_neg_h[value_index];
+						height = (int) (pixel_mult * (-value + prev_neg[value_index]))
+								- prev_neg_h[value_index];
+						yoffset = widget->height - (int) (areachart->max * pixel_mult) - height
+								- prev_neg_h[value_index];
 						prev_neg_h[value_index] += height;
+						prev_neg[value_index] += -value;
 					} else {
-						yoffset = null_y - height;
+						height = (int) (pixel_mult * -value);
+						yoffset = widget->height - (int) (areachart->max * pixel_mult) - height;
 						prev_neg_h[value_index] = height;
+						prev_neg[value_index] = -value;
 					}
 				} else {
 					if (!areachart_var->add_prev) {
 						prev_pos_h[value_index] = 0;
 						prev_neg_h[value_index] = 0;
+						prev_pos[value_index] = 0.0;
+						prev_neg[value_index] = 0.0;
 					}
 					continue;
 				}
@@ -361,8 +412,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			}
 		}
 	} else if (areachart->angle->angle == 270.0) {
-		int xoffset, yoffset, null_x;
+		int xoffset, yoffset;
 		int *prev_pos_w, *prev_neg_w;
+		double *prev_pos, *prev_neg;
 		double pixel_mult;
 
 		if (areachart->background)
@@ -371,14 +423,16 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 		pixel_mult = ((double) widget->width) / (areachart->max - areachart->min);
 
-		null_x = (int) (areachart->max * pixel_mult);
-
 		prev_pos_w = alloca(widget->height * sizeof(int));
 		prev_neg_w = alloca(widget->height * sizeof(int));
+		prev_pos = alloca(widget->height * sizeof(double));
+		prev_neg = alloca(widget->height * sizeof(double));
 
 		for (yoffset = 0; yoffset < widget->height; yoffset++) {
 			prev_pos_w[yoffset] = 0;
 			prev_neg_w[yoffset] = 0;
+			prev_pos[yoffset] = 0.0;
+			prev_neg[yoffset] = 0.0;
 		}
 
 		for (l = areachart->var_list; l; l = l->next) {
@@ -395,32 +449,46 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 			for (yoffset = 0; yoffset < widget->height; yoffset++) {
 				int value_index, width;
+				double value;
 				unsigned int i;
 
 				value_index = ((yoffset + areachart->value_index + 1) % widget->height);
+				value = areachart_var->values[value_index];
 
-				if (areachart_var->values[value_index] > 0.0) {
-					width = areachart_var->values[value_index] * pixel_mult;
+				if (value > 0.0) {
 					if (areachart_var->add_prev) {
-						xoffset = null_x - width - prev_pos_w[value_index];
+						width = (int) (pixel_mult * (value + prev_pos[value_index]))
+							- prev_pos_w[value_index];
+						xoffset = (int) (areachart->max * pixel_mult) - width
+							- prev_pos_w[value_index];
 						prev_pos_w[value_index] += width;
+						prev_pos[value_index] += value;
 					} else {
-						xoffset = null_x - width;
+						width = (int) (pixel_mult * value);
+						xoffset = (int) (areachart->max * pixel_mult) - width;
 						prev_pos_w[value_index] = width;
+						prev_pos[value_index] = value;
 					}
-				} else if (areachart_var->values[value_index] < 0.0) {
-					width = areachart_var->values[value_index] * pixel_mult * (- 1.0);
+				} else if (value < 0.0) {
 					if (areachart_var->add_prev) {
-						xoffset = null_x + prev_neg_w[value_index];
+						width = (int) (pixel_mult * (-value + prev_neg[value_index]))
+								- prev_neg_w[value_index];
+						xoffset = (int) (areachart->max * pixel_mult)
+								+ prev_neg_w[value_index];
 						prev_neg_w[value_index] += width;
+						prev_neg[value_index] += -value;
 					} else {
-						xoffset = null_x;
+						width = (int) (pixel_mult * -value);
+						xoffset = (int) (areachart->max * pixel_mult);
 						prev_neg_w[value_index] = width;
+						prev_neg[value_index] = -value;
 					}
 				} else {
 					if (!areachart_var->add_prev) {
 						prev_pos_w[value_index] = 0;
 						prev_neg_w[value_index] = 0;
+						prev_pos[value_index] = 0.0;
+						prev_neg[value_index] = 0.0;
 					}
 					continue;
 				}
@@ -457,8 +525,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			}
 		}
 	} else {
-		int xoffset, yoffset, null_y;
+		int xoffset, yoffset;
 		int *prev_pos_h, *prev_neg_h;
+		double *prev_pos, *prev_neg;
 		double pixel_mult;
 		unsigned int chart_width, chart_height;
 		Imlib_Image tmp;
@@ -476,14 +545,16 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 		pixel_mult = ((double) chart_height) / (areachart->max - areachart->min);
 
-		null_y = (int) (areachart->max * pixel_mult);
-
 		prev_pos_h = alloca(chart_width * sizeof(int));
 		prev_neg_h = alloca(chart_width * sizeof(int));
+		prev_pos = alloca(chart_width * sizeof(double));
+		prev_neg = alloca(chart_width * sizeof(double));
 
 		for (xoffset = 0; xoffset < chart_width; xoffset++) {
 			prev_pos_h[xoffset] = 0;
 			prev_neg_h[xoffset] = 0;
+			prev_pos[xoffset] = 0.0;
+			prev_neg[xoffset] = 0.0;
 		}
 
 		for (l = areachart->var_list; l; l = l->next) {
@@ -498,32 +569,46 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 			for (xoffset = 0; xoffset < chart_width; xoffset++) {
 				int value_index, height;
+				double value;
 				unsigned int i;
 
 				value_index = ((areachart->value_index - xoffset + chart_width) % chart_width);
+				value = areachart_var->values[value_index];
 
-				if (areachart_var->values[value_index] > 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult;
+				if (value > 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y - height - prev_pos_h[value_index];
+						height = (int) (pixel_mult * (value + prev_pos[value_index]))
+								- prev_pos_h[value_index];
+						yoffset = (int) (areachart->max * pixel_mult) - height
+								- prev_pos_h[value_index];
 						prev_pos_h[value_index] += height;
+						prev_pos[value_index] += value;
 					} else {
-						yoffset = null_y - height;
+						height = (int) (pixel_mult * value);
+						yoffset = (int) (areachart->max * pixel_mult) - height;
 						prev_pos_h[value_index] = height;
+						prev_pos[value_index] = value;
 					}
-				} else if (areachart_var->values[value_index] < 0.0) {
-					height = areachart_var->values[value_index] * pixel_mult * (- 1.0);
+				} else if (value < 0.0) {
 					if (areachart_var->add_prev) {
-						yoffset = null_y + prev_neg_h[value_index];
+						height = (int) (pixel_mult * (-value + prev_neg[value_index]))
+								- prev_neg_h[value_index];
+						yoffset = (int) (areachart->max * pixel_mult)
+								+ prev_neg_h[value_index];
 						prev_neg_h[value_index] += height;
+						prev_neg[value_index] += -value;
 					} else {
-						yoffset = null_y;
+						height = (int) (pixel_mult * -value);
+						yoffset = (int) (areachart->max * pixel_mult);
 						prev_neg_h[value_index] = height;
+						prev_neg[value_index] = -value;
 					}
 				} else {
 					if (!areachart_var->add_prev) {
 						prev_pos_h[value_index] = 0;
 						prev_neg_h[value_index] = 0;
+						prev_pos[value_index] = 0.0;
+						prev_neg[value_index] = 0.0;
 					}
 					continue;
 				}
