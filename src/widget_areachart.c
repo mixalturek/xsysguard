@@ -66,26 +66,6 @@ typedef struct {
 
 /******************************************************************************/
 
-// NOTE: calls imlib_context_set_image()
-static Imlib_Image create_color_range_image(unsigned width, unsigned height, Imlib_Color_Range range, double range_angle) {
-	Imlib_Image img;
-
-	img = imlib_create_image(width, height);
-
-	if (img == NULL)
-		return NULL;
-
-	imlib_context_set_image(img);
-	imlib_image_set_has_alpha(1);
-	T(imlib_image_clear());
-	imlib_context_set_color_range(range);
-	T(imlib_image_fill_color_range_rectangle(0, 0, width, height, range_angle));
-
-	return img;
-}
-
-/******************************************************************************/
-
 static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	areachart_t *areachart;
 	xsg_list_t *l;
@@ -120,7 +100,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			Imlib_Image range_img = NULL;
 
 			if (areachart_var->range != NULL)
-				range_img = create_color_range_image(widget->width, widget->height,
+				range_img = xsg_imlib_create_color_range_image(widget->width, widget->height,
 						areachart_var->range, areachart_var->range_angle);
 
 			imlib_context_set_image(buffer);
@@ -216,7 +196,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			Imlib_Image range_img = NULL;
 
 			if (areachart_var->range)
-				range_img = create_color_range_image(widget->width, widget->height,
+				range_img = xsg_imlib_create_color_range_image(widget->width, widget->height,
 						areachart_var->range, areachart_var->range_angle + 90.0);
 
 			imlib_context_set_image(buffer);
@@ -311,7 +291,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			Imlib_Image range_img = NULL;
 
 			if (areachart_var->range != NULL)
-				range_img = create_color_range_image(widget->width, widget->height,
+				range_img = xsg_imlib_create_color_range_image(widget->width, widget->height,
 						areachart_var->range, areachart_var->range_angle + 180.0);
 
 			imlib_context_set_image(buffer);
@@ -406,7 +386,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			Imlib_Image range_img = NULL;
 
 			if (areachart_var->range != NULL)
-				range_img = create_color_range_image(widget->width, widget->height,
+				range_img = xsg_imlib_create_color_range_image(widget->width, widget->height,
 						areachart_var->range, areachart_var->range_angle + 270.0);
 
 			imlib_context_set_image(buffer);
@@ -511,7 +491,7 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 			Imlib_Image range_img = NULL;
 
 			if (areachart_var->range != NULL)
-				range_img = create_color_range_image(chart_width, chart_height,
+				range_img = xsg_imlib_create_color_range_image(chart_width, chart_height,
 						areachart_var->range, areachart_var->range_angle);
 
 			imlib_context_set_image(tmp);

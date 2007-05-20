@@ -235,6 +235,30 @@ void xsg_imlib_blend_background(const char *bg, int x, int y, unsigned w, unsign
 	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
 }
 
+Imlib_Image xsg_imlib_create_color_range_image(unsigned width, unsigned height, Imlib_Color_Range range, double range_angle) {
+	Imlib_Image img, old_img;
+	Imlib_Color_Range old_range;
+
+	old_img = imlib_context_get_image();
+	old_range = imlib_context_get_color_range();
+
+	img = imlib_create_image(width, height);
+
+	if (unlikely(img == NULL))
+		return NULL;
+
+	imlib_context_set_image(img);
+	imlib_image_set_has_alpha(1);
+	imlib_image_clear();
+	imlib_context_set_color_range(range);
+	imlib_image_fill_color_range_rectangle(0, 0, width, height, range_angle);
+
+	imlib_context_set_color_range(old_range);
+	imlib_context_set_image(old_img);
+
+	return img;
+}
+
 /******************************************************************************
  *
  * font drawing
