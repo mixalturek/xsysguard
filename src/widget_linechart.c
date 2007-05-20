@@ -21,7 +21,7 @@
 /*
  *
  * LineChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [AddPrev]
+ * + <variable> <color>
  *
  */
 
@@ -42,7 +42,6 @@
 typedef struct {
 	uint32_t var_id;
 	Imlib_Color color;
-	bool add_prev;
 	double *values;
 } linechart_var_t;
 
@@ -54,7 +53,7 @@ typedef struct {
 	double max;
 	bool const_min;
 	bool const_max;
-	Imlib_Image background;
+	char *background;
 	xsg_list_t *var_list;
 	unsigned int value_index;
 } linechart_t;
@@ -63,118 +62,346 @@ typedef struct {
 
 static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	linechart_t *linechart;
-	linechart_var_t *linechart_var;
-	double min, max;
 	xsg_list_t *l;
-	Imlib_Image tmp;
-	ImlibPolygon poly;
-	double pixel_h;
-	unsigned int width;
-	unsigned int height;
-	unsigned int i;
 
 	xsg_debug("render_linechart");
 
-	linechart = (linechart_t *) widget->data;
+	linechart = widget->data;
 
-	if (linechart->angle) {
-		width = linechart->angle->width;
-		height = linechart->angle->height;
-	} else {
-		width = widget->width;
-		height = widget->height;
-	}
+	if ((linechart->angle == NULL) || (linechart->angle->angle == 0.0)) {
+		int xoffset, yoffset;
+		double pixel_mult;
 
-	if (linechart->const_min) {
-		min = linechart->min;
-	} else {
-		min = DBL_MAX;
+		if (linechart->background)
+			T(xsg_imlib_blend_background(linechart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 0, widget->update));
+
+		pixel_mult = ((double) widget->height) / (linechart->max - linechart->min);
+
+		imlib_context_set_image(buffer);
+		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
+
 		for (l = linechart->var_list; l; l = l->next) {
-			linechart_var = l->data;
-			for (i = 0; i < width; i++)
-				min = MIN(min, linechart_var->values[i]);
-		}
-		if (min == DBL_MAX)
-			return;
-	}
+			linechart_var_t *linechart_var = l->data;
+			ImlibPolygon poly = imlib_polygon_new();
+			unsigned int point_count = 0;
 
-	if (linechart->const_max) {
-		max = linechart->max;
-	} else {
-		max = DBL_MIN;
+			imlib_context_set_color(linechart_var->color.red, linechart_var->color.green,
+					linechart_var->color.blue, linechart_var->color.alpha);
+
+			for (xoffset = 0; xoffset < widget->width; xoffset++) {
+				int value_index;
+				double value;
+
+				value_index = ((linechart->value_index - xoffset + widget->width) % widget->width);
+				value = linechart_var->values[value_index];
+
+				if (isnan(value)) {
+					if (point_count > 0) {
+						T(imlib_image_draw_polygon(poly, 0));
+						imlib_polygon_free(poly);
+						poly = imlib_polygon_new();
+						point_count = 0;
+					}
+					continue;
+				}
+
+				yoffset = (int) (pixel_mult * (linechart->max - value));
+
+				imlib_polygon_add_point(poly, widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y + yoffset);
+				point_count++;
+			}
+
+			if (point_count > 0)
+				T(imlib_image_draw_polygon(poly, 0));
+
+			imlib_polygon_free(poly);
+		}
+
+		imlib_context_set_cliprect(0, 0, 0, 0);
+
+	} else if (linechart->angle->angle == 90.0) {
+		int xoffset, yoffset;
+		double pixel_mult;
+
+		if (linechart->background)
+			T(xsg_imlib_blend_background(linechart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 1, widget->update));
+
+		pixel_mult = ((double) widget->width) / (linechart->max - linechart->min);
+
+		imlib_context_set_image(buffer);
+		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
+
 		for (l = linechart->var_list; l; l = l->next) {
-			linechart_var = l->data;
-			for (i = 0; i < width; i++)
-				max = MAX(max, linechart_var->values[i]);
+			linechart_var_t *linechart_var = l->data;
+			ImlibPolygon poly = imlib_polygon_new();
+			unsigned int point_count = 0;
+
+			imlib_context_set_color(linechart_var->color.red, linechart_var->color.green,
+					linechart_var->color.blue, linechart_var->color.alpha);
+
+			for (yoffset = 0; yoffset < widget->height; yoffset++) {
+				int value_index;
+				double value;
+
+				value_index = ((linechart->value_index - yoffset + widget->height) % widget->height);
+				value = linechart_var->values[value_index];
+
+				if (isnan(value)) {
+					if (point_count > 0) {
+						T(imlib_image_draw_polygon(poly, 0));
+						imlib_polygon_free(poly);
+						poly = imlib_polygon_new();
+						point_count = 0;
+					}
+					continue;
+				}
+
+				xoffset = widget->width - (int) (pixel_mult * (linechart->max - value));
+
+				imlib_polygon_add_point(poly, widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y + yoffset);
+				point_count++;
+			}
+
+			if (point_count > 0)
+				T(imlib_image_draw_polygon(poly, 0));
+
+			imlib_polygon_free(poly);
 		}
-		if (max == DBL_MIN)
-			return;
-	}
 
-	tmp = imlib_create_image(width, height);
-	imlib_context_set_image(tmp);
-	imlib_image_set_has_alpha(1);
-	imlib_image_clear();
+		imlib_context_set_cliprect(0, 0, 0, 0);
 
-	/* TODO background image */
+	} else if (linechart->angle->angle == 180.0) {
+		int xoffset, yoffset;
+		double pixel_mult;
 
-	pixel_h = (max - min) / (double) height;
+		if (linechart->background)
+			T(xsg_imlib_blend_background(linechart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 2, widget->update));
 
-	for (l= linechart->var_list; l; l = l->next) {
-		linechart_var = l->data;
+		pixel_mult = ((double) widget->height) / (linechart->max - linechart->min);
 
-		poly = imlib_polygon_new();
+		imlib_context_set_image(buffer);
+		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
 
-		for (i = 0; i < width; i++) {
-			unsigned int j;
-			int x, y;
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var_t *linechart_var = l->data;
+			ImlibPolygon poly = imlib_polygon_new();
+			unsigned int point_count = 0;
 
-			j = (i + linechart->value_index) % width;
-			x = width - i;
-			y = height - linechart_var->values[j] * pixel_h;
+			imlib_context_set_color(linechart_var->color.red, linechart_var->color.green,
+					linechart_var->color.blue, linechart_var->color.alpha);
 
-			imlib_polygon_add_point(poly, x, y); /* FIXME */
+			for (xoffset = 0; xoffset < widget->width; xoffset++) {
+				int value_index;
+				double value;
+
+				value_index = ((xoffset + linechart->value_index + 1) % widget->width);
+				value = linechart_var->values[value_index];
+
+				if (isnan(value)) {
+					if (point_count > 0) {
+						T(imlib_image_draw_polygon(poly, 0));
+						imlib_polygon_free(poly);
+						poly = imlib_polygon_new();
+						point_count = 0;
+					}
+					continue;
+				}
+
+				yoffset = widget->height - (int) (pixel_mult * (linechart->max - value));
+
+				imlib_polygon_add_point(poly, widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y + yoffset);
+				point_count++;
+			}
+
+			if (point_count > 0)
+				T(imlib_image_draw_polygon(poly, 0));
+
+			imlib_polygon_free(poly);
 		}
 
-		imlib_image_draw_polygon(poly, 0);
+		imlib_context_set_cliprect(0, 0, 0, 0);
 
-		imlib_polygon_free(poly);
+	} else if (linechart->angle->angle == 270.0) {
+		int xoffset, yoffset;
+		double pixel_mult;
+
+		if (linechart->background)
+			T(xsg_imlib_blend_background(linechart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 3, widget->update));
+
+		pixel_mult = ((double) widget->width) / (linechart->max - linechart->min);
+
+		imlib_context_set_image(buffer);
+		imlib_context_set_cliprect(widget->xoffset - up_x, widget->yoffset - up_y, widget->width, widget->height);
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var_t *linechart_var = l->data;
+			ImlibPolygon poly = imlib_polygon_new();
+			unsigned int point_count = 0;
+
+			imlib_context_set_color(linechart_var->color.red, linechart_var->color.green,
+					linechart_var->color.blue, linechart_var->color.alpha);
+
+			for (yoffset = 0; yoffset < widget->height; yoffset++) {
+				int value_index;
+				double value;
+
+				value_index = ((yoffset + linechart->value_index + 1) % widget->height);
+				value = linechart_var->values[value_index];
+
+				if (isnan(value)) {
+					if (point_count > 0) {
+						T(imlib_image_draw_polygon(poly, 0));
+						imlib_polygon_free(poly);
+						poly = imlib_polygon_new();
+						point_count = 0;
+					}
+					continue;
+				}
+
+				xoffset = (int) (pixel_mult * (linechart->max - value));
+
+				imlib_polygon_add_point(poly, widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y + yoffset);
+				point_count++;
+			}
+
+			if (point_count > 0)
+				T(imlib_image_draw_polygon(poly, 0));
+
+			imlib_polygon_free(poly);
+		}
+
+		imlib_context_set_cliprect(0, 0, 0, 0);
+
+	} else {
+		int xoffset, yoffset;
+		double pixel_mult;
+		unsigned int chart_width, chart_height;
+		Imlib_Image tmp;
+
+		chart_width = linechart->angle->width;
+		chart_height = linechart->angle->height;
+
+		tmp = imlib_create_image(chart_width, chart_height);
+		imlib_context_set_image(tmp);
+		imlib_image_set_has_alpha(1);
+		T(imlib_image_clear());
+
+		if (linechart->background)
+			T(xsg_imlib_blend_background(linechart->background, 0, 0, chart_width, chart_height, 0, widget->update));
+
+		pixel_mult = ((double) chart_height) / (linechart->max - linechart->min);
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var_t *linechart_var = l->data;
+			ImlibPolygon poly = imlib_polygon_new();
+			unsigned int point_count = 0;
+
+			imlib_context_set_color(linechart_var->color.red, linechart_var->color.green,
+					linechart_var->color.blue, linechart_var->color.alpha);
+
+			for (xoffset = 0; xoffset < chart_width; xoffset++) {
+				int value_index;
+				double value;
+
+				value_index = ((linechart->value_index - xoffset + chart_width) % chart_width);
+				value = linechart_var->values[value_index];
+
+				if (isnan(value)) {
+					if (point_count > 0) {
+						T(imlib_image_draw_polygon(poly, 0));
+						imlib_polygon_free(poly);
+						poly = imlib_polygon_new();
+						point_count = 0;
+					}
+					continue;
+				}
+
+				yoffset = (int) (pixel_mult * (linechart->max - value));
+
+				imlib_polygon_add_point(poly, xoffset, yoffset);
+				point_count++;
+			}
+
+			if (point_count > 0)
+				T(imlib_image_draw_polygon(poly, 0));
+
+			imlib_polygon_free(poly);
+		}
+
+		imlib_context_set_image(buffer);
+		T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
+					linechart->angle->xoffset - up_x, linechart->angle->yoffset - up_y,
+					linechart->angle->angle_x, linechart->angle->angle_y));
+
+		imlib_context_set_image(tmp);
+		imlib_free_image();
 	}
-
-	imlib_context_set_image(buffer);
-
-	if (linechart->angle)
-		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
-				linechart->angle->width, linechart->angle->height,
-				linechart->angle->xoffset - up_x, linechart->angle->yoffset - up_y,
-				linechart->angle->angle_x, linechart->angle->angle_y);
-	else
-		imlib_blend_image_onto_image(tmp, 1, 0, 0, widget->width, widget->height,
-				widget->xoffset - up_x, widget->yoffset - up_y,
-				widget->width, widget->height);
-
-	imlib_context_set_image(tmp);
-	imlib_free_image();
 }
 
 static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	xsg_list_t *l;
-	double prev = 0.0;
-	unsigned int i;
+	unsigned int i, count;
 
 	linechart = (linechart_t *) widget->data;
+
 	i = linechart->value_index;
 	for (l = linechart->var_list; l; l = l->next) {
 		linechart_var = l->data;
 
-		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id)) {
-			linechart_var->values[i] = xsg_rpn_calc(linechart_var->var_id);
-			if (linechart_var->add_prev)
-				linechart_var->values[i] += prev;
+		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id))
+			linechart_var->values[i] = xsg_var_get_double(linechart_var->var_id);
+	}
+
+	if (linechart->const_min && linechart->const_max)
+		return;
+
+	if (linechart->angle)
+		count = linechart->angle->width;
+	else
+		count = widget->width;
+
+	if (!linechart->const_min && !linechart->const_max) {
+		linechart->min = DBL_MAX;
+		linechart->max = DBL_MIN;
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var = l->data;
+
+			for (i = 0; i < count; i++) {
+				linechart->min = MIN(linechart->min, linechart_var->values[i]);
+				linechart->max = MAX(linechart->max, linechart_var->values[i]);
+			}
 		}
-		prev = linechart_var->values[i];
+	} else if (linechart->const_min) {
+		linechart->max = DBL_MIN;
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var = l->data;
+
+			for (i = 0; i < count; i++) {
+				linechart->max = MAX(linechart->max, linechart_var->values[i]);
+			}
+		}
+	} else if (linechart->const_max) {
+		linechart->min = DBL_MAX;
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var = l->data;
+
+			for (i = 0; i < count; i++) {
+				linechart->min = MIN(linechart->min, linechart_var->values[i]);
+			}
+		}
 	}
 }
 
@@ -236,11 +463,9 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 			linechart->max = xsg_conf_read_double();
 			linechart->const_max = TRUE;
 		} else if (xsg_conf_find_command("Background")) {
-			char *filename = xsg_conf_read_string();
-			linechart->background = xsg_imlib_load_image(filename);
-			if (unlikely(linechart->background == NULL))
-				xsg_error("Cannot load image \"%s\"", filename);
-			xsg_free(filename);
+			if (linechart->background != NULL)
+				xsg_free(linechart->background);
+			linechart->background = xsg_conf_read_string();
 		} else {
 			xsg_conf_error("Show, Angle, Min, Max or Background");
 		}
@@ -272,19 +497,12 @@ void xsg_widget_linechart_parse_var(uint32_t var_id) {
 
 	linechart_var->var_id = var_id;
 	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
-	linechart_var->add_prev = FALSE;
 	linechart_var->values = xsg_new0(double, width);
 
 	for (i = 0; i < width; i++)
 		linechart_var->values[i] = DNAN;
 
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("AddPrev")) {
-			linechart_var->add_prev = TRUE;
-		} else {
-			xsg_conf_error("AddPrev");
-		}
-	}
+	xsg_conf_read_newline();
 }
 
 
