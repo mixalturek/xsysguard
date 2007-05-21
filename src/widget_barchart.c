@@ -120,7 +120,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
 					height = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_h;
-					yoffset = (int) (barchart->max * pixel_mult);
+					yoffset = (int) (barchart->max * pixel_mult) + prev_neg_h;
 					prev_neg_h += height;
 					prev_neg += -value;
 				} else {
@@ -469,7 +469,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
 					height = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_h;
-					yoffset = (int) (barchart->max * pixel_mult);
+					yoffset = (int) (barchart->max * pixel_mult) + prev_neg_h;
 					prev_neg_h += height;
 					prev_neg += -value;
 				} else {
