@@ -73,7 +73,6 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	if (barchart->min >= barchart->max)
 		return;
 
-	// load mask image
 	mask_img = NULL;
 	if (barchart->mask) {
 		mask_img = xsg_imlib_load_image(barchart->mask);
@@ -83,70 +82,78 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	}
 
 	if ((mask_img == NULL) && ((barchart->angle == NULL) || (barchart->angle->angle == 0.0))) {
-		int clip_x, clip_y, clip_w, clip_h;
-		int null_y, prev_pos_h, prev_neg_h;
+		int yoffset;
+		int prev_pos_h, prev_neg_h;
+		double prev_pos, prev_neg;
 		double pixel_mult;
 
 		imlib_context_set_image(buffer);
 
 		pixel_mult = ((double) widget->height) / (barchart->max - barchart->min);
 
-		clip_x = widget->xoffset - up_x;
-		clip_w = widget->width;
-
-		null_y = widget->yoffset - up_y + ((int) (barchart->max * pixel_mult));
-
 		prev_pos_h = 0;
 		prev_neg_h = 0;
+		prev_pos = 0.0;
+		prev_neg = 0.0;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var_t *barchart_var;
+			double value;
+			int height;
 
 			barchart_var = l->data;
 
-			if (isnan(barchart_var->value))
-				continue;
+			value = barchart_var->value;
 
-			if (barchart_var->value > 0.0) {
-				clip_h = barchart_var->value * pixel_mult;
+			if (value > 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y - clip_h - prev_pos_h;
-					prev_pos_h += clip_h;
+					height = (int) (pixel_mult * (value + prev_pos)) - prev_pos_h;
+					yoffset = (int) (barchart->max * pixel_mult) - height - prev_pos_h;
+					prev_pos_h += height;
+					prev_pos += value;
 				} else {
-					clip_y = null_y - clip_h;
-					prev_pos_h = clip_h;
+					height = (int) (pixel_mult * value);
+					yoffset = (int) (barchart->max * pixel_mult) - height;
+					prev_pos_h = height;
+					prev_pos = value;
 				}
-			} else if (barchart_var->value < 0.0) {
-				clip_h = barchart_var->value * pixel_mult * (- 1.0);
+			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y + prev_neg_h;
-					prev_neg_h += clip_h;
+					height = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_h;
+					yoffset = (int) (barchart->max * pixel_mult);
+					prev_neg_h += height;
+					prev_neg += -value;
 				} else {
-					clip_y = null_y;
-					prev_neg_h = clip_h;
+					height = (int) (pixel_mult * -value);
+					yoffset = (int) (barchart->max * pixel_mult);
+					prev_neg_h = height;
+					prev_neg = -value;
 				}
 			} else {
 				if (!barchart_var->add_prev) {
 					prev_pos_h = 0;
 					prev_neg_h = 0;
+					prev_pos = 0.0;
+					prev_neg = 0.0;
 				}
 				continue;
 			}
 
-			if (clip_y < (widget->yoffset - up_y)) {
-				clip_h -= widget->yoffset - up_y - clip_y;
-				clip_y = widget->yoffset - up_y;
+			if (yoffset < 0) {
+				height += yoffset;
+				yoffset = 0;
 			}
 
-			if ((clip_y + clip_h) > (widget->yoffset - up_y + widget->height))
-				clip_h -= (clip_y + clip_h) - (widget->yoffset - up_y + widget->height);
+			if ((yoffset + height) > widget->height)
+				height -= (yoffset + height) - widget->height;
 
-			if (clip_h <= 0)
+			if (height <= 0)
 				continue;
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle;
-				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_cliprect(widget->xoffset - up_x,
+						widget->yoffset - up_y + yoffset, widget->width, height);
 				imlib_context_set_color_range(barchart_var->range);
 				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
 						widget->width, widget->height, range_angle));
@@ -154,74 +161,83 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+				T(imlib_image_fill_rectangle(widget->xoffset - up_x,
+							widget->yoffset - up_y + yoffset, widget->width, height));
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 90.0)) {
-		int clip_x, clip_y, clip_w, clip_h;
-		int null_x, prev_pos_w, prev_neg_w;
+		int xoffset;
+		int prev_pos_w, prev_neg_w;
+		double prev_pos, prev_neg;
 		double pixel_mult;
 
 		imlib_context_set_image(buffer);
 
 		pixel_mult = ((double) widget->width) / (barchart->max - barchart->min);
 
-		clip_y = widget->yoffset - up_y;
-		clip_h = widget->height;
-
-		null_x = widget->xoffset - up_x + widget->width - ((int) (barchart->max * pixel_mult));
-
 		prev_pos_w = 0;
 		prev_neg_w = 0;
+		prev_pos = 0.0;
+		prev_neg = 0.0;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var_t *barchart_var;
+			double value;
+			int width;
 
 			barchart_var = l->data;
 
-			if (isnan(barchart_var->value))
-				continue;
+			value = barchart_var->value;
 
-			if (barchart_var->value > 0.0) {
-				clip_w = barchart_var->value * pixel_mult;
+			if (value > 0.0) {
 				if (barchart_var->add_prev) {
-					clip_x = null_x + prev_pos_w;
-					prev_pos_w += clip_w;
+					width = (int) (pixel_mult * (value + prev_pos)) - prev_pos_w;
+					xoffset = widget->width - (int) (barchart->max * pixel_mult) + prev_pos_w;
+					prev_pos_w += width;
+					prev_pos += value;
 				} else {
-					clip_x = null_x;
-					prev_pos_w = clip_w;
+					width = (int) (pixel_mult * value);
+					xoffset = widget->width - (int) (barchart->max * pixel_mult);
+					prev_pos_w = width;
+					prev_pos = value;
 				}
-			} else if (barchart_var->value < 0.0) {
-				clip_w = barchart_var->value * pixel_mult * (- 1.0);
+			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
-					clip_x = null_x - clip_w - prev_neg_w;
-					prev_neg_w += clip_w;
+					width = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_w;
+					xoffset = widget->width - (int) (barchart->max * pixel_mult) - width - prev_neg_w;
+					prev_neg_w += width;
+					prev_neg += -value;
 				} else {
-					clip_x = null_x - clip_w;
-					prev_neg_w = clip_w;
+					width = (int) (pixel_mult * -value);
+					xoffset = widget->width - (int) (barchart->max * pixel_mult) - width;
+					prev_neg_w = width;
+					prev_neg = -value;
 				}
 			} else {
 				if (!barchart_var->add_prev) {
 					prev_pos_w = 0;
 					prev_neg_w = 0;
+					prev_pos = 0.0;
+					prev_neg = 0.0;
 				}
 				continue;
 			}
 
-			if (clip_x < (widget->xoffset - up_x)) {
-				clip_w -= widget->xoffset - up_x - clip_x;
-				clip_x = widget->xoffset - up_x;
+			if (xoffset < 0) {
+				width += xoffset;
+				xoffset = 0;
 			}
 
-			if ((clip_x + clip_w) > (widget->xoffset - up_x + widget->width))
-				clip_w -= (clip_x + clip_w) - (widget->xoffset - up_x + widget->width);
+			if ((xoffset + width) > widget->width)
+				width -= (xoffset + width) - widget->width;
 
-			if (clip_w <= 0)
+			if (width <= 0)
 				continue;
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 90.0;
-				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_cliprect(widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y, width, widget->height);
 				imlib_context_set_color_range(barchart_var->range);
 				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
 							widget->width, widget->height, range_angle));
@@ -229,74 +245,83 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+				T(imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
+							widget->yoffset - up_y, width, widget->height));
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 180.0)) {
-		int clip_x, clip_y, clip_w, clip_h;
-		int null_y, prev_pos_h, prev_neg_h;
+		int yoffset;
+		int prev_pos_h, prev_neg_h;
+		double prev_pos, prev_neg;
 		double pixel_mult;
 
 		imlib_context_set_image(buffer);
 
 		pixel_mult = ((double) widget->height) / (barchart->max - barchart->min);
 
-		clip_x = widget->xoffset - up_x;
-		clip_w = widget->width;
-
-		null_y = widget->yoffset - up_y + widget->height - ((int) (barchart->max * pixel_mult));
-
 		prev_pos_h = 0;
 		prev_neg_h = 0;
+		prev_pos = 0.0;
+		prev_neg = 0.0;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var_t *barchart_var;
+			double value;
+			int height;
 
 			barchart_var = l->data;
 
-			if (isnan(barchart_var->value))
-				continue;
+			value = barchart_var->value;
 
-			if (barchart_var->value > 0.0) {
-				clip_h = barchart_var->value * pixel_mult;
+			if (value > 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y + prev_pos_h;
-					prev_pos_h += clip_h;
+					height = (int) (pixel_mult * (value + prev_pos)) - prev_pos_h;
+					yoffset = widget->height - (int) (barchart->max * pixel_mult) + prev_pos_h;
+					prev_pos_h += height;
+					prev_pos += value;
 				} else {
-					clip_y = null_y;
-					prev_pos_h = clip_h;
+					height = (int) (pixel_mult * value);
+					yoffset = widget->height - (int) (barchart->max * pixel_mult);
+					prev_pos_h = height;
+					prev_pos = value;
 				}
-			} else if (barchart_var->value < 0.0) {
-				clip_h = barchart_var->value * pixel_mult * -1;
+			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y - clip_h - prev_neg_h;
-					prev_neg_h += clip_h;
+					height = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_h;
+					yoffset = widget->height - (int) (barchart->max * pixel_mult) - height - prev_neg_h;
+					prev_neg_h += height;
+					prev_neg += -value;
 				} else {
-					clip_y = null_y - clip_h;
-					prev_neg_h = clip_h;
+					height = (int) (pixel_mult * -value);
+					yoffset = widget->height - (int) (barchart->max * pixel_mult) - height;
+					prev_neg_h = height;
+					prev_neg = -value;
 				}
 			} else {
 				if (!barchart_var->add_prev) {
 					prev_pos_h = 0;
 					prev_neg_h = 0;
+					prev_pos = 0.0;
+					prev_neg = 0.0;
 				}
 				continue;
 			}
 
-			if (clip_y < (widget->yoffset - up_y)) {
-				clip_h -= widget->yoffset - up_y - clip_y;
-				clip_y = widget->yoffset - up_y;
+			if (yoffset < 0) {
+				height += yoffset;
+				yoffset = 0;
 			}
 
-			if ((clip_y + clip_h) > (widget->yoffset - up_y + widget->height))
-				clip_h -= (clip_y + clip_h) - (widget->yoffset - up_y + widget->height);
+			if ((yoffset + height) > widget->height)
+				height -= (yoffset + height) - widget->height;
 
-			if (clip_h <= 0)
+			if (height <= 0)
 				continue;
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 180.0;
-				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_cliprect(widget->xoffset - up_x,
+						widget->yoffset - up_y + yoffset, widget->width, height);
 				imlib_context_set_color_range(barchart_var->range);
 				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
 						widget->width, widget->height, range_angle));
@@ -304,74 +329,83 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+				T(imlib_image_fill_rectangle(widget->xoffset - up_x,
+							widget->yoffset - up_y + yoffset, widget->width, height));
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 270.0)) {
-		int clip_x, clip_y, clip_w, clip_h;
-		int null_x, prev_pos_w, prev_neg_w;
+		int xoffset;
+		int prev_pos_w, prev_neg_w;
+		double prev_pos, prev_neg;
 		double pixel_mult;
 
 		imlib_context_set_image(buffer);
 
 		pixel_mult = ((double) widget->width) / (barchart->max - barchart->min);
 
-		clip_y = widget->yoffset - up_y;
-		clip_h = widget->height;
-
-		null_x = widget->xoffset - up_x + ((int) (barchart->max * pixel_mult));
-
 		prev_pos_w = 0;
 		prev_neg_w = 0;
+		prev_pos = 0.0;
+		prev_neg = 0.0;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var_t *barchart_var;
+			double value;
+			int width;
 
 			barchart_var = l->data;
 
-			if (isnan(barchart_var->value))
-				continue;
+			value = barchart_var->value;
 
-			if (barchart_var->value > 0.0) {
-				clip_w = barchart_var->value * pixel_mult;
+			if (value > 0.0) {
 				if (barchart_var->add_prev) {
-					clip_x = null_x - clip_w - prev_pos_w;
-					prev_pos_w += clip_w;
+					width = (int) (pixel_mult * (value + prev_pos)) - prev_pos_w;
+					xoffset = (int) (barchart->max * pixel_mult) - width - prev_pos_w;
+					prev_pos_w += width;
+					prev_pos += value;
 				} else {
-					clip_x = null_x - clip_w;
-					prev_pos_w = clip_w;
+					width = (int) (pixel_mult * value);
+					xoffset = (int) (barchart->max * pixel_mult) - width;
+					prev_pos_w = width;
+					prev_pos = value;
 				}
-			} else if (barchart_var->value < 0.0) {
-				clip_w = barchart_var->value * pixel_mult * (- 1.0);
+			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
-					clip_x = null_x + prev_neg_w;
-					prev_neg_w += clip_w;
+					width = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_w;
+					xoffset = (int) (barchart->max * pixel_mult) + prev_neg_w;
+					prev_neg_w += width;
+					prev_neg += -value;
 				} else {
-					clip_x = null_x;
-					prev_neg_w = clip_w;
+					width = (int) (pixel_mult * -value);
+					xoffset = (int) (barchart->max * pixel_mult);
+					prev_neg_w = width;
+					prev_neg = -value;
 				}
 			} else {
 				if (!barchart_var->add_prev) {
 					prev_pos_w = 0;
 					prev_neg_w = 0;
+					prev_pos = 0.0;
+					prev_neg = 0.0;
 				}
 				continue;
 			}
 
-			if (clip_x < (widget->xoffset - up_x)) {
-				clip_w -= widget->xoffset - up_x - clip_x;
-				clip_x = widget->xoffset - up_x;
+			if (xoffset < 0) {
+				width += xoffset;
+				xoffset = 0;
 			}
 
-			if ((clip_x + clip_w) > (widget->xoffset - up_x + widget->width))
-				clip_w -= (clip_x + clip_h) - (widget->xoffset - up_x + widget->width);
+			if ((xoffset + width) > widget->width)
+				width -= (xoffset + width) - widget->width;
 
-			if (clip_w <= 0)
+			if (width <= 0)
 				continue;
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 270.0;
-				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_cliprect(widget->xoffset - up_x + xoffset,
+						widget->yoffset - up_y, width, widget->height);
 				imlib_context_set_color_range(barchart_var->range);
 				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
 							widget->width, widget->height, range_angle));
@@ -379,94 +413,102 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+				T(imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
+							widget->yoffset - up_y, width, widget->height));
 			}
 		}
 	} else {
-		int clip_x, clip_y, clip_w, clip_h;
-		int null_y, prev_pos_h, prev_neg_h;
+		int yoffset;
+		int prev_pos_h, prev_neg_h;
+		double prev_pos, prev_neg;
 		double pixel_mult;
-		unsigned int width, height;
+		unsigned int chart_width, chart_height;
 		Imlib_Image tmp;
 
 		if (barchart->angle) {
-			width = barchart->angle->width;
-			height = barchart->angle->height;
+			chart_width = barchart->angle->width;
+			chart_height = barchart->angle->height;
 		} else {
-			width = widget->width;
-			height = widget->height;
+			chart_width = widget->width;
+			chart_height = widget->height;
 		}
 
-		tmp = imlib_create_image(width, height);
+		tmp = imlib_create_image(chart_width, chart_height);
 		imlib_context_set_image(tmp);
 		imlib_image_set_has_alpha(1);
 		imlib_image_clear();
 
-		pixel_mult = ((double) height) / (barchart->max - barchart->min);
-
-		clip_x = 0;
-		clip_w = width;
-
-		null_y = (int) (barchart->max * pixel_mult);
+		pixel_mult = ((double) chart_height) / (barchart->max - barchart->min);
 
 		prev_pos_h = 0;
 		prev_neg_h = 0;
+		prev_pos = 0.0;
+		prev_neg = 0.0;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var_t *barchart_var;
+			double value;
+			int height;
 
 			barchart_var = l->data;
 
-			if (isnan(barchart_var->value))
-				continue;
+			value = barchart_var->value;
 
-			if (barchart_var->value > 0.0) {
-				clip_h = barchart_var->value * pixel_mult;
+			if (value > 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y - clip_h - prev_pos_h;
-					prev_pos_h += clip_h;
+					height = (int) (pixel_mult * (value + prev_pos)) - prev_pos_h;
+					yoffset = (int) (barchart->max * pixel_mult) - height - prev_pos_h;
+					prev_pos_h += height;
+					prev_pos += value;
 				} else {
-					clip_y = null_y - clip_h;
-					prev_pos_h = clip_h;
+					height = (int) (pixel_mult * value);
+					yoffset = (int) (barchart->max * pixel_mult) - height;
+					prev_pos_h = height;
+					prev_pos = value;
 				}
-			} else if (barchart_var->value < 0.0) {
-				clip_h = barchart_var->value * pixel_mult * (- 1.0);
+			} else if (value < 0.0) {
 				if (barchart_var->add_prev) {
-					clip_y = null_y + prev_neg_h;
-					prev_neg_h += clip_h;
+					height = (int) (pixel_mult * (-value + prev_neg)) - prev_neg_h;
+					yoffset = (int) (barchart->max * pixel_mult);
+					prev_neg_h += height;
+					prev_neg += -value;
 				} else {
-					clip_y = null_y;
-					prev_neg_h = clip_h;
+					height = (int) (pixel_mult * -value);
+					yoffset = (int) (barchart->max * pixel_mult);
+					prev_neg_h = height;
+					prev_neg = -value;
 				}
 			} else {
 				if (!barchart_var->add_prev) {
 					prev_pos_h = 0;
 					prev_neg_h = 0;
+					prev_pos = 0.0;
+					prev_neg = 0.0;
 				}
 				continue;
 			}
 
-			if (clip_y < 0) {
-				clip_h -= -clip_y;
-				clip_y = 0;
+			if (yoffset < 0) {
+				height += yoffset;
+				yoffset = 0;
 			}
 
-			if (clip_y + clip_h > height)
-				clip_h -= (clip_y + clip_h) - height;
+			if (yoffset + height > chart_height)
+				height -= (yoffset + height) - chart_height;
 
-			if (clip_h <= 0)
+			if (height <= 0)
 				continue;
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle;
-				imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
+				imlib_context_set_cliprect(0, yoffset, chart_width, height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(0, 0, width, height, range_angle));
+				T(imlib_image_fill_color_range_rectangle(0, 0, chart_width, chart_height, range_angle));
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(clip_x, clip_y, clip_w, clip_h));
+				T(imlib_image_fill_rectangle(0, yoffset, chart_width, height));
 			}
 		}
 
@@ -475,13 +517,13 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 
 		imlib_context_set_image(buffer);
 		if (barchart->angle) {
-			T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, width, height,
+			T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
 					barchart->angle->xoffset - up_x, barchart->angle->yoffset - up_y,
 					barchart->angle->angle_x, barchart->angle->angle_y));
 		} else {
-			T(imlib_blend_image_onto_image(tmp, 1, 0, 0, width, height,
+			T(imlib_blend_image_onto_image(tmp, 1, 0, 0, chart_width, chart_height,
 					widget->xoffset - up_x, widget->yoffset - up_y,
-					width, height));
+					chart_width, chart_height));
 		}
 
 		imlib_context_set_image(tmp);
