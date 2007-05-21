@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <endian.h>
 
 /******************************************************************************
  *
@@ -280,8 +281,14 @@ char *xsg_strndup(const char *str, size_t n) {
  ******************************************************************************/
 
 static int am_big_endian(void) {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	return FALSE;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+	return TRUE;
+#else
 	long one = 1;
 	return !(*((char *)(&one)));
+#endif
 }
 
 static uint16_t swap_16(uint16_t u) {
