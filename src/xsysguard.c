@@ -33,6 +33,7 @@
 #include "conf.h"
 #include "main.h"
 #include "var.h"
+#include "dump.h"
 #include "printf.h"
 #include "window.h"
 #include "widget_line.h"
@@ -463,8 +464,10 @@ int main(int argc, char **argv) {
 	xsg_printf_init();
 	xsg_window_init();
 
+	xsg_dump_atexit();
+
 	xsg_main_loop();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

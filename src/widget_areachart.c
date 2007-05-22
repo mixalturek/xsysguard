@@ -37,6 +37,7 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
+#include "dump.h"
 
 /******************************************************************************/
 
@@ -70,9 +71,10 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	areachart_t *areachart;
 	xsg_list_t *l;
 
-	xsg_debug("render_areachart");
-
 	areachart = widget->data;
+
+	xsg_debug("Render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	if ((areachart->angle == NULL) || (areachart->angle->angle == 0.0)) {
 		int xoffset, yoffset;
@@ -914,8 +916,11 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 
 		} else if (xsg_conf_find_command("AddPrev")) {
 			areachart_var->add_prev = TRUE;
+		} else if (xsg_conf_find_command("Dump")) {
+			xsg_dump_register(xsg_conf_read_string(), widget->update, width, areachart_var->values,
+					&areachart->value_index);
 		} else {
-			xsg_conf_error("ColorRange, Top or AddPrev");
+			xsg_conf_error("ColorRange, Top, AddPrev or Dump");
 		}
 	}
 }
