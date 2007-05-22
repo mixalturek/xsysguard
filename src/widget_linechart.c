@@ -35,7 +35,7 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
-#include "rpn.h"
+#include "dump.h"
 
 /******************************************************************************/
 
@@ -64,9 +64,10 @@ static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	linechart_t *linechart;
 	xsg_list_t *l;
 
-	xsg_debug("render_linechart");
-
 	linechart = widget->data;
+
+	xsg_debug("Render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	if ((linechart->angle == NULL) || (linechart->angle->angle == 0.0)) {
 		int xoffset, yoffset;
@@ -473,7 +474,6 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	if (angle != 0.0)
 		linechart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
-
 }
 
 void xsg_widget_linechart_parse_var(uint32_t var_id) {
@@ -502,7 +502,14 @@ void xsg_widget_linechart_parse_var(uint32_t var_id) {
 	for (i = 0; i < width; i++)
 		linechart_var->values[i] = DNAN;
 
-	xsg_conf_read_newline();
+	while (!xsg_conf_find_newline()) {
+		if (xsg_conf_find_command("Dump")) {
+			xsg_dump_register(xsg_conf_read_string(), widget->update, width, linechart_var->values,
+					&linechart->value_index);
+		} else {
+			xsg_conf_error("Dump");
+		}
+	}
 }
 
 
