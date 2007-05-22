@@ -195,7 +195,7 @@ void xsg_imlib_blend_background(const char *bg, int x, int y, unsigned w, unsign
 
 	imlib_context_set_cliprect(x, y, w, h);
 
-	tick = xsg_main_get_counter();
+	tick = xsg_main_get_tick();
 
 	switch (orientation) {
 		case 0:

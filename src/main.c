@@ -43,7 +43,7 @@ static xsg_list_t *update_list = NULL;
 static xsg_list_t *shutdown_list = NULL;
 static xsg_list_t *poll_list = NULL;
 
-static uint64_t counter = 0;
+static uint64_t tick = 0;
 static uint64_t interval = 1000;
 
 /******************************************************************************/
@@ -52,9 +52,17 @@ void xsg_main_set_interval(uint64_t i) {
 	interval = i;
 }
 
-uint64_t xsg_main_get_counter(void) {
-	return counter;
+uint64_t xsg_main_get_interval() {
+	return interval;
 }
+
+/******************************************************************************/
+
+uint64_t xsg_main_get_tick(void) {
+	return tick;
+}
+
+/******************************************************************************/
 
 void xsg_main_add_init_func(void (*func)(void)) {
 	init_list = xsg_list_append(init_list, (void *) func);
@@ -125,11 +133,11 @@ static void loop(void) {
 	while (1) {
 		xsg_gettimeofday(&time_start, 0);
 
-		xsg_message("Tick %"PRIu64, counter);
+		xsg_message("Tick %"PRIu64, tick);
 
 		for (l = update_list; l; l = l->next) {
 			void (*func)(uint64_t) = l->data;
-			func(counter);
+			func(tick);
 		}
 
 		while (1) {
@@ -186,7 +194,7 @@ static void loop(void) {
 					(p->func)(p->arg, events);
 			}
 		}
-		counter++;
+		tick++;
 	}
 }
 

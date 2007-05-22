@@ -89,7 +89,8 @@ void xsg_var_update(uint32_t id);
  * main.c
  ******************************************************************************/
 
-uint64_t xsg_main_get_counter(void);
+uint64_t xsg_main_get_interval();
+uint64_t xsg_main_get_tick(void);
 
 void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
