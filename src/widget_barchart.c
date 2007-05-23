@@ -548,7 +548,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
 		}
 	} else if (barchart->const_min) {
 		double pos = 0.0;
@@ -560,7 +560,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
@@ -592,7 +592,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
@@ -625,7 +625,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 			barchart_var = l->data;
 
 			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id))
-				barchart_var->value = xsg_var_get_double(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
 
 			if (barchart_var->value > 0.0) {
 				if (barchart_var->add_prev)
@@ -690,7 +690,7 @@ void xsg_widget_barchart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(*widget_id, *update);
+			widget->show_var_id = xsg_var_parse(*widget_id, *update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -716,9 +716,6 @@ void xsg_widget_barchart_parse_var(uint32_t var_id) {
 	xsg_widget_t *widget;
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
-
-	if (!xsg_var_is_double(var_id))
-		xsg_error("BarChart allows double vars only");
 
 	barchart_var = xsg_new0(barchart_var_t, 1);
 

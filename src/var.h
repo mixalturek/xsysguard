@@ -31,14 +31,10 @@ void xsg_var_update(uint32_t var_id);
 
 /******************************************************************************/
 
-uint32_t xsg_var_parse_double(uint32_t id, uint64_t update);
-uint32_t xsg_var_parse_string(uint32_t id, uint64_t update);
+uint32_t xsg_var_parse(uint32_t id, uint64_t update);
 
-double xsg_var_get_double(uint32_t var_id);
-char *xsg_var_get_string(uint32_t var_id);
-
-bool xsg_var_is_double(uint32_t var_id);
-bool xsg_var_is_string(uint32_t var_id);
+double xsg_var_get_num(uint32_t var_id);
+char *xsg_var_get_str(uint32_t var_id);
 
 /*****************************************************************************/
 

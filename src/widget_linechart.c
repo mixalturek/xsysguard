@@ -360,7 +360,7 @@ static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
 		linechart_var = l->data;
 
 		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id))
-			linechart_var->values[i] = xsg_var_get_double(linechart_var->var_id);
+			linechart_var->values[i] = xsg_var_get_num(linechart_var->var_id);
 	}
 
 	if (linechart->const_min && linechart->const_max)
@@ -454,7 +454,7 @@ void xsg_widget_linechart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(*widget_id, *update);
+			widget->show_var_id = xsg_var_parse(*widget_id, *update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -481,9 +481,6 @@ void xsg_widget_linechart_parse_var(uint32_t var_id) {
 	linechart_t *linechart;
 	linechart_var_t * linechart_var;
 	unsigned int width, i;
-
-	if (!xsg_var_is_double(var_id))
-		xsg_error("LineChart allows double vars only");
 
 	widget = xsg_widgets_last();
 	linechart = widget->data;

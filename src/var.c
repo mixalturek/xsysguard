@@ -32,9 +32,7 @@ typedef struct _var_t var_t;
 
 struct _var_t {
 	uint32_t widget_id;
-	uint32_t rpn_id;		// double only
-	char * (*string_func)(void *);	// string only
-	void *string_arg;		// string only
+	uint32_t rpn_id;
 };
 
 /******************************************************************************/
@@ -89,72 +87,30 @@ void xsg_var_update(uint32_t var_id) {
 	xsg_window_update_widget(var->widget_id, var_id);
 }
 
-uint32_t xsg_var_parse_double(uint32_t widget_id, uint64_t update) {
+uint32_t xsg_var_parse(uint32_t widget_id, uint64_t update) {
 	var_t *var;
 
 	var = xsg_new0(var_t, 1);
 	var->widget_id = widget_id;
 	var->rpn_id = xsg_rpn_parse(var_count, update);
-	var->string_func = NULL;
-	var->string_arg = NULL;
 
 	var_list = xsg_list_append(var_list, var);
 	return var_count++;
 }
 
-uint32_t xsg_var_parse_string(uint32_t widget_id, uint64_t update) {
-	char *(*func)(void *);
-	void *arg;
-	var_t *var;
-
-	xsg_modules_parse_string(var_count, update, &func, &arg);
-
-	var = xsg_new0(var_t, 1);
-	var->widget_id = widget_id;
-	var->rpn_id = 0;
-	var->string_func = func;
-	var->string_arg = arg;
-
-	var_list = xsg_list_append(var_list, var);
-
-	return var_count++;
-}
-
-double xsg_var_get_double(uint32_t var_id) {
+double xsg_var_get_num(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
 
-	if (unlikely(var->string_func != NULL))
-		xsg_error("called xsg_var_get_double for string var: %"PRIu32, var_id);
-
-	return xsg_rpn_calc(var->rpn_id);
+	return xsg_rpn_get_num(var->rpn_id);
 }
 
-char *xsg_var_get_string(uint32_t var_id) {
+char *xsg_var_get_str(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
 
-	if (unlikely(var->string_func == NULL))
-		xsg_error("called xsg_var_get_string for double var: %"PRIu32, var_id);
-
-	return var->string_func(var->string_arg);
+	return xsg_rpn_get_str(var->rpn_id);
 }
-
-bool xsg_var_is_double(uint32_t var_id) {
-	var_t *var;
-
-	var = get_var(var_id);
-
-	if (var->string_func != NULL)
-		return FALSE;
-	else
-		return TRUE;
-}
-
-bool xsg_var_is_string(uint32_t var_id) {
-	return !xsg_var_is_double(var_id);
-}
-
 

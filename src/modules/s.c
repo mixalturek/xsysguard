@@ -34,9 +34,9 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void parse_string(uint32_t id, uint64_t update, char * (**func)(void *), void **arg) {
+void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	*arg = xsg_conf_read_string();
-	*func = get_string;
+	*s = get_string;
 }
 
 char *info() {

@@ -553,7 +553,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(*widget_id, *update);
+			widget->show_var_id = xsg_var_parse(*widget_id, *update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {

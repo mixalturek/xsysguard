@@ -93,8 +93,8 @@ static void init() {
 
 /******************************************************************************/
 
-void xsg_modules_parse_number(uint32_t var_id, uint64_t update, double (**func)(void *), void **arg) {
-	xsg_modules_parse_number_t *parse_number;
+void xsg_modules_parse(uint32_t var_id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+	xsg_modules_parse_t *parse;
 	char *filename = NULL;
 	void *module;
 	module_t *m = NULL;
@@ -117,65 +117,25 @@ void xsg_modules_parse_number(uint32_t var_id, uint64_t update, double (**func)(
 	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
 	if (!module)
-		xsg_error("cannot load module \"%s\": %s", m->name, dlerror());
+		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
 
-	parse_number = dlsym(module, "parse_number");
+	parse = dlsym(module, "parse");
 
-	if (!parse_number)
-		xsg_error("cannot find \"parse_number\" symbol in module \"%s\": %s", m->name, dlerror());
+	if (!parse)
+		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
 
-	*func = NULL;
+	*n = NULL;
+	*s = NULL;
 	*arg = NULL;
 
-	parse_number(var_id, update, func, arg);
+	parse(var_id, update, n, s, arg);
 
-	if (*func == NULL)
-		xsg_error("module \"%s\" must set func != NULL", m->name);
-}
-
-void xsg_modules_parse_string(uint32_t var_id, uint64_t update, char * (**func)(void *), void **arg) {
-	xsg_modules_parse_string_t *parse_string;
-	char *filename = NULL;
-	void *module;
-	module_t *m = NULL;
-	xsg_list_t *l;
-
-	if (!modules_list)
-		init();
-
-	for (l = modules_list; l; l = l->next) {
-		m = l->data;
-		if (xsg_conf_find_command(m->name)) {
-			filename = m->file;
-			break;
-		}
-	}
-
-	if (!filename)
-		xsg_conf_error("module name");
-
-	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
-
-	if (!module)
-		xsg_error("cannot load module \"%s\": %s", m->name, dlerror());
-
-	parse_string = dlsym(module, "parse_string");
-
-	if (!parse_string)
-		xsg_error("cannot find \"parse_string\" symbol in module \"%s\": %s", m->name, dlerror());
-
-	*func = NULL;
-	*arg = NULL;
-
-	parse_string(var_id, update, func, arg);
-
-	if (*func == NULL)
-		xsg_error("module \"%s\" must set func != NULL", m->name);
+	if ((*n == NULL) && (*s == NULL))
+		xsg_error("module \"%s\" must set s != NULL or n != NULL", m->name);
 }
 
 void xsg_modules_list() {
-	xsg_modules_parse_number_t *parse_number;
-	xsg_modules_parse_string_t *parse_string;
+	xsg_modules_parse_t *parse;
 	xsg_modules_info_t *info;
 	char *filename;
 	void *module;
@@ -195,10 +155,9 @@ void xsg_modules_list() {
 		if (!module)
 			continue;
 
-		parse_number = dlsym(module, "parse_number");
-		parse_string = dlsym(module, "parse_string");
+		parse = dlsym(module, "parse");
 
-		if ((!parse_number) && (!parse_string))
+		if (!parse)
 			continue;
 
 		info = dlsym(module, "info");

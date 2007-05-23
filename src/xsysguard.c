@@ -65,7 +65,7 @@ static void xsg_logv(const char *domain, xsg_log_level_t level, const char *form
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
-			abort();
+			exit(EXIT_FAILURE);
 
 	if (colored_log) {
 		switch (level) {
@@ -124,7 +124,7 @@ static void xsg_logv(const char *domain, xsg_log_level_t level, const char *form
 		fprintf(stderr, "\n");
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
-		abort();
+		exit(EXIT_FAILURE);
 }
 
 void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
@@ -153,13 +153,12 @@ static void parse_env() {
 }
 
 static bool parse_var(uint32_t widget_id, uint64_t update, uint32_t *var_id) {
-	if (xsg_conf_find_command("+"))
-		*var_id = xsg_var_parse_double(widget_id, update);
-	else if (xsg_conf_find_command("."))
-		*var_id = xsg_var_parse_string(widget_id, update);
-	else
+	if (!xsg_conf_find_command("+")) {
 		return FALSE;
-	return TRUE;
+	} else {
+		*var_id = xsg_var_parse(widget_id, update);
+		return TRUE;
+	}
 }
 
 static void parse_config(char *config_buffer) {

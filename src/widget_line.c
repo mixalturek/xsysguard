@@ -46,9 +46,11 @@ typedef struct {
 static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	line_t *line;
 
-	xsg_debug("render_line");
-
 	line = (line_t *) widget->data;
+
+	xsg_debug("Render Line: x1=%d, y1=%d, x2=%d, y2=%d, red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
+			line->x1, line->y1, line->x2, line->y2,
+			line->color.red, line->color.green, line->color.blue, line->color.alpha);
 
 	imlib_context_set_image(buffer);
 
@@ -100,7 +102,7 @@ void xsg_widget_line_parse() {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(widget_id, update);
+			widget->show_var_id = xsg_var_parse(widget_id, update);
 		} else {
 			xsg_conf_error("Show");
 		}

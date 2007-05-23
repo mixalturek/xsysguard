@@ -129,7 +129,7 @@ void xsg_widget_polygon_parse() {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(widget_id, update);
+			widget->show_var_id = xsg_var_parse(widget_id, update);
 		} else if (xsg_conf_find_command("Filled")) {
 			polygon->filled = TRUE;
 		} else if (xsg_conf_find_command("Closed")) {

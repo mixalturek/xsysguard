@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <math.h>
+#include <string.h>
 
 #include "rpn.h"
 #include "var.h"
@@ -31,14 +32,16 @@ typedef struct _op_t op_t;
 typedef struct _rpn_t rpn_t;
 
 struct _op_t {
-	double *(*op)(double *stptr);
-	double (*func)(void *arg);
+	void (*op)(void);
+	double (*num_func)(void *arg);
+	char *(*str_func)(void *arg);
 	void *arg;
 };
 
 struct _rpn_t {
 	xsg_list_t *op_list;
-	uint32_t stack_size;
+	unsigned num_stack_size;
+	unsigned str_stack_size;
 };
 
 /******************************************************************************/
@@ -46,6 +49,14 @@ struct _rpn_t {
 static uint32_t rpn_count = 0;
 static xsg_list_t *rpn_list = NULL;
 static rpn_t **rpn_array = NULL;
+
+static double *num_stack = NULL;
+static double *num_stptr = NULL;
+static xsg_string_t **str_stack = NULL;
+static xsg_string_t **str_stptr = NULL;
+
+static unsigned max_num_stack_size = 0;
+static unsigned max_str_stack_size = 0;
 
 /******************************************************************************/
 
@@ -73,397 +84,518 @@ static void build_rpn_array(void) {
 	}
 }
 
+static void build_stacks(void) {
+	unsigned i;
+
+	num_stack = xsg_new(double, max_num_stack_size);
+	str_stack = xsg_new(xsg_string_t *, max_str_stack_size);
+
+	for (i = 0; i < max_str_stack_size; i++)
+		str_stack[i] = xsg_string_new(NULL);
+}
+
 /******************************************************************************/
 
-static double *op_lt(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_lt(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] < stptr[0] ? 1.0 : 0.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] < num_stptr[0] ? 1.0 : 0.0;
+	num_stptr -= 1;
 }
 
-static double *op_le(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_le(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] <= stptr[0] ? 1.0 : 0.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] <= num_stptr[0] ? 1.0 : 0.0;
+	num_stptr -= 1;
 }
 
-static double *op_gt(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_gt(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] > stptr[0] ? 1.0 : 0.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] > num_stptr[0] ? 1.0 : 0.0;
+	num_stptr -= 1;
 }
 
-static double *op_ge(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_ge(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] >= stptr[0] ? 1.0 : 0.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] >= num_stptr[0] ? 1.0 : 0.0;
+	num_stptr -= 1;
 }
 
-static double *op_eq(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_eq(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] == stptr[0] ? 1.0 : 0.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] == num_stptr[0] ? 1.0 : 0.0;
+	num_stptr -= 1;
 }
 
-static double *op_ne(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_ne(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
 	else
-		stptr[-1] = stptr[-1] == stptr[0] ? 0.0 : 1.0;
-	return stptr - 1;
+		num_stptr[-1] = num_stptr[-1] == num_stptr[0] ? 0.0 : 1.0;
+	num_stptr -= 1;
 }
 
-static double *op_un(double *stptr) {
-	stptr[0] = isnan(stptr[0]) ? 1.0 : 0.0;
-	return stptr;
+static void op_un(void) {
+	num_stptr[0] = isnan(num_stptr[0]) ? 1.0 : 0.0;
 }
 
-static double *op_isinf(double *stptr) {
-	stptr[0] = isinf(stptr[0]) ? 1.0 : 0.0;
-	return stptr;
+static void op_isinf(void) {
+	num_stptr[0] = isinf(num_stptr[0]) ? 1.0 : 0.0;
 }
 
-static double *op_if(double *stptr) {
-	stptr[-2] = stptr[-2] != 0.0 ? stptr[-1] : stptr[0];
-	return stptr - 2;
+static void op_if(void) {
+	num_stptr[-2] = num_stptr[-2] != 0.0 ? num_stptr[-1] : num_stptr[0];
+	num_stptr -= 2;
 }
 
-static double *op_min(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_min(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
-	else if (stptr[-1] > stptr[0])
-		stptr[-1] = stptr[0];
-	return stptr - 1;
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
+	else if (num_stptr[-1] > num_stptr[0])
+		num_stptr[-1] = num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_max(double *stptr) {
-	if (isnan(stptr[-1]))
+static void op_max(void) {
+	if (isnan(num_stptr[-1]))
 		;
-	else if (isnan(stptr[0]))
-		stptr[-1] = stptr[0];
-	else if (stptr[-1] < stptr[0])
-		stptr[-1] = stptr[0];
-	return stptr - 1;
+	else if (isnan(num_stptr[0]))
+		num_stptr[-1] = num_stptr[0];
+	else if (num_stptr[-1] < num_stptr[0])
+		num_stptr[-1] = num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_limit(double *stptr) {
-	if (isnan(stptr[-2]))
+static void op_limit(void) {
+	if (isnan(num_stptr[-2]))
 		;
-	else if (isnan(stptr[-1]))
-		stptr[-2] = stptr[-1];
-	else if (isnan(stptr[0]))
-		stptr[-2] = stptr[0];
-	else if (stptr[-2] < stptr[-1])
-		stptr[-2] = DNAN;
-	else if (stptr[-2] > stptr[0])
-		stptr[-2] = DNAN;
-	return stptr - 2;
+	else if (isnan(num_stptr[-1]))
+		num_stptr[-2] = num_stptr[-1];
+	else if (isnan(num_stptr[0]))
+		num_stptr[-2] = num_stptr[0];
+	else if (num_stptr[-2] < num_stptr[-1])
+		num_stptr[-2] = DNAN;
+	else if (num_stptr[-2] > num_stptr[0])
+		num_stptr[-2] = DNAN;
+	num_stptr -= 2;
 }
 
-static double *op_unkn(double *stptr) {
-	stptr[+1] = DNAN;
-	return stptr + 1;
+static void op_unkn(void) {
+	num_stptr[+1] = DNAN;
+	num_stptr += 1;
 }
 
-static double *op_inf(double *stptr) {
-	stptr[+1] = DINF;
-	return stptr + 1;
+static void op_inf(void) {
+	num_stptr[+1] = DINF;
+	num_stptr += 1;
 }
 
-static double *op_neginf(double *stptr) {
-	stptr[+1] = -DINF;
-	return stptr + 1;
+static void op_neginf(void) {
+	num_stptr[+1] = -DINF;
+	num_stptr += 1;
 }
 
-static double *op_add(double *stptr) {
-	stptr[-1] += stptr[0];
-	return stptr - 1;
+static void op_add(void) {
+	num_stptr[-1] += num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_sub(double *stptr) {
-	stptr[-1] -= stptr[0];
-	return stptr - 1;
+static void op_sub(void) {
+	num_stptr[-1] -= num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_mul(double *stptr) {
-	stptr[-1] *= stptr[0];
-	return stptr - 1;
+static void op_mul(void) {
+	num_stptr[-1] *= num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_div(double *stptr) {
-	stptr[-1] /= stptr[0];
-	return stptr - 1;
+static void op_div(void) {
+	num_stptr[-1] /= num_stptr[0];
+	num_stptr -= 1;
 }
 
-static double *op_mod(double *stptr) {
-	stptr[-1] = fmod(stptr[-1], stptr[0]);
-	return stptr - 1;
+static void op_mod(void) {
+	num_stptr[-1] = fmod(num_stptr[-1], num_stptr[0]);
+	num_stptr -= 1;
 }
 
-static double *op_sin(double *stptr) {
-	stptr[0] = sin(stptr[0]);
-	return stptr;
+static void op_sin(void) {
+	num_stptr[0] = sin(num_stptr[0]);
 }
 
-static double *op_cos(double *stptr) {
-	stptr[0] = cos(stptr[0]);
-	return stptr;
+static void op_cos(void) {
+	num_stptr[0] = cos(num_stptr[0]);
 }
 
-static double *op_log(double *stptr) {
-	stptr[0] = log(stptr[0]);
-	return stptr;
+static void op_log(void) {
+	num_stptr[0] = log(num_stptr[0]);
 }
 
-static double *op_exp(double *stptr) {
-	stptr[0] = exp(stptr[0]);
-	return stptr;
+static void op_exp(void) {
+	num_stptr[0] = exp(num_stptr[0]);
 }
 
-static double *op_sqrt(double *stptr) {
-	stptr[0] = sqrt(stptr[0]);
-	return stptr;
+static void op_sqrt(void) {
+	num_stptr[0] = sqrt(num_stptr[0]);
 }
 
-static double *op_atan(double *stptr) {
-	stptr[0] = atan(stptr[0]);
-	return stptr;
+static void op_atan(void) {
+	num_stptr[0] = atan(num_stptr[0]);
 }
 
-static double *op_atan2(double *stptr) {
-	stptr[-1] = atan2(stptr[-1], stptr[0]);
-	return stptr - 1;
+static void op_atan2(void) {
+	num_stptr[-1] = atan2(num_stptr[-1], num_stptr[0]);
+	num_stptr -= 1;
 }
 
-static double *op_floor(double *stptr) {
-	stptr[0] = floor(stptr[0]);
-	return stptr;
+static void op_floor(void) {
+	num_stptr[0] = floor(num_stptr[0]);
 }
 
-static double *op_ceil(double *stptr) {
-	stptr[0] = ceil(stptr[0]);
-	return stptr;
+static void op_ceil(void) {
+	num_stptr[0] = ceil(num_stptr[0]);
 }
 
-static double *op_deg2rad(double *stptr) {
-	stptr[0] *= 0.0174532952;
-	return stptr;
+static void op_deg2rad(void) {
+	num_stptr[0] *= 0.0174532952;
 }
 
-static double *op_rad2deg(double *stptr) {
-	stptr[0] *= 57.29577951;
-	return stptr;
+static void op_rad2deg(void) {
+	num_stptr[0] *= 57.29577951;
 }
 
-static double *op_abs(double *stptr) {
-	stptr[0] = fabs(stptr[0]);
-	return stptr;
+static void op_abs(void) {
+	num_stptr[0] = fabs(num_stptr[0]);
 }
 
-static double *op_dup(double *stptr) {
-	stptr[+1] = stptr[0];
-	return stptr + 1;
+static void op_dup(void) {
+	num_stptr[+1] = num_stptr[0];
+	num_stptr += 1;
 }
 
-static double *op_pop(double *stptr) {
-	return stptr - 1;
+static void op_pop(void) {
+	num_stptr -= 1;
 }
 
-static double *op_exc(double *stptr) {
+static void op_exc(void) {
 	double tmp;
-	tmp = stptr[0];
-	stptr[0] = stptr[-1];
-	stptr[-1] = tmp;
-	return stptr;
+	tmp = num_stptr[0];
+	num_stptr[0] = num_stptr[-1];
+	num_stptr[-1] = tmp;
+}
+
+static void op_strdup(void) {
+	str_stptr[+1] = xsg_string_assign(str_stptr[+1], str_stptr[0]->str);
+	str_stptr += 1;
+}
+
+static void op_strpop(void) {
+	str_stptr -= 1;
+}
+
+static void op_strexc(void) {
+	xsg_string_t *tmp;
+	tmp = str_stptr[0];
+	str_stptr[0] = str_stptr[-1];
+	str_stptr[-1] = tmp;
+}
+
+static void op_strlen(void) {
+	num_stptr[+1] = (double) strlen(str_stptr[0]->str);
+	num_stptr += 1;
+	str_stptr -= 1;
+}
+
+static void op_strcmp(void) {
+	num_stptr[+1] = (double) strcmp(str_stptr[-1]->str, str_stptr[0]->str);
+	num_stptr += 1;
+	str_stptr -= 2;
 }
 
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
 	build_rpn_array();
+	build_stacks();
 }
 
+/******************************************************************************/
+
+#define CHECK_NUM_STACK_SIZE(command, size) \
+	if (num_stack_size < size) xsg_error("RPN: " command ": number stack size smaller than " #size)
+#define CHECK_STR_STACK_SIZE(command, size) \
+	if (str_stack_size < size) xsg_error("RPN: " command ": string stack size smaller than " #size)
+
 uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
-	int stack_size = 0;
-	int max_stack_size = 0;
+	int num_stack_size = 0;
+	int str_stack_size = 0;
 	rpn_t *rpn;
 
 	rpn = xsg_new0(rpn_t, 1);
 	rpn->op_list = NULL;
-	rpn->stack_size = 0;
+	rpn->num_stack_size = 0;
+	rpn->str_stack_size = 0;
 
 	do {
 		op_t *op;
 
 		op = xsg_new0(op_t, 1);
 		op->op = NULL;
-		op->func = NULL;
+		op->num_func = NULL;
+		op->str_func = NULL;
 		op->arg = NULL;
 
 		if (xsg_conf_find_command("LT")) {
+			CHECK_NUM_STACK_SIZE("LT", 2);
 			op->op = op_lt;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("LE")) {
+			CHECK_NUM_STACK_SIZE("LE", 2);
 			op->op = op_le;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("GT")) {
+			CHECK_NUM_STACK_SIZE("GT", 2);
 			op->op = op_gt;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("GE")) {
+			CHECK_NUM_STACK_SIZE("GE", 2);
 			op->op = op_ge;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("EQ")) {
+			CHECK_NUM_STACK_SIZE("EQ", 2);
 			op->op = op_eq;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("NE")) {
+			CHECK_NUM_STACK_SIZE("NE", 2);
 			op->op = op_ne;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("UN")) {
+			CHECK_NUM_STACK_SIZE("UN", 1);
 			op->op = op_un;
 		} else if (xsg_conf_find_command("ISINF")) {
+			CHECK_NUM_STACK_SIZE("ISINF", 1);
 			op->op = op_isinf;
 		} else if (xsg_conf_find_command("IF")) {
+			CHECK_NUM_STACK_SIZE("IF", 3);
 			op->op = op_if;
-			stack_size -= 2;
+			num_stack_size -= 2;
 		} else if (xsg_conf_find_command("MIN")) {
+			CHECK_NUM_STACK_SIZE("MIN", 2);
 			op->op = op_min;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("MAX")) {
+			CHECK_NUM_STACK_SIZE("MAX", 2);
 			op->op = op_max;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("LIMIT")) {
+			CHECK_NUM_STACK_SIZE("LIMIT", 3);
 			op->op = op_limit;
-			stack_size -= 2;
+			num_stack_size -= 2;
 		} else if (xsg_conf_find_command("UNKN")) {
 			op->op = op_unkn;
-			stack_size += 1;
+			num_stack_size += 1;
 		} else if (xsg_conf_find_command("INF")) {
 			op->op = op_inf;
-			stack_size += 1;
+			num_stack_size += 1;
 		} else if (xsg_conf_find_command("NEGINF")) {
 			op->op = op_neginf;
-			stack_size += 1;
+			num_stack_size += 1;
 		} else if (xsg_conf_find_command("ADD")) {
+			CHECK_NUM_STACK_SIZE("ADD", 2);
 			op->op = op_add;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("SUB")) {
+			CHECK_NUM_STACK_SIZE("SUB", 2);
 			op->op = op_sub;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("MUL")) {
+			CHECK_NUM_STACK_SIZE("MUL", 2);
 			op->op = op_mul;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("DIV")) {
+			CHECK_NUM_STACK_SIZE("DIV", 2);
 			op->op = op_div;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("MOD")) {
+			CHECK_NUM_STACK_SIZE("MOD", 2);
 			op->op = op_mod;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("SIN")) {
+			CHECK_NUM_STACK_SIZE("SIN", 1);
 			op->op = op_sin;
 		} else if (xsg_conf_find_command("COS")) {
+			CHECK_NUM_STACK_SIZE("COS", 1);
 			op->op = op_cos;
 		} else if (xsg_conf_find_command("LOG")) {
+			CHECK_NUM_STACK_SIZE("LOG", 1);
 			op->op = op_log;
 		} else if (xsg_conf_find_command("EXP")) {
+			CHECK_NUM_STACK_SIZE("EXP", 1);
 			op->op = op_exp;
 		} else if (xsg_conf_find_command("SQRT")) {
+			CHECK_NUM_STACK_SIZE("SQRT", 1);
 			op->op = op_sqrt;
 		} else if (xsg_conf_find_command("ATAN")) {
+			CHECK_NUM_STACK_SIZE("ATAN", 1);
 			op->op = op_atan;
 		} else if (xsg_conf_find_command("ATAN2")) {
+			CHECK_NUM_STACK_SIZE("ATAN2", 2);
 			op->op = op_atan2;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("FLOOR")) {
+			CHECK_NUM_STACK_SIZE("FLOOR", 1);
 			op->op = op_floor;
 		} else if (xsg_conf_find_command("CEIL")) {
+			CHECK_NUM_STACK_SIZE("CEIL", 1);
 			op->op = op_ceil;
 		} else if (xsg_conf_find_command("DEG2RAD")) {
+			CHECK_NUM_STACK_SIZE("DEG2RAD", 1);
 			op->op = op_deg2rad;
 		} else if (xsg_conf_find_command("RAD2DEG")) {
+			CHECK_NUM_STACK_SIZE("RAD2DEG", 1);
 			op->op = op_rad2deg;
 		} else if (xsg_conf_find_command("ABS")) {
+			CHECK_NUM_STACK_SIZE("ABS", 1);
 			op->op = op_abs;
 		} else if (xsg_conf_find_command("DUP")) {
+			CHECK_NUM_STACK_SIZE("DUP", 1);
 			op->op = op_dup;
-			stack_size += 1;
+			num_stack_size += 1;
 		} else if (xsg_conf_find_command("POP")) {
+			CHECK_NUM_STACK_SIZE("POP", 1);
 			op->op = op_pop;
-			stack_size -= 1;
+			num_stack_size -= 1;
 		} else if (xsg_conf_find_command("EXC")) {
+			CHECK_NUM_STACK_SIZE("EXC", 2);
 			op->op = op_exc;
-			if (stack_size < 2)
-				xsg_error("EXC: stack_size < 2");
+		} else if (xsg_conf_find_command("STRDUP")) {
+			CHECK_STR_STACK_SIZE("STRDUP", 1);
+			op->op = op_strdup;
+			str_stack_size += 1;
+		} else if (xsg_conf_find_command("STRPOP")) {
+			CHECK_STR_STACK_SIZE("STRPOP", 1);
+			op->op = op_strpop;
+			str_stack_size -= 1;
+		} else if (xsg_conf_find_command("STREXC")) {
+			CHECK_STR_STACK_SIZE("STREXC", 2);
+			op->op = op_strexc;
+		} else if (xsg_conf_find_command("STRLEN")) {
+			CHECK_STR_STACK_SIZE("STRLEN", 1);
+			op->op = op_strlen;
+			num_stack_size += 1;
+			str_stack_size -= 1;
+		} else if (xsg_conf_find_command("STRCMP")) {
+			CHECK_STR_STACK_SIZE("STRCMP", 1);
+			op->op = op_strcmp;
+			num_stack_size += 1;
+			str_stack_size -= 2;
 		} else {
-			xsg_modules_parse_number(var_id, update, &op->func, &op->arg);
-			stack_size += 1;
+			xsg_modules_parse(var_id, update, &op->num_func, &op->str_func, &op->arg);
+			if (op->num_func != NULL)
+				num_stack_size += 1;
+			if (op->str_func != NULL)
+				str_stack_size += 1;
 		}
 
-		if (stack_size < 1)
-			xsg_error("stack_size < 1");
-
-		max_stack_size = MAX(max_stack_size, stack_size);
+		max_num_stack_size = MAX(max_num_stack_size, num_stack_size);
+		max_str_stack_size = MAX(max_str_stack_size, str_stack_size);
 
 		rpn->op_list = xsg_list_append(rpn->op_list, op);
 
 	} while (xsg_conf_find_command(","));
 
-	if (stack_size != 1)
-		xsg_error("more than one elemant on the stack");
-
-	rpn->stack_size = max_stack_size;
+	rpn->num_stack_size = num_stack_size;
+	rpn->str_stack_size = str_stack_size;
 
 	rpn_list = xsg_list_append(rpn_list, rpn);
 	return rpn_count++;
 }
 
-double xsg_rpn_calc(uint32_t rpn_id) {
+static void calc(rpn_t *rpn) {
 	xsg_list_t *l;
-	double *stack;
-	double *stptr;
-	rpn_t *rpn;
 
-	rpn = get_rpn(rpn_id);
-
-	stack = (double *)alloca(sizeof(double) * rpn->stack_size);
-	stptr = stack - 1;
+	num_stptr = num_stack - 1;
+	str_stptr = str_stack - 1;
 
 	for (l = rpn->op_list; l; l = l->next) {
 		op_t *op = l->data;
 		if (op->op) {
-			stptr = op->op(stptr);
+			op->op();
 		} else {
-			stptr[+1] = op->func(op->arg);
-			stptr++;
+			if (op->num_func) {
+				num_stptr[+1] = op->num_func(op->arg);
+				num_stptr++;
+			}
+			if (op->str_func) {
+				str_stptr[+1] = xsg_string_assign(str_stptr[+1], op->str_func(op->arg));
+				str_stptr++;
+			}
 		}
 	}
+}
 
-	xsg_debug("rpn_calc(%u): %f", rpn_id, *stack);
+double xsg_rpn_get_num(uint32_t rpn_id) {
+	double num;
+	rpn_t *rpn;
 
-	return *stack;
+	rpn = get_rpn(rpn_id);
+
+	if (unlikely(rpn->num_stack_size < 1)) {
+		xsg_warning("RPN(%"PRIu32"): no number left on stack");
+		return DNAN;
+	}
+
+	calc(rpn);
+
+	num = num_stptr[0];
+
+	xsg_debug("RPN(%"PRIu32"): %f", rpn_id, num);
+
+	return num;
+}
+
+char *xsg_rpn_get_str(uint32_t rpn_id) {
+	char *str;
+	rpn_t *rpn;
+
+	rpn = get_rpn(rpn_id);
+
+	if (unlikely(rpn->str_stack_size < 1)) {
+		xsg_warning("RPN(%"PRIu32"): no string left on stack");
+		return NULL;
+	}
+
+	calc(rpn);
+
+	str = str_stptr[0]->str;
+
+	xsg_debug("RPN(%"PRIu32"): \"%s\"", rpn_id, str);
+
+	return str;
 }
 
 

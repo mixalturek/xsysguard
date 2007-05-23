@@ -27,7 +27,8 @@
 
 void xsg_rpn_init(void);
 uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update);
-double xsg_rpn_calc(uint32_t rpn_id);
+double xsg_rpn_get_num(uint32_t rpn_id);
+char *xsg_rpn_get_str(uint32_t rpn_id);
 
 /*****************************************************************************/
 

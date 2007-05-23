@@ -34,13 +34,13 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse_number(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
+void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	double *d;
 
 	d = xsg_new0(double, 1);
 	*d = xsg_conf_read_double();
 	*arg = (void *) d;
-	*func = get_number;
+	*n = get_number;
 }
 
 char *info() {

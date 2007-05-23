@@ -57,12 +57,10 @@ typedef int bool;
 
 /******************************************************************************/
 
-typedef void xsg_modules_parse_number_t(uint32_t id, uint64_t update, double (**func)(void *), void **arg);
-typedef void xsg_modules_parse_string_t(uint32_t id, uint64_t update, char * (**func)(void *), void **arg);
+typedef void xsg_modules_parse_t(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg);
 typedef char *xsg_modules_info_t(void);
 
-xsg_modules_parse_number_t parse_number;
-xsg_modules_parse_string_t parse_string;
+xsg_modules_parse_t parse;
 xsg_modules_info_t info;
 
 /******************************************************************************

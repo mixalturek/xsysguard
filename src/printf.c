@@ -262,16 +262,6 @@ void xsg_printf_add_var(uint32_t printf_id, uint32_t var_id) {
 
 	var = p->next_var->data;
 
-	if (var->type == VAR_STRING) {
-		if (!xsg_var_is_string(var_id))
-			xsg_conf_error("string variable");
-	} else if (var->type == VAR_INT || var->type == VAR_UINT || var->type == VAR_DOUBLE || var->type == VAR_CHAR || var->type == VAR_POINTER) {
-		if (!xsg_var_is_double(var_id))
-			xsg_conf_error("double variable");
-	} else {
-		xsg_error("printf_add_var: unknown var type");
-	}
-
 	var->var_id = var_id;
 
 	p->next_var = p->next_var->next;
@@ -289,33 +279,33 @@ const char *xsg_printf(uint32_t printf_id) {
 		var_t *var = l->data;
 		if (var->type == VAR_INT) {
 			// d, i
-			double d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_num(var->var_id);
 			if (isnan(d) || isinf(d))
 				d = 0.0;
 			xsg_string_append_printf(p->buffer, var->format, (int64_t) d);
 		} else if (var->type == VAR_UINT) {
 			// o, u, x, X
-			double d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_num(var->var_id);
 			if (isnan(d) || isinf(d))
 				d = 0.0;
 			xsg_string_append_printf(p->buffer, var->format, (uint64_t) d);
 		} else if (var->type == VAR_DOUBLE) {
 			// e, E, f, F, g, G, a, A
-			double d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_num(var->var_id);
 			xsg_string_append_printf(p->buffer, var->format, d);
 		} else if (var->type == VAR_CHAR) {
 			// c
-			double d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_num(var->var_id);
 			if (isnan(d) || isinf(d))
 				d = (double) ' ';
 			xsg_string_append_printf(p->buffer, var->format, (int) d);
 		} else if (var->type == VAR_STRING) {
 			// s
-			char *s = xsg_var_get_string(var->var_id);
+			char *s = xsg_var_get_str(var->var_id);
 			xsg_string_append_printf(p->buffer, var->format, s);
 		} else if (var->type == VAR_POINTER) {
 			// p
-			double d = xsg_var_get_double(var->var_id);
+			double d = xsg_var_get_num(var->var_id);
 			if (isnan(d) || isinf(d))
 				d = 0.0;
 			xsg_string_append_printf(p->buffer, var->format, (unsigned) d);

@@ -109,7 +109,7 @@ void xsg_widget_image_parse() {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse_double(widget_id, widget->update);
+			widget->show_var_id = xsg_var_parse(widget_id, widget->update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {

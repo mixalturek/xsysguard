@@ -207,7 +207,7 @@ void xsg_window_parse_argb_visual() {
 
 void xsg_window_parse_show() {
 	window.show_update = xsg_conf_read_uint();
-	window.show_var_id = xsg_var_parse_double(0xffffffff, window.show_update);
+	window.show_var_id = xsg_var_parse(0xffffffff, window.show_update);
 }
 
 /******************************************************************************
@@ -512,7 +512,7 @@ static void update_show(void) {
 	show = window.show;
 
 	if (window.show_update != 0)
-		window.show = (xsg_var_get_double(window.show_var_id) == 0.0) ? FALSE : TRUE;
+		window.show = (xsg_var_get_num(window.show_var_id) == 0.0) ? FALSE : TRUE;
 	else
 		window.show = TRUE;
 

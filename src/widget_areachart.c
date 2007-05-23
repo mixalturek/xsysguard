@@ -665,7 +665,7 @@ static void update_areachart(xsg_widget_t *widget, uint32_t var_id) {
 		areachart_var = l->data;
 
 		if ((var_id == 0xffffffff) || (areachart_var->var_id == var_id))
-			areachart_var->values[i] = xsg_var_get_double(areachart_var->var_id);
+			areachart_var->values[i] = xsg_var_get_num(areachart_var->var_id);
 	}
 
 	if (areachart->const_min && areachart->const_max)
@@ -824,7 +824,7 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Show")) {
-			widget->show = xsg_var_parse_double(*widget_id, *update);
+			widget->show = xsg_var_parse(*widget_id, *update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -851,9 +851,6 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	unsigned int width, i;
-
-	if (!xsg_var_is_double(var_id))
-		xsg_error("AreaChart allows double vars only");
 
 	widget = xsg_widgets_last();
 	areachart = widget->data;

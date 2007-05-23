@@ -194,9 +194,8 @@ static double get_random(void *arg) {
 
 /******************************************************************************/
 
-void parse_number(uint32_t id, uint64_t update, double (**func)(void *), void **arg) {
-	*func = get_random;
-	*arg = NULL;
+void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+	*n = get_random;
 }
 
 char *info() {
