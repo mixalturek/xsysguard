@@ -25,7 +25,7 @@
 static double get_tick(void *arg) {
 	double d;
 
-	d = xsg_main_get_counter();
+	d = xsg_main_get_tick();
 
 	xsg_debug("get_tick: %f", d);
 
