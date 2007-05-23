@@ -30,6 +30,7 @@ typedef struct _dump_t {
 	uint64_t first_tv_sec;
 	uint64_t first_tv_usec;
 	const char *filename;
+	const char *name;
 	uint64_t update;
 	unsigned count;
 	double *values;
@@ -64,6 +65,7 @@ void xsg_dump_register(const char *name, uint64_t update, unsigned count, double
 	d->first_tv_sec = (uint64_t) tv.tv_sec;
 	d->first_tv_usec = (uint64_t) tv.tv_usec;
 	d->filename = xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "dumps", name, NULL);
+	d->name = name;
 	d->update = update;
 	d->count = count;
 	d->values = values;
