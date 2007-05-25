@@ -121,6 +121,12 @@ xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) {
 	return xsg_string_insert_len(string, -1, val, -1);
 }
 
+xsg_string_t *xsg_string_append_c(xsg_string_t *string, char c) {
+	if (unlikely(string == NULL))
+		return NULL;
+	return xsg_string_insert_c(string, -1, c);
+}
+
 xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) {
 	if (unlikely(string == NULL))
 		return NULL;
@@ -174,6 +180,24 @@ xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const cha
 
 	string->str[string->len] = 0;
 
+	return string;
+}
+
+xsg_string_t *xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c) {
+	if (unlikely(string == NULL))
+		return NULL;
+	xsg_string_maybe_expand(string, 1);
+	if (pos < 0) {
+		pos = string->len;
+	} else {
+		if (unlikely(pos > string->len))
+			return string;
+	}
+	if (pos < string->len)
+		memmove(string->str + pos + 1, string->str + pos, string->len - pos);
+	string->str[pos] = c;
+	string->len += 1;
+	string->str[string->len] = 0;
 	return string;
 }
 
