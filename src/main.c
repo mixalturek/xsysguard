@@ -22,6 +22,8 @@
 #include <sys/time.h>
 #include <time.h>
 #include <signal.h>
+#include <errno.h>
+#include <string.h>
 
 #include "main.h"
 
@@ -173,6 +175,12 @@ static void loop(void) {
 			xsg_message("Sleeping for %u.%06us", (unsigned) time_sleep.tv_sec, (unsigned) time_sleep.tv_usec);
 
 			fd_count = select(fd_max + 1, &read_fds, &write_fds, &except_fds, &time_sleep);
+
+			if (unlikely(fd_count == -1) && (errno == EINTR))
+				continue;
+
+			if (unlikely(fd_count == -1))
+				xsg_error("select: %s", strerror(errno));
 
 			if (fd_count == 0)
 				break; // timeout
