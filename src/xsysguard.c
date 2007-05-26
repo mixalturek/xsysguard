@@ -62,59 +62,62 @@ static bool colored_log = FALSE;
 xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
 static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
+	unsigned int pid;
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
 			exit(EXIT_FAILURE);
 
+	pid = getpid();
+
 	if (colored_log) {
 		switch (level) {
 			case XSG_LOG_LEVEL_ERROR:
-				fprintf(stderr, COLOR_MAGENTA"[ERR]xsysguard");
+				fprintf(stderr, COLOR_MAGENTA"[%u][ERR]", pid);
 				break;
 			case XSG_LOG_LEVEL_WARNING:
-				fprintf(stderr, COLOR_YELLOW"[WRN]xsysguard");
+				fprintf(stderr, COLOR_YELLOW"[%u][WRN]", pid);
 				break;
 			case XSG_LOG_LEVEL_MESSAGE:
-				fprintf(stderr, COLOR_CYAN"[MSG]xsysguard");
+				fprintf(stderr, COLOR_CYAN"[%u][MSG]", pid);
 				break;
 			case XSG_LOG_LEVEL_DEBUG:
-				fprintf(stderr, COLOR_BLUE"[DBG]xsysguard");
+				fprintf(stderr, COLOR_BLUE"[%u][DBG]", pid);
 				break;
 			case XSG_LOG_LEVEL_MEM:
-				fprintf(stderr, COLOR_RED"[MEM]xsysguard");
+				fprintf(stderr, COLOR_RED"[%u][MEM]", pid);
 				break;
 			default:
-				fprintf(stderr, "[???]xsysguard");
+				fprintf(stderr, "[%u][???]", pid);
 				break;
 		}
 	} else {
 		switch (level) {
 			case XSG_LOG_LEVEL_ERROR:
-				fprintf(stderr, "[ERR]xsysguard");
+				fprintf(stderr, "[ERR][%u]", pid);
 				break;
 			case XSG_LOG_LEVEL_WARNING:
-				fprintf(stderr, "[WRN]xsysguard");
+				fprintf(stderr, "[WRN][%u]", pid);
 				break;
 			case XSG_LOG_LEVEL_MESSAGE:
-				fprintf(stderr, "[MSG]xsysguard");
+				fprintf(stderr, "[MSG][%u]", pid);
 				break;
 			case XSG_LOG_LEVEL_DEBUG:
-				fprintf(stderr, "[DBG]xsysguard");
+				fprintf(stderr, "[DBG][%u]", pid);
 				break;
 			case XSG_LOG_LEVEL_MEM:
-				fprintf(stderr, "[MEM]xsysguard");
+				fprintf(stderr, "[MEM][%u]", pid);
 				break;
 			default:
-				fprintf(stderr, "[???]xsysguard");
+				fprintf(stderr, "[???][%u]", pid);
 				break;
 		}
 	}
 
 	if (domain == NULL)
-		fprintf(stderr, ": ");
+		fprintf(stderr, "xsysguard: ");
 	else
-		fprintf(stderr, "/%s: ", domain);
+		fprintf(stderr, "xsysguard/%s: ", domain);
 
 	vfprintf(stderr, format, args);
 
@@ -337,7 +340,7 @@ static void usage(void) {
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
-		"  -h, --help       Print help options to stdout\n"
+		"  -h, --help       Print this help message to stdout\n"
 		"  -m, --modules    Print a list of all available modules to stdout\n"
 		"  -f, --file=FILE  Read configuration from FILE\n"
 		"  -c, --color      Enable colored logging\n"
