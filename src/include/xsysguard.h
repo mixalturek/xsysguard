@@ -46,8 +46,6 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define ABS(a) (((a) < 0) ? -(a) : (a))
 
-#define ISNAN(d) (((d) != (d)) ? TRUE : FALSE)
-
 #define DNAN ((double)(0.0/0.0))
 #define DINF ((double)(1.0/0.0))
 
@@ -117,6 +115,7 @@ struct _xsg_list_t {
 
 xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
+xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data);
 xsg_list_t *xsg_list_last(xsg_list_t *list);
 unsigned int xsg_list_length(xsg_list_t *list);
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);

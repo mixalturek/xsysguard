@@ -86,6 +86,27 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	return new_list;
 }
 
+xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
+	xsg_list_t *tmp;
+
+	tmp = list;
+	while (tmp) {
+		if (tmp->data != data) {
+			tmp = tmp->next;
+		} else {
+			if (tmp->prev)
+				tmp->prev->next = tmp->next;
+			if (tmp->next)
+				tmp->next->prev = tmp->prev;
+			if (list == tmp)
+				list = list->next;
+			xsg_free(tmp);
+			break;
+		}
+	}
+	return list;
+}
+
 void xsg_list_free(xsg_list_t *list) {
 	xsg_list_t *next;
 
