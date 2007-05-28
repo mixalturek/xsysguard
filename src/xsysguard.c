@@ -63,6 +63,7 @@ xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
 static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
 	unsigned int pid;
+	char *prefix = NULL;
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
@@ -73,51 +74,51 @@ static void xsg_logv(const char *domain, xsg_log_level_t level, const char *form
 	if (colored_log) {
 		switch (level) {
 			case XSG_LOG_LEVEL_ERROR:
-				fprintf(stderr, COLOR_MAGENTA"[%u][ERR]", pid);
+				prefix = COLOR_MAGENTA"[ERR]";
 				break;
 			case XSG_LOG_LEVEL_WARNING:
-				fprintf(stderr, COLOR_YELLOW"[%u][WRN]", pid);
+				prefix = COLOR_YELLOW"[WRN]";
 				break;
 			case XSG_LOG_LEVEL_MESSAGE:
-				fprintf(stderr, COLOR_CYAN"[%u][MSG]", pid);
+				prefix = COLOR_CYAN"[MSG]";
 				break;
 			case XSG_LOG_LEVEL_DEBUG:
-				fprintf(stderr, COLOR_BLUE"[%u][DBG]", pid);
+				prefix = COLOR_BLUE"[DBG]";
 				break;
 			case XSG_LOG_LEVEL_MEM:
-				fprintf(stderr, COLOR_RED"[%u][MEM]", pid);
+				prefix = COLOR_RED"[MEM]";
 				break;
 			default:
-				fprintf(stderr, "[%u][???]", pid);
+				prefix = "[???]";
 				break;
 		}
 	} else {
 		switch (level) {
 			case XSG_LOG_LEVEL_ERROR:
-				fprintf(stderr, "[ERR][%u]", pid);
+				prefix = "[ERR]";
 				break;
 			case XSG_LOG_LEVEL_WARNING:
-				fprintf(stderr, "[WRN][%u]", pid);
+				prefix = "[WRN]";
 				break;
 			case XSG_LOG_LEVEL_MESSAGE:
-				fprintf(stderr, "[MSG][%u]", pid);
+				prefix = "[MSG]";
 				break;
 			case XSG_LOG_LEVEL_DEBUG:
-				fprintf(stderr, "[DBG][%u]", pid);
+				prefix = "[DBG]";
 				break;
 			case XSG_LOG_LEVEL_MEM:
-				fprintf(stderr, "[MEM][%u]", pid);
+				prefix = "[MEM]";
 				break;
 			default:
-				fprintf(stderr, "[???][%u]", pid);
+				prefix = "[???]";
 				break;
 		}
 	}
 
 	if (domain == NULL)
-		fprintf(stderr, "xsysguard: ");
+		fprintf(stderr, "%s[%u]xsysguard: ", prefix, pid);
 	else
-		fprintf(stderr, "xsysguard/%s: ", domain);
+		fprintf(stderr, "%s[%u]xsysguard/%s: ", prefix, pid, domain);
 
 	vfprintf(stderr, format, args);
 
@@ -389,7 +390,6 @@ static void usage(void) {
  ******************************************************************************/
 
 int main(int argc, char **argv) {
-	int log = xsg_log_level;
 	char *filename = NULL;
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;
@@ -423,7 +423,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'l':
 				if (optarg)
-					log = atoi(optarg);
+					xsg_log_level = atoi(optarg);
 				break;
 			case 'c':
 				colored_log = TRUE;
@@ -438,8 +438,6 @@ int main(int argc, char **argv) {
 				break;
 		}
 	}
-
-	xsg_log_level = log;
 
 	if (print_usage) {
 		usage();
