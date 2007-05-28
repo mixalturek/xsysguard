@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "main.h"
+#include "var.h"
 
 /******************************************************************************/
 
@@ -87,7 +88,7 @@ void xsg_main_add_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void 
 	p->func = func;
 	p->arg = arg;
 
-	poll_list = xsg_list_append(poll_list, p);
+	poll_list = xsg_list_prepend(poll_list, p);
 }
 
 void xsg_main_remove_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events) {
@@ -201,6 +202,7 @@ static void loop(void) {
 				if (events)
 					(p->func)(p->arg, events);
 			}
+			xsg_var_flush();
 		}
 		tick++;
 	}

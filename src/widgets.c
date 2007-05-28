@@ -111,9 +111,6 @@ void xsg_widgets_update(uint32_t widget_id, uint32_t var_id) {
 		(widget->update_func)(widget, var_id);
 
 	xsg_window_update_append_rect(widget->xoffset, widget->yoffset, widget->width, widget->height);
-
-	xsg_window_render();
-	xsg_window_render_xshape();
 }
 
 static void scroll_and_update(uint64_t count) {

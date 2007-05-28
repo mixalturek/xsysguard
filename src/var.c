@@ -75,17 +75,34 @@ static void build_var_array(void) {
 
 /******************************************************************************/
 
-void xsg_var_init() {
+void xsg_var_init(void) {
 	build_var_array();
 	xsg_rpn_init();
 }
+
+/******************************************************************************/
+
+static bool need_flush = FALSE;
 
 void xsg_var_update(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
+
 	xsg_window_update_widget(var->widget_id, var_id);
+
+	need_flush = TRUE;
 }
+
+void xsg_var_flush(void) {
+	if (need_flush) {
+		xsg_window_render();
+		xsg_window_render_xshape();
+		need_flush = FALSE;
+	}
+}
+
+/******************************************************************************/
 
 uint32_t xsg_var_parse(uint32_t widget_id, uint64_t update) {
 	var_t *var;
