@@ -71,6 +71,7 @@ typedef struct {
 	bool show;
 	uint64_t show_update;
 	uint32_t show_var_id;
+	xsg_main_poll_t poll;
 } window_t;
 
 static window_t window = {
@@ -107,6 +108,7 @@ static window_t window = {
 	show: FALSE,
 	show_update: 0,
 	show_var_id: 0xffffffff,
+	poll: { 0 },
 };
 
 /******************************************************************************
@@ -673,7 +675,7 @@ static void set_class_hints() {
  *
  ******************************************************************************/
 
-static void handle_xevents(void *arg, xsg_main_poll_t events) {
+static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 	XEvent event;
 
 	while (XPending(window.display)) {
@@ -785,8 +787,12 @@ void xsg_window_init() {
 
 	xsg_widgets_init();
 
-	xsg_main_add_poll_func(ConnectionNumber(window.display), handle_xevents, NULL,
-			XSG_MAIN_POLL_READ | XSG_MAIN_POLL_EXCEPT);
+	window.poll.fd = ConnectionNumber(window.display);
+	window.poll.events = XSG_MAIN_POLL_READ;
+	window.poll.func = handle_xevents;
+	window.poll.arg = NULL;
+
+	xsg_main_add_poll(&window.poll);
 
 	update_show();
 }

@@ -85,21 +85,28 @@ void xsg_var_update(uint32_t id);
  * main.c
  ******************************************************************************/
 
-uint64_t xsg_main_get_interval();
+uint64_t xsg_main_get_interval(void);
 uint64_t xsg_main_get_tick(void);
 
 void xsg_main_add_init_func(void (*func)(void));
 void xsg_main_add_update_func(void (*func)(uint64_t));
 void xsg_main_add_shutdown_func(void (*func)(void));
 
-typedef enum {
+typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,
 	XSG_MAIN_POLL_WRITE  = 1 << 1,
-	XSG_MAIN_POLL_EXCEPT = 1 << 2,
+	XSG_MAIN_POLL_EXCEPT = 1 << 2
+} xsg_main_poll_events_t;
+
+typedef struct _xsg_main_poll_t {
+	int fd;
+	xsg_main_poll_events_t events;
+	void (*func)(void *arg, xsg_main_poll_events_t events);
+	void *arg;
 } xsg_main_poll_t;
 
-void xsg_main_add_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
-void xsg_main_remove_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events);
+void xsg_main_add_poll(xsg_main_poll_t *poll);
+void xsg_main_remove_poll(xsg_main_poll_t *poll);
 
 /******************************************************************************
  * list.c

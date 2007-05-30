@@ -30,17 +30,6 @@
 
 /******************************************************************************/
 
-typedef struct _poll_t poll_t;
-
-struct _poll_t {
-	int fd;
-	xsg_main_poll_t events;
-	void (*func)(void *, xsg_main_poll_t);
-	void *arg;
-};
-
-/******************************************************************************/
-
 static xsg_list_t *init_list = NULL;
 static xsg_list_t *update_list = NULL;
 static xsg_list_t *shutdown_list = NULL;
@@ -79,39 +68,18 @@ void xsg_main_add_shutdown_func(void (*func)(void)) {
 	shutdown_list = xsg_list_append(shutdown_list, func);
 }
 
-void xsg_main_add_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events) {
-	poll_t *p;
+void xsg_main_add_poll(xsg_main_poll_t *poll) {
+	if (unlikely(poll == NULL))
+		return;
 
-	p = xsg_new0(poll_t, 1);
-	p->fd = fd;
-	p->events = events;
-	p->func = func;
-	p->arg = arg;
-
-	poll_list = xsg_list_prepend(poll_list, p);
+	poll_list = xsg_list_prepend(poll_list, poll);
 }
 
-void xsg_main_remove_poll_func(int fd, void (*func)(void *, xsg_main_poll_t), void *arg, xsg_main_poll_t events) {
-	xsg_list_t *l, *old;
-	poll_t *p;
+void xsg_main_remove_poll(xsg_main_poll_t *poll) {
+	if (unlikely(poll == NULL))
+		return;
 
-	l = poll_list;
-	while (l) {
-		old = l;
-		p = l->data;
-		l = l->next;
-
-		if (fd >= 0 && fd != p->fd)
-			continue;
-		if (func != NULL && func != p->func)
-			continue;
-		if (arg != NULL && arg != p->arg)
-			continue;
-		if (events != 0 && events != p->events)
-			continue;
-
-		poll_list = xsg_list_delete_link(poll_list, old);
-	}
+	poll_list = xsg_list_remove(poll_list, poll);
 }
 
 /******************************************************************************/
@@ -156,9 +124,8 @@ static void loop(void) {
 			FD_ZERO(&except_fds);
 
 			for (l = poll_list; l; l = l->next) {
-				poll_t *p;
+				xsg_main_poll_t *p = l->data;;
 
-				p = l->data;
 				if (p->events & XSG_MAIN_POLL_READ) {
 					FD_SET(p->fd, &read_fds);
 					fd_max = MAX(fd_max, p->fd);
@@ -189,10 +156,9 @@ static void loop(void) {
 			xsg_message("Interrupted by file descriptor");
 
 			for (l = poll_list; l; l = l->next) {
-				xsg_main_poll_t events = 0;
-				poll_t *p;
+				xsg_main_poll_events_t events = 0;
+				xsg_main_poll_t *p = l->data;
 
-				p = l->data;
 				if ((p->events & XSG_MAIN_POLL_READ) && (FD_ISSET(p->fd, &read_fds)))
 					events |= XSG_MAIN_POLL_READ;
 				if ((p->events & XSG_MAIN_POLL_WRITE) && (FD_ISSET(p->fd, &write_fds)))
