@@ -150,10 +150,10 @@ static void parse_env() {
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	xsg_message("Setting environment variable %s = %s", variable, value);
+	xsg_message("Setting environment variable \"%s=%s\"", variable, value);
 
-	if (!setenv(variable, value, overwrite))
-		xsg_warning("Cannot set environment variable %s = %s", variable, value);
+	if (setenv(variable, value, overwrite) != 0)
+		xsg_warning("Cannot set environment variable \"%s=%s\"", variable, value);
 }
 
 static bool parse_var(uint32_t widget_id, uint64_t update, uint32_t *var_id) {
