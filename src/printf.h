@@ -28,7 +28,7 @@
 void xsg_printf_init(void);
 uint32_t xsg_printf_new(const char *format);
 void xsg_printf_add_var(uint32_t printf_id, uint32_t var_id);
-const char *xsg_printf(uint32_t printf_id);
+const char *xsg_printf(uint32_t printf_id, uint32_t var_id);
 
 /******************************************************************************/
 

@@ -84,7 +84,7 @@ void xsg_var_init(void) {
 
 static bool need_flush = FALSE;
 
-void xsg_var_update(uint32_t var_id) {
+void xsg_var_dirty(uint32_t var_id) {
 	var_t *var;
 
 	var = get_var(var_id);
@@ -94,7 +94,7 @@ void xsg_var_update(uint32_t var_id) {
 	need_flush = TRUE;
 }
 
-void xsg_var_flush(void) {
+void xsg_var_flush_dirty(void) {
 	if (need_flush) {
 		xsg_window_render();
 		xsg_window_render_xshape();

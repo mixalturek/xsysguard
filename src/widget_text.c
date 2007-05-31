@@ -490,7 +490,7 @@ static void update_text(xsg_widget_t *widget, uint32_t var_id) {
 	if (text->lines != NULL)
 		xsg_strfreev(text->lines);
 
-	text->lines = xsg_strsplit_set(xsg_printf(text->printf_id), "\n", 0);
+	text->lines = xsg_strsplit_set(xsg_printf(text->printf_id, var_id), "\n", 0);
 }
 
 static void scroll_text(xsg_widget_t *widget) {

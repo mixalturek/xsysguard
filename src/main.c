@@ -68,6 +68,8 @@ void xsg_main_add_shutdown_func(void (*func)(void)) {
 	shutdown_list = xsg_list_append(shutdown_list, func);
 }
 
+/******************************************************************************/
+
 void xsg_main_add_poll(xsg_main_poll_t *poll) {
 	if (unlikely(poll == NULL))
 		return;
@@ -168,7 +170,7 @@ static void loop(void) {
 				if (events)
 					(p->func)(p->arg, events);
 			}
-			xsg_var_flush();
+			xsg_var_flush_dirty();
 		}
 		tick++;
 	}

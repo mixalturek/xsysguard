@@ -79,7 +79,7 @@ void xsg_conf_error(const char *expected);
  * var.c
  ******************************************************************************/
 
-void xsg_var_update(uint32_t id);
+void xsg_var_dirty(uint32_t id);
 
 /******************************************************************************
  * main.c
