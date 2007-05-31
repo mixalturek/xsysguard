@@ -333,7 +333,7 @@ static bool xsg_imlib_check_text_draw_bug() {
 	imlib_context_set_cliprect(old_clip_x, old_clip_y, old_clip_w, old_clip_h);
 
 	if (has_bug)
-		xsg_warning("Found cliprect bug in imlib_text_draw...");
+		xsg_warning("Found cliprect bug in imlib_text_draw. Enabling workaround.");
 
 	return has_bug;
 }
