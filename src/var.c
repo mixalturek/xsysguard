@@ -41,6 +41,8 @@ static uint32_t var_count = 0;
 static xsg_list_t *var_list = NULL;
 static var_t **var_array = NULL;
 
+static bool dirty = FALSE;
+
 /******************************************************************************/
 
 static var_t *get_var(uint32_t var_id) {
@@ -82,8 +84,6 @@ void xsg_var_init(void) {
 
 /******************************************************************************/
 
-static bool need_flush = FALSE;
-
 void xsg_var_dirty(uint32_t var_id) {
 	var_t *var;
 
@@ -91,14 +91,14 @@ void xsg_var_dirty(uint32_t var_id) {
 
 	xsg_window_update_widget(var->widget_id, var_id);
 
-	need_flush = TRUE;
+	dirty = TRUE;
 }
 
 void xsg_var_flush_dirty(void) {
-	if (need_flush) {
+	if (dirty) {
 		xsg_window_render();
 		xsg_window_render_xshape();
-		need_flush = FALSE;
+		dirty = FALSE;
 	}
 }
 
