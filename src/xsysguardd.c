@@ -24,6 +24,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <errno.h>
+#include <time.h>
 
 #include "modules.h"
 #include "conf.h"
@@ -42,6 +43,8 @@
 
 static bool colored_log = FALSE;
 
+static bool timestamps = FALSE;
+
 static bool log_to_stderr = FALSE;
 
 /******************************************************************************/
@@ -59,6 +62,20 @@ static void xsg_logv(const char *domain, xsg_log_level_t level, const char *form
 
 	if (log_to_stderr) {
 		char *prefix = NULL;
+
+		if (timestamps) {
+			struct timeval tv;
+			struct tm *tm;
+			char buf[64];
+
+			xsg_gettimeofday(&tv, NULL);
+
+			tm = localtime(&tv.tv_sec);
+
+			if (localtime != NULL)
+				if (strftime(buf, sizeof(buf) - 1, "%H:%M:%S", tm) != 0)
+					fprintf(stderr, "%s.%06u ", buf, (unsigned) tv.tv_usec);
+		}
 
 		if (colored_log) {
 			switch (level) {
@@ -218,13 +235,14 @@ static void usage(void) {
 	char **pathv;
 	char **p;
 
-	printf( "xsysguardd " VERSION " Copyright 2005-2007 by Sascha wessel <sawe@users.sf.net>\n\n"
+	printf( "xsysguardd " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Print this help message to stdout\n"
 		"  -m, --modules       Print a list of all available modules to stdout\n"
 		"  -s, --stderr        Print log messages to stderr\n"
 		"  -c, --color         Enable colored logging\n"
+		"  -t, --time          Add current time to each log line\n"
 		"  -l, --log=N         Set loglevel to N: "
 		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
@@ -254,6 +272,7 @@ int main(int argc, char **argv) {
 		{ "help",    0, NULL, 'h' },
 		{ "log",     1, NULL, 'l' },
 		{ "color",   0, NULL, 'c' },
+		{ "time",    0, NULL, 't' },
 		{ "stderr",  0, NULL, 's' },
 		{ "modules", 0, NULL, 'm' },
 		{ NULL,      0, NULL,  0  }
@@ -263,7 +282,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hl:csm", long_options, &option_index);
+		option = getopt_long(argc, argv, "hl:csmt", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -283,6 +302,9 @@ int main(int argc, char **argv) {
 				break;
 			case 's':
 				log_to_stderr = TRUE;
+				break;
+			case 't':
+				timestamps = TRUE;
 				break;
 			case 'm':
 				list_modules = TRUE;
