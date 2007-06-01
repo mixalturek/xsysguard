@@ -22,50 +22,124 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <getopt.h>
+#include <errno.h>
 
 #include "modules.h"
 #include "conf.h"
 #include "main.h"
-#include "var.h"
-
-#include <glib.h> // FIXME
+#include "vard.h"
+#include "writebuffer.h"
 
 /******************************************************************************/
 
-static uint32_t log_level = LOG_LEVEL_ERROR;
+#define COLOR_MAGENTA "\e[35m"
+#define COLOR_YELLOW  "\e[33m"
+#define COLOR_CYAN    "\e[36m"
+#define COLOR_BLUE    "\e[34m"
+#define COLOR_RED     "\e[31m"
+#define COLOR_DEFAULT "\e[0m"
 
-void xsg_log(const char *domain, uint32_t level, const char *format, va_list args) {
-	char buffer[1025];
-	uint16_t len = 0;
-	uint8_t type = 0;
-	uint8_t l;
+static bool colored_log = FALSE;
 
-	if (log_level < level)
-		return;
+static bool log_to_stderr = FALSE;
 
-	if (level == LOG_LEVEL_ERROR)
-		len += snprintf(buffer, sizeof(buffer) - 1 - len, "ERROR: ");
-	else if (level == LOG_LEVEL_WARNING)
-		len += snprintf(buffer, sizeof(buffer) - 1 - len, "WARNING: ");
-	else if (level == LOG_LEVEL_MESSAGE)
-		len += snprintf(buffer, sizeof(buffer) - 1 - len, "MESSAGE: ");
-	else if (level == LOG_LEVEL_DEBUG)
-		len += snprintf(buffer, sizeof(buffer) - 1 - len, "DWBUG: ");
+/******************************************************************************/
 
-	if (domain != NULL)
-		len += snprintf(buffer, sizeof(buffer) - 1 - len, "[%s] ", domain);
+xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
-	len += vsnprintf(buffer, sizeof(buffer) - 1 - len, format, args);
+static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
+	unsigned int pid;
 
-	len += snprintf(buffer, sizeof(buffer) - 1 - len, "\n");
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
+			exit(EXIT_FAILURE);
 
-	l = level;
+	pid = getpid();
 
-	fwrite(&type, 1, 1, stdout);
-	fwrite(&l, 1, 1, stdout);
-	fwrite(&len, 2, 1, stdout);
-	fwrite(buffer, len, 1, stdout);
-	fflush(stdout);
+	if (log_to_stderr) {
+		char *prefix = NULL;
+
+		if (colored_log) {
+			switch (level) {
+				case XSG_LOG_LEVEL_ERROR:
+					prefix = COLOR_MAGENTA"[ERR]";
+					break;
+				case XSG_LOG_LEVEL_WARNING:
+					prefix = COLOR_YELLOW"[WRN]";
+					break;
+				case XSG_LOG_LEVEL_MESSAGE:
+					prefix = COLOR_CYAN"[MSG]";
+					break;
+				case XSG_LOG_LEVEL_DEBUG:
+					prefix = COLOR_BLUE"[DBG]";
+					break;
+				case XSG_LOG_LEVEL_MEM:
+					prefix = COLOR_RED"[MEM]";
+					break;
+				default:
+					prefix = "[???]";
+					break;
+			}
+		} else {
+			switch (level) {
+				case XSG_LOG_LEVEL_ERROR:
+					prefix = "[ERR]";
+					break;
+				case XSG_LOG_LEVEL_WARNING:
+					prefix = "[WRN]";
+					break;
+				case XSG_LOG_LEVEL_MESSAGE:
+					prefix = "[MSG]";
+					break;
+				case XSG_LOG_LEVEL_DEBUG:
+					prefix = "[DBG]";
+					break;
+				case XSG_LOG_LEVEL_MEM:
+					prefix = "[MEM]";
+					break;
+				default:
+					prefix = "[???]";
+					break;
+			}
+		}
+
+		if (domain == NULL)
+			fprintf(stderr, "%s[%u]xsysguardd: ", prefix, pid);
+		else
+			fprintf(stderr, "%s[%u]xsysguardd/%s: ", prefix, pid, domain);
+
+		vfprintf(stderr, format, args);
+
+		if (colored_log)
+			fprintf(stderr, COLOR_DEFAULT"\n");
+		else
+			fprintf(stderr, "\n");
+
+	} else {
+		char buffer[1024];
+		size_t len = 0;
+
+		if (domain == NULL)
+			len = snprintf(buffer, sizeof(buffer) - 1, "[%u]xsysguardd: ", pid);
+		if (domain != NULL)
+			len = snprintf(buffer, sizeof(buffer) - 1, "[%u]xsysguardd/%s: ", pid, domain);
+
+		len += vsnprintf(buffer + len, sizeof(buffer) - 1 - len, format, args);
+
+		xsg_writebuffer_queue_log(level, buffer, len);
+	}
+
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+		exit(EXIT_FAILURE);
+}
+
+void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
+	va_list args;
+
+	va_start(args, format);
+	xsg_logv(domain, level, format, args);
+	va_end(args);
 }
 
 /******************************************************************************/
@@ -73,81 +147,172 @@ void xsg_log(const char *domain, uint32_t level, const char *format, va_list arg
 static void read_data(void *ptr, size_t size, FILE *stream) {
 
 	if (fread(ptr, 1, size, stream) != size)
-		xsg_error("cannot read configuration");
+		xsg_error("Reading configuration failed: inconsistent data");
 }
 
-static void read_config(FILE *stream) {
+static void read_config(FILE *stream, bool log_level_overwrite) {
+	char *init = "\0\nxsysguard\n";
+	unsigned i;
+	uint64_t interval;
+	uint8_t log_level;
 
-	while (1) {
-		uint8_t command;
-		read_data(&command, 1, stream);
-		if (command == 0x00) {
+	// init
+	for (i = 0; i < sizeof(init); i++) {
+		char c;
+
+		read_data(&c, 1, stream);
+
+		if (c != init[i])
+			xsg_error("Reading configuration failed: initialization string not found");
+	}
+
+	// interval
+	read_data(&interval, sizeof(uint64_t), stream);
+	xsg_main_set_interval(xsg_uint64_be(interval));
+
+	// log level
+	read_data(&log_level, sizeof(uint8_t), stream);
+	if (!log_level_overwrite)
+		xsg_log_level = log_level;
+
+	while (TRUE) {
+		uint8_t type;
+		uint32_t id;
+		uint64_t update;
+		uint32_t config_len;
+		char *config;
+
+		// type
+		read_data(&type, sizeof(uint8_t), stream);
+
+		if (type == 0x00)
 			break;
-		} else if (command == 0x01) {
-			uint64_t interval;
-			read_data(&interval, 8, stream);
-			xsg_main_set_interval(GUINT64_FROM_BE(interval));
-		} else if (command == 0x02) {
-			read_data(&log_level, 1, stream);
-		} else if (command == 0x03) {
-			uint16_t var_id;
-			uint64_t update;
-			uint16_t config_len;
-			char *config;
 
-			read_data(&var_id, 2, stream);
-			var_id = GUINT32_FROM_BE(var_id);
-			read_data(&update, 8, stream);
-			update = GUINT64_FROM_BE(update);
-			read_data(&config_len, 2, stream);
-			config_len = GUINT16_FROM_BE(config_len);
-			config = xsg_new0(char, config_len + 1);
-			read_data(config, config_len, stream);
-			xsg_conf_set_buffer(config);
-			xsg_var_parse(update, var_id);
-			xsg_free(config);
-		} else {
-			xsg_error("inconsistent configuration");
-		}
+		// id
+		read_data(&id, sizeof(uint32_t), stream);
+		id = xsg_uint32_be(id);
+
+		// update
+		read_data(&update, sizeof(uint64_t), stream);
+		update = xsg_uint64_be(update);
+
+		// config_len
+		read_data(&config_len, sizeof(uint32_t), stream);
+		config_len = xsg_uint32_be(config_len);
+
+		// config
+		config = xsg_new(char, config_len + 1);
+		read_data(config, config_len, stream);
+		config[config_len] = '\0';
+
+		xsg_conf_set_buffer(config);
+		xsg_var_parse(id, update, type);
+
+		xsg_free(config);
 	}
 }
 
+/******************************************************************************/
+
+static void usage(void) {
+	char **pathv;
+	char **p;
+
+	printf( "xsysguardd " VERSION " Copyright 2005-2007 by Sascha wessel <sawe@users.sf.net>\n\n"
+		"Usage: xsysguardd [ARGUMENTS...]\n\n"
+		"Arguments:\n"
+		"  -h, --help          Print this help message to stdout\n"
+		"  -m, --modules       Print a list of all available modules to stdout\n"
+		"  -s, --stderr        Print log messages to stderr\n"
+		"  -c, --color         Enable colored logging\n"
+		"  -l, --log=N         Set loglevel to N: "
+		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
+			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
+	printf("\n\n");
+
+	printf("Module path:\n");
+	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
+	if (pathv != NULL)
+		for (p = pathv; *p; p++)
+			printf("  %s\n", *p);
+	xsg_strfreev(pathv);
+	printf("\n");
+}
+
+/******************************************************************************
+ *
+ * main
+ *
+ ******************************************************************************/
 
 int main(int argc, char **argv) {
 	bool list_modules = FALSE;
-	GOptionContext *context;
-	GError *error = NULL;
-	int log = 0;
+	bool print_usage = FALSE;
+	bool log_level_overwrite = FALSE;
 
-	GOptionEntry option_entries[] = {
-		{ "log", 'l', 0, G_OPTION_ARG_INT, &log,
-			"Set loglevel to N = 0 ... 5 (DEBUG)", "N" },
-		{ "modules", 'm', 0, G_OPTION_ARG_NONE, &list_modules,
-			"Print a list of all available modules to stdout", NULL },
-		{ NULL }
+	struct option long_options[] = {
+		{ "help",    0, NULL, 'h' },
+		{ "log",     1, NULL, 'l' },
+		{ "color",   0, NULL, 'c' },
+		{ "stderr",  0, NULL, 's' },
+		{ "modules", 0, NULL, 'm' },
+		{ NULL,      0, NULL,  0  }
 	};
 
-	context = g_option_context_new(NULL);
-	g_option_context_add_main_entries(context, option_entries, NULL);
-	g_option_context_parse(context, &argc, &argv, &error);
-	g_option_context_free(context);
+	opterr = 0;
+	while (1) {
+		int option, option_index = 0;
 
-	if (error)
-		xsg_error("%s", error->message);
+		option = getopt_long(argc, argv, "hl:csm", long_options, &option_index);
 
-	log_level = log;
+		if (option == EOF)
+			break;
+
+		switch (option) {
+			case 'h':
+				print_usage = TRUE;
+				log_to_stderr = TRUE;
+				break;
+			case 'l':
+				if (optarg)
+					xsg_log_level = atoi(optarg);
+				log_level_overwrite = TRUE;
+				break;
+			case 'c':
+				colored_log = TRUE;
+				break;
+			case 's':
+				log_to_stderr = TRUE;
+				break;
+			case 'm':
+				list_modules = TRUE;
+				log_to_stderr = TRUE;
+				break;
+			case '?':
+				print_usage = TRUE;
+				log_to_stderr = TRUE;
+				break;
+			default:
+				break;
+		}
+	}
+
+	if (print_usage) {
+		usage();
+		exit(EXIT_SUCCESS);
+	}
 
 	if (list_modules) {
 		xsg_modules_list();
-		exit(0);
+		exit(EXIT_SUCCESS);
 	}
+
+	read_config(stdin, log_level_overwrite);
 
 	xsg_var_init();
 
-	read_config(stdin);
-
 	xsg_main_loop();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

@@ -73,8 +73,9 @@ COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
 COMMON_SRC     += string.c list.c utils.c
-COMMON_SRC     += var.h
-XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c var.c widget.h
+
+XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c widget.h
+XSYSGUARD_SRC  += var.c var.h
 XSYSGUARD_SRC  += printf.c printf.h
 XSYSGUARD_SRC  += dump.c dump.h
 XSYSGUARD_SRC  += angle.c angle.h
@@ -90,7 +91,10 @@ XSYSGUARD_SRC  += widget_barchart.c widget_barchart.h
 XSYSGUARD_SRC  += widget_linechart.c widget_linechart.h
 XSYSGUARD_SRC  += widget_areachart.c widget_areachart.h
 XSYSGUARD_SRC  += widget_text.c widget_text.h
-XSYSGUARDD_SRC := $(COMMON_SRC) xsysguardd.c vard.c
+
+XSYSGUARDD_SRC := $(COMMON_SRC) xsysguardd.c
+XSYSGUARDD_SRC += vard.c vard.h
+XSYSGUARDD_SRC += writebuffer.c writebuffer.h
 
 
 all: xsysguardd xsysguard
