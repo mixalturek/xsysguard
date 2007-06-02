@@ -789,6 +789,8 @@ void xsg_window_init() {
 	imlib_set_cache_size(window.cache_size);
 	imlib_set_font_cache_size(window.font_cache_size);
 
+	xsg_main_add_signal_handler(xsg_imlib_flush_cache);
+
 	if (window.xshape) {
 		window.mask = XCreatePixmap(window.display, window.id, window.width, window.height, 1);
 		imlib_context_set_mask(window.mask);

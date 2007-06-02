@@ -21,8 +21,31 @@
 #include <xsysguard.h>
 #include <Imlib2.h>
 #include <math.h>
+#include <signal.h>
 
 #include "imlib.h"
+
+/******************************************************************************/
+
+static bool flush_image_cache = FALSE;
+static bool flush_font_cache = FALSE;
+
+/******************************************************************************/
+
+void xsg_imlib_flush_cache(int signum) {
+	switch (signum) {
+		case SIGUSR1:
+			xsg_message("Triggering image cache flush");
+			flush_image_cache = TRUE;
+			break;
+		case SIGUSR2:
+			xsg_message("Triggering font cache flush");
+			flush_font_cache = TRUE;
+			break;
+		default:
+			break;
+	}
+}
 
 /******************************************************************************/
 
@@ -30,6 +53,17 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 	static char **pathv = NULL;
 	char **p;
 	char *file;
+
+	if (unlikely(flush_image_cache)) {
+		int cache_size;
+
+		xsg_message("Flushing image cache");
+
+		cache_size = imlib_get_cache_size();
+		imlib_set_cache_size(0);
+		imlib_set_cache_size(cache_size);
+		flush_image_cache = FALSE;
+	}
 
 	if (unlikely(pathv == NULL)) {
 		pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
@@ -354,6 +388,11 @@ static bool xsg_imlib_has_text_draw_bug() {
 }
 
 void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int *width_return, int *height_return, int *horizontal_advance_return, int *vertical_advance_return) {
+	if (unlikely(flush_font_cache)) {
+		xsg_message("Flushing font cache");
+		imlib_flush_font_cache();
+		flush_font_cache = FALSE;
+	}
 	if (likely(!xsg_imlib_has_text_draw_bug())) {
 		imlib_text_draw_with_return_metrics(x, y, text, width_return, height_return, horizontal_advance_return, vertical_advance_return);
 	} else {
@@ -533,6 +572,11 @@ void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int
 }
 
 void xsg_imlib_text_draw(int x, int y, const char *text) {
+	if (unlikely(flush_font_cache)) {
+		xsg_message("Flushing font cache");
+		imlib_flush_font_cache();
+		flush_font_cache = FALSE;
+	}
 	if (likely(!xsg_imlib_has_text_draw_bug()))
 		imlib_text_draw(x, y, text);
 	else

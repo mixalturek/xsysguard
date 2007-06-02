@@ -40,6 +40,8 @@
 
 /******************************************************************************/
 
+void xsg_imlib_flush_cache(int signum);
+
 Imlib_Color xsg_imlib_uint2color(uint32_t u);
 Imlib_Image xsg_imlib_load_image(const char *filename);
 void xsg_imlib_blend_mask(Imlib_Image mask);
