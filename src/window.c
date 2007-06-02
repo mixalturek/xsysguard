@@ -698,6 +698,17 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 
 /******************************************************************************
  *
+ * io error handler
+ *
+ ******************************************************************************/
+
+static int io_error_handler(Display *display) {
+	xsg_error("X connection broken");
+	return 0;
+}
+
+/******************************************************************************
+ *
  * initialize window
  *
  ******************************************************************************/
@@ -706,6 +717,8 @@ void xsg_window_init() {
 	Colormap colormap;
 	XSetWindowAttributes attrs;
 	unsigned long valuemask;
+
+	XSetIOErrorHandler(io_error_handler);
 
 	if ((window.display = XOpenDisplay(NULL)) == NULL)
 		xsg_error("Cannot open display");

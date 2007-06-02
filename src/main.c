@@ -34,6 +34,7 @@ static xsg_list_t *init_list = NULL;
 static xsg_list_t *update_list = NULL;
 static xsg_list_t *shutdown_list = NULL;
 static xsg_list_t *poll_list = NULL;
+static xsg_list_t *signal_handler_list = NULL;
 
 static uint64_t tick = 0;
 static uint64_t interval = 1000;
@@ -66,6 +67,10 @@ void xsg_main_add_update_func(void (*func)(uint64_t)) {
 
 void xsg_main_add_shutdown_func(void (*func)(void)) {
 	shutdown_list = xsg_list_append(shutdown_list, func);
+}
+
+void xsg_main_add_signal_handler(void (*func)(int signum)) {
+	signal_handler_list = xsg_list_append(signal_handler_list, func);
 }
 
 /******************************************************************************/
@@ -176,49 +181,70 @@ static void loop(void) {
 	}
 }
 
-static void termination_handler(int signum) {
+static void shutdown(void) {
 	xsg_list_t *l;
 	void (*func)(void);
 
-	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
-	xsg_message("Terminating...");
+	xsg_message("Shutdown...");
 
 	for (l = shutdown_list; l; l = l->next) {
 		func = l->data;
 		func();
 	}
 
-	xsg_message("Exiting...");
-	exit(EXIT_SUCCESS);
+	_exit(EXIT_SUCCESS);
 }
 
+static void signal_handler(int signum) {
+	xsg_list_t *l;
+	void (*func)(int);
+
+	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
+
+	for (l = signal_handler_list; l; l = l->next) {
+		func = l->data;
+		func(signum);
+	}
+
+	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM)
+		xsg_error("Received signal %d: %s", signum, sys_siglist[signum]);
+}
+
+static int ssigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
+	int n;
+
+	n = sigaction(signum, act, oldact);
+
+	if (n == -1)
+		xsg_warning("sigaction for signal number %d failed: %s", signum, strerror(errno));
+
+	return n;
+}
 
 void xsg_main_loop() {
 	xsg_list_t *l;
 	void (*func)(void);
-	struct sigaction new_action, old_action;
+	struct sigaction action;
+
+	action.sa_handler = signal_handler;
+	sigemptyset(&action.sa_mask);
+	action.sa_flags = 0;
+
+	ssigaction(SIGABRT, &action, NULL);
+	ssigaction(SIGINT, &action, NULL);
+	ssigaction(SIGQUIT, &action, NULL);
+	ssigaction(SIGHUP, &action, NULL);
+	ssigaction(SIGTERM, &action, NULL);
+	ssigaction(SIGPIPE, &action, NULL);
+	ssigaction(SIGUSR1, &action, NULL);
+	ssigaction(SIGUSR2, &action, NULL);
+
+	atexit(shutdown);
 
 	for (l = init_list; l; l = l->next) {
 		func = l->data;
 		func();
 	}
-
-	new_action.sa_handler = termination_handler;
-	sigemptyset(&new_action.sa_mask);
-	new_action.sa_flags = 0;
-
-	sigaction(SIGINT, NULL, &old_action);
-	if (old_action.sa_handler != SIG_IGN)
-		sigaction(SIGINT, &new_action, NULL);
-	sigaction(SIGHUP, NULL, &old_action);
-	if (old_action.sa_handler != SIG_IGN)
-		sigaction(SIGHUP, &new_action, NULL);
-	sigaction(SIGTERM, NULL, &old_action);
-	if (old_action.sa_handler != SIG_IGN)
-		sigaction(SIGTERM, &new_action, NULL);
-	sigaction(SIGPIPE, NULL, &old_action);
-	if (old_action.sa_handler != SIG_IGN)
-		sigaction(SIGPIPE, &new_action, NULL);
 
 	loop();
 }
