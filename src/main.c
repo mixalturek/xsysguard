@@ -184,6 +184,12 @@ static void loop(void) {
 static void shutdown(void) {
 	xsg_list_t *l;
 	void (*func)(void);
+	static bool shutdown_active = FALSE;
+
+	if (shutdown_active)
+		return;
+
+	shutdown_active = TRUE;
 
 	xsg_message("Shutdown...");
 
