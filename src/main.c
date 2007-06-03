@@ -34,6 +34,7 @@ static xsg_list_t *init_list = NULL;
 static xsg_list_t *update_list = NULL;
 static xsg_list_t *shutdown_list = NULL;
 static xsg_list_t *poll_list = NULL;
+static xsg_list_t *timeout_list = NULL;
 static xsg_list_t *signal_handler_list = NULL;
 
 static uint64_t tick = 0;
@@ -59,35 +60,43 @@ uint64_t xsg_main_get_tick(void) {
 /******************************************************************************/
 
 void xsg_main_add_init_func(void (*func)(void)) {
-	init_list = xsg_list_append(init_list, (void *) func);
+	if (likely(func != NULL))
+		init_list = xsg_list_append(init_list, (void *) func);
 }
 
 void xsg_main_add_update_func(void (*func)(uint64_t)) {
-	update_list = xsg_list_append(update_list, func);
+	if (likely(func != NULL))
+		update_list = xsg_list_append(update_list, func);
 }
 
 void xsg_main_add_shutdown_func(void (*func)(void)) {
-	shutdown_list = xsg_list_append(shutdown_list, func);
+	if (likely(func != NULL))
+		shutdown_list = xsg_list_append(shutdown_list, func);
 }
-
-void xsg_main_add_signal_handler(void (*func)(int signum)) {
-	signal_handler_list = xsg_list_append(signal_handler_list, func);
-}
-
-/******************************************************************************/
 
 void xsg_main_add_poll(xsg_main_poll_t *poll) {
-	if (unlikely(poll == NULL))
-		return;
-
-	poll_list = xsg_list_prepend(poll_list, poll);
+	if (likely(poll != NULL))
+		poll_list = xsg_list_prepend(poll_list, poll);
 }
 
 void xsg_main_remove_poll(xsg_main_poll_t *poll) {
-	if (unlikely(poll == NULL))
-		return;
+	if (likely(poll != NULL))
+		poll_list = xsg_list_remove(poll_list, poll);
+}
 
-	poll_list = xsg_list_remove(poll_list, poll);
+void xsg_main_add_timeout(xsg_main_timeout_t *timeout) {
+	if (likely(timeout != NULL))
+		timeout_list = xsg_list_prepend(timeout_list, timeout);
+}
+
+void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
+	if (likely(timeout != NULL))
+		timeout_list = xsg_list_remove(timeout_list, timeout);
+}
+
+void xsg_main_add_signal_handler(void (*func)(int signum)) {
+	if (likely(func != NULL))
+		signal_handler_list = xsg_list_append(signal_handler_list, func);
 }
 
 /******************************************************************************/
@@ -95,7 +104,7 @@ void xsg_main_remove_poll(xsg_main_poll_t *poll) {
 static void loop(void) {
 	struct timeval time_out;
 	struct timeval time_start;
-	struct timeval time_end;
+	struct timeval time_now;
 	struct timeval time_diff;
 	struct timeval time_sleep;
 	fd_set read_fds;
@@ -120,11 +129,30 @@ static void loop(void) {
 		}
 
 		while (1) {
-			xsg_gettimeofday(&time_end, 0);
-			xsg_timeval_sub(&time_diff, &time_end, &time_start);
+			xsg_main_timeout_t *timeout = NULL;
+
+			xsg_gettimeofday(&time_now, 0);
+			xsg_timeval_sub(&time_diff, &time_now, &time_start);
 
 			if (xsg_timeval_sub(&time_sleep, &time_out, &time_diff))
 				break; // timeout
+
+			for (l = timeout_list; l; l = l->next) {
+				xsg_main_timeout_t *t = l->data;
+				struct timeval timeout_sleep;
+
+				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
+					t->func(t->arg);
+					xsg_var_flush_dirty();
+					continue;
+				}
+
+				if (timercmp(&timeout_sleep, &time_sleep, <)) {
+					time_sleep.tv_sec = timeout_sleep.tv_sec;
+					time_sleep.tv_usec = timeout_sleep.tv_usec;
+					timeout = t;
+				}
+			}
 
 			fd_max = 0;
 			FD_ZERO(&read_fds);
@@ -158,8 +186,15 @@ static void loop(void) {
 			if (unlikely(fd_count == -1))
 				xsg_error("select: %s", strerror(errno));
 
-			if (fd_count == 0)
-				break; // timeout
+			if (fd_count == 0) {
+				if (timeout != NULL) {
+					timeout->func(timeout->arg);
+					xsg_var_flush_dirty();
+					continue;
+				} else {
+					break; // timeout
+				}
+			}
 
 			xsg_debug("Interrupted by file descriptor");
 

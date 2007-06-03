@@ -109,6 +109,15 @@ typedef struct _xsg_main_poll_t {
 void xsg_main_add_poll(xsg_main_poll_t *poll);
 void xsg_main_remove_poll(xsg_main_poll_t *poll);
 
+typedef struct _xsg_main_timeout_t {
+	struct timeval tv; // absolute time
+	void (*func)(void *arg);
+	void *arg;
+} xsg_main_timeout_t;
+
+void xsg_main_add_timeout(xsg_main_timeout_t *timeout);
+void xsg_main_remove_timeout(xsg_main_timeout_t *timeout);
+
 /******************************************************************************
  * list.c
  ******************************************************************************/
