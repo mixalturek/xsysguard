@@ -339,13 +339,13 @@ static void add_stat(uint64_t update, void (*func)()) {
 
 /******************************************************************************/
 
-void update_stats(uint64_t count) {
+void update_stats(uint64_t tick) {
 	stat_t *stat;
 	xsg_list_t *l;
 
 	for (l = stat_list; l; l = l->next) {
 		stat = l->data;
-		if (count % stat->update == 0)
+		if (tick % stat->update == 0)
 			stat->func();
 	}
 }
@@ -2572,12 +2572,15 @@ static void parse_process_count(double (**n)(void *), char *(**s)(void *), void 
  ******************************************************************************/
 
 static void init_stats(void) {
+	xsg_message("Running sg_init()");
 	sg_init();
+	xsg_message("Running sg_snapshot()");
 	sg_snapshot();
 	update_stats(0);
 }
 
 static void shutdown_stats(void) {
+	xsg_message("Running sg_shutdown()");
 	sg_shutdown();
 }
 
