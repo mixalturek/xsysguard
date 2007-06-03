@@ -243,7 +243,7 @@ static void signal_handler(int signum) {
 	xsg_list_t *l;
 	void (*func)(int);
 
-	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM)
+	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM || signum == SIGABRT)
 		xsg_error("Received signal %d: %s", signum, sys_siglist[signum]);
 
 	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
@@ -279,8 +279,10 @@ void xsg_main_loop() {
 	ssigaction(SIGABRT, &action, NULL);
 	ssigaction(SIGINT, &action, NULL);
 	ssigaction(SIGQUIT, &action, NULL);
-	ssigaction(SIGHUP, &action, NULL);
 	ssigaction(SIGTERM, &action, NULL);
+
+	ssigaction(SIGCHLD, &action, NULL);
+	ssigaction(SIGHUP, &action, NULL);
 	ssigaction(SIGPIPE, &action, NULL);
 	ssigaction(SIGUSR1, &action, NULL);
 	ssigaction(SIGUSR2, &action, NULL);
