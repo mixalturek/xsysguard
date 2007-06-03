@@ -42,6 +42,7 @@ static uint64_t interval = 1000;
 /******************************************************************************/
 
 void xsg_main_set_interval(uint64_t i) {
+	xsg_message("Setting interval to %"PRIu64, i);
 	interval = i;
 }
 
@@ -111,7 +112,7 @@ static void loop(void) {
 	while (1) {
 		xsg_gettimeofday(&time_start, 0);
 
-		xsg_message("Tick %"PRIu64, tick);
+		xsg_debug("Tick %"PRIu64, tick);
 
 		for (l = update_list; l; l = l->next) {
 			void (*func)(uint64_t) = l->data;
@@ -147,7 +148,7 @@ static void loop(void) {
 				}
 			}
 
-			xsg_message("Sleeping for %u.%06us", (unsigned) time_sleep.tv_sec, (unsigned) time_sleep.tv_usec);
+			xsg_debug("Sleeping for %u.%06us", (unsigned) time_sleep.tv_sec, (unsigned) time_sleep.tv_usec);
 
 			fd_count = select(fd_max + 1, &read_fds, &write_fds, &except_fds, &time_sleep);
 
@@ -160,7 +161,7 @@ static void loop(void) {
 			if (fd_count == 0)
 				break; // timeout
 
-			xsg_message("Interrupted by file descriptor");
+			xsg_debug("Interrupted by file descriptor");
 
 			for (l = poll_list; l; l = l->next) {
 				xsg_main_poll_events_t events = 0;
@@ -191,12 +192,14 @@ static void shutdown(void) {
 
 	shutdown_active = TRUE;
 
-	xsg_message("Shutdown...");
+	xsg_message("Running shutdown functions");
 
 	for (l = shutdown_list; l; l = l->next) {
 		func = l->data;
 		func();
 	}
+
+	xsg_message("Terminating...");
 
 	_exit(EXIT_SUCCESS);
 }
@@ -205,15 +208,15 @@ static void signal_handler(int signum) {
 	xsg_list_t *l;
 	void (*func)(int);
 
+	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM)
+		xsg_error("Received signal %d: %s", signum, sys_siglist[signum]);
+
 	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
 
 	for (l = signal_handler_list; l; l = l->next) {
 		func = l->data;
 		func(signum);
 	}
-
-	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM)
-		xsg_error("Received signal %d: %s", signum, sys_siglist[signum]);
 }
 
 static int ssigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
@@ -232,6 +235,8 @@ void xsg_main_loop() {
 	void (*func)(void);
 	struct sigaction action;
 
+	xsg_message("Installing signal handler");
+
 	action.sa_handler = signal_handler;
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0;
@@ -245,7 +250,11 @@ void xsg_main_loop() {
 	ssigaction(SIGUSR1, &action, NULL);
 	ssigaction(SIGUSR2, &action, NULL);
 
+	xsg_message("Registering shutdown function");
+
 	atexit(shutdown);
+
+	xsg_message("Running init functions");
 
 	for (l = init_list; l; l = l->next) {
 		func = l->data;

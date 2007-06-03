@@ -72,9 +72,9 @@ static void init() {
 	if (unlikely(pathv == NULL))
 		xsg_error("Cannot get XSYSGUARD_MODULE_PATH");
 
-	xsg_message("Searching for modules...");
+	xsg_debug("Searching for modules...");
 	for (p = pathv; *p; p++) {
-		xsg_message("Searching for modules in \"%s\"", *p);
+		xsg_debug("Searching for modules in \"%s\"", *p);
 		if ((dir = opendir(*p)) == NULL)
 			continue;
 		while ((filename = read_dir_name(dir)) != NULL) {
@@ -83,7 +83,7 @@ static void init() {
 				m->name = name;
 				m->file = xsg_build_filename(*p, filename, NULL);
 				modules_list = xsg_list_prepend(modules_list, m);
-				xsg_message("Found module file \"%s\"", filename);
+				xsg_message("Found module file in \"%s\": \"%s\"", *p, filename);
 			}
 		}
 		closedir(dir);

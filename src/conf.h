@@ -27,7 +27,7 @@
 
 void xsg_conf_set_buffer(char *buffer);
 
-bool xsg_conf_find_comment(void);
+bool xsg_conf_find_commentline(void);
 bool xsg_conf_find_newline(void);
 bool xsg_conf_find_end(void);
 

@@ -336,16 +336,16 @@ static void op_strcmp(void) {
 	str_stptr -= 2;
 }
 
-static void op_debug(void) {
+static void op_dump(void) {
 	int num_stack_size, str_stack_size, i;
 	num_stack_size = (num_stptr + 1 - num_stack);
 	str_stack_size = (str_stptr + 1 - str_stack);
-	xsg_debug("RPN: STACKPOINTER:  NUMBER=%02u/%02u  STRING=%02u/%02u",
+	xsg_message("RPN: STACKPOINTER:  NUMBER=%02u/%02u  STRING=%02u/%02u",
 			num_stack_size, max_num_stack_size, str_stack_size, max_str_stack_size);
 	for (i = 0; i < num_stack_size; i++)
-		xsg_debug("RPN: NUMBER[%i]: % 12.6f  %e", i, num_stack[i], num_stack[i]);
+		xsg_message("RPN: NUMBER[%i]: % 12.6f  %e", i, num_stack[i], num_stack[i]);
 	for (i = 0; i < str_stack_size; i++)
-		xsg_debug("RPN: STRING[%i]: \"%s\"", i, str_stack[i]->str);
+		xsg_message("RPN: STRING[%i]: \"%s\"", i, str_stack[i]->str);
 }
 
 /******************************************************************************/
@@ -525,8 +525,8 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 			op->op = op_strcmp;
 			num_stack_size += 1;
 			str_stack_size -= 2;
-		} else if (xsg_conf_find_command("DEBUG")) {
-			op->op = op_debug;
+		} else if (xsg_conf_find_command("DUMP")) {
+			op->op = op_dump;
 		} else {
 			xsg_modules_parse(var_id, update, &op->num_func, &op->str_func, &op->arg);
 			if (op->num_func != NULL)

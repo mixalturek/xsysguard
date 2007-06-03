@@ -469,7 +469,7 @@ void xsg_window_render(void) {
 
 		imlib_updates_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
 
-		xsg_message("Render (x=%d, y=%d, width=%d, height=%d)", up_x, up_y, up_w, up_h);
+		xsg_debug("Render x=%d, y=%d, width=%d, height=%d", up_x, up_y, up_w, up_h);
 
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
@@ -681,14 +681,14 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 	while (XPending(window.display)) {
 		XNextEvent(window.display, &event);
 		if (event.type == Expose) {
-			xsg_message("XExpose (x=%d, y=%d, width=%d, height=%d)",
+			xsg_message("Received XExpose: x=%d, y=%d, width=%d, height=%d",
 					event.xexpose.x, event.xexpose.y,
 					event.xexpose.width, event.xexpose.height);
 			window.updates = imlib_update_append_rect(window.updates,
 					event.xexpose.x, event.xexpose.y,
 					event.xexpose.width, event.xexpose.height);
 		} else {
-			xsg_message("XEvent (type=%d)", event.type);
+			xsg_message("Received XEvent: type=%d", event.type);
 		}
 	}
 

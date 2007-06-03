@@ -102,7 +102,7 @@ bool xsg_conf_find_command(const char *command) {
 	return TRUE;
 }
 
-bool xsg_conf_find_comment() {
+bool xsg_conf_find_commentline() {
 
 	skip_space();
 

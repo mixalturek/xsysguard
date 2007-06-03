@@ -167,10 +167,10 @@ static void parse_env() {
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	xsg_message("Setting environment variable \"%s=%s\"", variable, value);
+	xsg_message("Setting environment variable %s=\"%s\"", variable, value);
 
 	if (setenv(variable, value, overwrite) != 0)
-		xsg_warning("Cannot set environment variable \"%s=%s\"", variable, value);
+		xsg_warning("Cannot set environment variable %s=\"%s\"", variable, value);
 }
 
 static bool parse_var(uint32_t widget_id, uint64_t update, uint32_t *var_id) {
@@ -192,15 +192,10 @@ static void parse_config(char *config_buffer) {
 	while (!xsg_conf_find_end()) {
 		if (xsg_conf_find_newline())
 			continue;
-		if (xsg_conf_find_comment())
+		if (xsg_conf_find_commentline())
 			continue;
 		if (xsg_conf_find_command("Set")) {
-			if (xsg_conf_find_command("Interval")) {
-				uint64_t interval;
-				interval = xsg_conf_read_uint();
-				xsg_main_set_interval(interval);
-				xsg_conf_read_newline();
-			} else if (xsg_conf_find_command("Name")) {
+			if (xsg_conf_find_command("Name")) {
 				xsg_window_parse_name();
 			} else if (xsg_conf_find_command("Class")) {
 				xsg_window_parse_class();
@@ -289,7 +284,7 @@ static char *find_config_file(char *name) {
 	if (unlikely(pathv == NULL))
 		xsg_error("Cannot get XSYSGUARD_CONFIG_PATH");
 
-	xsg_message("Searching for config...");
+	xsg_debug("Searching for config...");
 	for (p = pathv; *p; p++) {
 		file = xsg_build_filename(*p, name, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
@@ -301,7 +296,7 @@ static char *find_config_file(char *name) {
 	}
 
 	xsg_strfreev(pathv);
-	xsg_error("Cannot find file: \"%s\"", name);
+	xsg_error("Cannot find config file: \"%s\"", name);
 	return 0;
 }
 
@@ -328,6 +323,8 @@ static char *get_config_file(const char *filename) {
 		xsg_error("Cannot read config file: %s: not a regular file", filename);
 
 	buffer = xsg_malloc(size + 1);
+
+	xsg_message("Reading config file \"%s\"", filename);
 
 	bytes_read = 0;
 	while (bytes_read < size) {
@@ -358,12 +355,13 @@ static void usage(void) {
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
-		"  -h, --help       Print this help message to stdout\n"
-		"  -m, --modules    Print a list of all available modules to stdout\n"
-		"  -f, --file=FILE  Read configuration from FILE\n"
-		"  -c, --color      Enable colored logging\n"
-		"  -t, --time       Add current time to each log line\n"
-		"  -l, --log=N      Set loglevel to N: "
+		"  -h, --help        Print this help message to stdout\n"
+		"  -m, --modules     Print a list of all available modules to stdout\n"
+		"  -f, --file=FILE   Read configuration from FILE\n"
+		"  -i, --interval=I  Set main interval to I milliseconds\n"
+		"  -c, --color       Enable colored logging\n"
+		"  -t, --time        Add current time to each log line\n"
+		"  -l, --log=N       Set loglevel to N: "
 		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
 	printf("\n\n");
@@ -412,22 +410,24 @@ int main(int argc, char **argv) {
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;
 	char *config_buffer = NULL;
+	uint64_t interval = 1000;
 
 	struct option long_options[] = {
-		{ "help",    0, NULL, 'h' },
-		{ "log",     1, NULL, 'l' },
-		{ "color",   0, NULL, 'c' },
-		{ "time",    0, NULL, 't' },
-		{ "file",    1, NULL, 'f' },
-		{ "modules", 0, NULL, 'm' },
-		{ NULL,      0, NULL,  0  }
+		{ "help",     0, NULL, 'h' },
+		{ "interval", 1, NULL, 'i' },
+		{ "log",      1, NULL, 'l' },
+		{ "color",    0, NULL, 'c' },
+		{ "time",     0, NULL, 't' },
+		{ "file",     1, NULL, 'f' },
+		{ "modules",  0, NULL, 'm' },
+		{ NULL,       0, NULL,  0  }
 	};
 
 	opterr = 0;
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hl:f:mct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hi:l:f:mct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -435,6 +435,10 @@ int main(int argc, char **argv) {
 		switch (option) {
 			case 'h':
 				print_usage = TRUE;
+				break;
+			case 'i':
+				sscanf(optarg, "%"SCNu64, &interval);
+				xsg_main_set_interval(interval);
 				break;
 			case 'f':
 				if (optarg)
