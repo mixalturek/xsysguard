@@ -27,6 +27,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "angle.h"
 #include "imlib.h"
 #include "conf.h"
@@ -50,7 +52,7 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	unsigned int width, height;
 	double angle;
 
-	xsg_debug("render_rectangle");
+	xsg_debug("%s: Render Rectangle", xsg_window_get_config_name(widget->window_id));
 
 	rectangle = (rectangle_t *) widget->data;
 
@@ -128,24 +130,19 @@ static void scroll_rectangle(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_rectangle_parse() {
+void xsg_widget_rectangle_parse(uint32_t window_id) {
 	xsg_widget_t *widget;
 	rectangle_t *rectangle;
 	double angle = 0.0;
-	uint32_t widget_id;
 
-	widget = xsg_new0(xsg_widget_t, 1);
+	widget = xsg_widgets_new(window_id);;
+
 	rectangle = xsg_new(rectangle_t, 1);
 
-	widget_id = xsg_widgets_add(widget);
-
-	widget->update = xsg_conf_read_uint();;
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_rectangle;
 	widget->update_func = update_rectangle;
 	widget->scroll_func = scroll_rectangle;
@@ -158,8 +155,9 @@ void xsg_widget_rectangle_parse() {
 	rectangle->filled = FALSE;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(widget_id, widget->update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
 
@@ -189,7 +187,7 @@ void xsg_widget_rectangle_parse() {
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
-			xsg_conf_error("Show, Angle, ColorRange or Filled");
+			xsg_conf_error("Visible, Angle, ColorRange or Filled");
 		}
 	}
 

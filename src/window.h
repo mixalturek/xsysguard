@@ -27,33 +27,47 @@
 
 void xsg_window_init(void);
 
-void xsg_window_update_widget(uint32_t widget_id, uint32_t var_id);
+void xsg_window_update(uint32_t window_id, uint32_t widget_id, uint32_t var_id);
 
 /*****************************************************************************/
 
-void xsg_window_parse_name(void);
-void xsg_window_parse_class(void);
-void xsg_window_parse_resource(void);
-void xsg_window_parse_geometry(void);
-void xsg_window_parse_sticky(void);
-void xsg_window_parse_skip_taskbar(void);
-void xsg_window_parse_skip_pager(void);
-void xsg_window_parse_layer(void);
-void xsg_window_parse_decorations(void);
-void xsg_window_parse_override_redirect(void);
-void xsg_window_parse_background(void);
-void xsg_window_parse_grab_root(void);
-void xsg_window_parse_cache_size(void);
-void xsg_window_parse_font_cache_size(void);
-void xsg_window_parse_xshape(void);
-void xsg_window_parse_argb_visual(void);
-void xsg_window_parse_show(void);
+void xsg_window_set_cache_size(int size);
+void xsg_window_set_font_cache_size(int size);
+
+/******************************************************************************/
+
+uint32_t xsg_window_new(char *config);
+
+/******************************************************************************/
+
+void xsg_window_parse_name(uint32_t window_id);
+void xsg_window_parse_class(uint32_t window_id);
+void xsg_window_parse_resource(uint32_t window_id);
+void xsg_window_parse_geometry(uint32_t window_id);
+void xsg_window_parse_sticky(uint32_t window_id);
+void xsg_window_parse_skip_taskbar(uint32_t window_id);
+void xsg_window_parse_skip_pager(uint32_t window_id);
+void xsg_window_parse_layer(uint32_t window_id);
+void xsg_window_parse_decorations(uint32_t window_id);
+void xsg_window_parse_override_redirect(uint32_t window_id);
+void xsg_window_parse_background(uint32_t window_id);
+void xsg_window_parse_grab_root(uint32_t window_id);
+void xsg_window_parse_xshape(uint32_t window_id);
+void xsg_window_parse_argb_visual(uint32_t window_id);
+void xsg_window_parse_visible(uint32_t window_id);
 
 /*****************************************************************************/
 
 void xsg_window_render(void);
 void xsg_window_render_xshape(void);
-void xsg_window_update_append_rect(int xoffset, int yoffset, int width, int height);
+
+void xsg_window_update_append_rect(uint32_t window_id, int xoffset, int yoffset, int width, int height);
+
+/******************************************************************************/
+
+void xsg_window_add_widget(uint32_t window_id, void *widget);
+
+char *xsg_window_get_config_name(uint32_t window_id);
 
 /******************************************************************************/
 

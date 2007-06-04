@@ -26,39 +26,28 @@
 
 /*****************************************************************************/
 
-#ifndef TRACE
-# define T(func) func
-#else
-# define T(func) { \
-	struct timeval timeval_begin, timeval_end, timeval_diff; \
-	xsg_gettimeofday(&timeval_begin, NULL); \
-	func; \
-	xsg_gettimeofday(&timeval_end, NULL); \
-	xsg_timeval_sub(&timeval_diff, &timeval_end, &timeval_begin); \
-	xsg_debug("T %u.%06us [%04d] %s: %s", \
-			(unsigned) timeval_diff.tv_sec, \
-			(unsigned) timeval_diff.tv_usec, \
-			__LINE__, \
-			__FUNCTION__, \
-			#func); \
-}
-#endif
-
-/******************************************************************************/
-
 typedef struct _xsg_widget_t xsg_widget_t;
 
 struct _xsg_widget_t {
+	uint32_t id;
+
+	uint32_t window_id;
+
 	uint64_t update;
+
 	int xoffset;
 	int yoffset;
 	unsigned int width;
 	unsigned int height;
-	uint32_t show_var_id; // none: 0xffffffff
-	bool show;
+
+	uint64_t visible_update;
+	uint32_t visible_var_id;
+	bool visible;
+
 	void (*render_func)(xsg_widget_t *widget, Imlib_Image buffer, int x, int y);
 	void (*update_func)(xsg_widget_t *widget, uint32_t var_id);
 	void (*scroll_func)(xsg_widget_t *widget);
+
 	void *data;
 };
 

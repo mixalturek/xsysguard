@@ -31,6 +31,7 @@
 typedef struct _var_t var_t;
 
 struct _var_t {
+	uint32_t window_id;
 	uint32_t widget_id;
 	uint32_t rpn_id;
 };
@@ -89,7 +90,7 @@ void xsg_var_dirty(uint32_t var_id) {
 
 	var = get_var(var_id);
 
-	xsg_window_update_widget(var->widget_id, var_id);
+	xsg_window_update(var->window_id, var->widget_id, var_id);
 
 	dirty = TRUE;
 }
@@ -104,10 +105,11 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-uint32_t xsg_var_parse(uint32_t widget_id, uint64_t update) {
+uint32_t xsg_var_parse(uint32_t window_id, uint32_t widget_id, uint64_t update) {
 	var_t *var;
 
 	var = xsg_new0(var_t, 1);
+	var->window_id = window_id;
 	var->widget_id = widget_id;
 	var->rpn_id = xsg_rpn_parse(var_count, update);
 

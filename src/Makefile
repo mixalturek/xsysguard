@@ -74,7 +74,7 @@ COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
 COMMON_SRC     += string.c list.c utils.c
 
-XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c widget.h
+XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
 XSYSGUARD_SRC  += printf.c printf.h
 XSYSGUARD_SRC  += dump.c dump.h

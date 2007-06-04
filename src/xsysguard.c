@@ -173,21 +173,24 @@ static void parse_env() {
 		xsg_warning("Cannot set environment variable %s=\"%s\"", variable, value);
 }
 
-static bool parse_var(uint32_t widget_id, uint64_t update, uint32_t *var_id) {
+static bool parse_var(uint32_t window_id, uint32_t widget_id, uint64_t update, uint32_t *var_id) {
 	if (!xsg_conf_find_command("+")) {
 		return FALSE;
 	} else {
-		*var_id = xsg_var_parse(widget_id, update);
+		*var_id = xsg_var_parse(window_id, widget_id, update);
 		return TRUE;
 	}
 }
 
-static void parse_config(char *config_buffer) {
+static void parse_config(char *config_name, char *config_buffer) {
+	uint32_t window_id;
 	uint64_t update;
 	uint32_t var_id;
 	uint32_t widget_id;
 
 	xsg_conf_set_buffer(config_buffer);
+
+	window_id = xsg_window_new(config_name);
 
 	while (!xsg_conf_find_end()) {
 		if (xsg_conf_find_newline())
@@ -196,70 +199,66 @@ static void parse_config(char *config_buffer) {
 			continue;
 		if (xsg_conf_find_command("Set")) {
 			if (xsg_conf_find_command("Name")) {
-				xsg_window_parse_name();
+				xsg_window_parse_name(window_id);
 			} else if (xsg_conf_find_command("Class")) {
-				xsg_window_parse_class();
+				xsg_window_parse_class(window_id);
 			} else if (xsg_conf_find_command("Resource")) {
-				xsg_window_parse_resource();
+				xsg_window_parse_resource(window_id);
 			} else if (xsg_conf_find_command("Geometry")) {
-				xsg_window_parse_geometry();
+				xsg_window_parse_geometry(window_id);
 			} else if (xsg_conf_find_command("Sticky")) {
-				xsg_window_parse_sticky();
+				xsg_window_parse_sticky(window_id);
 			} else if (xsg_conf_find_command("SkipTaskbar")) {
-				xsg_window_parse_skip_taskbar();
+				xsg_window_parse_skip_taskbar(window_id);
 			} else if (xsg_conf_find_command("SkipPager")) {
-				xsg_window_parse_skip_pager();
+				xsg_window_parse_skip_pager(window_id);
 			} else if (xsg_conf_find_command("Layer")) {
-				xsg_window_parse_layer();
+				xsg_window_parse_layer(window_id);
 			} else if (xsg_conf_find_command("Decorations")) {
-				xsg_window_parse_decorations();
+				xsg_window_parse_decorations(window_id);
 			} else if (xsg_conf_find_command("OverrideRedirect")) {
-				xsg_window_parse_override_redirect();
+				xsg_window_parse_override_redirect(window_id);
 			} else if (xsg_conf_find_command("Background")) {
-				xsg_window_parse_background();
-			} else if (xsg_conf_find_command("CacheSize")) {
-				xsg_window_parse_cache_size();
-			} else if (xsg_conf_find_command("FontCacheSize")) {
-				xsg_window_parse_font_cache_size();
+				xsg_window_parse_background(window_id);
 			} else if (xsg_conf_find_command("XShape")) {
-				xsg_window_parse_xshape();
+				xsg_window_parse_xshape(window_id);
 			} else if (xsg_conf_find_command("ARGBVisual")) {
-				xsg_window_parse_argb_visual();
-			} else if (xsg_conf_find_command("Show")) {
-				xsg_window_parse_show();
+				xsg_window_parse_argb_visual(window_id);
+			} else if (xsg_conf_find_command("Visible")) {
+				xsg_window_parse_visible(window_id);
 			} else {
-				xsg_conf_error("Interval, IconName, Class, Resource, Geometry, "
+				xsg_conf_error("Name, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "
-						"Decorations, OverrideRedirect, Background, CacheSize, XShape "
-						"or ARGBVisual");
+						"Decorations, OverrideRedirect, Background, XShape, "
+						"ARGBVisual or Visible");
 			}
 		} else if (xsg_conf_find_command("SetEnv")) {
 			parse_env();
 		} else if (xsg_conf_find_command("Line")) {
-			xsg_widget_line_parse();
+			xsg_widget_line_parse(window_id);
 		} else if (xsg_conf_find_command("Rectangle")) {
-			xsg_widget_rectangle_parse();
+			xsg_widget_rectangle_parse(window_id);
 		} else if (xsg_conf_find_command("Ellipse")) {
-			xsg_widget_ellipse_parse();
+			xsg_widget_ellipse_parse(window_id);
 		} else if (xsg_conf_find_command("Polygon")) {
-			xsg_widget_polygon_parse();
+			xsg_widget_polygon_parse(window_id);
 		} else if (xsg_conf_find_command("Image")) {
-			xsg_widget_image_parse();
+			xsg_widget_image_parse(window_id);
 		} else if (xsg_conf_find_command("BarChart")) {
-			xsg_widget_barchart_parse(&update, &widget_id);
-			while (parse_var(widget_id, update, &var_id) != 0)
+			xsg_widget_barchart_parse(window_id, &update, &widget_id);
+			while (parse_var(window_id, widget_id, update, &var_id) != 0)
 				xsg_widget_barchart_parse_var(var_id);
 		} else if (xsg_conf_find_command("LineChart")) {
-			xsg_widget_linechart_parse(&update, &widget_id);
-			while (parse_var(widget_id, update, &var_id) != 0)
+			xsg_widget_linechart_parse(window_id, &update, &widget_id);
+			while (parse_var(window_id, widget_id, update, &var_id) != 0)
 				xsg_widget_linechart_parse_var(var_id);
 		} else if (xsg_conf_find_command("AreaChart")) {
-			xsg_widget_areachart_parse(&update, &widget_id);
-			while (parse_var(widget_id, update, &var_id) != 0)
+			xsg_widget_areachart_parse(window_id, &update, &widget_id);
+			while (parse_var(window_id, widget_id, update, &var_id) != 0)
 				xsg_widget_areachart_parse_var(var_id);
 		} else if (xsg_conf_find_command("Text")) {
-			xsg_widget_text_parse(&update, &widget_id);
-			while (parse_var(widget_id, update, &var_id) != 0)
+			xsg_widget_text_parse(window_id, &update, &widget_id);
+			while (parse_var(window_id, widget_id, update, &var_id) != 0)
 				xsg_widget_text_parse_var(var_id);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
@@ -355,13 +354,15 @@ static void usage(void) {
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
 		"Arguments:\n"
-		"  -h, --help        Print this help message to stdout\n"
-		"  -m, --modules     Print a list of all available modules to stdout\n"
-		"  -f, --file=FILE   Read configuration from FILE\n"
-		"  -i, --interval=I  Set main interval to I milliseconds\n"
-		"  -c, --color       Enable colored logging\n"
-		"  -t, --time        Add current time to each log line\n"
-		"  -l, --log=N       Set loglevel to N: "
+		"  -h, --help         Print this help message to stdout\n"
+		"  -m, --modules      Print a list of all available modules to stdout\n"
+		"  -f, --file=FILE    Read configuration from FILE\n"
+		"  -i, --interval=I   Set main interval to I milliseconds\n"
+		"  -F, --fontcache=B  Set imlib font cache size to B bytes\n"
+		"  -I, --imgcache=B   Set imlib image cache size to B bytes\n"
+		"  -c, --color        Enable colored logging\n"
+		"  -t, --time         Add current time to each log line\n"
+		"  -l, --log=N        Set loglevel to N: "
 		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
 	printf("\n\n");
@@ -406,28 +407,30 @@ static void usage(void) {
  ******************************************************************************/
 
 int main(int argc, char **argv) {
-	char *filename = NULL;
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;
-	char *config_buffer = NULL;
 	uint64_t interval = 1000;
+	xsg_list_t *filename_list = NULL;
+	xsg_list_t *l;
 
 	struct option long_options[] = {
-		{ "help",     0, NULL, 'h' },
-		{ "interval", 1, NULL, 'i' },
-		{ "log",      1, NULL, 'l' },
-		{ "color",    0, NULL, 'c' },
-		{ "time",     0, NULL, 't' },
-		{ "file",     1, NULL, 'f' },
-		{ "modules",  0, NULL, 'm' },
-		{ NULL,       0, NULL,  0  }
+		{ "help",      0, NULL, 'h' },
+		{ "interval",  1, NULL, 'i' },
+		{ "fontcache", 1, NULL, 'F' },
+		{ "imgcache",  1, NULL, 'I' },
+		{ "log",       1, NULL, 'l' },
+		{ "color",     0, NULL, 'c' },
+		{ "time",      0, NULL, 't' },
+		{ "file",      1, NULL, 'f' },
+		{ "modules",   0, NULL, 'm' },
+		{ NULL,        0, NULL,  0  }
 	};
 
 	opterr = 0;
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hi:l:f:mct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hi:F:I:l:f:mct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -440,9 +443,17 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%"SCNu64, &interval);
 				xsg_main_set_interval(interval);
 				break;
+			case 'F':
+				if (optarg)
+					xsg_window_set_font_cache_size(atoi(optarg));
+				break;
+			case 'I':
+				if (optarg)
+					xsg_window_set_cache_size(atoi(optarg));
+				break;
 			case 'f':
 				if (optarg)
-					filename = xsg_strdup(optarg);
+					filename_list = xsg_list_append(filename_list, xsg_strdup(optarg));
 				break;
 			case 'l':
 				if (optarg)
@@ -475,16 +486,33 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	if (!filename) {
-		if (optind < argc)
-			filename = find_config_file(argv[optind]);
-		else
-			filename = find_config_file("default");
+	for (l = filename_list; l; l = l->next) {
+		char *filename = l->data;
+		char *config_buffer;
+
+		config_buffer = get_config_file(filename);
+		parse_config(filename, config_buffer);
+		xsg_free(config_buffer);
 	}
 
-	config_buffer = get_config_file(filename);
-	parse_config(config_buffer);
-	xsg_free(config_buffer);
+	if ((filename_list == NULL) && (optind >= argc)) {
+		char *filename, *config_buffer;
+
+		filename = find_config_file("default");
+		config_buffer = get_config_file(filename);
+		parse_config("default", config_buffer);
+		xsg_free(config_buffer);
+	}
+
+	while (optind < argc) {
+		char *filename, *config_buffer;
+
+		filename = find_config_file(argv[optind]);
+		config_buffer = get_config_file(filename);
+		parse_config(argv[optind], config_buffer);
+		xsg_free(config_buffer);
+		optind++;
+	}
 
 	xsg_var_init();
 	xsg_printf_init();

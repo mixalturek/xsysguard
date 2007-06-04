@@ -27,6 +27,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
@@ -53,7 +55,7 @@ static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 	ImlibPolygon poly;
 	unsigned int i;
 
-	xsg_debug("render_polygon");
+	xsg_debug("%s: Render Polygon", xsg_window_get_config_name(widget->window_id));
 
 	polygon = (polygon_t *) widget->data;
 
@@ -83,20 +85,16 @@ static void scroll_polygon(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_polygon_parse() {
+void xsg_widget_polygon_parse(uint32_t window_id) {
 	xsg_widget_t *widget;
 	polygon_t *polygon;
 	ImlibPolygon poly;
 	unsigned int i;
 	int x1, y1, x2, y2;
-	uint64_t update;
-	uint32_t widget_id;
 
-	widget = xsg_new0(xsg_widget_t, 1);
-	polygon = xsg_new0(polygon_t, 1);
+	widget = xsg_widgets_new(window_id);
 
-	update = xsg_conf_read_uint();
-	widget_id = xsg_widgets_add(widget);
+	polygon = xsg_new(polygon_t, 1);
 
 	polygon->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	polygon->point_count = xsg_conf_read_uint();
@@ -115,27 +113,25 @@ void xsg_widget_polygon_parse() {
 	imlib_polygon_get_bounds(poly, &x1, &y1, &x2, &y2);
 	imlib_polygon_free(poly);
 
-	widget->update = update;
 	widget->xoffset = x1;
 	widget->yoffset = y1;
 	widget->width = x2 - x1;
 	widget->height = y2 - y1;
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_polygon;
 	widget->update_func = update_polygon;
 	widget->scroll_func = scroll_polygon;
 	widget->data = (void *) polygon;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(widget_id, update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("Filled")) {
 			polygon->filled = TRUE;
 		} else if (xsg_conf_find_command("Closed")) {
 			polygon->closed = TRUE;
 		} else {
-			xsg_conf_error("Show, Filled or Closed");
+			xsg_conf_error("Visible, Filled or Closed");
 		}
 	}
 }

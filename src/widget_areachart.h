@@ -25,7 +25,7 @@
 
 /*****************************************************************************/
 
-void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id);
+void xsg_widget_areachart_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id);
 void xsg_widget_areachart_parse_var(uint32_t var_id);
 
 /******************************************************************************/

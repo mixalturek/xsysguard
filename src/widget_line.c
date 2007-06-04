@@ -27,6 +27,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
@@ -48,7 +50,8 @@ static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 	line = (line_t *) widget->data;
 
-	xsg_debug("Render Line: x1=%d, y1=%d, x2=%d, y2=%d, red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
+	xsg_debug("%s: Render Line: x1=%d, y1=%d, x2=%d, y2=%d, red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
+			xsg_window_get_config_name(widget->window_id),
 			line->x1, line->y1, line->x2, line->y2,
 			line->color.red, line->color.green, line->color.blue, line->color.alpha);
 
@@ -69,17 +72,13 @@ static void scroll_line(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_line_parse() {
+void xsg_widget_line_parse(uint32_t window_id) {
 	xsg_widget_t *widget;
 	line_t *line;
-	uint64_t update;
-	uint32_t widget_id;
 
-	widget = xsg_new0(xsg_widget_t, 1);
+	widget = xsg_widgets_new(window_id);
+
 	line = xsg_new(line_t, 1);
-
-	update = xsg_conf_read_uint();
-	widget_id = xsg_widgets_add(widget);
 
 	line->x1 = xsg_conf_read_int();
 	line->y1 = xsg_conf_read_int();
@@ -88,23 +87,21 @@ void xsg_widget_line_parse() {
 	line->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	xsg_conf_read_newline();
 
-	widget->update = update;
 	widget->xoffset = MIN(line->x1, line->x2);
 	widget->yoffset = MIN(line->y1, line->y2);
 	widget->width = MAX(line->x1, line->x2) - widget->xoffset + 1;
 	widget->height = MAX(line->y1, line->y2) - widget->yoffset + 1;
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_line;
 	widget->update_func = update_line;
 	widget->scroll_func = scroll_line;
 	widget->data = (void *) line;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(widget_id, update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else {
-			xsg_conf_error("Show");
+			xsg_conf_error("Visible");
 		}
 	}
 }

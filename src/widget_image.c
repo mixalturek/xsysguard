@@ -27,6 +27,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "angle.h"
 #include "imlib.h"
 #include "conf.h"
@@ -45,9 +47,11 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 	image_t *image;
 	Imlib_Image img;
 
-	xsg_debug("render_image");
-
 	image = (image_t *) widget->data;
+
+	xsg_debug("%s: Render Image: x=%d, y=%d, widht=%u, height=%u, filename=%s",
+			xsg_window_get_config_name(widget->window_id),
+			widget->xoffset, widget->yoffset, widget->width, widget->height, image->filename);
 
 	img = xsg_imlib_load_image(image->filename);
 
@@ -81,24 +85,19 @@ static void scroll_image(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_image_parse() {
+void xsg_widget_image_parse(uint32_t window_id) {
 	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
-	uint32_t widget_id;
 
-	widget = xsg_new0(xsg_widget_t, 1);
-	image = xsg_new0(image_t, 1);
+	widget = xsg_widgets_new(window_id);
 
-	widget_id = xsg_widgets_add(widget);
+	image = xsg_new(image_t, 1);
 
-	widget->update = xsg_conf_read_uint();;
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_image;
 	widget->update_func = update_image;
 	widget->scroll_func = scroll_image;
@@ -108,12 +107,13 @@ void xsg_widget_image_parse() {
 	image->filename = xsg_conf_read_string();
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(widget_id, widget->update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("Show or Angle");
+			xsg_conf_error("Visible or Angle");
 		}
 	}
 

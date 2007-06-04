@@ -22,8 +22,7 @@
 #define __WIDGETS_H__ 1
 
 #include <xsysguard.h>
-
-#include "widget.h"
+#include <Imlib2.h>
 
 /*****************************************************************************/
 
@@ -31,11 +30,11 @@ void xsg_widgets_init(void);
 
 void xsg_widgets_update(uint32_t widget_id, uint32_t var_id);
 
-uint32_t xsg_widgets_add(xsg_widget_t *widget);
+void *xsg_widgets_new(uint32_t window_id);
 
-xsg_widget_t *xsg_widgets_last();
+void *xsg_widgets_last();
 
-void xsg_widgets_render(Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
+void xsg_widgets_render(void *widget, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
 
 /******************************************************************************/
 

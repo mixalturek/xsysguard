@@ -32,7 +32,7 @@ void xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-uint32_t xsg_var_parse(uint32_t id, uint64_t update);
+uint32_t xsg_var_parse(uint32_t window_id, uint32_t widget_id, uint64_t update);
 
 double xsg_var_get_num(uint32_t var_id);
 char *xsg_var_get_str(uint32_t var_id);

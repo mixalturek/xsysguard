@@ -83,7 +83,7 @@ static void init() {
 				m->name = name;
 				m->file = xsg_build_filename(*p, filename, NULL);
 				modules_list = xsg_list_prepend(modules_list, m);
-				xsg_message("Found module file in \"%s\": \"%s\"", *p, filename);
+				xsg_message("Found module in \"%s\": \"%s\"", *p, filename);
 			}
 		}
 		closedir(dir);

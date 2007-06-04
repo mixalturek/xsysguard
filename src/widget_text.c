@@ -28,6 +28,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "angle.h"
 #include "imlib.h"
 #include "printf.h"
@@ -491,36 +493,37 @@ static void update_text(xsg_widget_t *widget, uint32_t var_id) {
 		xsg_strfreev(text->lines);
 
 	text->lines = xsg_strsplit_set(xsg_printf(text->printf_id, var_id), "\n", 0);
+
+	xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
 static void scroll_text(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
+void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id) {
 	xsg_widget_t *widget;
 	text_t *text;
 	char *font_name;
 	char **pathv = NULL;
 	double angle = 0.0;
 
-	widget = xsg_new0(xsg_widget_t, 1);
-	text = xsg_new0(text_t, 1);
+	widget = xsg_widgets_new(window_id);
+
+	text = xsg_new(text_t, 1);
 
 	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_text;
 	widget->update_func = update_text;
 	widget->scroll_func = scroll_text;
 	widget->data = (void *) text;
 
 	*update = widget->update;
-	*widget_id = xsg_widgets_add(widget);
+	*widget_id = widget->id;
 
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 
@@ -535,7 +538,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 			xsg_error("Cannot get XSYSGUARD_FONT_PATH");
 
 		for (p = pathv; *p; p++) {
-			xsg_message("Adding path to font path: \"%s\"", *p);
+			xsg_message("Adding dir to font path: \"%s\"", *p);
 			imlib_add_path_to_font_path(*p);
 		}
 	}
@@ -552,8 +555,9 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 	text->lines = NULL;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(*widget_id, *update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {
@@ -581,7 +585,7 @@ void xsg_widget_text_parse(uint64_t *update, uint32_t *widget_id) {
 		} else if (xsg_conf_find_command("TabWidth")) {
 			text->tab_width = xsg_conf_read_uint();
 		} else {
-			xsg_conf_error("Show, Angle, Alignment or TabWidth");
+			xsg_conf_error("Visible, Angle, Alignment or TabWidth");
 		}
 	}
 

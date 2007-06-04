@@ -37,17 +37,20 @@
 
 /******************************************************************************/
 
-typedef struct {
+typedef struct _window_t {
+	char *config;
 	char *name;
 	char *class;
 	char *resource;
 	char *geometry;
 	int flags;
-	int win_gravity;
+	int gravity;
+
 	int xoffset;
 	int yoffset;
 	unsigned int width;
 	unsigned int height;
+
 	bool sticky;
 	bool skip_taskbar;
 	bool skip_pager;
@@ -57,59 +60,147 @@ typedef struct {
 	Imlib_Color background;
 	bool copy_from_parent;
 	bool copy_from_root;
-	unsigned int cache_size;
-	unsigned int font_cache_size;
 	bool xshape;
 	bool argb_visual;
-	Display *display;
 	Visual *visual;
+	Colormap colormap;
 	int depth;
-	int screen;
-	Window id;
-	Imlib_Updates updates;
+	Window window;
 	Pixmap mask;
-	bool show;
-	uint64_t show_update;
-	uint32_t show_var_id;
-	xsg_main_poll_t poll;
+
+	Imlib_Updates updates;
+
+	bool visible;
+	uint64_t visible_update;
+	uint32_t visible_var_id;
+
+	xsg_list_t *widget_list;
 } window_t;
 
-static window_t window = {
-	name: "xsysguard",
-	class: "xsysguard",
-	resource: "xsysguard",
-	geometry: "64x64+128+128",
-	flags: 0,
-	win_gravity: NorthWestGravity,
-	xoffset: 128,
-	yoffset: 128,
-	width: 64,
-	height: 64,
-	sticky: FALSE,
-	skip_taskbar: FALSE,
-	skip_pager: FALSE,
-	layer: 0,
-	decorations: TRUE,
-	override_redirect: FALSE,
-	background: { 0 },
-	copy_from_parent: FALSE,
-	copy_from_root: FALSE,
-	cache_size: 4194304,
-	font_cache_size: 2097152,
-	xshape: FALSE,
-	argb_visual: FALSE,
-	display: NULL,
-	visual: NULL,
-	depth: 0,
-	screen: 0,
-	id: 0,
-	updates: 0,
-	mask: 0,
-	show: FALSE,
-	show_update: 0,
-	show_var_id: 0xffffffff,
-	poll: { 0 },
-};
+/******************************************************************************/
+
+static uint32_t window_count = 0;
+static xsg_list_t *window_list = NULL;
+static window_t **window_array = NULL;
+
+static Display *display = NULL;
+static int screen = 0;
+static xsg_main_poll_t poll = { 0 };
+
+/******************************************************************************/
+
+void xsg_window_set_cache_size(int size) {
+	imlib_set_cache_size(size);
+}
+
+void xsg_window_set_font_cache_size(int size) {
+	imlib_set_font_cache_size(size);
+}
+
+/******************************************************************************/
+
+uint32_t xsg_window_new(char *config) {
+	window_t *window;
+
+	window = xsg_new(window_t, 1);
+
+	window->config = config;
+
+	window->name = "xsysguard";
+	window->class = "xsysguard";
+	window->resource = "xsysguard";
+
+	window->geometry = "64x64+128+128";
+	window->flags = 0;
+	window->gravity = NorthWestGravity;
+
+	window->xoffset = 128;
+	window->yoffset = 128;
+	window->width = 64;
+	window->height = 64;
+
+	window->sticky = FALSE;
+	window->skip_taskbar = FALSE;
+	window->skip_pager = FALSE;
+	window->layer = 0;
+	window->decorations = TRUE;
+	window->override_redirect = FALSE;
+
+	window->background.red = 0;
+	window->background.green = 0;
+	window->background.blue = 0;
+	window->background.alpha = 0xff;
+
+	window->copy_from_parent = FALSE;
+	window->copy_from_root = FALSE;
+
+	window->xshape = FALSE;
+	window->argb_visual = FALSE;
+	window->visual = NULL;
+	window->colormap = 0;
+	window->depth = 0;
+	window->window = 0;
+	window->mask = 0;
+
+//	window->xexpose_updates = 0;
+	window->updates = 0;
+
+	window->visible = FALSE;
+	window->visible_update = 0;
+	window->visible_var_id = 0;
+
+	window->widget_list = NULL;
+
+	window_list = xsg_list_append(window_list, window);
+
+	return window_count++;
+}
+
+/******************************************************************************/
+
+static window_t *get_window(uint32_t window_id) {
+	if (unlikely(window_array == NULL)) {
+		window_t *window;
+
+		xsg_debug("window_array is NULL, using window_list...");
+		window = xsg_list_nth_data(window_list, window_id);
+		if (unlikely(window == NULL))
+			xsg_error("invalid window_id: %"PRIu32, window_id);
+		else
+			return window;
+	}
+
+	if (unlikely(window_id >= window_count))
+		xsg_error("invalid window_id: %"PRIu32, window_id);
+
+	return window_array[window_id];
+}
+
+static void build_window_array(void) {
+	xsg_list_t *l;
+	uint32_t window_id = 0;
+
+	window_array = xsg_new(window_t *, window_count);
+
+	for (l = window_list; l; l = l->next) {
+		window_array[window_id] = l->data;
+		window_id++;
+	}
+}
+
+/******************************************************************************/
+
+void xsg_window_add_widget(uint32_t window_id, void *widget) {
+	window_t *window = get_window(window_id);
+
+	window->widget_list = xsg_list_append(window->widget_list, widget);
+}
+
+char *xsg_window_get_config_name(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	return window->config;
+}
 
 /******************************************************************************
  *
@@ -117,99 +208,118 @@ static window_t window = {
  *
  ******************************************************************************/
 
-void xsg_window_parse_name() {
-	window.name = xsg_conf_read_string();
+void xsg_window_parse_name(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->name = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_class() {
-	window.class = xsg_conf_read_string();
+void xsg_window_parse_class(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->class = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_resource() {
-	window.resource = xsg_conf_read_string();
+void xsg_window_parse_resource(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->resource = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_geometry() {
-	window.geometry = xsg_conf_read_string();
+void xsg_window_parse_geometry(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->geometry = xsg_conf_read_string();
 	xsg_conf_read_newline();
-	window.flags = XParseGeometry(window.geometry, &window.xoffset, &window.yoffset, &window.width, &window.height);
+	window->flags = XParseGeometry(window->geometry, &window->xoffset, &window->yoffset,
+			&window->width, &window->height);
 }
 
-void xsg_window_parse_sticky() {
-	window.sticky = xsg_conf_read_boolean();
-	xsg_conf_read_newline();
-}
+void xsg_window_parse_sticky(uint32_t window_id) {
+	window_t *window = get_window(window_id);
 
-void xsg_window_parse_skip_taskbar() {
-	window.skip_taskbar = xsg_conf_read_boolean();
-	xsg_conf_read_newline();
-}
-
-void xsg_window_parse_skip_pager() {
-	window.skip_pager = xsg_conf_read_boolean();
+	window->sticky = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_layer() {
+void xsg_window_parse_skip_taskbar(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->skip_taskbar = xsg_conf_read_boolean();
+	xsg_conf_read_newline();
+}
+
+void xsg_window_parse_skip_pager(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->skip_pager = xsg_conf_read_boolean();
+	xsg_conf_read_newline();
+}
+
+void xsg_window_parse_layer(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
 	if (xsg_conf_find_command("Above"))
-		window.layer = 1;
+		window->layer = 1;
 	else if (xsg_conf_find_command("Normal"))
-		window.layer = 0;
+		window->layer = 0;
 	else if (xsg_conf_find_command("Below"))
-		window.layer = -1;
+		window->layer = -1;
 	else
 		xsg_conf_error("Above, Normal or Below");
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_decorations() {
-	window.decorations = xsg_conf_read_boolean();
+void xsg_window_parse_decorations(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->decorations = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_override_redirect() {
-	window.override_redirect = xsg_conf_read_boolean();
+void xsg_window_parse_override_redirect(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->override_redirect = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_background() {
+void xsg_window_parse_background(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
 	if (xsg_conf_find_command("CopyFromParent"))
-		window.copy_from_parent = TRUE;
+		window->copy_from_parent = TRUE;
 	else if (xsg_conf_find_command("CopyFromRoot"))
-		window.copy_from_root = TRUE;
+		window->copy_from_root = TRUE;
 	else if (xsg_conf_find_command("Color"))
-		window.background = xsg_imlib_uint2color(xsg_conf_read_color());
+		window->background = xsg_imlib_uint2color(xsg_conf_read_color());
 	else
 		xsg_conf_error("CopyFromParent, CopyFromRoot or Color");
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_cache_size() {
-	window.cache_size = xsg_conf_read_uint();
+void xsg_window_parse_xshape(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->xshape = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_font_cache_size() {
-	window.font_cache_size = xsg_conf_read_uint();
+void xsg_window_parse_argb_visual(uint32_t window_id) {
+	window_t *window = get_window(window_id);
+
+	window->argb_visual = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_xshape() {
-	window.xshape = xsg_conf_read_boolean();
-	xsg_conf_read_newline();
-}
+void xsg_window_parse_visible(uint32_t window_id) {
+	window_t *window = get_window(window_id);
 
-void xsg_window_parse_argb_visual() {
-	window.argb_visual = xsg_conf_read_boolean();
-	xsg_conf_read_newline();
-}
-
-void xsg_window_parse_show() {
-	window.show_update = xsg_conf_read_uint();
-	window.show_var_id = xsg_var_parse(0xffffffff, window.show_update);
+	window->visible_update = xsg_conf_read_uint();
+	window->visible_var_id = xsg_var_parse(window_id, 0xffffffff, window->visible_update);
 }
 
 /******************************************************************************
@@ -218,26 +328,26 @@ void xsg_window_parse_show() {
  *
  ******************************************************************************/
 
-void set_xatom(const char *type, const char *property) {
+static void set_xatom(window_t *window, const char *type, const char *property) {
 	XEvent xev;
 	Atom type_atom;
 	Atom property_atom;
 
-	type_atom = XInternAtom(window.display, type, FALSE);
-	property_atom = XInternAtom(window.display, property, FALSE);
+	type_atom = XInternAtom(display, type, FALSE);
+	property_atom = XInternAtom(display, property, FALSE);
 
-	xsg_message("Setting Xatom \"%s\": \"%s\"", type, property);
+	xsg_message("%s: Setting Xatom \"%s\": \"%s\"", window->config, type, property);
 
 	xev.type = ClientMessage;
 	xev.xclient.type = ClientMessage;
-	xev.xclient.window = window.id;
+	xev.xclient.window = window->window;
 	xev.xclient.message_type = type_atom;
 	xev.xclient.format = 32;
 	xev.xclient.data.l[0] = 1;
 	xev.xclient.data.l[1] = property_atom;
 	xev.xclient.data.l[2] = 0;
 
-	XSendEvent(window.display, XRootWindow(window.display, window.screen), FALSE, SubstructureNotifyMask, &xev);
+	XSendEvent(display, XRootWindow(display, screen), FALSE, SubstructureNotifyMask, &xev);
 }
 
 /******************************************************************************
@@ -274,17 +384,17 @@ static Visual *find_argb_visual() {
 	XRenderPictFormat *format;
 	Visual *visual = NULL;
 
-	template.screen = window.screen;
+	template.screen = screen;
 	template.depth = 32;
 	template.class = TrueColor;
 
-	xvi = XGetVisualInfo(window.display, VisualScreenMask | VisualDepthMask | VisualClassMask, &template, &nvi);
+	xvi = XGetVisualInfo(display, VisualScreenMask | VisualDepthMask | VisualClassMask, &template, &nvi);
 
 	if (xvi == NULL)
 		xsg_error("Cannot find an argb visual.");
 
 	for (i = 0; i < nvi; i++) {
-		format = XRenderFindVisualFormat(window.display, xvi[i].visual);
+		format = XRenderFindVisualFormat(display, xvi[i].visual);
 		if (format->type == PictTypeDirect && format->direct.alphaMask) {
 			visual = xvi[i].visual;
 			break;
@@ -300,6 +410,7 @@ static Visual *find_argb_visual() {
 }
 
 static void xrender_check() {
+	static bool checked = FALSE;
 	int render_event;
 	int render_error;
 	int composite_opcode;
@@ -308,22 +419,27 @@ static void xrender_check() {
 	int composite_major;
 	int composite_minor;
 
-	if (!XRenderQueryExtension(window.display, &render_event, &render_error))
+	if (checked)
+		return;
+
+	checked = TRUE;
+
+	if (!XRenderQueryExtension(display, &render_event, &render_error))
 		xsg_error("No render extension found.");
 
-	if (!XQueryExtension(window.display, COMPOSITE_NAME, &composite_opcode, &composite_event, &composite_error))
+	if (!XQueryExtension(display, COMPOSITE_NAME, &composite_opcode, &composite_event, &composite_error))
 		xsg_error("No composite extension found.");
 
-	XCompositeQueryVersion(window.display, &composite_major, &composite_minor);
+	XCompositeQueryVersion(display, &composite_major, &composite_minor);
 
 	xsg_message("Composite extension found: %d.%d", composite_major, composite_minor);
 }
 
-static void xrender_init() {
-	XCompositeRedirectSubwindows(window.display, window.id, CompositeRedirectAutomatic);
+static void xrender_init(window_t *window) {
+	XCompositeRedirectSubwindows(display, window->window, CompositeRedirectAutomatic);
 }
 
-static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoffset) {
+static void xrender_pixmaps(window_t *window, Pixmap *colors, Pixmap *alpha, int xoffset, int yoffset) {
 	DATA32 *data;
 	DATA32 *colors_data;
 	DATA32 *alpha_data;
@@ -343,13 +459,13 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 	colors_data = xsg_new(DATA32, width * height);
 	alpha_data = xsg_new(DATA32, width * height);
 
-	colors_image = XCreateImage(window.display, window.visual, 32, ZPixmap, 0, (char *) colors_data,
+	colors_image = XCreateImage(display, window->visual, 32, ZPixmap, 0, (char *) colors_data,
 			width, height, 32, width * 4);
 
-	alpha_image = XCreateImage(window.display, window.visual, 32, ZPixmap, 0, (char *) alpha_data,
+	alpha_image = XCreateImage(display, window->visual, 32, ZPixmap, 0, (char *) alpha_data,
 			width, height, 32, width * 4);
 
-	if (window.xshape) {
+	if (window->xshape) {
 
 		mask_data = xsg_new(DATA8, width * height);
 
@@ -384,36 +500,36 @@ static void xrender_pixmaps(Pixmap *colors, Pixmap *alpha, int xoffset, int yoff
 		G_VAL(alpha_data + i) = 0;
 		B_VAL(alpha_data + i) = 0;
 
-		if (window.xshape)
+		if (window->xshape)
 			mask_data[i] = (A_VAL(data + i) == 0) ? 0 : 1;
 	}
 
-	*colors = XCreatePixmap(window.display, window.id, width, height, 32);
+	*colors = XCreatePixmap(display, window->window, width, height, 32);
 
-	*alpha = XCreatePixmap(window.display, window.id, width, height, 32);
+	*alpha = XCreatePixmap(display, window->window, width, height, 32);
 
-	gc = XCreateGC(window.display, window.id, 0, 0);
+	gc = XCreateGC(display, window->window, 0, 0);
 
-	XPutImage(window.display, *colors, gc, colors_image, 0, 0, 0, 0, width, height);
+	XPutImage(display, *colors, gc, colors_image, 0, 0, 0, 0, width, height);
 
-	XPutImage(window.display, *alpha, gc, alpha_image, 0, 0, 0, 0, width, height);
+	XPutImage(display, *alpha, gc, alpha_image, 0, 0, 0, 0, width, height);
 
 	XDestroyImage(colors_image);
 	XDestroyImage(alpha_image);
 
-	XFreeGC(window.display, gc);
+	XFreeGC(display, gc);
 
-	if (window.xshape) {
-		mask_gc = XCreateGC(window.display, window.mask, 0, 0);
-		XPutImage(window.display, window.mask, mask_gc, mask_image, 0, 0,
-				xoffset, yoffset, window.width, window.height);
+	if (window->xshape) {
+		mask_gc = XCreateGC(display, window->mask, 0, 0);
+		XPutImage(display, window->mask, mask_gc, mask_image, 0, 0,
+				xoffset, yoffset, window->width, window->height);
 		xsg_free(mask_data);
 		xsg_free(mask_image);
-		XFreeGC(window.display, mask_gc);
+		XFreeGC(display, mask_gc);
 	}
 }
 
-static void xrender(int xoffset, int yoffset) {
+static void xrender(window_t *window, int xoffset, int yoffset) {
 	Pixmap colors;
 	Pixmap alpha;
 	Picture root_picture;
@@ -427,64 +543,76 @@ static void xrender(int xoffset, int yoffset) {
 	width = imlib_image_get_width();
 	height = imlib_image_get_height();
 
-	xrender_pixmaps(&colors, &alpha, xoffset, yoffset);
+	xrender_pixmaps(window, &colors, &alpha, xoffset, yoffset);
 
-	pict_format = XRenderFindStandardFormat(window.display,	PictStandardARGB32);
+	pict_format = XRenderFindStandardFormat(display, PictStandardARGB32);
 
 	root_pict_attrs.subwindow_mode = IncludeInferiors;
 
-	root_picture = XRenderCreatePicture(window.display, window.id, XRenderFindVisualFormat(window.display, window.visual),
+	root_picture = XRenderCreatePicture(display, window->window, XRenderFindVisualFormat(display, window->visual),
 			CPSubwindowMode, &root_pict_attrs);
 
-	colors_picture = XRenderCreatePicture(window.display, colors, pict_format, 0, 0);
+	colors_picture = XRenderCreatePicture(display, colors, pict_format, 0, 0);
 
-	alpha_picture = XRenderCreatePicture(window.display, alpha, pict_format, 0, 0);
+	alpha_picture = XRenderCreatePicture(display, alpha, pict_format, 0, 0);
 
-	XRenderComposite(window.display, PictOpSrc, colors_picture, alpha_picture, root_picture, 0, 0, 0, 0,
+	XRenderComposite(display, PictOpSrc, colors_picture, alpha_picture, root_picture, 0, 0, 0, 0,
 			xoffset, yoffset, width, height);
 
-	XRenderFreePicture(window.display, colors_picture);
-	XRenderFreePicture(window.display, alpha_picture);
+	XRenderFreePicture(display, colors_picture);
+	XRenderFreePicture(display, alpha_picture);
 
-	XFreePixmap(window.display, colors);
-	XFreePixmap(window.display, alpha);
+	XFreePixmap(display, colors);
+	XFreePixmap(display, alpha);
 }
 
 #endif /* ENABLE_XRENDER */
 
 /******************************************************************************
  *
- * render onto window
+ * render window
  *
  ******************************************************************************/
 
-void xsg_window_render(void) {
-	int up_x, up_y, up_w, up_h;
+static void render(window_t *window) {
 	Imlib_Updates update;
 	Imlib_Image buffer;
 
-	window.updates = imlib_updates_merge_for_rendering(window.updates, window.width, window.height);
+	window->updates = imlib_updates_merge_for_rendering(window->updates, window->width, window->height);
 
-	for (update = window.updates; update; update = imlib_updates_get_next(update)) {
+	imlib_context_set_visual(window->visual);
+	imlib_context_set_colormap(window->colormap);
+	imlib_context_set_drawable(window->window);
+
+	if (window->xshape)
+		imlib_context_set_mask(window->mask);
+	else
+		imlib_context_set_mask(0);
+
+	for (update = window->updates; update; update = imlib_updates_get_next(update)) {
+		int up_x, up_y, up_w, up_h;
+		xsg_list_t *l;
 
 		imlib_updates_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
 
-		xsg_debug("Render x=%d, y=%d, width=%d, height=%d", up_x, up_y, up_w, up_h);
+		xsg_debug("%s: Render x=%d, y=%d, width=%d, height=%d", up_x, up_y, up_w, up_h, window->config);
 
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
 		imlib_image_set_has_alpha(1);
-		imlib_image_clear_color(window.background.red, window.background.green,
-				window.background.blue, window.background.alpha);
+		imlib_image_clear_color(window->background.red, window->background.green,
+				window->background.blue, window->background.alpha);
+
 		/* TODO grab_root / parent */
 
-		xsg_widgets_render(buffer, up_x, up_y, up_w, up_h);
+		for (l = window->widget_list; l; l = l->next)
+			xsg_widgets_render(l->data, buffer, up_x, up_y, up_w, up_h);
 
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(0);
 
-		if (window.argb_visual)
-			xrender(up_x, up_y);
+		if (window->argb_visual)
+			xrender(window, up_x, up_y);
 		else
 			T(imlib_render_image_on_drawable(up_x, up_y));
 
@@ -493,55 +621,75 @@ void xsg_window_render(void) {
 		imlib_free_image();
 	}
 
-	if (window.updates)
-		imlib_updates_free(window.updates);
+	if (window->updates)
+		imlib_updates_free(window->updates);
 
-	window.updates = 0;
+	window->updates = 0;
+}
+
+void xsg_window_render(void) {
+	xsg_list_t *l;
+
+	for (l = window_list; l; l = l->next) {
+		window_t *window = l->data;
+
+		render(window);
+	}
 }
 
 /******************************************************************************/
 
-void xsg_window_render_xshape(void) {
-	if (window.xshape)
-		XShapeCombineMask(window.display, window.id, ShapeBounding, 0, 0, window.mask, ShapeSet);
+static void render_xshape(window_t *window) {
+	if (window->xshape)
+		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+}
+
+void xsg_window_render_xshape() {
+	xsg_list_t *l;
+
+	for (l = window_list; l; l = l->next) {
+		window_t *window = l->data;
+
+		render_xshape(window);
+	}
 }
 
 /******************************************************************************/
 
-static void update_show(void) {
-	bool show;
+static void update_visible(window_t *window) {
+	bool visible;
 
-	show = window.show;
+	visible = window->visible;
 
-	if (window.show_update != 0)
-		window.show = (xsg_var_get_num(window.show_var_id) == 0.0) ? FALSE : TRUE;
+	if (window->visible_update != 0)
+		window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
 	else
-		window.show = TRUE;
+		window->visible = TRUE;
 
-	if (window.show != show) {
-		if (window.show) {
-			xsg_debug("XMapWindow");
+	if (window->visible != visible) {
+		if (window->visible) {
+			xsg_debug("%s: XMapWindow", window->config);
 
-			XMapWindow(window.display, window.id);
+			XMapWindow(display, window->window);
 
-			if (window.sticky)
-				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_STICKY");
+			if (window->sticky)
+				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_STICKY");
 
-			if (window.skip_taskbar)
-				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR");
+			if (window->skip_taskbar)
+				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR");
 
-			if (window.skip_pager)
-				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_SKIP_PAGER");
+			if (window->skip_pager)
+				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_SKIP_PAGER");
 
-			if (window.layer > 0)
-				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_ABOVE");
-			else if (window.layer < 0)
-				set_xatom("_NET_WM_STATE", "_NET_WM_STATE_BELOW");
+			if (window->layer > 0)
+				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_ABOVE");
+			else if (window->layer < 0)
+				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_BELOW");
 
 		} else {
-			xsg_debug("XUnmapWindow");
+			xsg_debug("%s: XUnmapWindow", window->config);
 
-			XUnmapWindow(window.display, window.id);
+			XUnmapWindow(display, window->window);
 		}
 	}
 }
@@ -552,12 +700,36 @@ static void update_show(void) {
  *
  ******************************************************************************/
 
-void xsg_window_update_widget(uint32_t widget_id, uint32_t var_id) {
+static void update_append_rect(window_t *window, int xoffset, int yoffset, int width, int height) {
+	window->updates = imlib_update_append_rect(window->updates, xoffset, yoffset, width, height);
+}
+
+void xsg_window_update_append_rect(uint32_t window_id, int xoffset, int yoffset, int width, int height) {
+	window_t *window = get_window(window_id);
+
+	update_append_rect(window, xoffset, yoffset, width, height);
+}
+
+/******************************************************************************
+ *
+ * async update func
+ *
+ ******************************************************************************/
+
+void xsg_window_update(uint32_t window_id, uint32_t widget_id, uint32_t var_id) {
+	window_t *window = get_window(window_id);
+
 	if (widget_id == 0xffffffff) {
-		update_show();
-		xsg_window_update_append_rect(0, 0, window.width, window.height);
-		xsg_window_render();
-		xsg_window_render_xshape();
+		bool visible = window->visible;
+
+		window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
+
+		if (visible != window->visible) {
+			update_visible(window);
+			if (window->visible) {
+				update_append_rect(window, 0, 0, window->width, window->height);
+			}
+		}
 	} else {
 		xsg_widgets_update(widget_id, var_id);
 	}
@@ -565,19 +737,31 @@ void xsg_window_update_widget(uint32_t widget_id, uint32_t var_id) {
 
 /******************************************************************************
  *
- * update func
+ * tick update func
  *
  ******************************************************************************/
 
 static void update(uint64_t count) {
-	if (window.show_update && (count % window.show_update) == 0)
-		update_show();
-}
+	xsg_list_t *l;
 
-/******************************************************************************/
+	for (l = window_list; l; l = l->next) {
+		window_t *window = l->data;
 
-void xsg_window_update_append_rect(int xoffset, int yoffset, int width, int height) {
-	window.updates = imlib_update_append_rect(window.updates, xoffset, yoffset, width, height);
+		if ((window->visible_update != 0) && (count % window->visible_update) == 0) {
+			bool visible = window->visible;
+
+			window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
+
+			if (visible != window->visible) {
+				update_visible(window);
+				if (window->visible)
+					update_append_rect(window, 0, 0, window->width, window->height);
+			}
+		}
+	}
+
+	xsg_window_render();
+	xsg_window_render_xshape();
 }
 
 /******************************************************************************
@@ -594,7 +778,7 @@ typedef struct {
 	unsigned long status;
 } MotifWmHints;
 
-void hide_decorations() {
+void hide_decorations(window_t *window) {
 	Atom hints_atom;
 	Atom type;
 	int format;
@@ -604,9 +788,9 @@ void hide_decorations() {
 	MotifWmHints **hints_pointer = &hints;
 	MotifWmHints new_hints = { 0 };
 
-	hints_atom = XInternAtom(window.display, "_MOTIF_WM_HINTS", FALSE);
+	hints_atom = XInternAtom(display, "_MOTIF_WM_HINTS", FALSE);
 
-	XGetWindowProperty(window.display, window.id, hints_atom, 0, sizeof(MotifWmHints)/sizeof(long), False, AnyPropertyType,
+	XGetWindowProperty(display, window->window, hints_atom, 0, sizeof(MotifWmHints)/sizeof(long), False, AnyPropertyType,
 			&type, &format, &nitems, &bytes_after, (unsigned char **) hints_pointer);
 
 	if (type == None)
@@ -615,7 +799,9 @@ void hide_decorations() {
 	hints->flags |= (1L << 1);
 	hints->decorations = 0;
 
-	XChangeProperty(window.display, window.id, hints_atom, hints_atom, 32,
+	xsg_message("%s: Hiding window decorations", window->config);
+
+	XChangeProperty(display, window->window, hints_atom, hints_atom, 32,
 			PropModeReplace, (unsigned char *) hints, sizeof(MotifWmHints)/sizeof(long));
 
 	if (hints != &new_hints)
@@ -628,24 +814,26 @@ void hide_decorations() {
  *
  ******************************************************************************/
 
-static void set_size_hints() {
+static void set_size_hints(window_t *window) {
 	XSizeHints *size_hints;
 
 	size_hints = XAllocSizeHints();
 
 	size_hints->flags = PMinSize | PMaxSize | PSize | USPosition | PWinGravity;
 
-	size_hints->min_width = window.width;
-	size_hints->max_width = window.width;
-	size_hints->min_height = window.height;
-	size_hints->max_height = window.height;
-	size_hints->height = window.height;
-	size_hints->width = window.width;
-	size_hints->x = window.xoffset;
-	size_hints->y = window.yoffset;
-	size_hints->win_gravity = window.win_gravity;
+	size_hints->min_width = window->width;
+	size_hints->max_width = window->width;
+	size_hints->min_height = window->height;
+	size_hints->max_height = window->height;
+	size_hints->height = window->height;
+	size_hints->width = window->width;
+	size_hints->x = window->xoffset;
+	size_hints->y = window->yoffset;
+	size_hints->win_gravity = window->gravity;
 
-	XSetWMNormalHints(window.display, window.id, size_hints);
+	xsg_message("%s: Setting size hints", window->config);
+
+	XSetWMNormalHints(display, window->window, size_hints);
 
 	XFree(size_hints);
 }
@@ -656,15 +844,17 @@ static void set_size_hints() {
  *
  ******************************************************************************/
 
-static void set_class_hints() {
+static void set_class_hints(window_t *window) {
 	XClassHint *class_hint;
 
 	class_hint = XAllocClassHint();
 
-	class_hint->res_name = window.resource;
-	class_hint->res_class = window.class;
+	class_hint->res_name = window->resource;
+	class_hint->res_class = window->class;
 
-	XSetClassHint(window.display, window.id, class_hint);
+	xsg_message("%s: Setting class hints", window->config);
+
+	XSetClassHint(display, window->window, class_hint);
 
 	XFree(class_hint);
 }
@@ -678,22 +868,29 @@ static void set_class_hints() {
 static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 	XEvent event;
 
-	while (XPending(window.display)) {
-		XNextEvent(window.display, &event);
+	while (XPending(display)) {
+		XNextEvent(display, &event);
 		if (event.type == Expose) {
-			xsg_message("Received XExpose: x=%d, y=%d, width=%d, height=%d",
-					event.xexpose.x, event.xexpose.y,
-					event.xexpose.width, event.xexpose.height);
-			window.updates = imlib_update_append_rect(window.updates,
-					event.xexpose.x, event.xexpose.y,
-					event.xexpose.width, event.xexpose.height);
+			xsg_list_t *l;
+
+			for (l = window_list; l; l = l->next) {
+				window_t *window = l->data;
+
+				if (window->window == event.xexpose.window) {
+					xsg_message("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
+							event.xexpose.x, event.xexpose.y,
+							event.xexpose.width, event.xexpose.height);
+					window->updates = imlib_update_append_rect(window->updates,
+							event.xexpose.x, event.xexpose.y,
+							event.xexpose.width, event.xexpose.height);
+				}
+			}
 		} else {
 			xsg_message("Received XEvent: type=%d", event.type);
 		}
 	}
 
-	if (window.updates)
-		xsg_window_render();
+	xsg_window_render();
 }
 
 /******************************************************************************
@@ -714,102 +911,107 @@ static int io_error_handler(Display *display) {
  ******************************************************************************/
 
 void xsg_window_init() {
-	Colormap colormap;
-	XSetWindowAttributes attrs;
-	unsigned long valuemask;
+	xsg_list_t *l;
 
 	XSetIOErrorHandler(io_error_handler);
 
-	if ((window.display = XOpenDisplay(NULL)) == NULL)
+	display = XOpenDisplay(NULL);
+
+	if (unlikely(display == NULL))
 		xsg_error("Cannot open display");
 
-	window.screen = XDefaultScreen(window.display);
+	screen = XDefaultScreen(display);
 
-	if (window.flags & XNegative) {
-		window.xoffset += DisplayWidth(window.display, window.screen) - window.width;
-		window.win_gravity = NorthEastGravity;
+	for (l = window_list; l; l = l->next) {
+		window_t *window = l->data;
+		XSetWindowAttributes attrs;
+		unsigned long valuemask;
+
+		if (window->flags & XNegative) {
+			window->xoffset += DisplayWidth(display, screen) - window->width;
+			window->gravity = NorthEastGravity;
+		}
+
+		if (window->flags & YNegative) {
+			window->yoffset += DisplayHeight(display, screen) - window->height;
+			window->gravity = (window->gravity == NorthEastGravity ? SouthEastGravity : SouthWestGravity);
+		}
+
+		if (window->argb_visual) {
+			xrender_check();
+			window->visual = find_argb_visual();
+			window->depth = 32;
+		} else {
+			window->visual = imlib_get_best_visual(display, screen, &window->depth);
+		}
+
+		if (window->xshape) {
+			int event_base, error_base;
+
+			if (!XShapeQueryExtension(display, &event_base, &error_base))
+				xsg_error("%s: No xshape extension found", window->config);
+		}
+
+		window->colormap = XCreateColormap(display, RootWindow(display, screen), window->visual, AllocNone);
+
+		attrs.background_pixel = 0;
+		attrs.colormap = window->colormap;
+		valuemask = CWBackPixel | CWColormap;
+
+		if (window->override_redirect) {
+			attrs.override_redirect = 1;
+			valuemask |= CWOverrideRedirect;
+		}
+
+		window->window = XCreateWindow(display, XRootWindow(display, screen),
+			window->xoffset, window->yoffset, window->width, window->height, 0,
+			window->depth, InputOutput, window->visual, valuemask, &attrs);
+
+		set_size_hints(window);
+		set_class_hints(window);
+
+		XStoreName(display, window->window, window->name);
+
+		XSelectInput(display, window->window, ExposureMask);
+
+		if (window->argb_visual)
+			xrender_init(window);
+
+		if (!window->decorations)
+			hide_decorations(window);
+
+		if (window->xshape)
+			window->mask = XCreatePixmap(display, window->window, window->width, window->height, 1);
+
+		window->updates = imlib_update_append_rect(window->updates, 0, 0, window->width, window->height);
 	}
-
-	if (window.flags & YNegative) {
-		window.yoffset += DisplayHeight(window.display, window.screen) - window.height;
-		window.win_gravity = (window.win_gravity == NorthEastGravity ? SouthEastGravity : SouthWestGravity);
-	}
-
-	if (window.argb_visual) {
-		xrender_check();
-		window.visual = find_argb_visual();
-		window.depth = 32;
-	} else {
-		window.visual = imlib_get_best_visual(window.display, window.screen, &window.depth);
-	}
-
-	if (window.xshape) {
-		int event_base, error_base;
-
-		if (!XShapeQueryExtension(window.display, &event_base, &error_base))
-			xsg_error("No xshape extension found");
-	}
-
-	colormap = XCreateColormap(window.display, RootWindow(window.display, window.screen), window.visual, AllocNone);
-
-	attrs.background_pixel = 0;
-	attrs.colormap = colormap;
-	valuemask = CWBackPixel | CWColormap;
-
-	if (window.override_redirect) {
-		attrs.override_redirect = 1;
-		valuemask |= CWOverrideRedirect;
-	}
-
-	window.id = XCreateWindow(window.display, XRootWindow(window.display, window.screen),
-			window.xoffset, window.yoffset, window.width, window.height, 0,
-			window.depth, InputOutput, window.visual, valuemask, &attrs);
-
-	set_size_hints();
-	set_class_hints();
-
-	XStoreName(window.display, window.id, window.name);
-
-	XSelectInput(window.display, window.id, ExposureMask);
-
-	if (window.argb_visual)
-		xrender_init();
-
-	if (!window.decorations)
-		hide_decorations();
 
 	imlib_context_set_blend(1);
 	imlib_context_set_dither(0);
 	imlib_context_set_dither_mask(0);
 	imlib_context_set_anti_alias(1);
-	imlib_context_set_display(window.display);
-	imlib_context_set_visual(window.visual);
-	imlib_context_set_colormap(colormap);
-	imlib_context_set_drawable(window.id);
-	imlib_set_cache_size(window.cache_size);
-	imlib_set_font_cache_size(window.font_cache_size);
+	imlib_context_set_display(display);
 
 	xsg_main_add_signal_handler(xsg_imlib_flush_cache);
 
-	if (window.xshape) {
-		window.mask = XCreatePixmap(window.display, window.id, window.width, window.height, 1);
-		imlib_context_set_mask(window.mask);
-	}
-
-	window.updates = imlib_update_append_rect(window.updates, 0, 0, window.width, window.height);
+	xsg_widgets_init();
 
 	xsg_main_add_update_func(update);
 
-	xsg_widgets_init();
+	poll.fd = ConnectionNumber(display);
+	poll.events = XSG_MAIN_POLL_READ;
+	poll.func = handle_xevents;
+	poll.arg = NULL;
 
-	window.poll.fd = ConnectionNumber(window.display);
-	window.poll.events = XSG_MAIN_POLL_READ;
-	window.poll.func = handle_xevents;
-	window.poll.arg = NULL;
+	xsg_main_add_poll(&poll);
 
-	xsg_main_add_poll(&window.poll);
+	build_window_array();
 
-	update_show();
+	for (l = window_list; l; l = l->next) {
+		window_t *window = l->data;
+
+		update_visible(window);
+	}
 }
 
 

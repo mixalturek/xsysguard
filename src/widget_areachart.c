@@ -33,6 +33,7 @@
 
 #include "widgets.h"
 #include "widget.h"
+#include "window.h"
 #include "angle.h"
 #include "imlib.h"
 #include "conf.h"
@@ -73,7 +74,8 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 	areachart = widget->data;
 
-	xsg_debug("Render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: Render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+			xsg_window_get_config_name(widget->window_id),
 			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	if ((areachart->angle == NULL) || (areachart->angle->angle == 0.0)) {
@@ -790,12 +792,13 @@ static void scroll_areachart(xsg_widget_t *widget) {
 	areachart->value_index = (areachart->value_index + 1) % width;
 }
 
-void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
+void xsg_widget_areachart_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id) {
 	xsg_widget_t *widget;
 	areachart_t *areachart;
 	double angle = 0.0;
 
-	widget = xsg_new0(xsg_widget_t, 1);
+	widget = xsg_widgets_new(window_id);
+
 	areachart = xsg_new(areachart_t, 1);
 
 	widget->update = xsg_conf_read_uint();
@@ -803,15 +806,13 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
 	widget->height = xsg_conf_read_uint();
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_areachart;
 	widget->update_func = update_areachart;
 	widget->scroll_func = scroll_areachart;
 	widget->data = (void *) areachart;
 
 	*update = widget->update;
-	*widget_id = xsg_widgets_add(widget);
+	*widget_id = widget->id;
 
 	areachart->angle = NULL;
 	areachart->min = 0.0;
@@ -823,8 +824,9 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 	areachart->value_index = 0;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show = xsg_var_parse(*widget_id, *update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -838,7 +840,7 @@ void xsg_widget_areachart_parse(uint64_t *update, uint32_t *widget_id) {
 				xsg_free(areachart->background);
 			areachart->background = xsg_conf_read_string();
 		} else {
-			xsg_conf_error("Show, Angle, Min, Max or Background");
+			xsg_conf_error("Visible, Angle, Min, Max or Background");
 		}
 	}
 
@@ -854,7 +856,7 @@ void xsg_widget_areachart_parse_var(uint32_t var_id) {
 
 	widget = xsg_widgets_last();
 	areachart = widget->data;
-	areachart_var = xsg_new0(areachart_var_t, 1);
+	areachart_var = xsg_new(areachart_var_t, 1);
 	areachart->var_list = xsg_list_append(areachart->var_list, areachart_var);
 
 	if (areachart->angle)

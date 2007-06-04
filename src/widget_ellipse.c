@@ -27,6 +27,8 @@
 /******************************************************************************/
 
 #include "widgets.h"
+#include "widget.h"
+#include "window.h"
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
@@ -47,9 +49,12 @@ typedef struct {
 static void render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	ellipse_t *ellipse;
 
-	xsg_debug("render_ellipse");
-
 	ellipse = (ellipse_t *) widget->data;
+
+	xsg_debug("%s: Render Ellipse: xc=%d, yc=%d, a=%d, b=%d, red=%d, green=%d, blue=%d, alpha=%d",
+			xsg_window_get_config_name(widget->window_id),
+			ellipse->xc, ellipse->yc, ellipse->a, ellipse->b,
+			ellipse->color.red, ellipse->color.green, ellipse->color.blue, ellipse->color.alpha);
 
 	imlib_context_set_image(buffer);
 
@@ -72,17 +77,13 @@ static void scroll_ellipse(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_ellipse_parse() {
+void xsg_widget_ellipse_parse(uint32_t window_id) {
 	xsg_widget_t *widget;
 	ellipse_t *ellipse;
-	uint64_t update;
-	uint32_t widget_id;
 
-	widget = xsg_new0(xsg_widget_t, 1);
-	ellipse = xsg_new0(ellipse_t, 1);
+	widget = xsg_widgets_new(window_id);;
 
-	update = xsg_conf_read_uint();
-	widget_id = xsg_widgets_add(widget);
+	ellipse = xsg_new(ellipse_t, 1);
 
 	ellipse->xc = xsg_conf_read_int();
 	ellipse->yc = xsg_conf_read_int();
@@ -91,25 +92,23 @@ void xsg_widget_ellipse_parse() {
 	ellipse->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	ellipse->filled = FALSE;
 
-	widget->update = update;
 	widget->xoffset = ellipse->xc - ellipse->a;
 	widget->yoffset = ellipse->yc - ellipse->b;
 	widget->width = ellipse->a * 2;
 	widget->height = ellipse->b * 2;
-	widget->show_var_id = 0xffffffff;
-	widget->show = TRUE;
 	widget->render_func = render_ellipse;
 	widget->update_func = update_ellipse;
 	widget->scroll_func = scroll_ellipse;
 	widget->data = (void *) ellipse;
 
 	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Show")) {
-			widget->show_var_id = xsg_var_parse(widget_id, update);
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
 		} else if (xsg_conf_find_command("Filled")) {
 			ellipse->filled = TRUE;
 		} else {
-			xsg_conf_error("Show or Filled");
+			xsg_conf_error("Visible or Filled");
 		}
 	}
 
