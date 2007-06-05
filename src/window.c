@@ -914,9 +914,9 @@ void xsg_window_init() {
 
 	xsg_main_add_signal_handler(xsg_imlib_flush_cache);
 
-	xsg_widgets_init();
-
 	xsg_main_add_update_func(update);
+
+	xsg_widgets_init();
 
 	poll.fd = ConnectionNumber(display);
 	poll.events = XSG_MAIN_POLL_READ;

@@ -61,18 +61,39 @@ uint64_t xsg_main_get_tick(void) {
 
 void xsg_main_add_init_func(void (*func)(void)) {
 	if (likely(func != NULL))
-		init_list = xsg_list_append(init_list, (void *) func);
+		init_list = xsg_list_prepend(init_list, (void *) func);
 }
+
+void xsg_main_remove_init_func(void (*func)(void)) {
+	if (likely(func != NULL))
+		init_list = xsg_list_remove(init_list, func);
+}
+
+/******************************************************************************/
 
 void xsg_main_add_update_func(void (*func)(uint64_t)) {
 	if (likely(func != NULL))
-		update_list = xsg_list_append(update_list, func);
+		update_list = xsg_list_prepend(update_list, func);
 }
+
+void xsg_main_remove_update_func(void (*func)(uint64_t)) {
+	if (likely(func != NULL))
+		update_list = xsg_list_remove(update_list, func);
+}
+
+/******************************************************************************/
 
 void xsg_main_add_shutdown_func(void (*func)(void)) {
 	if (likely(func != NULL))
-		shutdown_list = xsg_list_append(shutdown_list, func);
+		shutdown_list = xsg_list_prepend(shutdown_list, func);
 }
+
+void xsg_main_remove_shutdown_func(void (*func)(void)) {
+	if (likely(func != NULL))
+		shutdown_list = xsg_list_remove(shutdown_list, func);
+}
+
+/******************************************************************************/
 
 void xsg_main_add_poll(xsg_main_poll_t *poll) {
 	if (likely(poll != NULL))
@@ -84,6 +105,8 @@ void xsg_main_remove_poll(xsg_main_poll_t *poll) {
 		poll_list = xsg_list_remove(poll_list, poll);
 }
 
+/******************************************************************************/
+
 void xsg_main_add_timeout(xsg_main_timeout_t *timeout) {
 	if (likely(timeout != NULL))
 		timeout_list = xsg_list_prepend(timeout_list, timeout);
@@ -94,9 +117,16 @@ void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
 		timeout_list = xsg_list_remove(timeout_list, timeout);
 }
 
+/******************************************************************************/
+
 void xsg_main_add_signal_handler(void (*func)(int signum)) {
 	if (likely(func != NULL))
-		signal_handler_list = xsg_list_append(signal_handler_list, func);
+		signal_handler_list = xsg_list_prepend(signal_handler_list, func);
+}
+
+void xsg_main_remove_signal_handler(void (*func)(int signum)) {
+	if (likely(func != NULL))
+		signal_handler_list = xsg_list_remove(signal_handler_list, func);
 }
 
 /******************************************************************************/

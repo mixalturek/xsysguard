@@ -93,9 +93,16 @@ uint64_t xsg_main_get_interval(void);
 uint64_t xsg_main_get_tick(void);
 
 void xsg_main_add_init_func(void (*func)(void));
+void xsg_main_remove_init_func(void (*func)(void));
+
 void xsg_main_add_update_func(void (*func)(uint64_t tick));
+void xsg_main_remove_update_func(void (*func)(uint64_t tick));
+
 void xsg_main_add_shutdown_func(void (*func)(void));
+void xsg_main_remove_shutdown_func(void (*func)(void));
+
 void xsg_main_add_signal_handler(void (*func)(int signum));
+void xsg_main_remove_sugnal_handler(void (*func)(int signum));
 
 typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,
