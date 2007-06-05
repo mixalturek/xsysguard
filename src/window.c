@@ -30,6 +30,7 @@
 #endif
 
 #include "window.h"
+#include "update.h"
 #include "widgets.h"
 #include "imlib.h"
 #include "conf.h"
@@ -68,7 +69,8 @@ struct _xsg_window_t {
 	Window window;
 	Pixmap mask;
 
-	Imlib_Updates updates;
+	Imlib_Updates xexpose_updates;
+	xsg_list_t *updates;
 
 	bool visible;
 	uint64_t visible_update;
@@ -134,8 +136,8 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->window = 0;
 	window->mask = 0;
 
-//	window->xexpose_updates = 0;
-	window->updates = 0;
+	window->xexpose_updates = 0;
+	window->updates = NULL;
 
 	window->visible = FALSE;
 	window->visible_update = 0;
@@ -503,10 +505,28 @@ static void xrender(xsg_window_t *window, int xoffset, int yoffset) {
  ******************************************************************************/
 
 static void render(xsg_window_t *window) {
-	Imlib_Updates update;
+	Imlib_Updates xexpose_update;
 	Imlib_Image buffer;
+	xsg_list_t *update;
 
-	window->updates = imlib_updates_merge_for_rendering(window->updates, window->width, window->height);
+	if (!window->visible)
+		return;
+
+	xsg_debug("%s: Render...", window->config);
+
+	window->xexpose_updates = imlib_updates_merge_for_rendering(window->xexpose_updates, window->width, window->height);
+
+	for (xexpose_update = window->xexpose_updates; xexpose_update; xexpose_update = imlib_updates_get_next(xexpose_update)) {
+		int x, y, w, h;
+
+		imlib_updates_get_coordinates(xexpose_update, &x, &y, &w, &h);
+		window->updates = xsg_update_append_rect(window->updates, x, y, w, h);
+	}
+
+	if (window->xexpose_updates)
+		imlib_updates_free(window->xexpose_updates);
+
+	window->xexpose_updates = 0;
 
 	imlib_context_set_visual(window->visual);
 	imlib_context_set_colormap(window->colormap);
@@ -517,13 +537,13 @@ static void render(xsg_window_t *window) {
 	else
 		imlib_context_set_mask(0);
 
-	for (update = window->updates; update; update = imlib_updates_get_next(update)) {
+	for (update = window->updates; update; update = update->next) {
 		int up_x, up_y, up_w, up_h;
 		xsg_list_t *l;
 
-		imlib_updates_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
+		xsg_update_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
 
-		xsg_debug("%s: Render x=%d, y=%d, width=%d, height=%d", up_x, up_y, up_w, up_h, window->config);
+		xsg_debug("%s: Render x=%d, y=%d, width=%d, height=%d", window->config, up_x, up_y, up_w, up_h);
 
 		buffer = imlib_create_image(up_w, up_h);
 		imlib_context_set_image(buffer);
@@ -549,9 +569,7 @@ static void render(xsg_window_t *window) {
 		imlib_free_image();
 	}
 
-	if (window->updates)
-		imlib_updates_free(window->updates);
-
+	xsg_update_free(window->updates);
 	window->updates = 0;
 }
 
@@ -629,7 +647,7 @@ static void update_visible(xsg_window_t *window) {
  ******************************************************************************/
 
 void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height) {
-	window->updates = imlib_update_append_rect(window->updates, xoffset, yoffset, width, height);
+	window->updates = xsg_update_append_rect(window->updates, xoffset, yoffset, width, height);
 }
 
 /******************************************************************************
@@ -800,7 +818,7 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 					xsg_message("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
 							event.xexpose.x, event.xexpose.y,
 							event.xexpose.width, event.xexpose.height);
-					window->updates = imlib_update_append_rect(window->updates,
+					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
 							event.xexpose.x, event.xexpose.y,
 							event.xexpose.width, event.xexpose.height);
 				}
@@ -903,7 +921,7 @@ void xsg_window_init() {
 		if (window->xshape)
 			window->mask = XCreatePixmap(display, window->window, window->width, window->height, 1);
 
-		window->updates = imlib_update_append_rect(window->updates, 0, 0, window->width, window->height);
+		window->updates = xsg_update_append_rect(window->updates, 0, 0, window->width, window->height);
 	}
 
 	imlib_context_set_blend(1);

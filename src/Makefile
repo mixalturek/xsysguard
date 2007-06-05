@@ -80,6 +80,7 @@ XSYSGUARD_SRC  += printf.c printf.h
 XSYSGUARD_SRC  += dump.c dump.h
 XSYSGUARD_SRC  += angle.c angle.h
 XSYSGUARD_SRC  += imlib.c imlib.h
+XSYSGUARD_SRC  += update.c update.h
 XSYSGUARD_SRC  += window.c window.h
 XSYSGUARD_SRC  += widgets.c widgets.h
 XSYSGUARD_SRC  += widget_line.c widget_line.h
