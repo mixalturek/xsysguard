@@ -27,6 +27,7 @@
 
 /******************************************************************************/
 
+static char *log_name;
 static char *buf;
 static char *ptr;
 static unsigned int line;
@@ -45,7 +46,11 @@ static void skip_space() {
 
 /******************************************************************************/
 
-void xsg_conf_set_buffer(char *buffer) {
+void xsg_conf_set_buffer(char *name, char *buffer) {
+	if (name)
+		log_name = name;
+	else
+		log_name = "";
 	buf = buffer;
 	ptr = buffer;
 	line = 1;
@@ -72,8 +77,8 @@ void xsg_conf_error(const char *expected) {
 	p[n-1] = '^';
 	p[n] = '\0';
 
-	xsg_error("Cannot parse configuration line %d: %s expected.\n%s\n%s\n",
-			line, expected, ptr, p);
+	xsg_error("%s: Cannot parse configuration line %d: %s expected.\n%s\n%s\n",
+			log_name, line, expected, ptr, p);
 }
 
 /******************************************************************************/

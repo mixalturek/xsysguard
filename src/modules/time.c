@@ -231,7 +231,7 @@ static double get_tm_isdst(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	bool local = TRUE;
 
 	if (xsg_conf_find_command("gm")) {

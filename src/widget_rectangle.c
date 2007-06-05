@@ -52,7 +52,7 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	unsigned int width, height;
 	double angle;
 
-	xsg_debug("%s: Render Rectangle", xsg_window_get_config_name(widget->window_id));
+	xsg_debug("%s: Render Rectangle", xsg_window_get_config_name(widget->window));
 
 	rectangle = (rectangle_t *) widget->data;
 
@@ -122,7 +122,7 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	}
 }
 
-static void update_rectangle(xsg_widget_t *widget, uint32_t var_id) {
+static void update_rectangle(xsg_widget_t *widget, xsg_var_t *var) {
 	return;
 }
 
@@ -130,12 +130,12 @@ static void scroll_rectangle(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_rectangle_parse(uint32_t window_id) {
+void xsg_widget_rectangle_parse(xsg_window_t *window) {
 	xsg_widget_t *widget;
 	rectangle_t *rectangle;
 	double angle = 0.0;
 
-	widget = xsg_widgets_new(window_id);;
+	widget = xsg_widgets_new(window);
 
 	rectangle = xsg_new(rectangle_t, 1);
 
@@ -157,7 +157,7 @@ void xsg_widget_rectangle_parse(uint32_t window_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
 

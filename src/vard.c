@@ -30,7 +30,7 @@
 
 /******************************************************************************/
 
-typedef struct _var_t {
+struct _xsg_var_t {
 	uint64_t update;
 	uint32_t remote_id;
 
@@ -45,48 +45,14 @@ typedef struct _var_t {
 	xsg_string_t *str;
 	double num;
 
-	uint32_t rpn_id;
-} var_t;
+	xsg_rpn_t *rpn;
+};
 
 /******************************************************************************/
 
-static uint32_t var_count = 0;
 static xsg_list_t *var_list = NULL;
-static var_t **var_array = NULL;
 
 static bool dirty = FALSE;
-
-/******************************************************************************/
-
-static var_t *get_var(uint32_t var_id) {
-	if (unlikely(var_array == NULL)) {
-		var_t *var;
-
-		xsg_debug("var_array is NULL, using var_list...");
-		var = xsg_list_nth_data(var_list, var_id);
-		if (unlikely(var == NULL))
-			xsg_error("invalid var_id: %"PRIu32, var_id);
-		else
-			return var;
-	}
-
-	if (unlikely(var_id >= var_count))
-		xsg_error("invalid var_id: %"PRIu32, var_id);
-
-	return var_array[var_id];
-}
-
-static void build_var_array(void) {
-	xsg_list_t *l;
-	uint32_t var_id = 0;
-
-	var_array = xsg_new(var_t *, var_count);
-
-	for (l = var_list; l; l = l->next) {
-		var_array[var_id] = l->data;
-		var_id++;
-	}
-}
 
 /******************************************************************************/
 
@@ -100,7 +66,7 @@ void xsg_var_queue_vars(void) {
 		return;
 
 	for (l = var_list; l; l = l->next) {
-		var_t *var = l->data;
+		xsg_var_t *var = l->data;
 
 		if (!var->dirty)
 			continue;
@@ -122,11 +88,11 @@ void xsg_var_queue_vars(void) {
 
 /******************************************************************************/
 
-static void update_var(var_t *var) {
+static void update_var(xsg_var_t *var) {
 	if (var->type == NUM) {
 		double num;
 
-		num = xsg_rpn_get_num(var->rpn_id);
+		num = xsg_rpn_get_num(var->rpn);
 
 		if (num != var->num) {
 			var->num = num;
@@ -136,7 +102,7 @@ static void update_var(var_t *var) {
 	} else if (var->type == STR) {
 		char *str;
 
-		str = xsg_rpn_get_str(var->rpn_id);
+		str = xsg_rpn_get_str(var->rpn);
 
 		if (strcmp(str, var->str->str) != 0) {
 			var->str = xsg_string_assign(var->str, str);
@@ -158,8 +124,8 @@ static void update(uint64_t tick) {
 	dirty = TRUE;
 
 	for (l = var_list; l; l = l->next) {
-		var_t *var = l->data;
-		if ((tick % var->update) == 0)
+		xsg_var_t *var = l->data;
+		if ((var->update != 0) && (tick % var->update) == 0)
 			update_var(var);
 	}
 
@@ -168,8 +134,8 @@ static void update(uint64_t tick) {
 
 /******************************************************************************/
 
-void xsg_var_dirty(uint32_t var_id) {
-	update_var(get_var(var_id));
+void xsg_var_dirty(xsg_var_t *var) {
+	update_var(var);
 }
 
 void xsg_var_flush_dirty(void) {
@@ -178,13 +144,13 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-void xsg_var_parse(uint32_t id, uint64_t update, uint8_t type) {
-	var_t *var;
+void xsg_var_parse(uint32_t remote_id, uint64_t update, uint8_t type) {
+	xsg_var_t *var;
 
-	var = xsg_new(var_t, 1);
+	var = xsg_new(xsg_var_t, 1);
 
 	var->update = update;
-	var->remote_id = id;
+	var->remote_id = remote_id;
 	var->dirty = FALSE;
 
 	var->type = type;
@@ -196,15 +162,12 @@ void xsg_var_parse(uint32_t id, uint64_t update, uint8_t type) {
 
 	var->num = DNAN;
 
-	var->rpn_id = xsg_rpn_parse(var_count, update);
+	var->rpn = xsg_rpn_parse(var, update);
 
 	var_list = xsg_list_append(var_list, var);
-	var_count++;
 }
 
 void xsg_var_init() {
-	build_var_array();
 	xsg_main_add_update_func(update);
-	xsg_rpn_init();
 }
 

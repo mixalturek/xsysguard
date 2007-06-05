@@ -25,10 +25,14 @@
 
 /******************************************************************************/
 
+typedef struct _xsg_rpn_t xsg_rpn_t;
+
+/******************************************************************************/
+
 void xsg_rpn_init(void);
-uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update);
-double xsg_rpn_get_num(uint32_t rpn_id);
-char *xsg_rpn_get_str(uint32_t rpn_id);
+xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update);
+double xsg_rpn_get_num(xsg_rpn_t *rpn);
+char *xsg_rpn_get_str(xsg_rpn_t *rpn);
 
 /*****************************************************************************/
 

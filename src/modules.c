@@ -93,7 +93,7 @@ static void init() {
 
 /******************************************************************************/
 
-void xsg_modules_parse(uint32_t var_id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void xsg_modules_parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	xsg_modules_parse_t *parse;
 	char *filename = NULL;
 	void *module;
@@ -128,7 +128,7 @@ void xsg_modules_parse(uint32_t var_id, uint64_t update, double (**n)(void *), c
 	*s = NULL;
 	*arg = NULL;
 
-	parse(var_id, update, n, s, arg);
+	parse(var, update, n, s, arg);
 
 	if ((*n == NULL) && (*s == NULL))
 		xsg_error("module \"%s\" must set s != NULL or n != NULL", m->name);

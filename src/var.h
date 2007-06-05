@@ -25,17 +25,20 @@
 
 /******************************************************************************/
 
-void xsg_var_init(void);
+#include "window.h"
+#include "widgets.h"
 
-void xsg_var_dirty(uint32_t var_id);
+/******************************************************************************/
+
+void xsg_var_dirty(xsg_var_t *var);
 void xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-uint32_t xsg_var_parse(uint32_t window_id, uint32_t widget_id, uint64_t update);
+xsg_var_t *xsg_var_parse(xsg_window_t *window, xsg_widget_t *widget, uint64_t update);
 
-double xsg_var_get_num(uint32_t var_id);
-char *xsg_var_get_str(uint32_t var_id);
+double xsg_var_get_num(xsg_var_t *var);
+char *xsg_var_get_str(xsg_var_t *var);
 
 /*****************************************************************************/
 

@@ -23,10 +23,12 @@
 
 #include <xsysguard.h>
 
+#include "window.h"
+
 /*****************************************************************************/
 
-void xsg_widget_barchart_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id);
-void xsg_widget_barchart_parse_var(uint32_t var_id);
+xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update);
+void xsg_widget_barchart_parse_var(xsg_var_t *var);
 
 /******************************************************************************/
 

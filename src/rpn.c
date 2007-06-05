@@ -29,7 +29,8 @@
 /******************************************************************************/
 
 typedef struct _op_t op_t;
-typedef struct _rpn_t rpn_t;
+
+/******************************************************************************/
 
 struct _op_t {
 	void (*op)(void);
@@ -38,7 +39,7 @@ struct _op_t {
 	void *arg;
 };
 
-struct _rpn_t {
+struct _xsg_rpn_t {
 	xsg_list_t *op_list;
 	unsigned num_stack_size;
 	unsigned str_stack_size;
@@ -46,9 +47,7 @@ struct _rpn_t {
 
 /******************************************************************************/
 
-static uint32_t rpn_count = 0;
 static xsg_list_t *rpn_list = NULL;
-static rpn_t **rpn_array = NULL;
 
 static double *num_stack = NULL;
 static double *num_stptr = NULL;
@@ -59,30 +58,6 @@ static unsigned max_num_stack_size = 0;
 static unsigned max_str_stack_size = 0;
 
 /******************************************************************************/
-
-static rpn_t *get_rpn(uint32_t rpn_id) {
-	if (unlikely(rpn_array == NULL))
-		xsg_error("rpn_array is NULL");
-
-	if (unlikely(rpn_id >= rpn_count))
-		xsg_error("invalid rpn_id: %"PRIu32, rpn_id);
-
-	return rpn_array[rpn_id];
-}
-
-static void build_rpn_array(void) {
-	xsg_list_t *l;
-	uint32_t rpn_id = 0;
-
-	xsg_debug("Building rpn_array (rpn_count=%u)", rpn_count);
-
-	rpn_array = xsg_new0(rpn_t *, rpn_count);
-
-	for (l = rpn_list; l; l = l->next) {
-		rpn_array[rpn_id] = l->data;
-		rpn_id++;
-	}
-}
 
 static void build_stacks(void) {
 	unsigned i;
@@ -351,7 +326,6 @@ static void op_dump(void) {
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
-	build_rpn_array();
 	build_stacks();
 }
 
@@ -362,12 +336,12 @@ void xsg_rpn_init(void) {
 #define CHECK_STR_STACK_SIZE(command, size) \
 	if (str_stack_size < size) xsg_error("RPN: " command ": string stack size smaller than " #size)
 
-uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
+xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 	int num_stack_size = 0;
 	int str_stack_size = 0;
-	rpn_t *rpn;
+	xsg_rpn_t *rpn;
 
-	rpn = xsg_new0(rpn_t, 1);
+	rpn = xsg_new(xsg_rpn_t, 1);
 	rpn->op_list = NULL;
 	rpn->num_stack_size = 0;
 	rpn->str_stack_size = 0;
@@ -375,7 +349,7 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 	do {
 		op_t *op;
 
-		op = xsg_new0(op_t, 1);
+		op = xsg_new(op_t, 1);
 		op->op = NULL;
 		op->num_func = NULL;
 		op->str_func = NULL;
@@ -528,7 +502,7 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 		} else if (xsg_conf_find_command("DUMP")) {
 			op->op = op_dump;
 		} else {
-			xsg_modules_parse(var_id, update, &op->num_func, &op->str_func, &op->arg);
+			xsg_modules_parse(var, update, &op->num_func, &op->str_func, &op->arg);
 			if (op->num_func != NULL)
 				num_stack_size += 1;
 			if (op->str_func != NULL)
@@ -546,10 +520,11 @@ uint32_t xsg_rpn_parse(uint32_t var_id, uint64_t update) {
 	rpn->str_stack_size = str_stack_size;
 
 	rpn_list = xsg_list_append(rpn_list, rpn);
-	return rpn_count++;
+
+	return rpn;
 }
 
-static void calc(rpn_t *rpn) {
+static void calc(xsg_rpn_t *rpn) {
 	xsg_list_t *l;
 
 	num_stptr = num_stack - 1;
@@ -572,14 +547,11 @@ static void calc(rpn_t *rpn) {
 	}
 }
 
-double xsg_rpn_get_num(uint32_t rpn_id) {
+double xsg_rpn_get_num(xsg_rpn_t *rpn) {
 	double num;
-	rpn_t *rpn;
-
-	rpn = get_rpn(rpn_id);
 
 	if (unlikely(rpn->num_stack_size < 1)) {
-		xsg_warning("RPN(%"PRIu32"): no number left on stack");
+		xsg_warning("RPN: no number left on stack");
 		return DNAN;
 	}
 
@@ -587,27 +559,20 @@ double xsg_rpn_get_num(uint32_t rpn_id) {
 
 	num = num_stptr[0];
 
-	xsg_debug("RPN(%"PRIu32"): %f", rpn_id, num);
-
 	return num;
 }
 
-char *xsg_rpn_get_str(uint32_t rpn_id) {
+char *xsg_rpn_get_str(xsg_rpn_t *rpn) {
 	char *str;
-	rpn_t *rpn;
-
-	rpn = get_rpn(rpn_id);
 
 	if (unlikely(rpn->str_stack_size < 1)) {
-		xsg_warning("RPN(%"PRIu32"): no string left on stack");
+		xsg_warning("RPN: no string left on stack");
 		return NULL;
 	}
 
 	calc(rpn);
 
 	str = str_stptr[0]->str;
-
-	xsg_debug("RPN(%"PRIu32"): \"%s\"", rpn_id, str);
 
 	return str;
 }

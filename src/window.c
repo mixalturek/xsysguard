@@ -37,7 +37,7 @@
 
 /******************************************************************************/
 
-typedef struct _window_t {
+struct _xsg_window_t {
 	char *config;
 	char *name;
 	char *class;
@@ -72,16 +72,14 @@ typedef struct _window_t {
 
 	bool visible;
 	uint64_t visible_update;
-	uint32_t visible_var_id;
+	xsg_var_t *visible_var;
 
 	xsg_list_t *widget_list;
-} window_t;
+};
 
 /******************************************************************************/
 
-static uint32_t window_count = 0;
 static xsg_list_t *window_list = NULL;
-static window_t **window_array = NULL;
 
 static Display *display = NULL;
 static int screen = 0;
@@ -97,14 +95,18 @@ void xsg_window_set_font_cache_size(int size) {
 	imlib_set_font_cache_size(size);
 }
 
-/******************************************************************************/
+/******************************************************************************
+ *
+ * window_new
+ *
+ ******************************************************************************/
 
-uint32_t xsg_window_new(char *config) {
-	window_t *window;
+xsg_window_t *xsg_window_new(char *config_name) {
+	xsg_window_t *window;
 
-	window = xsg_new(window_t, 1);
+	window = xsg_new(xsg_window_t, 1);
 
-	window->config = config;
+	window->config = config_name;
 
 	window->name = "xsysguard";
 	window->class = "xsysguard";
@@ -147,58 +149,22 @@ uint32_t xsg_window_new(char *config) {
 
 	window->visible = FALSE;
 	window->visible_update = 0;
-	window->visible_var_id = 0;
+	window->visible_var = NULL;
 
 	window->widget_list = NULL;
 
 	window_list = xsg_list_append(window_list, window);
 
-	return window_count++;
+	return window;
 }
 
 /******************************************************************************/
 
-static window_t *get_window(uint32_t window_id) {
-	if (unlikely(window_array == NULL)) {
-		window_t *window;
-
-		xsg_debug("window_array is NULL, using window_list...");
-		window = xsg_list_nth_data(window_list, window_id);
-		if (unlikely(window == NULL))
-			xsg_error("invalid window_id: %"PRIu32, window_id);
-		else
-			return window;
-	}
-
-	if (unlikely(window_id >= window_count))
-		xsg_error("invalid window_id: %"PRIu32, window_id);
-
-	return window_array[window_id];
-}
-
-static void build_window_array(void) {
-	xsg_list_t *l;
-	uint32_t window_id = 0;
-
-	window_array = xsg_new(window_t *, window_count);
-
-	for (l = window_list; l; l = l->next) {
-		window_array[window_id] = l->data;
-		window_id++;
-	}
-}
-
-/******************************************************************************/
-
-void xsg_window_add_widget(uint32_t window_id, void *widget) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_add_widget(xsg_window_t *window, xsg_widget_t *widget) {
 	window->widget_list = xsg_list_append(window->widget_list, widget);
 }
 
-char *xsg_window_get_config_name(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+char *xsg_window_get_config_name(xsg_window_t *window) {
 	return window->config;
 }
 
@@ -208,60 +174,44 @@ char *xsg_window_get_config_name(uint32_t window_id) {
  *
  ******************************************************************************/
 
-void xsg_window_parse_name(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_name(xsg_window_t *window) {
 	window->name = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_class(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_class(xsg_window_t *window) {
 	window->class = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_resource(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_resource(xsg_window_t *window) {
 	window->resource = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_geometry(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_geometry(xsg_window_t *window) {
 	window->geometry = xsg_conf_read_string();
 	xsg_conf_read_newline();
 	window->flags = XParseGeometry(window->geometry, &window->xoffset, &window->yoffset,
 			&window->width, &window->height);
 }
 
-void xsg_window_parse_sticky(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_sticky(xsg_window_t *window) {
 	window->sticky = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_skip_taskbar(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_skip_taskbar(xsg_window_t *window) {
 	window->skip_taskbar = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_skip_pager(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_skip_pager(xsg_window_t *window) {
 	window->skip_pager = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_layer(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_layer(xsg_window_t *window) {
 	if (xsg_conf_find_command("Above"))
 		window->layer = 1;
 	else if (xsg_conf_find_command("Normal"))
@@ -273,23 +223,17 @@ void xsg_window_parse_layer(uint32_t window_id) {
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_decorations(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_decorations(xsg_window_t *window) {
 	window->decorations = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_override_redirect(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_override_redirect(xsg_window_t * window) {
 	window->override_redirect = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_background(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_background(xsg_window_t * window) {
 	if (xsg_conf_find_command("CopyFromParent"))
 		window->copy_from_parent = TRUE;
 	else if (xsg_conf_find_command("CopyFromRoot"))
@@ -301,25 +245,19 @@ void xsg_window_parse_background(uint32_t window_id) {
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_xshape(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_xshape(xsg_window_t *window) {
 	window->xshape = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_argb_visual(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_argb_visual(xsg_window_t *window) {
 	window->argb_visual = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_visible(uint32_t window_id) {
-	window_t *window = get_window(window_id);
-
+void xsg_window_parse_visible(xsg_window_t *window) {
 	window->visible_update = xsg_conf_read_uint();
-	window->visible_var_id = xsg_var_parse(window_id, 0xffffffff, window->visible_update);
+	window->visible_var = xsg_var_parse(window, NULL, window->visible_update);
 }
 
 /******************************************************************************
@@ -328,7 +266,7 @@ void xsg_window_parse_visible(uint32_t window_id) {
  *
  ******************************************************************************/
 
-static void set_xatom(window_t *window, const char *type, const char *property) {
+static void set_xatom(xsg_window_t *window, const char *type, const char *property) {
 	XEvent xev;
 	Atom type_atom;
 	Atom property_atom;
@@ -435,11 +373,11 @@ static void xrender_check() {
 	xsg_message("Composite extension found: %d.%d", composite_major, composite_minor);
 }
 
-static void xrender_init(window_t *window) {
+static void xrender_init(xsg_window_t *window) {
 	XCompositeRedirectSubwindows(display, window->window, CompositeRedirectAutomatic);
 }
 
-static void xrender_pixmaps(window_t *window, Pixmap *colors, Pixmap *alpha, int xoffset, int yoffset) {
+static void xrender_pixmaps(xsg_window_t *window, Pixmap *colors, Pixmap *alpha, int xoffset, int yoffset) {
 	DATA32 *data;
 	DATA32 *colors_data;
 	DATA32 *alpha_data;
@@ -529,7 +467,7 @@ static void xrender_pixmaps(window_t *window, Pixmap *colors, Pixmap *alpha, int
 	}
 }
 
-static void xrender(window_t *window, int xoffset, int yoffset) {
+static void xrender(xsg_window_t *window, int xoffset, int yoffset) {
 	Pixmap colors;
 	Pixmap alpha;
 	Picture root_picture;
@@ -574,7 +512,7 @@ static void xrender(window_t *window, int xoffset, int yoffset) {
  *
  ******************************************************************************/
 
-static void render(window_t *window) {
+static void render(xsg_window_t *window) {
 	Imlib_Updates update;
 	Imlib_Image buffer;
 
@@ -631,7 +569,7 @@ void xsg_window_render(void) {
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
-		window_t *window = l->data;
+		xsg_window_t *window = l->data;
 
 		render(window);
 	}
@@ -639,7 +577,7 @@ void xsg_window_render(void) {
 
 /******************************************************************************/
 
-static void render_xshape(window_t *window) {
+static void render_xshape(xsg_window_t *window) {
 	if (window->xshape)
 		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
 }
@@ -648,7 +586,7 @@ void xsg_window_render_xshape() {
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
-		window_t *window = l->data;
+		xsg_window_t *window = l->data;
 
 		render_xshape(window);
 	}
@@ -656,13 +594,13 @@ void xsg_window_render_xshape() {
 
 /******************************************************************************/
 
-static void update_visible(window_t *window) {
+static void update_visible(xsg_window_t *window) {
 	bool visible;
 
 	visible = window->visible;
 
 	if (window->visible_update != 0)
-		window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
+		window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
 	else
 		window->visible = TRUE;
 
@@ -696,18 +634,12 @@ static void update_visible(window_t *window) {
 
 /******************************************************************************
  *
- * async events
+ * update append rect
  *
  ******************************************************************************/
 
-static void update_append_rect(window_t *window, int xoffset, int yoffset, int width, int height) {
+void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height) {
 	window->updates = imlib_update_append_rect(window->updates, xoffset, yoffset, width, height);
-}
-
-void xsg_window_update_append_rect(uint32_t window_id, int xoffset, int yoffset, int width, int height) {
-	window_t *window = get_window(window_id);
-
-	update_append_rect(window, xoffset, yoffset, width, height);
 }
 
 /******************************************************************************
@@ -716,22 +648,20 @@ void xsg_window_update_append_rect(uint32_t window_id, int xoffset, int yoffset,
  *
  ******************************************************************************/
 
-void xsg_window_update(uint32_t window_id, uint32_t widget_id, uint32_t var_id) {
-	window_t *window = get_window(window_id);
-
-	if (widget_id == 0xffffffff) {
+void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
+	if (widget == NULL) {
 		bool visible = window->visible;
 
-		window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
+		window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
 
 		if (visible != window->visible) {
 			update_visible(window);
 			if (window->visible) {
-				update_append_rect(window, 0, 0, window->width, window->height);
+				xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
 			}
 		}
 	} else {
-		xsg_widgets_update(widget_id, var_id);
+		xsg_widgets_update(widget, var);
 	}
 }
 
@@ -741,21 +671,21 @@ void xsg_window_update(uint32_t window_id, uint32_t widget_id, uint32_t var_id) 
  *
  ******************************************************************************/
 
-static void update(uint64_t count) {
+static void update(uint64_t tick) {
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
-		window_t *window = l->data;
+		xsg_window_t *window = l->data;
 
-		if ((window->visible_update != 0) && (count % window->visible_update) == 0) {
+		if ((window->visible_update != 0) && (tick % window->visible_update) == 0) {
 			bool visible = window->visible;
 
-			window->visible = (xsg_var_get_num(window->visible_var_id) == 0.0) ? FALSE : TRUE;
+			window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
 
 			if (visible != window->visible) {
 				update_visible(window);
 				if (window->visible)
-					update_append_rect(window, 0, 0, window->width, window->height);
+					xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
 			}
 		}
 	}
@@ -778,7 +708,7 @@ typedef struct {
 	unsigned long status;
 } MotifWmHints;
 
-void hide_decorations(window_t *window) {
+void hide_decorations(xsg_window_t *window) {
 	Atom hints_atom;
 	Atom type;
 	int format;
@@ -814,7 +744,7 @@ void hide_decorations(window_t *window) {
  *
  ******************************************************************************/
 
-static void set_size_hints(window_t *window) {
+static void set_size_hints(xsg_window_t *window) {
 	XSizeHints *size_hints;
 
 	size_hints = XAllocSizeHints();
@@ -844,7 +774,7 @@ static void set_size_hints(window_t *window) {
  *
  ******************************************************************************/
 
-static void set_class_hints(window_t *window) {
+static void set_class_hints(xsg_window_t *window) {
 	XClassHint *class_hint;
 
 	class_hint = XAllocClassHint();
@@ -874,7 +804,7 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 			xsg_list_t *l;
 
 			for (l = window_list; l; l = l->next) {
-				window_t *window = l->data;
+				xsg_window_t *window = l->data;
 
 				if (window->window == event.xexpose.window) {
 					xsg_message("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
@@ -923,7 +853,7 @@ void xsg_window_init() {
 	screen = XDefaultScreen(display);
 
 	for (l = window_list; l; l = l->next) {
-		window_t *window = l->data;
+		xsg_window_t *window = l->data;
 		XSetWindowAttributes attrs;
 		unsigned long valuemask;
 
@@ -1005,10 +935,8 @@ void xsg_window_init() {
 
 	xsg_main_add_poll(&poll);
 
-	build_window_array();
-
 	for (l = window_list; l; l = l->next) {
-		window_t *window = l->data;
+		xsg_window_t *window = l->data;
 
 		update_visible(window);
 	}

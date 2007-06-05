@@ -61,7 +61,7 @@ typedef enum {
 typedef struct {
 	Imlib_Color color;
 	Imlib_Font font;
-	uint32_t printf_id;
+	xsg_printf_t *print;
 	xsg_angle_t *angle;
 	alignment_t alignment;
 	unsigned int tab_width;
@@ -76,7 +76,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 	int line_advance, space_advance;
 	char **linev;
 
-	xsg_debug("render_text");
+	xsg_debug("%s: Render Text", xsg_window_get_config_name(widget->window));
 
 	text = widget->data;
 
@@ -484,7 +484,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 }
 
-static void update_text(xsg_widget_t *widget, uint32_t var_id) {
+static void update_text(xsg_widget_t *widget, xsg_var_t *var) {
 	text_t *text;
 
 	text = widget->data;
@@ -492,23 +492,23 @@ static void update_text(xsg_widget_t *widget, uint32_t var_id) {
 	if (text->lines != NULL)
 		xsg_strfreev(text->lines);
 
-	text->lines = xsg_strsplit_set(xsg_printf(text->printf_id, var_id), "\n", 0);
+	text->lines = xsg_strsplit_set(xsg_printf(text->print, var), "\n", 0);
 
-	xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
 static void scroll_text(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id) {
+xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	text_t *text;
 	char *font_name;
 	char **pathv = NULL;
 	double angle = 0.0;
 
-	widget = xsg_widgets_new(window_id);
+	widget = xsg_widgets_new(window);
 
 	text = xsg_new(text_t, 1);
 
@@ -523,7 +523,6 @@ void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widge
 	widget->data = (void *) text;
 
 	*update = widget->update;
-	*widget_id = widget->id;
 
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 
@@ -548,7 +547,7 @@ void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widge
 		xsg_error("Cannot load font: \"%s\"", font_name);
 	xsg_free(font_name);
 
-	text->printf_id = xsg_printf_new(xsg_conf_read_string());
+	text->print = xsg_printf_new(xsg_conf_read_string());
 	text->angle = NULL;
 	text->alignment = TOP_LEFT;
 	text->tab_width = 0;
@@ -557,7 +556,7 @@ void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widge
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {
@@ -591,16 +590,18 @@ void xsg_widget_text_parse(uint32_t window_id, uint64_t *update, uint32_t *widge
 
 	if (angle != 0.0)
 		text->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+
+	return widget;
 }
 
-void xsg_widget_text_parse_var(uint32_t var_id) {
+void xsg_widget_text_parse_var(xsg_var_t *var) {
 	xsg_widget_t *widget;
 	text_t *text;
 
 	widget = xsg_widgets_last();
 	text = widget->data;
 
-	xsg_printf_add_var(text->printf_id, var_id);
+	xsg_printf_add_var(text->print, var);
 	xsg_conf_read_newline();
 }
 

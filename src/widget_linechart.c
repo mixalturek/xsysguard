@@ -42,7 +42,7 @@
 /******************************************************************************/
 
 typedef struct {
-	uint32_t var_id;
+	xsg_var_t *var;
 	Imlib_Color color;
 	double *values;
 } linechart_var_t;
@@ -68,7 +68,8 @@ static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 
 	linechart = widget->data;
 
-	xsg_debug("Render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: Render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+			xsg_window_get_config_name(widget->window),
 			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	if ((linechart->angle == NULL) || (linechart->angle->angle == 0.0)) {
@@ -349,14 +350,14 @@ static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	}
 }
 
-static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
+static void update_linechart(xsg_widget_t *widget, xsg_var_t *var) {
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	xsg_list_t *l;
 	unsigned int i, count;
 
 	// TODO: dirty flag + smalller update rect
-	xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	linechart = (linechart_t *) widget->data;
 
@@ -364,8 +365,8 @@ static void update_linechart(xsg_widget_t *widget, uint32_t var_id) {
 	for (l = linechart->var_list; l; l = l->next) {
 		linechart_var = l->data;
 
-		if ((var_id == 0xffffffff) || (linechart_var->var_id == var_id))
-			linechart_var->values[i] = xsg_var_get_num(linechart_var->var_id);
+		if ((var == NULL) || (linechart_var->var == var))
+			linechart_var->values[i] = xsg_var_get_num(linechart_var->var);
 	}
 
 	if (linechart->const_min && linechart->const_max)
@@ -424,15 +425,15 @@ static void scroll_linechart(xsg_widget_t *widget) {
 
 	linechart->value_index = (linechart->value_index + 1) % width;
 
-	xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
-void xsg_widget_linechart_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id) {
+xsg_widget_t *xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	linechart_t *linechart;
 	double angle = 0.0;
 
-	widget = xsg_widgets_new(window_id);
+	widget = xsg_widgets_new(window);
 
 	linechart = xsg_new(linechart_t, 1);
 
@@ -447,7 +448,6 @@ void xsg_widget_linechart_parse(uint32_t window_id, uint64_t *update, uint32_t *
 	widget->data = (void *) linechart;
 
 	*update = widget->update;
-	*widget_id = widget->id;
 
 	linechart->angle = NULL;
 	linechart->min = 0.0;
@@ -461,7 +461,7 @@ void xsg_widget_linechart_parse(uint32_t window_id, uint64_t *update, uint32_t *
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -481,9 +481,11 @@ void xsg_widget_linechart_parse(uint32_t window_id, uint64_t *update, uint32_t *
 
 	if (angle != 0.0)
 		linechart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+
+	return widget;
 }
 
-void xsg_widget_linechart_parse_var(uint32_t var_id) {
+void xsg_widget_linechart_parse_var(xsg_var_t *var) {
 	xsg_widget_t *widget;
 	linechart_t *linechart;
 	linechart_var_t * linechart_var;
@@ -499,7 +501,7 @@ void xsg_widget_linechart_parse_var(uint32_t var_id) {
 	else
 		width = widget->width;
 
-	linechart_var->var_id = var_id;
+	linechart_var->var = var;
 	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	linechart_var->values = xsg_new0(double, width);
 

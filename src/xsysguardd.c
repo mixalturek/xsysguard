@@ -30,6 +30,7 @@
 #include "conf.h"
 #include "main.h"
 #include "vard.h"
+#include "rpn.h"
 #include "writebuffer.h"
 
 /******************************************************************************/
@@ -222,7 +223,7 @@ static void read_config(FILE *stream, bool log_level_overwrite) {
 		read_data(config, config_len, stream);
 		config[config_len] = '\0';
 
-		xsg_conf_set_buffer(config);
+		xsg_conf_set_buffer(NULL, config);
 		xsg_var_parse(id, update, type);
 
 		xsg_free(config);
@@ -331,6 +332,7 @@ int main(int argc, char **argv) {
 
 	read_config(stdin, log_level_overwrite);
 
+	xsg_rpn_init();
 	xsg_var_init();
 
 	xsg_main_loop();

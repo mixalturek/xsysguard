@@ -29,7 +29,8 @@
 /******************************************************************************/
 
 typedef struct _var_t {
-	uint32_t var_id;
+	xsg_var_t *var;
+
 	enum {
 		VAR_INT     = 1,
 		VAR_UINT    = 2,
@@ -38,64 +39,30 @@ typedef struct _var_t {
 		VAR_STRING  = 5,
 		VAR_POINTER = 6,
 	} type;
+
 	double num;
 	xsg_string_t *str;
+
 	char *format;
 } var_t;
 
-typedef struct _printf_t {
+/******************************************************************************/
+
+struct _xsg_printf_t {
 	char *begin;
 	xsg_list_t *var_list;
 	xsg_list_t *next_var;
 	xsg_string_t *buffer;
-} printf_t;
+};
 
 /******************************************************************************/
 
-static uint32_t printf_count = 0;
 static xsg_list_t *printf_list = NULL;
-static printf_t **printf_array = NULL;
 
 /******************************************************************************/
 
-static printf_t *get_printf(uint32_t printf_id) {
-	if (unlikely(printf_array == NULL)) {
-		printf_t *p;
-
-		xsg_debug("printf_array is NULL, using printf_list...");
-		p = xsg_list_nth_data(printf_list, printf_id);
-		if (p == NULL)
-			xsg_error("invalid printf_id: %"PRIu32, printf_id);
-		else
-			return p;
-	}
-
-	if (unlikely(printf_id >= printf_count))
-		xsg_error("invalid printf_id: %"PRIu32, printf_id);
-
-	return printf_array[printf_id];
-}
-
-static void build_printf_array(void) {
-	xsg_list_t *l;
-	uint32_t printf_id = 0;
-
-	printf_array = xsg_new0(printf_t *, printf_count);
-
-	for (l = printf_list; l; l = l->next) {
-		printf_array[printf_id] = l->data;
-		printf_id++;
-	}
-}
-
-/******************************************************************************/
-
-void xsg_printf_init(void) {
-	build_printf_array();
-}
-
-uint32_t xsg_printf_new(const char *format) {
-	printf_t *p;
+xsg_printf_t *xsg_printf_new(const char *format) {
+	xsg_printf_t *p;
 	xsg_string_t *buf;
 	const char *f;
 	int type = 0;
@@ -103,7 +70,7 @@ uint32_t xsg_printf_new(const char *format) {
 	if (unlikely(format == NULL))
 		xsg_error("printf_new: format is null");
 
-	p = xsg_new0(printf_t, 1);
+	p = xsg_new(xsg_printf_t, 1);
 
 	p->begin = NULL;
 	p->var_list = NULL;
@@ -127,8 +94,8 @@ uint32_t xsg_printf_new(const char *format) {
 				p->begin = xsg_strdup(buf->str);
 				xsg_debug("printf_new: begin: \"%s\"", buf->str);
 			} else {
-				var_t *var = xsg_new0(var_t, 1);
-				var->var_id = 0;
+				var_t *var = xsg_new(var_t, 1);
+				var->var = NULL;
 				var->type = type;
 				var->num = DNAN;
 				var->str = xsg_string_new(NULL);
@@ -238,7 +205,7 @@ uint32_t xsg_printf_new(const char *format) {
 		xsg_debug("printf_new: begin: \"%s\"", buf->str);
 	} else {
 		var_t *var = xsg_new0(var_t, 1);
-		var->var_id = 0;
+		var->var = NULL;
 		var->type = type;
 		var->num = DNAN;
 		var->str = xsg_string_new(NULL);
@@ -254,30 +221,24 @@ uint32_t xsg_printf_new(const char *format) {
 
 	printf_list = xsg_list_append(printf_list, p);
 
-	return printf_count++;
+	return p;
 }
 
-void xsg_printf_add_var(uint32_t printf_id, uint32_t var_id) {
-	printf_t *p;
+void xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v) {
 	var_t *var;
-
-	p = get_printf(printf_id);
 
 	if (p->next_var == NULL)
 		xsg_conf_error("no more variables");
 
 	var = p->next_var->data;
 
-	var->var_id = var_id;
+	var->var = v;
 
 	p->next_var = p->next_var->next;
 }
 
-const char *xsg_printf(uint32_t printf_id, uint32_t var_id) {
+char *xsg_printf(xsg_printf_t *p, xsg_var_t *v) {
 	xsg_list_t *l;
-	printf_t *p;
-
-	p = get_printf(printf_id);
 
 	p->buffer = xsg_string_assign(p->buffer, p->begin);
 
@@ -286,42 +247,42 @@ const char *xsg_printf(uint32_t printf_id, uint32_t var_id) {
 
 		if (var->type == VAR_INT) {
 			// d, i
-			if ((var_id == 0xffffffff) || (var_id == var->var_id)) {
-				var->num = xsg_var_get_num(var->var_id);
+			if ((v == NULL) || (v == var->var)) {
+				var->num = xsg_var_get_num(var->var);
 				if (isnan(var->num) || isinf(var->num))
 					var->num = 0.0;
 			}
 			xsg_string_append_printf(p->buffer, var->format, (int64_t) var->num);
 		} else if (var->type == VAR_UINT) {
 			// o, u, x, X
-			if ((var_id == 0xffffffff) || (var_id == var->var_id)) {
-				var->num = xsg_var_get_num(var->var_id);
+			if ((v == NULL) || (v == var->var)) {
+				var->num = xsg_var_get_num(var->var);
 				if (isnan(var->num) || isinf(var->num))
 					var->num = 0.0;
 			}
 			xsg_string_append_printf(p->buffer, var->format, (uint64_t) var->num);
 		} else if (var->type == VAR_DOUBLE) {
 			// e, E, f, F, g, G, a, A
-			if ((var_id == 0xffffffff) || (var_id == var->var_id))
-				var->num = xsg_var_get_num(var->var_id);
+			if ((v == NULL) || (v == var->var))
+				var->num = xsg_var_get_num(var->var);
 			xsg_string_append_printf(p->buffer, var->format, var->num);
 		} else if (var->type == VAR_CHAR) {
 			// c
-			if ((var_id == 0xffffffff) || (var_id == var->var_id)) {
-				var->num = xsg_var_get_num(var->var_id);
+			if ((v == NULL) || (v == var->var)) {
+				var->num = xsg_var_get_num(var->var);
 				if (isnan(var->num) || isinf(var->num))
 					var->num = (double) ' ';
 			}
 			xsg_string_append_printf(p->buffer, var->format, (int) var->num);
 		} else if (var->type == VAR_STRING) {
 			// s
-			if ((var_id == 0xffffffff) || (var_id == var->var_id))
-				var->str = xsg_string_assign(var->str, xsg_var_get_str(var->var_id));
+			if ((v == NULL) || (v == var->var))
+				var->str = xsg_string_assign(var->str, xsg_var_get_str(var->var));
 			xsg_string_append_printf(p->buffer, var->format, var->str->str);
 		} else if (var->type == VAR_POINTER) {
 			// p
-			if ((var_id == 0xffffffff) || (var_id == var->var_id)) {
-				var->num = xsg_var_get_num(var->var_id);
+			if ((v == NULL) || (v == var->var)) {
+				var->num = xsg_var_get_num(var->var);
 				if (isnan(var->num) || isinf(var->num))
 					var->num = 0.0;
 			}
@@ -331,7 +292,7 @@ const char *xsg_printf(uint32_t printf_id, uint32_t var_id) {
 		}
 	}
 
-	xsg_debug("printf(%u): \"%s\"", printf_id, p->buffer->str);
+	xsg_debug("printf: \"%s\"", p->buffer->str);
 
 	return p->buffer->str;
 }

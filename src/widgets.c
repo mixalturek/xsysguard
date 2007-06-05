@@ -32,21 +32,19 @@ static xsg_list_t *widget_list = NULL;
 
 /******************************************************************************/
 
-void *xsg_widgets_new(uint32_t window_id) {
-	static uint32_t count = 0;
+xsg_widget_t *xsg_widgets_new(xsg_window_t *window) {
 	xsg_widget_t *widget;
 
 	widget = xsg_new(xsg_widget_t, 1);
 
-	widget->id = count;
-	widget->window_id = window_id;
+	widget->window = window;
 	widget->update = 0;
 	widget->xoffset = 0;
 	widget->yoffset = 0;
 	widget->width = 0;
 	widget->height = 0;
 	widget->visible_update = 0;
-	widget->visible_var_id = 0;
+	widget->visible_var = NULL;
 	widget->visible = TRUE;
 	widget->render_func = NULL;
 	widget->update_func = NULL;
@@ -55,16 +53,14 @@ void *xsg_widgets_new(uint32_t window_id) {
 
 	widget_list = xsg_list_append(widget_list, widget);
 
-	xsg_window_add_widget(window_id, widget);
-
-	count++;
+	xsg_window_add_widget(window, widget);
 
 	return widget;
 }
 
 /******************************************************************************/
 
-void *xsg_widgets_last() {
+xsg_widget_t *xsg_widgets_last() {
 	xsg_list_t *l;
 
 	l = xsg_list_last(widget_list);
@@ -73,17 +69,6 @@ void *xsg_widgets_last() {
 		xsg_error("No widgets available");
 
 	return l->data;
-}
-
-static xsg_widget_t *get_widget(uint32_t widget_id) {
-	xsg_widget_t *widget;
-
-	widget = xsg_list_nth_data(widget_list, (unsigned int) widget_id);
-
-	if (!widget)
-		xsg_error("Invalid widget id: %u", widget_id);
-
-	return widget;
 }
 
 /******************************************************************************
@@ -112,7 +97,7 @@ static bool widget_rect(xsg_widget_t *widget, int x, int y, unsigned int w, unsi
 	return x_overlap && y_overlap;
 }
 
-void xsg_widgets_render(void *w, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h) {
+void xsg_widgets_render(xsg_widget_t *w, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h) {
 	xsg_widget_t *widget = w;
 
 	if (widget->visible && widget_rect(widget, up_x, up_y, up_w, up_h))
@@ -125,43 +110,41 @@ void xsg_widgets_render(void *w, Imlib_Image buffer, int up_x, int up_y, int up_
  *
  ******************************************************************************/
 
-void xsg_widgets_update(uint32_t widget_id, uint32_t var_id) {
-	xsg_widget_t *widget = get_widget(widget_id);
-
-	if (widget->visible_var_id == var_id) {
+void xsg_widgets_update(xsg_widget_t *widget, xsg_var_t *var) {
+	if (widget->visible_var == var) {
 		bool visible = widget->visible;
 
 		if (widget->visible_update != 0)
-			widget->visible = (xsg_var_get_num(var_id) == 0.0) ? FALSE : TRUE;
+			widget->visible = (xsg_var_get_num(var) == 0.0) ? FALSE : TRUE;
 		else
 			widget->visible = TRUE;
 		if (widget->visible != visible)
-			xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset,
+			xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset,
 					widget->width, widget->height);
 	} else {
-		(widget->update_func)(widget, var_id);
+		(widget->update_func)(widget, var);
 	}
 }
 
-static void scroll_and_update(uint64_t count) {
+static void scroll_and_update(uint64_t tick) {
 	xsg_list_t *l;
 
 	for (l = widget_list; l; l = l->next) {
 		xsg_widget_t *widget = l->data;
 
-		if ((widget->visible_update != 0) && (count % widget->visible_update) == 0) {
+		if ((widget->visible_update != 0) && (tick % widget->visible_update) == 0) {
 			bool visible = widget->visible;
 
-			widget->visible = (xsg_var_get_num(widget->visible_var_id) == 0.0) ? FALSE : TRUE;
+			widget->visible = (xsg_var_get_num(widget->visible_var) == 0.0) ? FALSE : TRUE;
 
 			if (visible != widget->visible)
-				xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset,
+				xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset,
 						widget->width, widget->height);
 		}
 
-		if ((widget->update != 0) && (count % widget->update) == 0) {
+		if ((widget->update != 0) && (tick % widget->update) == 0) {
 			(widget->scroll_func)(widget);
-			(widget->update_func)(widget, 0xffffffff); // update all vars
+			(widget->update_func)(widget, NULL);
 		}
 	}
 }

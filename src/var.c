@@ -28,70 +28,28 @@
 
 /******************************************************************************/
 
-typedef struct _var_t var_t;
-
-struct _var_t {
-	uint32_t window_id;
-	uint32_t widget_id;
-	uint32_t rpn_id;
+struct _xsg_var_t {
+	xsg_window_t *window;
+	xsg_widget_t *widget;
+	xsg_rpn_t *rpn;
 };
 
 /******************************************************************************/
 
-static uint32_t var_count = 0;
 static xsg_list_t *var_list = NULL;
-static var_t **var_array = NULL;
 
 static bool dirty = FALSE;
 
 /******************************************************************************/
 
-static var_t *get_var(uint32_t var_id) {
-	if (unlikely(var_array == NULL)) {
-		var_t *var;
-
-		xsg_debug("var_array is NULL, using var_list...");
-		var = xsg_list_nth_data(var_list, var_id);
-		if (unlikely(var == NULL))
-			xsg_error("invalid var_id: %"PRIu32, var_id);
-		else
-			return var;
-	}
-
-	if (unlikely(var_id >= var_count))
-		xsg_error("invalid var_id: %"PRIu32, var_id);
-
-	return var_array[var_id];
-}
-
-static void build_var_array(void) {
-	xsg_list_t *l;
-	uint32_t var_id = 0;
-
-	var_array = xsg_new0(var_t *, var_count);
-
-	for (l = var_list; l; l = l->next) {
-		var_array[var_id] = l->data;
-		var_id++;
-	}
-}
-
-/******************************************************************************/
-
 void xsg_var_init(void) {
-	build_var_array();
 	xsg_rpn_init();
 }
 
 /******************************************************************************/
 
-void xsg_var_dirty(uint32_t var_id) {
-	var_t *var;
-
-	var = get_var(var_id);
-
-	xsg_window_update(var->window_id, var->widget_id, var_id);
-
+void xsg_var_dirty(xsg_var_t *var) {
+	xsg_window_update(var->window, var->widget, var);
 	dirty = TRUE;
 }
 
@@ -105,31 +63,24 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-uint32_t xsg_var_parse(uint32_t window_id, uint32_t widget_id, uint64_t update) {
-	var_t *var;
+xsg_var_t *xsg_var_parse(xsg_window_t *window, xsg_widget_t *widget, uint64_t update) {
+	xsg_var_t *var;
 
-	var = xsg_new0(var_t, 1);
-	var->window_id = window_id;
-	var->widget_id = widget_id;
-	var->rpn_id = xsg_rpn_parse(var_count, update);
+	var = xsg_new(xsg_var_t, 1);
+	var->window = window;
+	var->widget = widget;
+	var->rpn = xsg_rpn_parse(var, update);
 
 	var_list = xsg_list_append(var_list, var);
-	return var_count++;
+
+	return var;
 }
 
-double xsg_var_get_num(uint32_t var_id) {
-	var_t *var;
-
-	var = get_var(var_id);
-
-	return xsg_rpn_get_num(var->rpn_id);
+double xsg_var_get_num(xsg_var_t *var) {
+	return xsg_rpn_get_num(var->rpn);
 }
 
-char *xsg_var_get_str(uint32_t var_id) {
-	var_t *var;
-
-	var = get_var(var_id);
-
-	return xsg_rpn_get_str(var->rpn_id);
+char *xsg_var_get_str(xsg_var_t *var) {
+	return xsg_rpn_get_str(var->rpn);
 }
 

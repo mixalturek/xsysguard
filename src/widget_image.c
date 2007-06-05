@@ -50,7 +50,7 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 	image = (image_t *) widget->data;
 
 	xsg_debug("%s: Render Image: x=%d, y=%d, widht=%u, height=%u, filename=%s",
-			xsg_window_get_config_name(widget->window_id),
+			xsg_window_get_config_name(widget->window),
 			widget->xoffset, widget->yoffset, widget->width, widget->height, image->filename);
 
 	img = xsg_imlib_load_image(image->filename);
@@ -77,7 +77,7 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 	imlib_free_image();
 }
 
-static void update_image(xsg_widget_t *widget, uint32_t var_id) {
+static void update_image(xsg_widget_t *widget, xsg_var_t *var) {
 	return;
 }
 
@@ -85,12 +85,12 @@ static void scroll_image(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_image_parse(uint32_t window_id) {
+void xsg_widget_image_parse(xsg_window_t *window) {
 	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
 
-	widget = xsg_widgets_new(window_id);
+	widget = xsg_widgets_new(window);
 
 	image = xsg_new(image_t, 1);
 
@@ -109,7 +109,7 @@ void xsg_widget_image_parse(uint32_t window_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {

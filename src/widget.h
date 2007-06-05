@@ -24,14 +24,14 @@
 #include <xsysguard.h>
 #include <Imlib2.h>
 
+#include "window.h"
+
 /*****************************************************************************/
 
-typedef struct _xsg_widget_t xsg_widget_t;
+//typedef struct _xsg_widget_t xsg_widget_t;
 
 struct _xsg_widget_t {
-	uint32_t id;
-
-	uint32_t window_id;
+	xsg_window_t *window;
 
 	uint64_t update;
 
@@ -41,11 +41,11 @@ struct _xsg_widget_t {
 	unsigned int height;
 
 	uint64_t visible_update;
-	uint32_t visible_var_id;
+	xsg_var_t *visible_var;
 	bool visible;
 
 	void (*render_func)(xsg_widget_t *widget, Imlib_Image buffer, int x, int y);
-	void (*update_func)(xsg_widget_t *widget, uint32_t var_id);
+	void (*update_func)(xsg_widget_t *widget, xsg_var_t *var);
 	void (*scroll_func)(xsg_widget_t *widget);
 
 	void *data;

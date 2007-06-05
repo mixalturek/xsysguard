@@ -20,6 +20,9 @@
 
 #include <xsysguard.h>
 
+#undef XSG_LOG_DOMAIN
+#define XSG_LOG_DOMAIN "number"
+
 /******************************************************************************/
 
 static double get_number(void *arg) {
@@ -34,10 +37,23 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse_hist(uint32_t count, uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+	double *num;
+	unsigned i;
+
+	num = xsg_new(double, count);
+	num[0] = xsg_conf_read_double();
+
+	for (i = 0; i < count; i++) {
+		arg[i] = (void *) num;
+		n[i] = get_number;
+	}
+}
+
+void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	double *d;
 
-	d = xsg_new0(double, 1);
+	d = xsg_new(double, 1);
 	*d = xsg_conf_read_double();
 	*arg = (void *) d;
 	*n = get_number;

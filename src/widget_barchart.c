@@ -41,7 +41,7 @@
 /******************************************************************************/
 
 typedef struct {
-	uint32_t var_id;
+	xsg_var_t *var;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double range_angle;
@@ -68,7 +68,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	xsg_list_t *l;
 	Imlib_Image mask_img;
 
-	xsg_debug("render_barchart");
+	xsg_debug("%s: Render BarChart", xsg_window_get_config_name(widget->window));
 
 	barchart = (barchart_t *) widget->data;
 
@@ -538,7 +538,7 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	}
 }
 
-static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
+static void update_barchart(xsg_widget_t *widget, xsg_var_t *var) {
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	xsg_list_t *l;
@@ -550,10 +550,10 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 
-			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
+			if ((var == NULL) || (barchart_var->var == var)) {
 				double value = barchart_var->value;
 
-				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var);
 				if (value != barchart_var->value)
 					dirty = TRUE;
 			}
@@ -567,10 +567,10 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 
-			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
+			if ((var == NULL) || (barchart_var->var == var)) {
 				double value = barchart_var->value;
 
-				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var);
 				if (value != barchart_var->value)
 					dirty = TRUE;
 			}
@@ -604,10 +604,10 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 
-			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
+			if ((var == NULL) || (barchart_var->var == var)) {
 				double value = barchart_var->value;
 
-				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var);
 				if (value != barchart_var->value)
 					dirty = TRUE;
 			}
@@ -642,10 +642,10 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 
-			if ((var_id == 0xffffffff) || (barchart_var->var_id == var_id)) {
+			if ((var == NULL) || (barchart_var->var == var)) {
 				double value = barchart_var->value;
 
-				barchart_var->value = xsg_var_get_num(barchart_var->var_id);
+				barchart_var->value = xsg_var_get_num(barchart_var->var);
 				if (value != barchart_var->value)
 					dirty = TRUE;
 			}
@@ -676,7 +676,7 @@ static void update_barchart(xsg_widget_t *widget, uint32_t var_id) {
 	}
 
 	if (dirty)
-		xsg_window_update_append_rect(widget->window_id, widget->xoffset, widget->yoffset,
+		xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset,
 				widget->width, widget->height);
 }
 
@@ -684,12 +684,12 @@ static void scroll_barchart(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_barchart_parse(uint32_t window_id, uint64_t *update, uint32_t *widget_id) {
+xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	barchart_t *barchart;
 	double angle = 0.0;
 
-	widget = xsg_widgets_new(window_id);;
+	widget = xsg_widgets_new(window);
 
 	barchart = xsg_new(barchart_t, 1);
 
@@ -704,7 +704,6 @@ void xsg_widget_barchart_parse(uint32_t window_id, uint64_t *update, uint32_t *w
 	widget->data = (void *) barchart;
 
 	*update = widget->update;
-	*widget_id = widget->id;
 
 	barchart->angle = NULL;
 	barchart->min = 0.0;
@@ -717,7 +716,7 @@ void xsg_widget_barchart_parse(uint32_t window_id, uint64_t *update, uint32_t *w
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -737,16 +736,18 @@ void xsg_widget_barchart_parse(uint32_t window_id, uint64_t *update, uint32_t *w
 
 	if (angle != 0.0)
 		barchart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+
+	return widget;
 }
 
-void xsg_widget_barchart_parse_var(uint32_t var_id) {
+void xsg_widget_barchart_parse_var(xsg_var_t *var) {
 	xsg_widget_t *widget;
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 
 	barchart_var = xsg_new(barchart_var_t, 1);
 
-	barchart_var->var_id = var_id;
+	barchart_var->var = var;
 	barchart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	barchart_var->range = NULL;
 	barchart_var->range_angle = 0.0;

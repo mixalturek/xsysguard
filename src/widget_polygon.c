@@ -55,7 +55,7 @@ static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 	ImlibPolygon poly;
 	unsigned int i;
 
-	xsg_debug("%s: Render Polygon", xsg_window_get_config_name(widget->window_id));
+	xsg_debug("%s: Render Polygon", xsg_window_get_config_name(widget->window));
 
 	polygon = (polygon_t *) widget->data;
 
@@ -77,7 +77,7 @@ static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 	imlib_polygon_free(poly);
 }
 
-static void update_polygon(xsg_widget_t *widget, uint32_t var_id) {
+static void update_polygon(xsg_widget_t *widget, xsg_var_t *var) {
 	return;
 }
 
@@ -85,14 +85,14 @@ static void scroll_polygon(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_polygon_parse(uint32_t window_id) {
+void xsg_widget_polygon_parse(xsg_window_t *window) {
 	xsg_widget_t *widget;
 	polygon_t *polygon;
 	ImlibPolygon poly;
 	unsigned int i;
 	int x1, y1, x2, y2;
 
-	widget = xsg_widgets_new(window_id);
+	widget = xsg_widgets_new(window);
 
 	polygon = xsg_new(polygon_t, 1);
 
@@ -125,7 +125,7 @@ void xsg_widget_polygon_parse(uint32_t window_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Filled")) {
 			polygon->filled = TRUE;
 		} else if (xsg_conf_find_command("Closed")) {

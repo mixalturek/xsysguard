@@ -25,9 +25,17 @@
 
 /*****************************************************************************/
 
+typedef struct _xsg_window_t xsg_window_t;
+
+/*****************************************************************************/
+
+#include "widgets.h"
+
+/******************************************************************************/
+
 void xsg_window_init(void);
 
-void xsg_window_update(uint32_t window_id, uint32_t widget_id, uint32_t var_id);
+void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var);
 
 /*****************************************************************************/
 
@@ -36,38 +44,38 @@ void xsg_window_set_font_cache_size(int size);
 
 /******************************************************************************/
 
-uint32_t xsg_window_new(char *config);
+xsg_window_t *xsg_window_new(char *config_name);
 
 /******************************************************************************/
 
-void xsg_window_parse_name(uint32_t window_id);
-void xsg_window_parse_class(uint32_t window_id);
-void xsg_window_parse_resource(uint32_t window_id);
-void xsg_window_parse_geometry(uint32_t window_id);
-void xsg_window_parse_sticky(uint32_t window_id);
-void xsg_window_parse_skip_taskbar(uint32_t window_id);
-void xsg_window_parse_skip_pager(uint32_t window_id);
-void xsg_window_parse_layer(uint32_t window_id);
-void xsg_window_parse_decorations(uint32_t window_id);
-void xsg_window_parse_override_redirect(uint32_t window_id);
-void xsg_window_parse_background(uint32_t window_id);
-void xsg_window_parse_grab_root(uint32_t window_id);
-void xsg_window_parse_xshape(uint32_t window_id);
-void xsg_window_parse_argb_visual(uint32_t window_id);
-void xsg_window_parse_visible(uint32_t window_id);
+void xsg_window_parse_name(xsg_window_t *window);
+void xsg_window_parse_class(xsg_window_t *window);
+void xsg_window_parse_resource(xsg_window_t *window);
+void xsg_window_parse_geometry(xsg_window_t *window);
+void xsg_window_parse_sticky(xsg_window_t *window);
+void xsg_window_parse_skip_taskbar(xsg_window_t *window);
+void xsg_window_parse_skip_pager(xsg_window_t *window);
+void xsg_window_parse_layer(xsg_window_t *window);
+void xsg_window_parse_decorations(xsg_window_t *window);
+void xsg_window_parse_override_redirect(xsg_window_t *window);
+void xsg_window_parse_background(xsg_window_t *window);
+void xsg_window_parse_grab_root(xsg_window_t *window);
+void xsg_window_parse_xshape(xsg_window_t *window);
+void xsg_window_parse_argb_visual(xsg_window_t *window);
+void xsg_window_parse_visible(xsg_window_t *window);
 
 /*****************************************************************************/
 
 void xsg_window_render(void);
 void xsg_window_render_xshape(void);
 
-void xsg_window_update_append_rect(uint32_t window_id, int xoffset, int yoffset, int width, int height);
+void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height);
 
 /******************************************************************************/
 
-void xsg_window_add_widget(uint32_t window_id, void *widget);
+void xsg_window_add_widget(xsg_window_t *window, xsg_widget_t *widget);
 
-char *xsg_window_get_config_name(uint32_t window_id);
+char *xsg_window_get_config_name(xsg_window_t *window);
 
 /******************************************************************************/
 

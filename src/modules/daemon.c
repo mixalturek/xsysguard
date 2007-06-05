@@ -86,7 +86,7 @@ typedef struct _daemon_t {
 
 typedef struct _daemon_var_t {
 	daemon_t *daemon;
-	uint32_t var_id;
+	xsg_var_t *var;
 	uint64_t update;
 	char *config;
 
@@ -507,7 +507,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 					daemon_var->new_num_fill = 0;
 
-					xsg_var_dirty(daemon_var->var_id);
+					xsg_var_dirty(daemon_var->var);
 
 					daemon->id_buffer_fill = 0;
 				}
@@ -536,7 +536,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 				daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
 
-				xsg_var_dirty(daemon_var->var_id);
+				xsg_var_dirty(daemon_var->var);
 
 				daemon->id_buffer_fill = 0;
 			} else {
@@ -769,7 +769,7 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(uint32_t var_id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	static bool first_time = TRUE;
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
@@ -818,7 +818,7 @@ void parse(uint32_t var_id, uint64_t update, double (**n)(void *), char *(**s)(v
 		xsg_conf_error("n or s");
 	}
 
-	daemon_var->var_id = var_id;
+	daemon_var->var = var;
 	daemon_var->update = update;
 	daemon_var->config = xsg_conf_read_string();
 

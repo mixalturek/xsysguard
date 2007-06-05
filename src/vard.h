@@ -27,12 +27,12 @@
 
 void xsg_var_init(void);
 
-void xsg_var_dirty(uint32_t var_id);
+void xsg_var_dirty(xsg_var_t *var);
 void xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-void xsg_var_parse(uint32_t id, uint64_t update, uint8_t type);
+void xsg_var_parse(uint32_t remote_id, uint64_t update, uint8_t type);
 
 void xsg_var_queue_vars(void);
 

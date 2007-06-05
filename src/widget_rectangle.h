@@ -23,9 +23,11 @@
 
 #include <xsysguard.h>
 
+#include "window.h"
+
 /*****************************************************************************/
 
-void xsg_widget_rectangle_parse(uint32_t window_id);
+void xsg_widget_rectangle_parse(xsg_window_t *window);
 
 /******************************************************************************/
 

@@ -51,7 +51,7 @@ static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 	line = (line_t *) widget->data;
 
 	xsg_debug("%s: Render Line: x1=%d, y1=%d, x2=%d, y2=%d, red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
-			xsg_window_get_config_name(widget->window_id),
+			xsg_window_get_config_name(widget->window),
 			line->x1, line->y1, line->x2, line->y2,
 			line->color.red, line->color.green, line->color.blue, line->color.alpha);
 
@@ -64,7 +64,7 @@ static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			line->x2 - up_x, line->y2 - up_y, 0);
 }
 
-static void update_line(xsg_widget_t *widget, uint32_t var_id) {
+static void update_line(xsg_widget_t *widget, xsg_var_t *var) {
 	return;
 }
 
@@ -72,11 +72,11 @@ static void scroll_line(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_line_parse(uint32_t window_id) {
+void xsg_widget_line_parse(xsg_window_t *window) {
 	xsg_widget_t *widget;
 	line_t *line;
 
-	widget = xsg_widgets_new(window_id);
+	widget = xsg_widgets_new(window);
 
 	line = xsg_new(line_t, 1);
 
@@ -99,7 +99,7 @@ void xsg_widget_line_parse(uint32_t window_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else {
 			xsg_conf_error("Visible");
 		}

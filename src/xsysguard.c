@@ -34,6 +34,7 @@
 #include "conf.h"
 #include "main.h"
 #include "var.h"
+#include "rpn.h"
 #include "dump.h"
 #include "printf.h"
 #include "window.h"
@@ -173,24 +174,24 @@ static void parse_env() {
 		xsg_warning("Cannot set environment variable %s=\"%s\"", variable, value);
 }
 
-static bool parse_var(uint32_t window_id, uint32_t widget_id, uint64_t update, uint32_t *var_id) {
+static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t update, xsg_var_t **var) {
 	if (!xsg_conf_find_command("+")) {
 		return FALSE;
 	} else {
-		*var_id = xsg_var_parse(window_id, widget_id, update);
+		*var = xsg_var_parse(window, widget, update);
 		return TRUE;
 	}
 }
 
 static void parse_config(char *config_name, char *config_buffer) {
-	uint32_t window_id;
+	xsg_window_t *window;
+	xsg_widget_t *widget;
+	xsg_var_t *var;
 	uint64_t update;
-	uint32_t var_id;
-	uint32_t widget_id;
 
-	xsg_conf_set_buffer(config_buffer);
+	xsg_conf_set_buffer(config_name, config_buffer);
 
-	window_id = xsg_window_new(config_name);
+	window = xsg_window_new(config_name);
 
 	while (!xsg_conf_find_end()) {
 		if (xsg_conf_find_newline())
@@ -199,33 +200,33 @@ static void parse_config(char *config_name, char *config_buffer) {
 			continue;
 		if (xsg_conf_find_command("Set")) {
 			if (xsg_conf_find_command("Name")) {
-				xsg_window_parse_name(window_id);
+				xsg_window_parse_name(window);
 			} else if (xsg_conf_find_command("Class")) {
-				xsg_window_parse_class(window_id);
+				xsg_window_parse_class(window);
 			} else if (xsg_conf_find_command("Resource")) {
-				xsg_window_parse_resource(window_id);
+				xsg_window_parse_resource(window);
 			} else if (xsg_conf_find_command("Geometry")) {
-				xsg_window_parse_geometry(window_id);
+				xsg_window_parse_geometry(window);
 			} else if (xsg_conf_find_command("Sticky")) {
-				xsg_window_parse_sticky(window_id);
+				xsg_window_parse_sticky(window);
 			} else if (xsg_conf_find_command("SkipTaskbar")) {
-				xsg_window_parse_skip_taskbar(window_id);
+				xsg_window_parse_skip_taskbar(window);
 			} else if (xsg_conf_find_command("SkipPager")) {
-				xsg_window_parse_skip_pager(window_id);
+				xsg_window_parse_skip_pager(window);
 			} else if (xsg_conf_find_command("Layer")) {
-				xsg_window_parse_layer(window_id);
+				xsg_window_parse_layer(window);
 			} else if (xsg_conf_find_command("Decorations")) {
-				xsg_window_parse_decorations(window_id);
+				xsg_window_parse_decorations(window);
 			} else if (xsg_conf_find_command("OverrideRedirect")) {
-				xsg_window_parse_override_redirect(window_id);
+				xsg_window_parse_override_redirect(window);
 			} else if (xsg_conf_find_command("Background")) {
-				xsg_window_parse_background(window_id);
+				xsg_window_parse_background(window);
 			} else if (xsg_conf_find_command("XShape")) {
-				xsg_window_parse_xshape(window_id);
+				xsg_window_parse_xshape(window);
 			} else if (xsg_conf_find_command("ARGBVisual")) {
-				xsg_window_parse_argb_visual(window_id);
+				xsg_window_parse_argb_visual(window);
 			} else if (xsg_conf_find_command("Visible")) {
-				xsg_window_parse_visible(window_id);
+				xsg_window_parse_visible(window);
 			} else {
 				xsg_conf_error("Name, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "
@@ -235,31 +236,31 @@ static void parse_config(char *config_name, char *config_buffer) {
 		} else if (xsg_conf_find_command("SetEnv")) {
 			parse_env();
 		} else if (xsg_conf_find_command("Line")) {
-			xsg_widget_line_parse(window_id);
+			xsg_widget_line_parse(window);
 		} else if (xsg_conf_find_command("Rectangle")) {
-			xsg_widget_rectangle_parse(window_id);
+			xsg_widget_rectangle_parse(window);
 		} else if (xsg_conf_find_command("Ellipse")) {
-			xsg_widget_ellipse_parse(window_id);
+			xsg_widget_ellipse_parse(window);
 		} else if (xsg_conf_find_command("Polygon")) {
-			xsg_widget_polygon_parse(window_id);
+			xsg_widget_polygon_parse(window);
 		} else if (xsg_conf_find_command("Image")) {
-			xsg_widget_image_parse(window_id);
+			xsg_widget_image_parse(window);
 		} else if (xsg_conf_find_command("BarChart")) {
-			xsg_widget_barchart_parse(window_id, &update, &widget_id);
-			while (parse_var(window_id, widget_id, update, &var_id) != 0)
-				xsg_widget_barchart_parse_var(var_id);
+			widget = xsg_widget_barchart_parse(window, &update);
+			while (parse_var(window, widget, update, &var) != 0)
+				xsg_widget_barchart_parse_var(var);
 		} else if (xsg_conf_find_command("LineChart")) {
-			xsg_widget_linechart_parse(window_id, &update, &widget_id);
-			while (parse_var(window_id, widget_id, update, &var_id) != 0)
-				xsg_widget_linechart_parse_var(var_id);
+			widget = xsg_widget_linechart_parse(window, &update);
+			while (parse_var(window, widget, update, &var) != 0)
+				xsg_widget_linechart_parse_var(var);
 		} else if (xsg_conf_find_command("AreaChart")) {
-			xsg_widget_areachart_parse(window_id, &update, &widget_id);
-			while (parse_var(window_id, widget_id, update, &var_id) != 0)
-				xsg_widget_areachart_parse_var(var_id);
+			widget = xsg_widget_areachart_parse(window, &update);
+			while (parse_var(window, widget, update, &var) != 0)
+				xsg_widget_areachart_parse_var(var);
 		} else if (xsg_conf_find_command("Text")) {
-			xsg_widget_text_parse(window_id, &update, &widget_id);
-			while (parse_var(window_id, widget_id, update, &var_id) != 0)
-				xsg_widget_text_parse_var(var_id);
+			widget = xsg_widget_text_parse(window, &update);
+			while (parse_var(window, widget, update, &var) != 0)
+				xsg_widget_text_parse_var(var);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart or Text");
@@ -514,8 +515,7 @@ int main(int argc, char **argv) {
 		optind++;
 	}
 
-	xsg_var_init();
-	xsg_printf_init();
+	xsg_rpn_init();
 	xsg_window_init();
 
 	xsg_dump_atexit();

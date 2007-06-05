@@ -24,17 +24,25 @@
 #include <xsysguard.h>
 #include <Imlib2.h>
 
-/*****************************************************************************/
+/******************************************************************************/
+
+typedef struct _xsg_widget_t xsg_widget_t;
+
+/******************************************************************************/
+
+#include "window.h"
+
+/******************************************************************************/
 
 void xsg_widgets_init(void);
 
-void xsg_widgets_update(uint32_t widget_id, uint32_t var_id);
+void xsg_widgets_update(xsg_widget_t *widget, xsg_var_t *var);
 
-void *xsg_widgets_new(uint32_t window_id);
+xsg_widget_t *xsg_widgets_new(xsg_window_t *window);
 
-void *xsg_widgets_last();
+xsg_widget_t *xsg_widgets_last(void);
 
-void xsg_widgets_render(void *widget, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
+void xsg_widgets_render(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
 
 /******************************************************************************/
 

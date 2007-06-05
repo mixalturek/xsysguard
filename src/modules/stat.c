@@ -2597,7 +2597,7 @@ static void add_funcs_to_main_loop(void) {
 
 /******************************************************************************/
 
-void parse(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
 	add_funcs_to_main_loop();
 
 	if (xsg_conf_find_command("host_info")){

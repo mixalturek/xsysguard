@@ -25,7 +25,7 @@
 
 /******************************************************************************/
 
-void xsg_conf_set_buffer(char *buffer);
+void xsg_conf_set_buffer(char *name, char *buffer);
 
 bool xsg_conf_find_commentline(void);
 bool xsg_conf_find_newline(void);

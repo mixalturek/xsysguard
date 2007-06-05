@@ -52,7 +52,7 @@ static void render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 	ellipse = (ellipse_t *) widget->data;
 
 	xsg_debug("%s: Render Ellipse: xc=%d, yc=%d, a=%d, b=%d, red=%d, green=%d, blue=%d, alpha=%d",
-			xsg_window_get_config_name(widget->window_id),
+			xsg_window_get_config_name(widget->window),
 			ellipse->xc, ellipse->yc, ellipse->a, ellipse->b,
 			ellipse->color.red, ellipse->color.green, ellipse->color.blue, ellipse->color.alpha);
 
@@ -69,7 +69,7 @@ static void render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 				ellipse->a, ellipse->b);
 }
 
-static void update_ellipse(xsg_widget_t *widget, uint32_t var_id) {
+static void update_ellipse(xsg_widget_t *widget, xsg_var_t *var) {
 	return;
 }
 
@@ -77,11 +77,11 @@ static void scroll_ellipse(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_ellipse_parse(uint32_t window_id) {
+void xsg_widget_ellipse_parse(xsg_window_t *window) {
 	xsg_widget_t *widget;
 	ellipse_t *ellipse;
 
-	widget = xsg_widgets_new(window_id);;
+	widget = xsg_widgets_new(window);
 
 	ellipse = xsg_new(ellipse_t, 1);
 
@@ -104,7 +104,7 @@ void xsg_widget_ellipse_parse(uint32_t window_id) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var_id = xsg_var_parse(window_id, widget->id, widget->visible_update);
+			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else if (xsg_conf_find_command("Filled")) {
 			ellipse->filled = TRUE;
 		} else {

@@ -55,7 +55,11 @@ typedef int bool;
 
 /******************************************************************************/
 
-typedef void xsg_modules_parse_t(uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg);
+typedef struct _xsg_var_t xsg_var_t;
+
+/******************************************************************************/
+
+typedef void xsg_modules_parse_t(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg);
 typedef char *xsg_modules_info_t(void);
 
 xsg_modules_parse_t parse;
@@ -79,7 +83,7 @@ void xsg_conf_error(const char *expected);
  * var.c
  ******************************************************************************/
 
-void xsg_var_dirty(uint32_t id);
+void xsg_var_dirty(xsg_var_t *var);
 
 /******************************************************************************
  * main.c
