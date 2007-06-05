@@ -372,7 +372,7 @@ static void usage(void) {
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
 	printf("\n\n");
 
-	printf("Config path:\n");
+	printf("XSYSGUARD_CONFIG_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
@@ -380,7 +380,7 @@ static void usage(void) {
 	xsg_strfreev(pathv);
 	printf("\n");
 
-	printf("Module path:\n");
+	printf("XSYSGUARD_MODULE_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
@@ -388,7 +388,7 @@ static void usage(void) {
 	xsg_strfreev(pathv);
 	printf("\n");
 
-	printf("Image path:\n");
+	printf("XSYSGUARD_IMAGE_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
@@ -396,7 +396,7 @@ static void usage(void) {
 	xsg_strfreev(pathv);
 	printf("\n");
 
-	printf("Font path:\n");
+	printf("XSYSGUARD_FONT_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)

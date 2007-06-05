@@ -249,7 +249,7 @@ static void usage(void) {
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
 	printf("\n\n");
 
-	printf("Module path:\n");
+	printf("XSYSGUARD_MODULE_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
 	if (pathv != NULL)
 		for (p = pathv; *p; p++)
