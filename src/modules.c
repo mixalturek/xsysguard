@@ -60,7 +60,7 @@ static const char *read_dir_name(DIR *dir) {
 
 /******************************************************************************/
 
-static void init() {
+void xsg_modules_init(void) {
 	DIR *dir;
 	char **pathv;
 	char **p;
@@ -101,7 +101,7 @@ void xsg_modules_parse(xsg_var_t *var, uint64_t update, double (**n)(void *), ch
 	xsg_list_t *l;
 
 	if (!modules_list)
-		init();
+		xsg_modules_init();
 
 	for (l = modules_list; l; l = l->next) {
 		m = l->data;
@@ -143,7 +143,7 @@ void xsg_modules_list() {
 	xsg_list_t *l;
 
 	if (!modules_list)
-		init();
+		xsg_modules_init();
 
 	printf("Available modules:\n");
 	for (l = modules_list; l; l = l->next) {

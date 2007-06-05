@@ -36,6 +36,7 @@
 #include "var.h"
 #include "rpn.h"
 #include "dump.h"
+#include "imlib.h"
 #include "printf.h"
 #include "window.h"
 #include "widget_line.h"
@@ -159,7 +160,7 @@ void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...)
 
 /******************************************************************************/
 
-static void parse_env() {
+static void parse_env(const char *config_name) {
 	char *variable;
 	char *value;
 	bool overwrite = FALSE;
@@ -168,10 +169,10 @@ static void parse_env() {
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	xsg_message("Setting environment variable %s=\"%s\"", variable, value);
+	xsg_message("%s: Setting environment variable %s=\"%s\"", config_name, variable, value);
 
 	if (setenv(variable, value, overwrite) != 0)
-		xsg_warning("Cannot set environment variable %s=\"%s\"", variable, value);
+		xsg_warning("%s: Cannot set environment variable %s=\"%s\": %s", config_name, variable, value, strerror(errno));
 }
 
 static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t update, xsg_var_t **var) {
@@ -234,7 +235,7 @@ static void parse_config(char *config_name, char *config_buffer) {
 						"ARGBVisual or Visible");
 			}
 		} else if (xsg_conf_find_command("SetEnv")) {
-			parse_env();
+			parse_env(config_name);
 		} else if (xsg_conf_find_command("Line")) {
 			xsg_widget_line_parse(window);
 		} else if (xsg_conf_find_command("Rectangle")) {
@@ -289,7 +290,7 @@ static char *find_config_file(char *name) {
 		file = xsg_build_filename(*p, name, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
 			xsg_strfreev(pathv);
-			xsg_message("Found config file \"%s\"", file);
+			xsg_message("%s: Found config file \"%s\"", name, file);
 			return file;
 		}
 		xsg_free(file);
@@ -300,7 +301,7 @@ static char *find_config_file(char *name) {
 	return 0;
 }
 
-static char *get_config_file(const char *filename) {
+static char *get_config_file(const char *config_name, const char *filename) {
 	struct stat stat_buf;
 	char *buffer;
 	size_t size, bytes_read;
@@ -324,7 +325,10 @@ static char *get_config_file(const char *filename) {
 
 	buffer = xsg_malloc(size + 1);
 
-	xsg_message("Reading config file \"%s\"", filename);
+	if (config_name != NULL)
+		xsg_message("%s: Reading config file \"%s\"", config_name, filename);
+	else
+		xsg_message("Reading config file \"%s\"", filename);
 
 	bytes_read = 0;
 	while (bytes_read < size) {
@@ -446,11 +450,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'F':
 				if (optarg)
-					xsg_window_set_font_cache_size(atoi(optarg));
+					xsg_imlib_set_font_cache_size(atoi(optarg));
 				break;
 			case 'I':
 				if (optarg)
-					xsg_window_set_cache_size(atoi(optarg));
+					xsg_imlib_set_cache_size(atoi(optarg));
 				break;
 			case 'f':
 				if (optarg)
@@ -482,16 +486,20 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
+	xsg_modules_init();
+
 	if (list_modules) {
 		xsg_modules_list();
 		exit(EXIT_SUCCESS);
 	}
 
+	xsg_imlib_init();
+
 	for (l = filename_list; l; l = l->next) {
 		char *filename = l->data;
 		char *config_buffer;
 
-		config_buffer = get_config_file(filename);
+		config_buffer = get_config_file(NULL, filename);
 		parse_config(filename, config_buffer);
 		xsg_free(config_buffer);
 	}
@@ -500,7 +508,7 @@ int main(int argc, char **argv) {
 		char *filename, *config_buffer;
 
 		filename = find_config_file("default");
-		config_buffer = get_config_file(filename);
+		config_buffer = get_config_file("default", filename);
 		parse_config("default", config_buffer);
 		xsg_free(config_buffer);
 	}
@@ -509,7 +517,7 @@ int main(int argc, char **argv) {
 		char *filename, *config_buffer;
 
 		filename = find_config_file(argv[optind]);
-		config_buffer = get_config_file(filename);
+		config_buffer = get_config_file(argv[optind], filename);
 		parse_config(argv[optind], config_buffer);
 		xsg_free(config_buffer);
 		optind++;

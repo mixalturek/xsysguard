@@ -39,11 +39,6 @@ void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *va
 
 /*****************************************************************************/
 
-void xsg_window_set_cache_size(int size);
-void xsg_window_set_font_cache_size(int size);
-
-/******************************************************************************/
-
 xsg_window_t *xsg_window_new(char *config_name);
 
 /******************************************************************************/

@@ -583,4 +583,33 @@ void xsg_imlib_text_draw(int x, int y, const char *text) {
 		xsg_imlib_text_draw_with_return_metrics(x, y, text, NULL, NULL, NULL, NULL);
 }
 
+/******************************************************************************
+ *
+ * init
+ *
+ ******************************************************************************/
+
+void xsg_imlib_init(void) {
+	char **pathv, **p;
+
+	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
+
+	if (unlikely(pathv == NULL))
+		xsg_error("Cannot get XSYSGUARD_FONT_PATH");
+
+	for (p = pathv; *p; p++) {
+		xsg_message("Adding dir to font path: \"%s\"", *p);
+		imlib_add_path_to_font_path(*p);
+	}
+}
+
+/******************************************************************************/
+
+void xsg_imlib_set_cache_size(int size) {
+	imlib_set_cache_size(size);
+}
+
+void xsg_imlib_set_font_cache_size(int size) {
+	imlib_set_font_cache_size(size);
+}
 

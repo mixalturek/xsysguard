@@ -505,7 +505,6 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	text_t *text;
 	char *font_name;
-	char **pathv = NULL;
 	double angle = 0.0;
 
 	widget = xsg_widgets_new(window);
@@ -527,20 +526,6 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 
 	font_name = xsg_conf_read_string();
-
-	if (unlikely(pathv == NULL)) {
-		char **p;
-
-		pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
-
-		if (unlikely(pathv == NULL))
-			xsg_error("Cannot get XSYSGUARD_FONT_PATH");
-
-		for (p = pathv; *p; p++) {
-			xsg_message("Adding dir to font path: \"%s\"", *p);
-			imlib_add_path_to_font_path(*p);
-		}
-	}
 
 	text->font = imlib_load_font(font_name);
 	if (unlikely(text->font == NULL))

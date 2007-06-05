@@ -28,8 +28,6 @@
 
 /*****************************************************************************/
 
-//typedef struct _xsg_widget_t xsg_widget_t;
-
 struct _xsg_widget_t {
 	xsg_window_t *window;
 

@@ -325,6 +325,8 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
+	xsg_modules_init();
+
 	if (list_modules) {
 		xsg_modules_list();
 		exit(EXIT_SUCCESS);

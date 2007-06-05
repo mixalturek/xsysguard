@@ -85,16 +85,6 @@ static Display *display = NULL;
 static int screen = 0;
 static xsg_main_poll_t poll = { 0 };
 
-/******************************************************************************/
-
-void xsg_window_set_cache_size(int size) {
-	imlib_set_cache_size(size);
-}
-
-void xsg_window_set_font_cache_size(int size) {
-	imlib_set_font_cache_size(size);
-}
-
 /******************************************************************************
  *
  * window_new
@@ -274,7 +264,7 @@ static void set_xatom(xsg_window_t *window, const char *type, const char *proper
 	type_atom = XInternAtom(display, type, FALSE);
 	property_atom = XInternAtom(display, property, FALSE);
 
-	xsg_message("%s: Setting Xatom \"%s\": \"%s\"", window->config, type, property);
+	xsg_message("%s: Setting Xatom %s: %s", window->config, type, property);
 
 	xev.type = ClientMessage;
 	xev.xclient.type = ClientMessage;

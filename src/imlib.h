@@ -60,6 +60,10 @@
 
 /******************************************************************************/
 
+void xsg_imlib_init(void);
+void xsg_imlib_set_cache_size(int size);
+void xsg_imlib_set_font_cache_size(int size);
+
 void xsg_imlib_flush_cache(int signum);
 
 Imlib_Color xsg_imlib_uint2color(uint32_t u);
