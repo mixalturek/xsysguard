@@ -315,6 +315,12 @@ static void op_strcmp(void) {
 	str_stptr -= 2;
 }
 
+static void op_strcasecmp(void) {
+	num_stptr[+1] = (double) strcasecmp(str_stptr[-1]->str, str_stptr[0]->str);
+	num_stptr += 1;
+	str_stptr -= 2;
+}
+
 static void op_strup(void) {
 	char *s = str_stptr[0]->str;
 
@@ -531,8 +537,13 @@ xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 			num_stack_size += 1;
 			str_stack_size -= 1;
 		} else if (xsg_conf_find_command("STRCMP")) {
-			CHECK_STR_STACK_SIZE("STRCMP", 1);
+			CHECK_STR_STACK_SIZE("STRCMP", 2);
 			op->op = op_strcmp;
+			num_stack_size += 1;
+			str_stack_size -= 2;
+		} else if (xsg_conf_find_command("STRCASECMP")) {
+			CHECK_STR_STACK_SIZE("STRCASECMP", 2);
+			op->op = op_strcasecmp;
 			num_stack_size += 1;
 			str_stack_size -= 2;
 		} else if (xsg_conf_find_command("STRUP")) {
