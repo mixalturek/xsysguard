@@ -503,7 +503,7 @@ xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 		} else if (xsg_conf_find_command("DUMP")) {
 			op->op = op_dump;
 		} else {
-			xsg_modules_parse(var, update, &op->num_func, &op->str_func, &op->arg);
+			xsg_modules_parse(update, var, &op->num_func, &op->str_func, &op->arg);
 			if (op->num_func != NULL)
 				num_stack_size += 1;
 			if (op->str_func != NULL)

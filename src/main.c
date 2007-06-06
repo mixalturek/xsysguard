@@ -60,8 +60,16 @@ uint64_t xsg_main_get_tick(void) {
 /******************************************************************************/
 
 void xsg_main_add_init_func(void (*func)(void)) {
-	if (likely(func != NULL))
-		init_list = xsg_list_prepend(init_list, (void *) func);
+	xsg_list_t *l;
+
+	if (unlikely(func == NULL))
+		return;
+
+	for (l = init_list; l; l = l->next)
+		if (unlikely(func == l->data))
+			return;
+
+	init_list = xsg_list_prepend(init_list, (void *) func);
 }
 
 void xsg_main_remove_init_func(void (*func)(void)) {
@@ -72,8 +80,16 @@ void xsg_main_remove_init_func(void (*func)(void)) {
 /******************************************************************************/
 
 void xsg_main_add_update_func(void (*func)(uint64_t)) {
-	if (likely(func != NULL))
-		update_list = xsg_list_prepend(update_list, func);
+	xsg_list_t *l;
+
+	if (unlikely(func == NULL))
+		return;
+
+	for (l = update_list; l; l = l->next)
+		if (unlikely(func == l->data))
+			return;
+
+	update_list = xsg_list_prepend(update_list, func);
 }
 
 void xsg_main_remove_update_func(void (*func)(uint64_t)) {
@@ -84,8 +100,16 @@ void xsg_main_remove_update_func(void (*func)(uint64_t)) {
 /******************************************************************************/
 
 void xsg_main_add_shutdown_func(void (*func)(void)) {
-	if (likely(func != NULL))
-		shutdown_list = xsg_list_prepend(shutdown_list, func);
+	xsg_list_t *l;
+
+	if (unlikely(func == NULL))
+		return;
+
+	for (l = shutdown_list; l; l = l->next)
+		if (unlikely(func == l->data))
+			return;
+
+	shutdown_list = xsg_list_prepend(shutdown_list, func);
 }
 
 void xsg_main_remove_shutdown_func(void (*func)(void)) {
@@ -96,8 +120,16 @@ void xsg_main_remove_shutdown_func(void (*func)(void)) {
 /******************************************************************************/
 
 void xsg_main_add_poll(xsg_main_poll_t *poll) {
-	if (likely(poll != NULL))
-		poll_list = xsg_list_prepend(poll_list, poll);
+	xsg_list_t *l;
+
+	if (unlikely(poll == NULL))
+		return;
+
+	for (l = poll_list; l; l = l->next)
+		if (unlikely(poll == l->data))
+			return;
+
+	poll_list = xsg_list_prepend(poll_list, poll);
 }
 
 void xsg_main_remove_poll(xsg_main_poll_t *poll) {
@@ -108,8 +140,16 @@ void xsg_main_remove_poll(xsg_main_poll_t *poll) {
 /******************************************************************************/
 
 void xsg_main_add_timeout(xsg_main_timeout_t *timeout) {
-	if (likely(timeout != NULL))
-		timeout_list = xsg_list_prepend(timeout_list, timeout);
+	xsg_list_t *l;
+
+	if (unlikely(timeout == NULL))
+		return;
+
+	for (l = timeout_list; l; l = l->next)
+		if (unlikely(timeout == l->data))
+			return;
+
+	timeout_list = xsg_list_prepend(timeout_list, timeout);
 }
 
 void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
@@ -120,8 +160,16 @@ void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
 /******************************************************************************/
 
 void xsg_main_add_signal_handler(void (*func)(int signum)) {
-	if (likely(func != NULL))
-		signal_handler_list = xsg_list_prepend(signal_handler_list, func);
+	xsg_list_t *l;
+
+	if (unlikely(func == NULL))
+		return;
+
+	for (l = signal_handler_list; l; l = l->next)
+		if (unlikely(func == l->data))
+			return;
+
+	signal_handler_list = xsg_list_prepend(signal_handler_list, func);
 }
 
 void xsg_main_remove_signal_handler(void (*func)(int signum)) {

@@ -37,7 +37,7 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void parse_hist(uint32_t count, uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse_fill(uint32_t count, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
 	unsigned i;
 	char *str;
 
@@ -49,7 +49,7 @@ void parse_hist(uint32_t count, uint32_t id, uint64_t update, double (**n)(void 
 	}
 }
 
-void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
 	*arg = xsg_conf_read_string();
 	*s = get_string;
 }

@@ -769,7 +769,7 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
 	static bool first_time = TRUE;
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;

@@ -59,11 +59,13 @@ typedef struct _xsg_var_t xsg_var_t;
 
 /******************************************************************************/
 
-typedef void xsg_modules_parse_t(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg);
 typedef char *xsg_modules_info_t(void);
+typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg);
+typedef void xsg_modules_parse_fill_t(uint32_t count, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg);
 
-xsg_modules_parse_t parse;
 xsg_modules_info_t info;
+xsg_modules_parse_t parse;
+xsg_modules_parse_fill_t parse_fill;
 
 /******************************************************************************
  * conf.c

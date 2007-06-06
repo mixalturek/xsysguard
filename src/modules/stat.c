@@ -2584,21 +2584,12 @@ static void shutdown_stats(void) {
 	sg_shutdown();
 }
 
-static void add_funcs_to_main_loop(void) {
-	static bool first_time = TRUE;
-
-	if (first_time) {
-		xsg_main_add_init_func(init_stats);
-		xsg_main_add_update_func(update_stats);
-		xsg_main_add_shutdown_func(shutdown_stats);
-		first_time = FALSE;
-	}
-}
-
 /******************************************************************************/
 
-void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
-	add_funcs_to_main_loop();
+void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+	xsg_main_add_init_func(init_stats);
+	xsg_main_add_update_func(update_stats);
+	xsg_main_add_shutdown_func(shutdown_stats);
 
 	if (xsg_conf_find_command("host_info")){
 		parse_host_info(n ,s, arg);

@@ -37,11 +37,11 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse_hist(uint32_t count, uint32_t id, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse_fill(uint32_t count, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
 	double *num;
 	unsigned i;
 
-	num = xsg_new(double, count);
+	num = xsg_new(double, 1);
 	num[0] = xsg_conf_read_double();
 
 	for (i = 0; i < count; i++) {
@@ -50,7 +50,7 @@ void parse_hist(uint32_t count, uint32_t id, uint64_t update, double (**n)(void 
 	}
 }
 
-void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
 	double *d;
 
 	d = xsg_new(double, 1);
