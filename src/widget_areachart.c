@@ -879,7 +879,7 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 	areachart_var->top_height = 0;
 	areachart_var->top_colors = NULL;
 	areachart_var->add_prev = FALSE;
-	areachart_var->values = xsg_new0(double, width);
+	areachart_var->values = xsg_new(double, width);
 
 	for (i = 0; i < width; i++)
 		areachart_var->values[i] = DNAN;
