@@ -245,6 +245,26 @@ void xsg_strfreev(char **str_array) {
 	}
 }
 
+int xsg_strvcmp(char **strv1, char **strv2) {
+	int i, ret;
+
+	if (unlikely(strv1 == NULL) && unlikely(strv2 == NULL))
+		return 0;
+	if (unlikely(strv1 == NULL))
+		return -1;
+	if (unlikely(strv2 == NULL))
+		return 1;
+	for (i = 0; strv1[i] != NULL && strv2[i] != NULL; i++) {
+		ret = strcmp(strv1[i], strv2[i]);
+		if (ret != 0)
+			return ret;
+	}
+	if (strv1[i] == NULL)
+		return -1;
+	else
+		return 1;
+}
+
 char *xsg_strdup(const char *str) {
 	char *new_str;
 	size_t length;

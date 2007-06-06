@@ -486,15 +486,19 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 static void update_text(xsg_widget_t *widget, xsg_var_t *var) {
 	text_t *text;
+	char **lines;
 
 	text = widget->data;
 
-	if (text->lines != NULL)
-		xsg_strfreev(text->lines);
+	lines = text->lines;
 
 	text->lines = xsg_strsplit_set(xsg_printf(text->print, var), "\n", 0);
 
-	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	if (xsg_strvcmp(lines, text->lines) != 0)
+		xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
+
+	if (lines != NULL)
+		xsg_strfreev(lines);
 }
 
 static void scroll_text(xsg_widget_t *widget) {
