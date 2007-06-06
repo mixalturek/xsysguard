@@ -1,4 +1,4 @@
-/* rpn.h
+/* types.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
@@ -18,21 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __RPN_H__
-#define __RPN_H__ 1
-
-#include <xsysguard.h>
-
-#include "types.h"
+#ifndef __TYPES_H__
+#define __TYPES_H__ 1
 
 /******************************************************************************/
 
-void xsg_rpn_init(void);
-xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update);
-double xsg_rpn_get_num(xsg_rpn_t *rpn);
-char *xsg_rpn_get_str(xsg_rpn_t *rpn);
+typedef struct _xsg_window_t xsg_window_t;
+typedef struct _xsg_widget_t xsg_widget_t;
+typedef struct _xsg_rpn_t xsg_rpn_t;
+typedef struct _xsg_printf_t xsg_printf_t;
 
-/*****************************************************************************/
+/******************************************************************************/
 
-#endif /* __RPN_H__ */
+#endif /* __TYPES_H__ */
 

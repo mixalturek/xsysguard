@@ -22,6 +22,7 @@
 #define __IMLIB_H__ 1
 
 #include <xsysguard.h>
+#include <Imlib2.h>
 #include <endian.h>
 
 /******************************************************************************/
