@@ -18,6 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/*
+ * This code is based on code from GLIB released under the GNU Lesser
+ * General Public License.
+ *
+ * Copyright (C) 1995-1997 Peter Mattis, Spencer Kimball and Josh MacDonald
+ *
+ * ftp://ftp.gtk.org/pub/gtk/
+ *
+ */
+
 #include <xsysguard.h>
 #include <string.h>
 #include <stdio.h>
