@@ -511,9 +511,9 @@ char *xsg_conf_read_string() {
 		}
 	}
 
-	str = string->str;
+	str = xsg_strndup(string->str, string->len);
 
-	xsg_string_free(string, FALSE);
+	xsg_string_free(string, TRUE);
 
 	return str;
 }
