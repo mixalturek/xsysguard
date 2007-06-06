@@ -54,7 +54,11 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 	*s = get_string;
 }
 
-char *info() {
+char *info(void) {
 	return "always returns the same string";
+}
+
+int version(void) {
+	return XSG_API_VERSION;
 }
 

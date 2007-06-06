@@ -79,7 +79,7 @@ void xsg_modules_init(void) {
 			continue;
 		while ((filename = read_dir_name(dir)) != NULL) {
 			if ((name = xsg_str_without_suffix(filename, ".so")) != NULL) {
-				module_t *m = xsg_new0(module_t, 1);
+				module_t *m = xsg_new(module_t, 1);
 				m->name = name;
 				m->file = xsg_build_filename(*p, filename, NULL);
 				modules_list = xsg_list_prepend(modules_list, m);
@@ -94,6 +94,7 @@ void xsg_modules_init(void) {
 /******************************************************************************/
 
 void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+	xsg_modules_version_t *version;
 	xsg_modules_parse_t *parse;
 	char *filename = NULL;
 	void *module;
@@ -117,12 +118,20 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), ch
 	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
 	if (!module)
-		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
+		xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+	version = dlsym(module, "version");
+
+	if (!version)
+		xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+	if (version() != 1)
+		xsg_error("Cannot load module %s: Invalid api version: %d", m->name, version());
 
 	parse = dlsym(module, "parse");
 
 	if (!parse)
-		xsg_error("Cannot load module \"%s\": %s", m->name, dlerror());
+		xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
 	*n = NULL;
 	*s = NULL;
@@ -131,10 +140,11 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), ch
 	parse(update, var, n, s, arg);
 
 	if ((*n == NULL) && (*s == NULL))
-		xsg_error("module \"%s\" must set s != NULL or n != NULL", m->name);
+		xsg_error("module %s must set s != NULL or n != NULL", m->name);
 }
 
 void xsg_modules_list() {
+	xsg_modules_version_t *version;
 	xsg_modules_parse_t *parse;
 	xsg_modules_info_t *info;
 	char *filename;
@@ -145,27 +155,38 @@ void xsg_modules_list() {
 	if (!modules_list)
 		xsg_modules_init();
 
-	printf("Available modules:\n");
 	for (l = modules_list; l; l = l->next) {
 		m = l->data;
 		filename = m->file;
 
 		module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
-		if (!module)
+		if (!module) {
+			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
+		}
+
+		version = dlsym(module, "version");
+
+		if (!version)
+			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
+
+		if (version() != 1)
+			xsg_warning("Cannot load module %s: Invalid api version: %d", m->name, version());
 
 		parse = dlsym(module, "parse");
 
-		if (!parse)
+		if (!parse) {
+			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
+		}
 
 		info = dlsym(module, "info");
 
 		if (info)
-			printf("%s - %s\n", m->name, info());
+			printf("%s:\t %s   (%s)\n", m->name, info(), m->file);
 		else
-			printf("%s\n", m->name);
+			printf("%s:\t   (%s)\n", m->name, m->file);
 	}
 }
 

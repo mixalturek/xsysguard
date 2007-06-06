@@ -829,7 +829,11 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 	daemon_var_count++;
 }
 
-char *info() {
+char *info(void) {
 	return "executes daemon processes";
+}
+
+int version (void) {
+	return XSG_API_VERSION;
 }
 

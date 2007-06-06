@@ -290,7 +290,11 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 	}
 }
 
-char *info() {
+char *info(void) {
 	return "date and time functions";
+}
+
+int version(void) {
+	return XSG_API_VERSION;
 }
 

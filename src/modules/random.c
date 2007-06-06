@@ -198,7 +198,11 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 	*n = get_random;
 }
 
-char *info() {
+char *info(void) {
 	return "random number generator";
+}
+
+int version(void) {
+	return XSG_API_VERSION;
 }
 

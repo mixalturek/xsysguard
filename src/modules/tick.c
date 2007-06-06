@@ -38,7 +38,11 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 	*n = get_tick;
 }
 
-char *info() {
+char *info(void) {
 	return "returns the current tick";
+}
+
+int version (void) {
+	return XSG_API_VERSION;
 }
 
