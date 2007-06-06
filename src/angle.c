@@ -47,7 +47,7 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *w
 		yoffset -= ca * h;
 	}
 
-	angle = xsg_new0(xsg_angle_t, 1);
+	angle = xsg_new(xsg_angle_t, 1);
 
 	angle->xoffset = xoffset;
 	angle->yoffset = yoffset;
