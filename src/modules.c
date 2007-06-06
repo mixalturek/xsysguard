@@ -146,6 +146,7 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), ch
 void xsg_modules_list() {
 	xsg_modules_version_t *version;
 	xsg_modules_parse_t *parse;
+	xsg_modules_parse_fill_t *parse_fill;
 	xsg_modules_info_t *info;
 	char *filename;
 	void *module;
@@ -174,14 +175,14 @@ void xsg_modules_list() {
 		if (version() != 1)
 			xsg_warning("Cannot load module %s: Invalid api version: %d", m->name, version());
 
+		info = dlsym(module, "info");
+		parse_fill = dlsym(module, "parse_fill");
 		parse = dlsym(module, "parse");
 
-		if (!parse) {
+		if (!parse && !parse_fill) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
 		}
-
-		info = dlsym(module, "info");
 
 		if (info)
 			printf("%s:\t %s   (%s)\n", m->name, info(), m->file);
