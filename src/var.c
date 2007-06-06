@@ -32,6 +32,7 @@ struct _xsg_var_t {
 	xsg_window_t *window;
 	xsg_widget_t *widget;
 	xsg_rpn_t *rpn;
+	bool dirty;
 };
 
 /******************************************************************************/
@@ -49,12 +50,22 @@ void xsg_var_init(void) {
 /******************************************************************************/
 
 void xsg_var_dirty(xsg_var_t *var) {
-	xsg_window_update(var->window, var->widget, var);
+	var->dirty = TRUE;
 	dirty = TRUE;
 }
 
 void xsg_var_flush_dirty(void) {
 	if (dirty) {
+		xsg_list_t *l;
+
+		for (l = var_list; l; l = l->next) {
+			xsg_var_t *var = l->data;
+
+			if (unlikely(var->dirty)) {
+				xsg_window_update(var->window, var->widget, var);
+				var->dirty = FALSE;
+			}
+		}
 		xsg_window_render();
 		xsg_window_render_xshape();
 		dirty = FALSE;
@@ -70,6 +81,7 @@ xsg_var_t *xsg_var_parse(xsg_window_t *window, xsg_widget_t *widget, uint64_t up
 	var->window = window;
 	var->widget = widget;
 	var->rpn = xsg_rpn_parse(var, update);
+	var->dirty = FALSE;
 
 	var_list = xsg_list_append(var_list, var);
 
