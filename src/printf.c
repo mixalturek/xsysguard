@@ -204,7 +204,7 @@ xsg_printf_t *xsg_printf_new(const char *format) {
 		p->begin = xsg_strdup(buf->str);
 		xsg_debug("printf_new: begin: \"%s\"", buf->str);
 	} else {
-		var_t *var = xsg_new0(var_t, 1);
+		var_t *var = xsg_new(var_t, 1);
 		var->var = NULL;
 		var->type = type;
 		var->num = DNAN;
