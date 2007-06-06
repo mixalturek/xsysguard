@@ -239,7 +239,7 @@ void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(vo
 	} else if (xsg_conf_find_command("local")) {
 		local = TRUE;
 	} else {
-		xsg_conf_error("gm or local");
+		xsg_conf_error("gm or local expected");
 	}
 
 	if (xsg_conf_find_command("strftime")) {
@@ -285,7 +285,7 @@ void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(vo
 		} else if (xsg_conf_find_command("tm_isdst")) {
 			*n = get_tm_isdst;
 		} else {
-			xsg_conf_error("strftime, ctime, tv_sec, tv_usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst");
+			xsg_conf_error("strftime, ctime, tv_sec, tv_usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
 		}
 	}
 }

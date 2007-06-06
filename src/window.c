@@ -211,7 +211,7 @@ void xsg_window_parse_layer(xsg_window_t *window) {
 	else if (xsg_conf_find_command("Below"))
 		window->layer = -1;
 	else
-		xsg_conf_error("Above, Normal or Below");
+		xsg_conf_error("Above, Normal or Below expected");
 	xsg_conf_read_newline();
 }
 
@@ -233,7 +233,7 @@ void xsg_window_parse_background(xsg_window_t * window) {
 	else if (xsg_conf_find_command("Color"))
 		window->background = xsg_imlib_uint2color(xsg_conf_read_color());
 	else
-		xsg_conf_error("CopyFromParent, CopyFromRoot or Color");
+		xsg_conf_error("CopyFromParent, CopyFromRoot or Color expected");
 	xsg_conf_read_newline();
 }
 
@@ -853,12 +853,14 @@ void xsg_window_init() {
 
 	XSetIOErrorHandler(io_error_handler);
 
-	display = XOpenDisplay(NULL);
+	if (display == NULL)
+		display = XOpenDisplay(NULL);
 
 	if (unlikely(display == NULL))
 		xsg_error("Cannot open display");
 
-	screen = XDefaultScreen(display);
+	if (screen == 0)
+		screen = XDefaultScreen(display);
 
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
@@ -948,6 +950,34 @@ void xsg_window_init() {
 
 		update_visible(window);
 	}
+}
+
+bool xsg_window_color_lookup(char *name, uint32_t *color) {
+	Colormap cm;
+	XColor c;
+
+	XSetIOErrorHandler(io_error_handler);
+
+	if (display == NULL)
+		display = XOpenDisplay(NULL);
+
+	if (unlikely(display == NULL))
+		xsg_error("Cannot open display");
+
+	if (screen == 0)
+		screen = XDefaultScreen(display);
+
+	cm = DefaultColormap(display, screen);
+
+	if (XParseColor(display, cm, name, &c) == 0)
+		return FALSE;
+
+	A_VAL(color) = 0xff;
+	R_VAL(color) = c.red >> 8;
+	G_VAL(color) = c.green >> 8;
+	B_VAL(color) = c.blue >> 8;
+
+	return TRUE;
 }
 
 

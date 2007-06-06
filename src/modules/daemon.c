@@ -815,7 +815,7 @@ void parse(xsg_var_t *var, uint64_t update, double (**n)(void *), char *(**s)(vo
 		daemon_var->new_str = xsg_string_new(NULL);
 		*s = get_str;
 	} else {
-		xsg_conf_error("n or s");
+		xsg_conf_error("n or s expected");
 	}
 
 	daemon_var->var = var;

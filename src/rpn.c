@@ -24,6 +24,7 @@
 
 #include "rpn.h"
 #include "var.h"
+#include "conf.h"
 #include "modules.h"
 
 /******************************************************************************/
@@ -514,7 +515,7 @@ xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 
 		rpn->op_list = xsg_list_append(rpn->op_list, op);
 
-	} while (xsg_conf_find_command(","));
+	} while (xsg_conf_find_comma());
 
 	rpn->num_stack_size = num_stack_size;
 	rpn->str_stack_size = str_stack_size;

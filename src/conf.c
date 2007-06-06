@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <string.h>
 #include <endian.h>
 
@@ -34,51 +35,102 @@ static unsigned int line;
 
 /******************************************************************************/
 
-static bool is(char c) {
-	return (*ptr == c);
-}
-
-static void skip_space() {
-	while (is(' ') || is('\t')) {
-		ptr++;
-	}
-}
-
-/******************************************************************************/
-
 void xsg_conf_set_buffer(char *name, char *buffer) {
-	if (name)
-		log_name = name;
-	else
-		log_name = "";
+	log_name = name;
 	buf = buffer;
 	ptr = buffer;
 	line = 1;
 }
 
-void xsg_conf_error(const char *expected) {
-	char *p;
-	unsigned int n;
+/******************************************************************************/
 
-	p = ptr;
+void xsg_conf_error(const char *message) {
+	unsigned n;
+	char *error_ptr;
+	char *line2;
 
-	while (!is('\0') && !is('\n'))
+	error_ptr = ptr;
+
+	while (ptr[0] != '\0' && ptr[0] != '\n')
 		ptr++;
 
-	*ptr = '\0';
+	ptr[0] = '\0';
 
-	while (!is('\n') && ptr > buf)
+	while (ptr[0] != '\n' && ptr > buf)
 		ptr--;
 
-	n = p - ptr;
+	n = error_ptr - ptr;
 
-	p = xsg_new0(char, n + 1);
-	memset(p, ' ', n);
-	p[n-1] = '^';
-	p[n] = '\0';
+	line2 = xsg_new(char, n + 1);
+	memset(line2, ' ', n - 1);
+	line2[n-1] = '^';
+	line2[n] = '\0';
 
-	xsg_error("%s: Cannot parse configuration line %d: %s expected.\n%s\n%s\n",
-			log_name, line, expected, ptr, p);
+	if (log_name)
+		xsg_error("%s: Cannot parse configuration line %d: %s.\n%s\n%s\n",
+				log_name, line, message, ptr, line2);
+	else
+		xsg_error("Cannot parse configuration line %d: %s.\n%s\n%s\n",
+				line, message, ptr, line2);
+}
+
+/******************************************************************************/
+
+static bool is_space(void) {
+	return (ptr[0] == ' ' || ptr[0] == '\t' || ptr[0] == ':');
+}
+
+static void skip_space() {
+	while (is_space())
+		ptr++;
+	if (ptr[0] == '\\') {
+		char *p = ptr;
+		while (is_space())
+			p++;
+		if (p[0] == '\n') {
+			ptr = p + 1;
+			line++;
+		}
+	}
+}
+
+/******************************************************************************/
+
+static bool is_env(void) {
+	return (ptr[0] == '$');
+}
+
+static char *env(int *n) {
+	char *p, *env;
+	int m;
+
+	while (ptr[0] == ' ' || ptr[0] == '\t')
+		ptr++;
+
+	if (ptr[0] == '$')
+		ptr++;
+
+	if (ptr[0] != '{')
+		xsg_conf_error("\"{\" expected");
+	ptr++;
+
+	if (ptr[0] == '}')
+		xsg_conf_error("name expected");
+
+	for (m = 0; ptr[m] != '}'; m++)
+		if (ptr[m] == '\0')
+			xsg_conf_error("\"}\" expected");
+
+	p = xsg_strndup(ptr, m);
+	env = getenv(p);
+	xsg_free(p);
+
+	*n = m + 1;
+
+	if (env == NULL)
+		xsg_conf_error("cannot find name in environment");
+
+	return env;
 }
 
 /******************************************************************************/
@@ -90,74 +142,79 @@ bool xsg_conf_find_command(const char *command) {
 
 	nptr = ptr;
 
-	while (*command != '\0') {
-		if (*command != *nptr)
+	while (command[0] != '\0') {
+		if (command[0] != nptr[0])
 			return FALSE;
 		command++;
 		nptr++;
 	}
 
-	if (*nptr != ',' && *nptr != ':' && *nptr != ' ' && *nptr != '\t' && *nptr != '\n')
+	if (isalpha(nptr[0]) || nptr[0] == '_') {
 		return FALSE;
-
-	if (*nptr == '\n')
-		nptr--;
-
-	ptr = nptr + 1;
-	return TRUE;
+	} else {
+		ptr = nptr;
+		return TRUE;
+	}
 }
 
-bool xsg_conf_find_commentline() {
-
+bool xsg_conf_find_comma(void) {
 	skip_space();
 
-	if (is('#')) {
+	if (ptr[0] == ',') {
 		ptr++;
-		while (!is('\0') && !is('\n'))
-			ptr++;
-		if (is('\n')) {
-			line++;
-			ptr++;
-		}
 		return TRUE;
 	} else {
 		return FALSE;
 	}
 }
 
-bool xsg_conf_find_newline() {
-
+bool xsg_conf_find_commentline(void) {
 	skip_space();
 
-	if (!is('\n'))
+	if (ptr[0] == '#') {
+		ptr++;
+		while (ptr[0] != '\0' && ptr[0] != '\n')
+			ptr++;
+		if (ptr[0] == '\n')
+			ptr++;
+		return TRUE;
+	} else {
 		return FALSE;
-
-	ptr++;
-	line++;
-	return TRUE;
+	}
 }
 
-bool xsg_conf_find_end() {
-
+bool xsg_conf_find_newline(void) {
 	skip_space();
 
-	return is('\0');
+	if (ptr[0] != '\n') {
+		return FALSE;
+	} else {
+		ptr++;
+		line++;
+		return TRUE;
+	}
+}
+
+bool xsg_conf_find_end(void) {
+	skip_space();
+
+	return ptr[0] == '\0';
 }
 
 /******************************************************************************/
 
-void xsg_conf_read_newline() {
-
+void xsg_conf_read_newline(void) {
 	skip_space();
 
-	if (!is('\n'))
-		xsg_conf_error("newline");
+	if (ptr[0] != '\n')
+		xsg_conf_error("newline expected");
 
 	ptr++;
 	line++;
 }
 
-bool xsg_conf_read_boolean() {
+bool xsg_conf_read_boolean(void) {
+	skip_space();
 
 	if (xsg_conf_find_command("on"))
 		return TRUE;
@@ -176,7 +233,7 @@ bool xsg_conf_read_boolean() {
 	else if (xsg_conf_find_command("False"))
 		return FALSE;
 	else
-		xsg_conf_error("on or off");
+		xsg_conf_error("on or off expected");
 
 	return FALSE;
 }
@@ -184,14 +241,17 @@ bool xsg_conf_read_boolean() {
 int64_t xsg_conf_read_int() {
 	int64_t i;
 	int n = 0;
+	int m = 0;
 
 	skip_space();
 
-	sscanf(ptr, "%"SCNd64"%n", &i, &n);
-
-	if (n < 1)
-		xsg_conf_error("integer");
-
+	if (is_env()) {
+		sscanf(env(&n), "%"SCNd64"%n", &i, &m);
+		if (m < 1) xsg_conf_error("cannot convert environment variable to integer");
+	} else {
+		sscanf(ptr, "%"SCNd64"%n", &i, &n);
+		if (n < 1) xsg_conf_error("integer expected");
+	}
 	ptr += n;
 	return i;
 }
@@ -199,19 +259,49 @@ int64_t xsg_conf_read_int() {
 uint64_t xsg_conf_read_uint() {
 	uint64_t u;
 	int n = 0;
+	int m = 0;
 
 	skip_space();
 
-	sscanf(ptr, "%"SCNu64"%n", &u, &n);
-
-	if (n < 1)
-		xsg_conf_error("unsigned integer");
-
+	if (is_env()) {
+		sscanf(env(&n), "%"SCNu64"%n", &u, &m);
+		if (m < 1) xsg_conf_error("cannot convert environment variable to unsigned integer");
+	} else {
+		sscanf(ptr, "%"SCNu64"%n", &u, &n);
+		if (n < 1) xsg_conf_error("unsigned integer expected");
+	}
 	ptr += n;
 	return u;
 }
 
+double xsg_conf_read_double() {
+	double d;
+	int n = 0;
+	int m = 0;
+
+	skip_space();
+
+	if (is_env()) {
+		sscanf(env(&n), "%lf%n", &d, &m);
+		if (m < 1) xsg_conf_error("cannot convert environment variable to floating-point number");
+	} else {
+		sscanf(ptr, "%lf%n", &d, &n);
+		if (n < 1) xsg_conf_error("floating-point number expected");
+	}
+	ptr += n;
+	return d;
+}
+
+/******************************************************************************/
+
+static bool (*color_lookup)(char *name, uint32_t *color) = NULL;
+
+void xsg_conf_set_color_lookup(bool (*func)(char *name, uint32_t *color)) {
+	color_lookup = func;
+}
+
 uint32_t xsg_conf_read_color() {
+	char *name = NULL;
 	uint32_t color = 0;
 	uint32_t argb = 0;
 	uint8_t a = 0;
@@ -219,15 +309,44 @@ uint32_t xsg_conf_read_color() {
 	uint8_t g = 0;
 	uint8_t b = 0;
 	int n = 0;
+	int m = 0;
+	char *e = NULL;
 
 	skip_space();
 
-	if (!is('#'))
-		xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA)");
+	if (is_env()) {
+		e = env(&m);
+		if (e[0] == '#') {
+			e++;
+			sscanf(e, "%"SCNx32"%n", &color, &n);
+		} else {
+			if (color_lookup == NULL)
+				xsg_conf_error("color (#RGB, #RGBA, #RRGGBB or #RRGGBBAA) expected");
+			name = xsg_strdup(e);
+		}
+	} else {
+		if (ptr[0] == '#') {
+			ptr++;
+			sscanf(ptr, "%"SCNx32"%n", &color, &n);
+		} else {
+			if (color_lookup == NULL)
+				xsg_conf_error("color (#RGB, #RGBA, #RRGGBB or #RRGGBBAA) expected");
+			while (isalpha(ptr[n]))
+				n++;
+			name = xsg_strndup(ptr, n);
+		}
+	}
 
-	ptr++;
-
-	sscanf(ptr, "%"SCNx32"%n", &color, &n);
+	if (name) {
+		if (color_lookup(name, &color)) {
+			if (e)
+				ptr += m;
+			else
+				ptr += n;
+			return color;
+		}
+		xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA or rgb.txt name) expected");
+	}
 
 	switch (n) {
 		case 3: // rgb
@@ -262,10 +381,16 @@ uint32_t xsg_conf_read_color() {
 			a = color & 0xff;
 			break;
 		default:
-			xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA)");
+			if (color_lookup)
+				xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA or rgb.txt name) expected");
+			else
+				xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA) expected");
 	}
 
-	ptr += n;
+	if (e)
+		ptr += m;
+	else
+		ptr += n;
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	((uint8_t *)(&argb))[0] = a;
@@ -282,26 +407,13 @@ uint32_t xsg_conf_read_color() {
 	return argb;
 }
 
-double xsg_conf_read_double() {
-	double d;
-	int n = 0;
-
-	skip_space();
-
-	sscanf(ptr, "%lf%n", &d, &n);
-
-	if (n < 1)
-		xsg_conf_error("floating-point number");
-
-	ptr += n;
-	return d;
-}
+/******************************************************************************/
 
 static char read_escape() {
 	char c;
 	int  n;
 
-	switch (*ptr) {
+	switch (ptr[0]) {
 		case ' ':
 			return ' ';
 		case 'a':
@@ -353,97 +465,56 @@ static char read_escape() {
 	}
 }
 
-static char *read_env() {
-	char *begin;
-	const char *env;
-	char *p;
-
-	begin = ptr;
-
-	while (!is(' ') && !is(':') && !is(',') && !is('\t') && !is('\n') && !is('\0'))
-		ptr++;
-
-	p = xsg_new0(char, ptr - begin + 1);
-	strncpy(p, begin, ptr - begin);
-
-	env = getenv(p);
-
-	if (env) {
-		xsg_free(p);
-		return xsg_strdup(env);
-	} else {
-		return p;
-	}
-}
-
 char *xsg_conf_read_string() {
-	char quote = 0;
-	bool escape;
-	char *start_ptr;
-	char *dest;
-	char *string;
-	size_t len;
+	xsg_string_t *string;
+	char quote = '\0';
+	bool escape = FALSE;
+	char *str;
 
 	skip_space();
 
-	if (is('\"') || is('\'') || is('`')) {
-		quote = *ptr;
+	string = xsg_string_new(NULL);
+
+	if (ptr[0] == '\"' || ptr[0] == '\'') {
+		quote = ptr[0];
 		ptr++;
-	} else {
-		return read_env();
 	}
 
-	start_ptr = ptr;
-	escape = FALSE;
-
-	while (*ptr) {
+	while (ptr[0] != '\0') {
 		if (escape) {
-			read_escape();
+			string = xsg_string_append_c(string, read_escape());
 			escape = FALSE;
 			ptr++;
 			continue;
 		}
-		if (is('\\')) {
+		if (ptr[0] == '\\') {
 			escape = TRUE;
 			ptr++;
 			continue;
 		}
-		if (is(quote)) {
+		if (ptr[0] == quote) {
 			ptr++;
 			break;
 		}
-		ptr++;
+		if (quote == '\0') {
+			if (is_space() || ptr[0] == '\n')
+				break;
+		}
+		if (quote == '\"' && is_env()) {
+			int n;
+
+			string = xsg_string_append(string, env(&n));
+			ptr += n;
+		} else {
+			string = xsg_string_append_c(string, ptr[0]);
+			ptr++;
+		}
 	}
 
-	len = ptr - start_ptr;
-	ptr = start_ptr;
+	str = string->str;
 
-	string = xsg_new0(char, len + 1);
+	xsg_string_free(string, FALSE);
 
-	dest = string;
-
-	escape = FALSE;
-	while (*ptr) {
-		if (escape) {
-			*dest = read_escape();
-			escape = FALSE;
-			dest++;
-			ptr++;
-			continue;
-		}
-		if (is('\\')) {
-			escape = TRUE;
-			ptr++;
-			continue;
-		}
-		if (is(quote)) {
-			ptr++;
-			break;
-		}
-		*dest = *ptr;
-		dest++;
-		ptr++;
-	}
-	return string;
+	return str;
 }
 

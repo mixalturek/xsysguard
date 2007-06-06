@@ -187,7 +187,7 @@ void xsg_widget_rectangle_parse(xsg_window_t *window) {
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
-			xsg_conf_error("Visible, Angle, ColorRange or Filled");
+			xsg_conf_error("Visible, Angle, ColorRange or Filled expected");
 		}
 	}
 

@@ -232,7 +232,7 @@ static void parse_config(char *config_name, char *config_buffer) {
 				xsg_conf_error("Name, Class, Resource, Geometry, "
 						"Sticky, SkipTaskbar, SkipPager, Layer, "
 						"Decorations, OverrideRedirect, Background, XShape, "
-						"ARGBVisual or Visible");
+						"ARGBVisual or Visible expected");
 			}
 		} else if (xsg_conf_find_command("SetEnv")) {
 			parse_env(config_name);
@@ -264,7 +264,7 @@ static void parse_config(char *config_name, char *config_buffer) {
 				xsg_widget_text_parse_var(var);
 		} else {
 			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
-					"Image, BarChart, LineChart, AreaChart or Text");
+					"Image, BarChart, LineChart, AreaChart or Text expected");
 		}
 	}
 }
@@ -494,6 +494,8 @@ int main(int argc, char **argv) {
 	}
 
 	xsg_imlib_init();
+
+	xsg_conf_set_color_lookup(xsg_window_color_lookup);
 
 	for (l = filename_list; l; l = l->next) {
 		char *filename = l->data;

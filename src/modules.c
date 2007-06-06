@@ -112,7 +112,7 @@ void xsg_modules_parse(xsg_var_t *var, uint64_t update, double (**n)(void *), ch
 	}
 
 	if (!filename)
-		xsg_conf_error("module name");
+		xsg_conf_error("module name expected");
 
 	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 

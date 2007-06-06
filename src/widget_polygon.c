@@ -131,7 +131,7 @@ void xsg_widget_polygon_parse(xsg_window_t *window) {
 		} else if (xsg_conf_find_command("Closed")) {
 			polygon->closed = TRUE;
 		} else {
-			xsg_conf_error("Visible, Filled or Closed");
+			xsg_conf_error("Visible, Filled or Closed expected");
 		}
 	}
 }

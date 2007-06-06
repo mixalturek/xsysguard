@@ -730,7 +730,7 @@ xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update) 
 				xsg_free(barchart->mask);
 			barchart->mask = xsg_conf_read_string();
 		} else {
-			xsg_conf_error("Visible, Angle, Min, Max or Mask");
+			xsg_conf_error("Visible, Angle, Min, Max or Mask expected");
 		}
 	}
 
@@ -782,7 +782,7 @@ void xsg_widget_barchart_parse_var(xsg_var_t *var) {
 		} else if (xsg_conf_find_command("AddPrev")) {
 			barchart_var->add_prev = TRUE;
 		} else {
-			xsg_conf_error("ColorRange or AddPrev");
+			xsg_conf_error("ColorRange or AddPrev expected");
 		}
 	}
 

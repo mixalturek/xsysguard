@@ -846,7 +846,7 @@ xsg_widget_t *xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update)
 				xsg_free(areachart->background);
 			areachart->background = xsg_conf_read_string();
 		} else {
-			xsg_conf_error("Visible, Angle, Min, Max or Background");
+			xsg_conf_error("Visible, Angle, Min, Max or Background expected");
 		}
 	}
 
@@ -927,7 +927,7 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 			xsg_dump_register(xsg_conf_read_string(), widget->update, width, areachart_var->values,
 					&areachart->value_index);
 		} else {
-			xsg_conf_error("ColorRange, Top, AddPrev or Dump");
+			xsg_conf_error("ColorRange, Top, AddPrev or Dump expected");
 		}
 	}
 }

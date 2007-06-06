@@ -27,8 +27,11 @@
 
 void xsg_conf_set_buffer(char *name, char *buffer);
 
+void xsg_conf_set_color_lookup(bool (*func)(char *name, uint32_t *color));
+
 bool xsg_conf_find_commentline(void);
 bool xsg_conf_find_newline(void);
+bool xsg_conf_find_comma(void);
 bool xsg_conf_find_end(void);
 
 void xsg_conf_read_newline(void);

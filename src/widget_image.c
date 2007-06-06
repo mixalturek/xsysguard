@@ -113,7 +113,7 @@ void xsg_widget_image_parse(xsg_window_t *window) {
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {
-			xsg_conf_error("Visible or Angle");
+			xsg_conf_error("Visible or Angle expected");
 		}
 	}
 

@@ -77,7 +77,7 @@ char *xsg_conf_read_string(void);
 
 bool xsg_conf_find_command(const char *command);
 
-void xsg_conf_error(const char *expected);
+void xsg_conf_error(const char *message);
 
 /******************************************************************************
  * var.c

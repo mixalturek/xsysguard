@@ -565,11 +565,11 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 				text->alignment = BOTTOM_RIGHT;
 			else
 				xsg_conf_error("TopLeft, TopCenter, TopRight, CenterLeft, Center, "
-						"CenterRight, BottomLeft, BottomCenter or BottomRight");
+						"CenterRight, BottomLeft, BottomCenter or BottomRight expected");
 		} else if (xsg_conf_find_command("TabWidth")) {
 			text->tab_width = xsg_conf_read_uint();
 		} else {
-			xsg_conf_error("Visible, Angle, Alignment or TabWidth");
+			xsg_conf_error("Visible, Angle, Alignment or TabWidth expected");
 		}
 	}
 

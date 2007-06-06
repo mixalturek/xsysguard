@@ -475,7 +475,7 @@ xsg_widget_t *xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
 				xsg_free(linechart->background);
 			linechart->background = xsg_conf_read_string();
 		} else {
-			xsg_conf_error("Visible, Angle, Min, Max or Background");
+			xsg_conf_error("Visible, Angle, Min, Max or Background expected");
 		}
 	}
 
@@ -513,7 +513,7 @@ void xsg_widget_linechart_parse_var(xsg_var_t *var) {
 			xsg_dump_register(xsg_conf_read_string(), widget->update, width, linechart_var->values,
 					&linechart->value_index);
 		} else {
-			xsg_conf_error("Dump");
+			xsg_conf_error("Dump expected");
 		}
 	}
 }

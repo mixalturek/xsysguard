@@ -108,7 +108,7 @@ void xsg_widget_ellipse_parse(xsg_window_t *window) {
 		} else if (xsg_conf_find_command("Filled")) {
 			ellipse->filled = TRUE;
 		} else {
-			xsg_conf_error("Visible or Filled");
+			xsg_conf_error("Visible or Filled expected");
 		}
 	}
 

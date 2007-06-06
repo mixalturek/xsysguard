@@ -228,7 +228,7 @@ void xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v) {
 	var_t *var;
 
 	if (p->next_var == NULL)
-		xsg_conf_error("no more variables");
+		xsg_conf_error("no more variables expected");
 
 	var = p->next_var->data;
 

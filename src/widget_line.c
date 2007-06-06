@@ -101,7 +101,7 @@ void xsg_widget_line_parse(xsg_window_t *window) {
 			widget->visible_update = xsg_conf_read_uint();
 			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
 		} else {
-			xsg_conf_error("Visible");
+			xsg_conf_error("Visible expected");
 		}
 	}
 }
