@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <math.h>
+#include <ctype.h>
 #include <string.h>
 
 #include "rpn.h"
@@ -284,6 +285,8 @@ static void op_exc(void) {
 	num_stptr[-1] = tmp;
 }
 
+/******************************************************************************/
+
 static void op_strdup(void) {
 	str_stptr[+1] = xsg_string_assign(str_stptr[+1], str_stptr[0]->str);
 	str_stptr += 1;
@@ -311,6 +314,38 @@ static void op_strcmp(void) {
 	num_stptr += 1;
 	str_stptr -= 2;
 }
+
+static void op_strup(void) {
+	char *s = str_stptr[0]->str;
+
+	while (*s) {
+		if (islower(*s))
+			*s = toupper(*s);
+		s++;
+	}
+}
+
+static void op_strdown(void) {
+	char *s = str_stptr[0]->str;
+
+	while (*s) {
+		if (isupper(*s))
+			*s = tolower(*s);
+		s++;
+	}
+}
+
+static void op_strinsert(void) {
+	ssize_t pos = num_stptr[-1];
+	ssize_t len = num_stptr[0];
+
+	str_stptr[-1] = xsg_string_insert_len(str_stptr[-1], pos, str_stptr[0]->str, len);
+
+	num_stptr -= 2;
+	str_stptr -= 1;
+}
+
+/******************************************************************************/
 
 static void op_dump(void) {
 	int num_stack_size, str_stack_size, i;
@@ -500,6 +535,18 @@ xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 			op->op = op_strcmp;
 			num_stack_size += 1;
 			str_stack_size -= 2;
+		} else if (xsg_conf_find_command("STRUP")) {
+			CHECK_STR_STACK_SIZE("STRUP", 1);
+			op->op = op_strup;
+		} else if (xsg_conf_find_command("STRDOWN")) {
+			CHECK_STR_STACK_SIZE("STRDOWN", 1);
+			op->op = op_strdown;
+		} else if (xsg_conf_find_command("STRINSERT")) {
+			CHECK_STR_STACK_SIZE("STRINSERT", 2);
+			CHECK_NUM_STACK_SIZE("STRINSERT", 2);
+			op->op = op_strinsert;
+			num_stack_size -= 2;
+			str_stack_size -= 1;
 		} else if (xsg_conf_find_command("DUMP")) {
 			op->op = op_dump;
 		} else {
