@@ -503,7 +503,7 @@ void xsg_widget_linechart_parse_var(xsg_var_t *var) {
 
 	linechart_var->var = var;
 	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
-	linechart_var->values = xsg_new0(double, width);
+	linechart_var->values = xsg_new(double, width);
 
 	for (i = 0; i < width; i++)
 		linechart_var->values[i] = DNAN;
