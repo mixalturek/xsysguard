@@ -493,8 +493,6 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	xsg_imlib_init_font_path();
-
 	xsg_conf_set_color_lookup(xsg_window_color_lookup);
 
 	for (l = filename_list; l; l = l->next) {
@@ -526,6 +524,7 @@ int main(int argc, char **argv) {
 	}
 
 	xsg_rpn_init();
+	xsg_imlib_init_font_path();
 	xsg_window_init();
 	xsg_imlib_init();
 

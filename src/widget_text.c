@@ -60,7 +60,7 @@ typedef enum {
 
 typedef struct {
 	Imlib_Color color;
-	Imlib_Font font;
+	char *font;
 	xsg_printf_t *print;
 	xsg_angle_t *angle;
 	alignment_t alignment;
@@ -72,6 +72,7 @@ typedef struct {
 
 static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
 	text_t *text;
+	Imlib_Font font;
 	unsigned line_count, line_index;
 	int line_advance, space_advance;
 	char **linev;
@@ -85,7 +86,12 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 	for (linev = text->lines; *linev != NULL; linev++)
 		line_count++;
 
-	imlib_context_set_font(text->font);
+	font = imlib_load_font(text->font);
+
+	if (unlikely(text->font == NULL))
+		xsg_error("Cannot load font: \"%s\"", text->font);
+
+	imlib_context_set_font(font);
 	imlib_context_set_color(text->color.red, text->color.green, text->color.blue, text->color.alpha);
 
 	imlib_get_text_advance(" ", &space_advance, &line_advance);
@@ -481,7 +487,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		imlib_context_set_image(tmp);
 		imlib_free_image();
 	}
-
+	imlib_free_font();
 }
 
 static void update_text(xsg_widget_t *widget, xsg_var_t *var) {
@@ -508,7 +514,6 @@ static void scroll_text(xsg_widget_t *widget) {
 xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	text_t *text;
-	char *font_name;
 	double angle = 0.0;
 
 	widget = xsg_widgets_new(window);
@@ -528,14 +533,7 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	*update = widget->update;
 
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
-
-	font_name = xsg_conf_read_string();
-
-	text->font = imlib_load_font(font_name);
-	if (unlikely(text->font == NULL))
-		xsg_error("Cannot load font: \"%s\"", font_name);
-	xsg_free(font_name);
-
+	text->font = xsg_conf_read_string();
 	text->print = xsg_printf_new(xsg_conf_read_string());
 	text->angle = NULL;
 	text->alignment = TOP_LEFT;
