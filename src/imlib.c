@@ -589,7 +589,7 @@ void xsg_imlib_text_draw(int x, int y, const char *text) {
  *
  ******************************************************************************/
 
-void xsg_imlib_init(void) {
+void xsg_imlib_init_font_path(void) {
 	char **pathv, **p;
 
 	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
@@ -601,7 +601,9 @@ void xsg_imlib_init(void) {
 		xsg_message("Adding dir to font path: \"%s\"", *p);
 		imlib_add_path_to_font_path(*p);
 	}
+}
 
+void xsg_imlib_init(void) {
 	xsg_main_add_signal_cleanup(signal_cleanup);
 	xsg_main_add_signal_handler(signal_handler);
 }

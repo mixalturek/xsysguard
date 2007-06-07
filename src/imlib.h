@@ -62,6 +62,7 @@
 /******************************************************************************/
 
 void xsg_imlib_init(void);
+void xsg_imlib_init_font_path(void);
 void xsg_imlib_set_cache_size(int size);
 void xsg_imlib_set_font_cache_size(int size);
 
