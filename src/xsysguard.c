@@ -357,14 +357,15 @@ static void usage(void) {
 	char **p;
 
 	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
-		"Usage: xsysguard [ARGUMENTS...] [CONFIG]\n\n"
+		"Usage: xsysguard [ARGUMENTS...] [CONFIGS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help         Print this help message to stdout\n"
 		"  -m, --modules      Print a list of all available modules to stdout\n"
-		"  -f, --file=FILE    Read configuration from FILE\n"
-		"  -i, --interval=I   Set main interval to I milliseconds\n"
-		"  -F, --fontcache=B  Set imlib font cache size to B bytes\n"
-		"  -I, --imgcache=B   Set imlib image cache size to B bytes\n"
+		"  -f, --fonts        Print a list of all available fonts to stdout\n"
+		"  -i, --interval=N   Set main interval to N milliseconds\n"
+		"  -C, --config=FILE  Read configuration from FILE\n"
+		"  -F, --fontcache=N  Set imlib's font cache size to N bytes\n"
+		"  -I, --imgcache=N   Set imlib's image cache size to N bytes\n"
 		"  -c, --color        Enable colored logging\n"
 		"  -t, --time         Add current time to each log line\n"
 		"  -l, --log=N        Set loglevel to N: "
@@ -413,6 +414,7 @@ static void usage(void) {
 
 int main(int argc, char **argv) {
 	bool list_modules = FALSE;
+	bool list_fonts = FALSE;
 	bool print_usage = FALSE;
 	uint64_t interval = 1000;
 	xsg_list_t *filename_list = NULL;
@@ -426,8 +428,9 @@ int main(int argc, char **argv) {
 		{ "log",       1, NULL, 'l' },
 		{ "color",     0, NULL, 'c' },
 		{ "time",      0, NULL, 't' },
-		{ "file",      1, NULL, 'f' },
+		{ "config",    1, NULL, 'C' },
 		{ "modules",   0, NULL, 'm' },
+		{ "fonts",     0, NULL, 'f' },
 		{ NULL,        0, NULL,  0  }
 	};
 
@@ -435,7 +438,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hi:F:I:l:f:mct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hi:F:I:l:C:mfct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -456,7 +459,7 @@ int main(int argc, char **argv) {
 				if (optarg)
 					xsg_imlib_set_cache_size(atoi(optarg));
 				break;
-			case 'f':
+			case 'C':
 				if (optarg)
 					filename_list = xsg_list_append(filename_list, xsg_strdup(optarg));
 				break;
@@ -472,6 +475,9 @@ int main(int argc, char **argv) {
 				break;
 			case 'm':
 				list_modules = TRUE;
+				break;
+			case 'f':
+				list_fonts = TRUE;
 				break;
 			case '?':
 				print_usage = TRUE;
@@ -490,6 +496,13 @@ int main(int argc, char **argv) {
 
 	if (list_modules) {
 		xsg_modules_list();
+		exit(EXIT_SUCCESS);
+	}
+
+	xsg_imlib_init_font_path();
+
+	if (list_fonts) {
+		xsg_imlib_list_fonts();
 		exit(EXIT_SUCCESS);
 	}
 
@@ -524,7 +537,6 @@ int main(int argc, char **argv) {
 	}
 
 	xsg_rpn_init();
-	xsg_imlib_init_font_path();
 	xsg_window_init();
 	xsg_imlib_init();
 

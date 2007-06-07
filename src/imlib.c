@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <Imlib2.h>
+#include <stdio.h>
 #include <math.h>
 #include <signal.h>
 
@@ -581,6 +582,20 @@ void xsg_imlib_text_draw(int x, int y, const char *text) {
 		imlib_text_draw(x, y, text);
 	else
 		xsg_imlib_text_draw_with_return_metrics(x, y, text, NULL, NULL, NULL, NULL);
+}
+
+/******************************************************************************/
+
+void xsg_imlib_list_fonts(void) {
+	char **list;
+	int num, i;
+
+	list = imlib_list_fonts(&num);
+
+	for (i = 0; i < num; i++)
+		printf("%s\n", list[i]);
+
+	imlib_free_font_list(list, num);
 }
 
 /******************************************************************************
