@@ -210,6 +210,7 @@ void xsg_hash_table_unref(xsg_hash_table_t *hash_table);
 void xsg_hash_table_insert(xsg_hash_table_t *hash_table, void *key, void *value);
 void *xsg_hash_table_lookup(xsg_hash_table_t *hash_table, const void *key);
 bool xsg_hash_table_lookup_extended(xsg_hash_table_t *hash_table, const void *key, void **orig_key, void **value);
+bool xsg_hash_table_remove(xsg_hash_table_t *hash_table, const void *key);
 void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table);
 void xsg_hash_table_destroy(xsg_hash_table_t *hash_table);
 

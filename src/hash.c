@@ -137,7 +137,7 @@ static xsg_hash_node_t *xsg_hash_node_new(void *key, void *value) {
 	return hash_node;
 }
 
-static void xsg_hash_nodes_destroy(xsg_hash_node_t *hash_node,
+static void xsg_hash_node_destroy(xsg_hash_node_t *hash_node,
 					void (*key_destroy_func)(void *data),
 					void (*value_destroy_func)(void *data)) {
 	if (key_destroy_func)
@@ -145,6 +145,21 @@ static void xsg_hash_nodes_destroy(xsg_hash_node_t *hash_node,
 	if (value_destroy_func)
 		value_destroy_func(hash_node->value);
 	xsg_free(hash_node);
+}
+
+static void xsg_hash_nodes_destroy(xsg_hash_node_t *hash_node,
+					void (*key_destroy_func)(void *data),
+					void (*value_destroy_func)(void *data)) {
+	while (hash_node) {
+		xsg_hash_node_t *next = hash_node->next;
+
+		if (key_destroy_func)
+			key_destroy_func(hash_node->key);
+		if (value_destroy_func)
+			value_destroy_func(hash_node->value);
+		xsg_free(hash_node);
+		hash_node = next;
+	}
 }
 
 /******************************************************************************/
@@ -297,6 +312,25 @@ void xsg_hash_table_insert(xsg_hash_table_t *hash_table, void *key, void *value)
 }
 
 /******************************************************************************/
+
+bool xsg_hash_table_remove(xsg_hash_table_t *hash_table, const void *key) {
+	xsg_hash_node_t **node, *dest;
+
+	if (unlikely(hash_table == NULL))
+		return FALSE;
+
+	node = xsg_hash_table_lookup_node(hash_table, key);
+
+	if (*node) {
+		dest = *node;
+		(*node) = dest->next;
+		xsg_hash_node_destroy(dest, hash_table->key_destroy_func, hash_table->value_destroy_func);
+		hash_table->nnodes--;
+		xsg_hash_table_resize(hash_table);
+		return TRUE;
+	}
+	return FALSE;
+}
 
 void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table) {
 	unsigned i;
