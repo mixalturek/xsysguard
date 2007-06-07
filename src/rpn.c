@@ -341,6 +341,25 @@ static void op_strdown(void) {
 	}
 }
 
+static void op_strreverse(void) {
+	char *h, *t;
+
+	h = str_stptr[0]->str;
+	t = h + str_stptr[0]->len - 1;
+
+	if (*h) {
+		while (h < t) {
+			char c;
+
+			c = *h;
+			*h = *t;
+			h++;
+			*t = c;
+			t--;
+		}
+	}
+}
+
 static void op_strinsert(void) {
 	ssize_t pos = num_stptr[-1];
 	ssize_t len = num_stptr[0];
@@ -552,6 +571,9 @@ xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
 		} else if (xsg_conf_find_command("STRDOWN")) {
 			CHECK_STR_STACK_SIZE("STRDOWN", 1);
 			op->op = op_strdown;
+		} else if (xsg_conf_find_command("STRREVERSE")) {
+			CHECK_STR_STACK_SIZE("STRREVERSE", 1);
+			op->op = op_strreverse;
 		} else if (xsg_conf_find_command("STRINSERT")) {
 			CHECK_STR_STACK_SIZE("STRINSERT", 2);
 			CHECK_NUM_STACK_SIZE("STRINSERT", 2);
