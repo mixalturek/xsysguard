@@ -770,7 +770,7 @@ static void set_size_hints(xsg_window_t *window) {
 	size_hints->y = window->yoffset;
 	size_hints->win_gravity = window->gravity;
 
-	xsg_message("%s: Setting size hints", window->config);
+	xsg_debug("%s: Setting size hints", window->config);
 
 	XSetWMNormalHints(display, window->window, size_hints);
 
@@ -791,7 +791,7 @@ static void set_class_hints(xsg_window_t *window) {
 	class_hint->res_name = window->resource;
 	class_hint->res_class = window->class;
 
-	xsg_message("%s: Setting class hints", window->config);
+	xsg_debug("%s: Setting class hints", window->config);
 
 	XSetClassHint(display, window->window, class_hint);
 
@@ -816,7 +816,7 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 				xsg_window_t *window = l->data;
 
 				if (window->window == event.xexpose.window) {
-					xsg_message("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
+					xsg_debug("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
 							event.xexpose.x, event.xexpose.y,
 							event.xexpose.width, event.xexpose.height);
 					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
