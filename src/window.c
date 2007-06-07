@@ -19,6 +19,7 @@
  */
 
 #include <xsysguard.h>
+#include <signal.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
@@ -844,6 +845,38 @@ static int io_error_handler(Display *display) {
 
 /******************************************************************************
  *
+ * signal handler
+ *
+ ******************************************************************************/
+
+static bool need_render_all = FALSE;
+
+static void signal_handler(int signum) {
+	if (signum == SIGHUP)
+		need_render_all = TRUE;
+}
+
+static void signal_cleanup(int signum) {
+	xsg_list_t *l;
+
+	if (need_render_all) {
+		need_render_all = FALSE;
+
+		xsg_message("Rendering all windows");
+
+		for (l = window_list; l; l = l->next) {
+			xsg_window_t *window = l->data;
+
+			xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
+		}
+	}
+
+	xsg_window_render();
+	xsg_window_render_xshape();
+}
+
+/******************************************************************************
+ *
  * initialize window
  *
  ******************************************************************************/
@@ -932,8 +965,6 @@ void xsg_window_init() {
 	imlib_context_set_anti_alias(1);
 	imlib_context_set_display(display);
 
-	xsg_main_add_signal_handler(xsg_imlib_flush_cache);
-
 	xsg_main_add_update_func(update);
 
 	xsg_widgets_init();
@@ -950,6 +981,9 @@ void xsg_window_init() {
 
 		update_visible(window);
 	}
+
+	xsg_main_add_signal_cleanup(signal_cleanup);
+	xsg_main_add_signal_handler(signal_handler);
 }
 
 bool xsg_window_color_lookup(char *name, uint32_t *color) {

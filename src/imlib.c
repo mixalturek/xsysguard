@@ -27,23 +27,44 @@
 
 /******************************************************************************/
 
+static xsg_hash_table_t *image_hash_table = NULL;
+
 static bool flush_image_cache = FALSE;
 static bool flush_font_cache = FALSE;
 
 /******************************************************************************/
 
-void xsg_imlib_flush_cache(int signum) {
+static void signal_handler(int signum) {
 	switch (signum) {
 		case SIGUSR1:
-			xsg_message("Triggering image cache flush");
 			flush_image_cache = TRUE;
 			break;
 		case SIGUSR2:
-			xsg_message("Triggering font cache flush");
 			flush_font_cache = TRUE;
 			break;
 		default:
 			break;
+	}
+}
+
+static void signal_cleanup(int signum) {
+	if (flush_image_cache) {
+		int cache_size;
+
+		xsg_message("Flushing image cache");
+
+		if (image_hash_table != NULL)
+			xsg_hash_table_remove_all(image_hash_table);
+
+		cache_size = imlib_get_cache_size();
+		imlib_set_cache_size(0);
+		imlib_set_cache_size(cache_size);
+		flush_image_cache = FALSE;
+	}
+	if (flush_font_cache) {
+		xsg_message("Flushing font cache");
+		imlib_flush_font_cache();
+		flush_font_cache = FALSE;
 	}
 }
 
@@ -86,28 +107,14 @@ static char *error2str(Imlib_Load_Error error) {
 }
 
 Imlib_Image xsg_imlib_load_image(const char *filename) {
-	static xsg_hash_table_t *hash_table = NULL;
 	static char **pathv = NULL;
 	Imlib_Load_Error error;
 	Imlib_Image image;
 	char **p;
 	char *file;
 
-	if (unlikely(hash_table == NULL))
-		hash_table = xsg_hash_table_new_full(xsg_str_hash, xsg_str_equal, xsg_free, xsg_free);
-
-	if (unlikely(flush_image_cache)) {
-		int cache_size;
-
-		xsg_message("Flushing image cache");
-
-		xsg_hash_table_remove_all(hash_table);
-
-		cache_size = imlib_get_cache_size();
-		imlib_set_cache_size(0);
-		imlib_set_cache_size(cache_size);
-		flush_image_cache = FALSE;
-	}
+	if (unlikely(image_hash_table == NULL))
+		image_hash_table = xsg_hash_table_new_full(xsg_str_hash, xsg_str_equal, xsg_free, xsg_free);
 
 	if (unlikely(pathv == NULL)) {
 		pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
@@ -116,7 +123,7 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 			xsg_error("Cannot get XSYSGUARD_IMAGE_PATH");
 	}
 
-	file = xsg_hash_table_lookup(hash_table, filename);
+	file = xsg_hash_table_lookup(image_hash_table, filename);
 
 	if (file != NULL) {
 		image = imlib_load_image_with_error_return(file, &error);
@@ -126,7 +133,7 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 			return image;
 		} else {
 			xsg_message("Loading image \"%s\" failed: %s", file, error2str(error));
-			xsg_hash_table_remove(hash_table, filename);
+			xsg_hash_table_remove(image_hash_table, filename);
 		}
 	}
 
@@ -139,7 +146,7 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 
 		if (image != NULL) {
 			xsg_message("Loaded image: \"%s\"", file);
-			xsg_hash_table_insert(hash_table, xsg_strdup(filename), file);
+			xsg_hash_table_insert(image_hash_table, xsg_strdup(filename), file);
 			return image;
 		} else {
 			xsg_message("Loading image \"%s\" failed: %s", file, error2str(error));
@@ -391,11 +398,6 @@ static bool xsg_imlib_has_text_draw_bug() {
 }
 
 void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int *width_return, int *height_return, int *horizontal_advance_return, int *vertical_advance_return) {
-	if (unlikely(flush_font_cache)) {
-		xsg_message("Flushing font cache");
-		imlib_flush_font_cache();
-		flush_font_cache = FALSE;
-	}
 	if (likely(!xsg_imlib_has_text_draw_bug())) {
 		imlib_text_draw_with_return_metrics(x, y, text, width_return, height_return, horizontal_advance_return, vertical_advance_return);
 	} else {
@@ -575,11 +577,6 @@ void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int
 }
 
 void xsg_imlib_text_draw(int x, int y, const char *text) {
-	if (unlikely(flush_font_cache)) {
-		xsg_message("Flushing font cache");
-		imlib_flush_font_cache();
-		flush_font_cache = FALSE;
-	}
 	if (likely(!xsg_imlib_has_text_draw_bug()))
 		imlib_text_draw(x, y, text);
 	else
@@ -604,6 +601,9 @@ void xsg_imlib_init(void) {
 		xsg_message("Adding dir to font path: \"%s\"", *p);
 		imlib_add_path_to_font_path(*p);
 	}
+
+	xsg_main_add_signal_cleanup(signal_cleanup);
+	xsg_main_add_signal_handler(signal_handler);
 }
 
 /******************************************************************************/

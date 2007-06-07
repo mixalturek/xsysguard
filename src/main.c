@@ -36,9 +36,12 @@ static xsg_list_t *shutdown_list = NULL;
 static xsg_list_t *poll_list = NULL;
 static xsg_list_t *timeout_list = NULL;
 static xsg_list_t *signal_handler_list = NULL;
+static xsg_list_t *signal_cleanup_list = NULL;
 
 static uint64_t tick = 0;
 static uint64_t interval = 1000;
+
+static int last_received_signum = 0;
 
 /******************************************************************************/
 
@@ -179,6 +182,26 @@ void xsg_main_remove_signal_handler(void (*func)(int signum)) {
 
 /******************************************************************************/
 
+void xsg_main_add_signal_cleanup(void (*func)(int signum)) {
+	xsg_list_t *l;
+
+	if (unlikely(func == NULL))
+		return;
+
+	for (l = signal_cleanup_list; l; l = l->next)
+		if (unlikely(func == l->data))
+			return;
+
+	signal_cleanup_list = xsg_list_prepend(signal_cleanup_list, func);
+}
+
+void xsg_main_remove_signal_cleanup(void (*func)(int signum)) {
+	if (likely(func != NULL))
+		signal_cleanup_list = xsg_list_remove(signal_cleanup_list, func);
+}
+
+/******************************************************************************/
+
 static void loop(void) {
 	struct timeval time_out;
 	struct timeval time_start;
@@ -208,6 +231,15 @@ static void loop(void) {
 
 		while (1) {
 			xsg_main_timeout_t *timeout = NULL;
+
+			if (last_received_signum != 0) {
+				last_received_signum = 0; // FIXME atomic?
+				xsg_message("Running signal cleanup functions...");
+				for (l = signal_cleanup_list; l; l = l->next) {
+					void (*func)(int) = l->data;
+					func(last_received_signum);
+				}
+			}
 
 			xsg_gettimeofday(&time_now, 0);
 			xsg_timeval_sub(&time_diff, &time_now, &time_start);
@@ -258,8 +290,10 @@ static void loop(void) {
 
 			fd_count = select(fd_max + 1, &read_fds, &write_fds, &except_fds, &time_sleep);
 
-			if (unlikely(fd_count == -1) && (errno == EINTR))
+			if (unlikely(fd_count == -1) && (errno == EINTR)) {
+				xsg_debug("Interrupted by signal");
 				continue;
+			}
 
 			if (unlikely(fd_count == -1))
 				xsg_error("select: %s", strerror(errno));
@@ -319,7 +353,8 @@ static void shutdown(void) {
 
 static void signal_handler(int signum) {
 	xsg_list_t *l;
-	void (*func)(int);
+
+	last_received_signum = signum;
 
 	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM || signum == SIGABRT)
 		xsg_error("Received signal %d: %s", signum, sys_siglist[signum]);
@@ -327,7 +362,7 @@ static void signal_handler(int signum) {
 	xsg_message("Received signal %d: %s", signum, sys_siglist[signum]);
 
 	for (l = signal_handler_list; l; l = l->next) {
-		func = l->data;
+		void (*func)(int) = l->data;
 		func(signum);
 	}
 }
