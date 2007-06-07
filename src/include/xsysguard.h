@@ -185,6 +185,35 @@ void xsg_string_append_printf(xsg_string_t *string, const char *format, ...);
 char *xsg_string_free(xsg_string_t *string, bool free_segment);
 
 /******************************************************************************
+ * hash.c
+ ******************************************************************************/
+
+bool xsg_direct_equal(const void *a, const void *b);
+unsigned xsg_direct_hash(const void *v);
+
+bool xsg_int_equal(const void *a, const void *b);
+unsigned xsg_int_hash(const void *v);
+
+bool xsg_str_equal(const void *a, const void *b);
+unsigned xsg_str_hash(const void *v);
+
+typedef struct _xsg_hash_table_t xsg_hash_table_t;
+
+xsg_hash_table_t *xsg_hash_table_new(unsigned (*hash_func)(const void *key),
+					bool (*equal_func)(const void *a, const void *b));
+xsg_hash_table_t *xsg_hash_table_new_full(unsigned (*hash_func)(const void *key),
+					bool (*equal_func)(const void *a, const void *b),
+					void (*key_destroy_notify_func)(void *data),
+					void (*value_destroy_notify_func)(void *data));
+xsg_hash_table_t *xsg_hash_table_ref(xsg_hash_table_t *hash_table);
+void xsg_hash_table_unref(xsg_hash_table_t *hash_table);
+void xsg_hash_table_insert(xsg_hash_table_t *hash_table, void *key, void *value);
+void *xsg_hash_table_lookup(xsg_hash_table_t *hash_table, const void *key);
+bool xsg_hash_table_lookup_extended(xsg_hash_table_t *hash_table, const void *key, void **orig_key, void **value);
+void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table);
+void xsg_hash_table_destroy(xsg_hash_table_t *hash_table);
+
+/******************************************************************************
  * utils.c
  ******************************************************************************/
 
