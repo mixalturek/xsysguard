@@ -26,10 +26,13 @@
 
 /******************************************************************************/
 
+#include <string.h>
+
 #include "widgets.h"
 #include "widget.h"
 #include "window.h"
 #include "angle.h"
+#include "printf.h"
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
@@ -37,6 +40,7 @@
 /******************************************************************************/
 
 typedef struct {
+	xsg_printf_t *print;
 	xsg_angle_t *angle;
 	char *filename;
 } image_t;
@@ -56,7 +60,8 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 	img = xsg_imlib_load_image(image->filename);
 
 	if (unlikely(img == NULL)) {
-		xsg_warning("Cannot load image \"%s\"", image->filename);
+		xsg_warning("%s: Render Image: Cannot load image \"%s\"",
+				xsg_window_get_config_name(widget->window), image->filename);
 		return;
 	}
 
@@ -78,14 +83,27 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 }
 
 static void update_image(xsg_widget_t *widget, xsg_var_t *var) {
-	return;
+	image_t *image;
+	char *filename;
+
+	image = widget->data;
+
+	filename = image->filename;
+
+	image->filename = xsg_printf(image->print, var);
+
+	if (filename != NULL && strcmp(filename, image->filename) != 0)
+		xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
+
+	if (filename != NULL)
+		xsg_free(filename);
 }
 
 static void scroll_image(xsg_widget_t *widget) {
 	return;
 }
 
-void xsg_widget_image_parse(xsg_window_t *window) {
+xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update) {
 	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
@@ -94,6 +112,7 @@ void xsg_widget_image_parse(xsg_window_t *window) {
 
 	image = xsg_new(image_t, 1);
 
+	widget->update = xsg_conf_read_uint();
 	widget->xoffset = xsg_conf_read_int();
 	widget->yoffset = xsg_conf_read_int();
 	widget->width = xsg_conf_read_uint();
@@ -103,6 +122,7 @@ void xsg_widget_image_parse(xsg_window_t *window) {
 	widget->scroll_func = scroll_image;
 	widget->data = (void *) image;
 
+	image->print = xsg_printf_new(xsg_conf_read_string());
 	image->angle = NULL;
 	image->filename = xsg_conf_read_string();
 
@@ -120,6 +140,17 @@ void xsg_widget_image_parse(xsg_window_t *window) {
 	if (angle != 0.0)
 		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
 
+	return widget;
 }
 
+void xsg_widget_image_parse_var(xsg_var_t *var) {
+	xsg_widget_t *widget;
+	image_t *image;
+
+	widget = xsg_widgets_last();
+	image = widget->data;
+
+	xsg_printf_add_var(image->print, var);
+	xsg_conf_read_newline();
+};
 

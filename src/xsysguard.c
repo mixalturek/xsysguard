@@ -245,7 +245,9 @@ static void parse_config(char *config_name, char *config_buffer) {
 		} else if (xsg_conf_find_command("Polygon")) {
 			xsg_widget_polygon_parse(window);
 		} else if (xsg_conf_find_command("Image")) {
-			xsg_widget_image_parse(window);
+			widget = xsg_widget_image_parse(window, &update);
+			while (parse_var(window, widget, update, &var) != 0)
+				xsg_widget_image_parse_var(var);
 		} else if (xsg_conf_find_command("BarChart")) {
 			widget = xsg_widget_barchart_parse(window, &update);
 			while (parse_var(window, widget, update, &var) != 0)

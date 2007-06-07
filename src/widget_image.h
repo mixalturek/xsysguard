@@ -23,11 +23,12 @@
 
 #include <xsysguard.h>
 
-#include "window.h"
+#include "types.h"
 
 /*****************************************************************************/
 
-void xsg_widget_image_parse(xsg_window_t *window);
+xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update);
+void xsg_widget_image_parse_var(xsg_var_t *var);
 
 /******************************************************************************/
 
