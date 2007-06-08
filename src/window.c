@@ -639,6 +639,7 @@ static void update_visible(xsg_window_t *window) {
 			else if (window->layer < 0)
 				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_BELOW");
 
+			xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
 		} else {
 			xsg_debug("%s: XUnmapWindow", window->config);
 
@@ -664,20 +665,10 @@ void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffse
  ******************************************************************************/
 
 void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
-	if (widget == NULL) {
-		bool visible = window->visible;
-
-		window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
-
-		if (visible != window->visible) {
-			update_visible(window);
-			if (window->visible) {
-				xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
-			}
-		}
-	} else {
+	if (widget == NULL)
+		update_visible(window);
+	else
 		xsg_widgets_update(widget, var);
-	}
 }
 
 /******************************************************************************
@@ -692,17 +683,8 @@ static void update(uint64_t tick) {
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
 
-		if ((window->visible_update != 0) && (tick % window->visible_update) == 0) {
-			bool visible = window->visible;
-
-			window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
-
-			if (visible != window->visible) {
-				update_visible(window);
-				if (window->visible)
-					xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
-			}
-		}
+		if ((window->visible_update != 0) && (tick % window->visible_update) == 0)
+			update_visible(window);
 	}
 
 	xsg_window_render();
