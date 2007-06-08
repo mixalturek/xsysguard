@@ -669,12 +669,14 @@ static void exec_daemon(daemon_t *daemon) {
 	for (l = daemon->var_list; l; l = l->next) {
 		daemon_var_t *daemon_var = l->data;
 
-		daemon_var->str = xsg_string_truncate(daemon_var->str, 0);
-		daemon_var->num = DNAN;
-
-		daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
-		daemon_var->new_num = DNAN;
-		daemon_var->new_num_fill = 0;
+		if (daemon_var->type == NUM) {
+			daemon_var->num = DNAN;
+			daemon_var->new_num = DNAN;
+			daemon_var->new_num_fill = 0;
+		} else {
+			daemon_var->str = xsg_string_truncate(daemon_var->str, 0);
+			daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
+		}
 	}
 }
 
