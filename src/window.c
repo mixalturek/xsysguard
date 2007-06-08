@@ -244,7 +244,9 @@ void xsg_window_parse_background(xsg_window_t * window) {
 }
 
 void xsg_window_parse_xshape(xsg_window_t *window) {
-	window->xshape = xsg_conf_read_uint();
+	uint64_t val = xsg_conf_read_uint();
+
+	window->xshape = MIN(val, 255);
 	xsg_conf_read_newline();
 }
 
