@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <signal.h>
+#include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/shape.h>
@@ -62,12 +63,14 @@ struct _xsg_window_t {
 	Imlib_Color background;
 	bool copy_from_parent;
 	bool copy_from_root;
-	bool xshape;
+	unsigned xshape;
 	bool argb_visual;
 	Visual *visual;
 	Colormap colormap;
 	int depth;
 	Window window;
+
+	Pixmap pixmap;
 	Pixmap mask;
 
 	Imlib_Updates xexpose_updates;
@@ -129,12 +132,14 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->copy_from_parent = FALSE;
 	window->copy_from_root = FALSE;
 
-	window->xshape = FALSE;
+	window->xshape = 0;
 	window->argb_visual = FALSE;
 	window->visual = NULL;
 	window->colormap = 0;
 	window->depth = 0;
 	window->window = 0;
+
+	window->pixmap = 0;
 	window->mask = 0;
 
 	window->xexpose_updates = 0;
@@ -239,7 +244,7 @@ void xsg_window_parse_background(xsg_window_t * window) {
 }
 
 void xsg_window_parse_xshape(xsg_window_t *window) {
-	window->xshape = xsg_conf_read_boolean();
+	window->xshape = xsg_conf_read_uint();
 	xsg_conf_read_newline();
 }
 
@@ -495,6 +500,9 @@ static void xrender(xsg_window_t *window, int xoffset, int yoffset) {
 
 	XFreePixmap(display, colors);
 	XFreePixmap(display, alpha);
+
+	if (window->xshape)
+		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
 }
 
 #endif /* ENABLE_XRENDER */
@@ -506,7 +514,6 @@ static void xrender(xsg_window_t *window, int xoffset, int yoffset) {
  ******************************************************************************/
 
 static void render(xsg_window_t *window) {
-	Imlib_Updates xexpose_update;
 	Imlib_Image buffer;
 	xsg_list_t *update;
 
@@ -515,28 +522,36 @@ static void render(xsg_window_t *window) {
 
 	xsg_debug("%s: Render...", window->config);
 
-	window->xexpose_updates = imlib_updates_merge_for_rendering(window->xexpose_updates, window->width, window->height);
-
-	for (xexpose_update = window->xexpose_updates; xexpose_update; xexpose_update = imlib_updates_get_next(xexpose_update)) {
-		int x, y, w, h;
-
-		imlib_updates_get_coordinates(xexpose_update, &x, &y, &w, &h);
-		window->updates = xsg_update_append_rect(window->updates, x, y, w, h);
-	}
-
-	if (window->xexpose_updates)
-		imlib_updates_free(window->xexpose_updates);
-
-	window->xexpose_updates = 0;
-
 	imlib_context_set_visual(window->visual);
 	imlib_context_set_colormap(window->colormap);
-	imlib_context_set_drawable(window->window);
 
-	if (window->xshape)
+	if (window->xshape > 0 && !window->argb_visual) {
+		imlib_context_set_drawable(window->pixmap);
 		imlib_context_set_mask(window->mask);
-	else
+		imlib_context_set_mask_alpha_threshold(window->xshape);
+	} else {
+		imlib_context_set_drawable(window->window);
 		imlib_context_set_mask(0);
+
+		if (window->xexpose_updates) {
+			Imlib_Updates xexpose_update;
+
+			window->xexpose_updates = imlib_updates_merge_for_rendering(window->xexpose_updates, window->width, window->height);
+
+			for (xexpose_update = window->xexpose_updates; xexpose_update; xexpose_update = imlib_updates_get_next(xexpose_update)) {
+				int x, y, w, h;
+
+				imlib_updates_get_coordinates(xexpose_update, &x, &y, &w, &h);
+				window->updates = xsg_update_append_rect(window->updates, x, y, w, h);
+			}
+
+			imlib_updates_free(window->xexpose_updates);
+			window->xexpose_updates = 0;
+		}
+	}
+
+	if (window->updates == NULL)
+		return;
 
 	for (update = window->updates; update; update = update->next) {
 		int up_x, up_y, up_w, up_h;
@@ -563,7 +578,7 @@ static void render(xsg_window_t *window) {
 		if (window->argb_visual)
 			xrender(window, up_x, up_y);
 		else
-			T(imlib_render_image_on_drawable(up_x, up_y));
+			imlib_render_image_on_drawable(up_x, up_y);
 
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(1);
@@ -571,7 +586,14 @@ static void render(xsg_window_t *window) {
 	}
 
 	xsg_update_free(window->updates);
-	window->updates = 0;
+	window->updates = NULL;
+
+	if (window->xshape > 0 && !window->argb_visual) {
+		XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
+		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+		XClearWindow(display, window->window);
+		XSync(display, False);
+	}
 }
 
 void xsg_window_render(void) {
@@ -584,22 +606,6 @@ void xsg_window_render(void) {
 	}
 }
 
-/******************************************************************************/
-
-static void render_xshape(xsg_window_t *window) {
-	if (window->xshape)
-		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
-}
-
-void xsg_window_render_xshape() {
-	xsg_list_t *l;
-
-	for (l = window_list; l; l = l->next) {
-		xsg_window_t *window = l->data;
-
-		render_xshape(window);
-	}
-}
 
 /******************************************************************************/
 
@@ -700,7 +706,6 @@ static void update(uint64_t tick) {
 	}
 
 	xsg_window_render();
-	xsg_window_render_xshape();
 }
 
 /******************************************************************************
@@ -805,31 +810,41 @@ static void set_class_hints(xsg_window_t *window) {
  ******************************************************************************/
 
 static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
+	xsg_list_t *l;
 	XEvent event;
 
 	while (XPending(display)) {
 		XNextEvent(display, &event);
 		if (event.type == Expose) {
-			xsg_list_t *l;
-
 			for (l = window_list; l; l = l->next) {
 				xsg_window_t *window = l->data;
 
 				if (window->window == event.xexpose.window) {
-					xsg_debug("%s: Received XExpose: x=%d, y=%d, width=%d, height=%d", window->config,
-							event.xexpose.x, event.xexpose.y,
-							event.xexpose.width, event.xexpose.height);
 					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
 							event.xexpose.x, event.xexpose.y,
 							event.xexpose.width, event.xexpose.height);
 				}
 			}
-		} else {
-			xsg_message("Received XEvent: type=%d", event.type);
 		}
 	}
 
-	xsg_window_render();
+	for (l = window_list; l; l = l->next) {
+		xsg_window_t *window = l->data;
+
+		if (window->xshape > 0) {
+			if (window->xexpose_updates != 0) {
+				XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
+				XClearWindow(display, window->window);
+				XSync(display, False);
+
+				imlib_updates_free(window->xexpose_updates);
+				window->xexpose_updates = 0;
+			}
+		} else {
+			if (window->xexpose_updates != 0)
+				render(window);
+		}
+	}
 }
 
 /******************************************************************************
@@ -872,7 +887,6 @@ static void signal_cleanup(int signum) {
 	}
 
 	xsg_window_render();
-	xsg_window_render_xshape();
 }
 
 /******************************************************************************
@@ -953,8 +967,12 @@ void xsg_window_init() {
 		if (!window->decorations)
 			hide_decorations(window);
 
-		if (window->xshape)
+
+		if (window->xshape > 0) {
 			window->mask = XCreatePixmap(display, window->window, window->width, window->height, 1);
+			if (!window->argb_visual)
+				window->pixmap = XCreatePixmap(display, window->window, window->width, window->height, window->depth);
+		}
 
 		window->updates = xsg_update_append_rect(window->updates, 0, 0, window->width, window->height);
 	}

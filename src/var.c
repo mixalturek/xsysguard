@@ -67,7 +67,6 @@ void xsg_var_flush_dirty(void) {
 			}
 		}
 		xsg_window_render();
-		xsg_window_render_xshape();
 		dirty = FALSE;
 	}
 }

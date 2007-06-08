@@ -58,7 +58,6 @@ void xsg_window_parse_visible(xsg_window_t *window);
 /*****************************************************************************/
 
 void xsg_window_render(void);
-void xsg_window_render_xshape(void);
 
 void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height);
 
