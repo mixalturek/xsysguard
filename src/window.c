@@ -785,6 +785,81 @@ static void render(xsg_window_t *window) {
 	}
 }
 
+/******************************************************************************
+ *
+ * X11 event handler
+ *
+ ******************************************************************************/
+
+static void handle_xevent(void) {
+	xsg_list_t *l;
+	XEvent event;
+
+	XNextEvent(display, &event);
+	for (l = window_list; l; l = l->next) {
+		xsg_window_t *window = l->data;
+
+		switch (event.type) {
+			case Expose:
+				if (window->window == event.xexpose.window) {
+					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
+							event.xexpose.x, event.xexpose.y,
+							event.xexpose.width, event.xexpose.height);
+					xsg_debug("%s: Received Expose event: x=%d, y=%d, w=%d, h=%d",
+							window->config,
+							event.xexpose.x, event.xexpose.y,
+							event.xexpose.width, event.xexpose.height);
+				}
+				break;
+			case ReparentNotify:
+				if (window->window == event.xreparent.window) {
+					xsg_message("%s: Received ReparentNotify event. New parent is: 0x%lx",
+							window->config, (unsigned long) event.xreparent.parent);
+					if (window->copy_from_parent) {
+						xsg_gettimeofday_and_add(&window->copy_from_parent_timeout.tv, 0, 100 * 1000);
+						xsg_main_add_timeout(&window->copy_from_parent_timeout);
+					}
+				}
+				break;
+			default:
+				xsg_debug("Received XEvent: %d", event.type);
+				break;
+		}
+	}
+}
+
+static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
+	xsg_list_t *l;
+
+	while (XPending(display)) {
+		while (XPending(display))
+			handle_xevent();
+
+		for (l = window_list; l; l = l->next) {
+			xsg_window_t *window = l->data;
+
+			if (window->xshape > 0) {
+				if (window->xexpose_updates != 0) {
+					XClearWindow(display, window->window);
+					XSync(display, False);
+
+					imlib_updates_free(window->xexpose_updates);
+					window->xexpose_updates = 0;
+				}
+			} else {
+				if (window->xexpose_updates != 0)
+					render(window);
+			}
+		}
+	}
+}
+
+/******************************************************************************
+ *
+ * render all window
+ *
+ ******************************************************************************/
+
 void xsg_window_render(void) {
 	xsg_list_t *l;
 
@@ -793,11 +868,11 @@ void xsg_window_render(void) {
 
 		render(window);
 	}
+
+	handle_xevents(NULL, 0);
 }
 
-
 /******************************************************************************/
-
 static void update_visible(xsg_window_t *window) {
 	bool visible;
 
@@ -839,29 +914,6 @@ static void update_visible(xsg_window_t *window) {
 
 /******************************************************************************
  *
- * update append rect
- *
- ******************************************************************************/
-
-void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height) {
-	window->updates = xsg_update_append_rect(window->updates, xoffset, yoffset, width, height);
-}
-
-/******************************************************************************
- *
- * async update func
- *
- ******************************************************************************/
-
-void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
-	if (widget == NULL)
-		update_visible(window);
-	else
-		xsg_widgets_update(widget, var);
-}
-
-/******************************************************************************
- *
  * tick update func
  *
  ******************************************************************************/
@@ -885,6 +937,30 @@ static void update(uint64_t tick) {
 	}
 
 	xsg_window_render();
+}
+
+
+/******************************************************************************
+ *
+ * update append rect
+ *
+ ******************************************************************************/
+
+void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height) {
+	window->updates = xsg_update_append_rect(window->updates, xoffset, yoffset, width, height);
+}
+
+/******************************************************************************
+ *
+ * async update func
+ *
+ ******************************************************************************/
+
+void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
+	if (widget == NULL)
+		update_visible(window);
+	else
+		xsg_widgets_update(widget, var);
 }
 
 /******************************************************************************
@@ -980,66 +1056,6 @@ static void set_class_hints(xsg_window_t *window) {
 	XSetClassHint(display, window->window, class_hint);
 
 	XFree(class_hint);
-}
-
-/******************************************************************************
- *
- * X11 event handler
- *
- ******************************************************************************/
-
-static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
-	xsg_list_t *l;
-	XEvent event;
-
-	while (XPending(display)) {
-		XNextEvent(display, &event);
-		for (l = window_list; l; l = l->next) {
-			xsg_window_t *window = l->data;
-
-			switch (event.type) {
-				case Expose:
-					if (window->window == event.xexpose.window) {
-						window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
-								event.xexpose.x, event.xexpose.y,
-								event.xexpose.width, event.xexpose.height);
-						xsg_debug("%s: Received Expose event: x=%d, y=%d, w=%d, h=%d",
-								window->config,
-								event.xexpose.x, event.xexpose.y,
-								event.xexpose.width, event.xexpose.height);
-					}
-					break;
-				case ReparentNotify:
-					if (window->window == event.xreparent.window) {
-						xsg_message("%s: Received ReparentNotify event. New parent is: 0x%lx",
-								window->config, (unsigned long) event.xreparent.parent);
-						xsg_gettimeofday_and_add(&window->copy_from_parent_timeout.tv, 0, 100 * 1000);
-						xsg_main_add_timeout(&window->copy_from_parent_timeout);
-					}
-					break;
-				default:
-					xsg_debug("Received XEvent: %d", event.type);
-					break;
-			}
-		}
-	}
-
-	for (l = window_list; l; l = l->next) {
-		xsg_window_t *window = l->data;
-
-		if (window->xshape > 0) {
-			if (window->xexpose_updates != 0) {
-				XClearWindow(display, window->window);
-				XSync(display, False);
-
-				imlib_updates_free(window->xexpose_updates);
-				window->xexpose_updates = 0;
-			}
-		} else {
-			if (window->xexpose_updates != 0)
-				render(window);
-		}
-	}
 }
 
 /******************************************************************************
@@ -1156,9 +1172,10 @@ void xsg_window_init() {
 
 		window->colormap = XCreateColormap(display, RootWindow(display, screen), window->visual, AllocNone);
 
+		attrs.event_mask = ExposureMask | StructureNotifyMask;
 		attrs.background_pixel = 0;
 		attrs.colormap = window->colormap;
-		valuemask = CWBackPixel | CWColormap;
+		valuemask = CWBackPixel | CWColormap | CWEventMask;
 
 		if (window->override_redirect) {
 			attrs.override_redirect = 1;
@@ -1173,8 +1190,6 @@ void xsg_window_init() {
 		set_class_hints(window);
 
 		XStoreName(display, window->window, window->name);
-
-		XSelectInput(display, window->window, ExposureMask | StructureNotifyMask);
 
 		if (window->argb_visual)
 			xrender_init(window);
