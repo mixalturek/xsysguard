@@ -112,8 +112,8 @@ void xsg_main_remove_shutdown_func(void (*func)(void));
 void xsg_main_add_signal_handler(void (*func)(int signum));
 void xsg_main_remove_sugnal_handler(void (*func)(int signum));
 
-void xsg_main_add_signal_cleanup(void (*func)(int signum));
-void xsg_main_remove_signal_cleanup(void (*func)(int signum));
+void xsg_main_add_signal_cleanup(void (*func)(void));
+void xsg_main_remove_signal_cleanup(void (*func)(void));
 
 typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,

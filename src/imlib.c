@@ -48,7 +48,7 @@ static void signal_handler(int signum) {
 	}
 }
 
-static void signal_cleanup(int signum) {
+static void signal_cleanup(void) {
 	if (flush_image_cache) {
 		int cache_size;
 

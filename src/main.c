@@ -184,7 +184,7 @@ void xsg_main_remove_signal_handler(void (*func)(int signum)) {
 
 /******************************************************************************/
 
-void xsg_main_add_signal_cleanup(void (*func)(int signum)) {
+void xsg_main_add_signal_cleanup(void (*func)(void)) {
 	xsg_list_t *l;
 
 	if (unlikely(func == NULL))
@@ -197,7 +197,7 @@ void xsg_main_add_signal_cleanup(void (*func)(int signum)) {
 	signal_cleanup_list = xsg_list_prepend(signal_cleanup_list, func);
 }
 
-void xsg_main_remove_signal_cleanup(void (*func)(int signum)) {
+void xsg_main_remove_signal_cleanup(void (*func)(void)) {
 	if (likely(func != NULL))
 		signal_cleanup_list = xsg_list_remove(signal_cleanup_list, func);
 }
@@ -252,8 +252,8 @@ static void loop(void) {
 				last_received_signum = 0; // FIXME atomic?
 				xsg_message("Running signal cleanup functions...");
 				for (l = signal_cleanup_list; l; l = l->next) {
-					void (*func)(int) = l->data;
-					func(last_received_signum);
+					void (*func)(void) = l->data;
+					func();
 				}
 			}
 

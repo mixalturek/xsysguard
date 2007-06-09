@@ -856,7 +856,7 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 
 /******************************************************************************
  *
- * render all window
+ * render all windows
  *
  ******************************************************************************/
 
@@ -872,7 +872,12 @@ void xsg_window_render(void) {
 	handle_xevents(NULL, 0);
 }
 
-/******************************************************************************/
+/******************************************************************************
+ *
+ * update visible
+ *
+ ******************************************************************************/
+
 static void update_visible(xsg_window_t *window) {
 	bool visible;
 
@@ -1090,7 +1095,7 @@ static void signal_handler(int signum) {
 		need_render_all = TRUE;
 }
 
-static void signal_cleanup(int signum) {
+static void signal_cleanup(void) {
 	xsg_list_t *l;
 
 	if (need_render_all) {
@@ -1236,6 +1241,12 @@ void xsg_window_init() {
 	xsg_main_add_signal_cleanup(signal_cleanup);
 	xsg_main_add_signal_handler(signal_handler);
 }
+
+/******************************************************************************
+ *
+ * color lookup
+ *
+ ******************************************************************************/
 
 bool xsg_window_color_lookup(char *name, uint32_t *color) {
 	Colormap cm;
