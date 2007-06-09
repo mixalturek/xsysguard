@@ -80,8 +80,6 @@ struct _xsg_window_t {
 
 	Window window;
 
-	Window parent;
-
 	Pixmap pixmap;
 	Pixmap mask;
 
@@ -325,9 +323,12 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 	Window src;
 	XSetWindowAttributes attrs;
 
+	if (unlikely(src_window == None))
+		return;
+
 	status = XTranslateCoordinates(display, window->window, src_window, 0, 0, &x, &y, &src);
 
-	if (!status)
+	if (unlikely(!status))
 		return;
 
 	attrs.background_pixmap = ParentRelative;
@@ -340,7 +341,7 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 			CWBackPixmap | CWBackingStore | CWOverrideRedirect | CWEventMask,
 			&attrs);
 
-	if (!src)
+	if (unlikely(!src))
 		return;
 
 	imlib_context_set_drawable(src);
@@ -423,17 +424,21 @@ static void grab_root_background(xsg_window_t *window) {
 static bool check_parent_background(xsg_window_t *window) {
 	Status status;
 	unsigned int nchildren;
-	Window *children;
+	Window *children = NULL;
 	Window root;
-	Window parent = window->copy_from_parent_window;
+	Window parent = None;
 
 	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
+
+	if (parent == None)
+		return FALSE;
 
 	if (children != NULL)
 		XFree(children);
 
 	if (parent != window->copy_from_parent_window) {
 		window->copy_from_parent_window = parent;
+		xsg_message("%s: New parent window is: 0x%lx", window->config, (unsigned long) parent);
 		return TRUE;
 	} else {
 		return FALSE;
@@ -441,8 +446,8 @@ static bool check_parent_background(xsg_window_t *window) {
 }
 
 static void grab_parent_background(xsg_window_t *window) {
-	check_parent_background(window); // update window->parent
-	grab_background(window, window->parent);
+	check_parent_background(window); // update window->copy_from_parent_window
+	grab_background(window, window->copy_from_parent_window);
 }
 
 /******************************************************************************
@@ -1157,11 +1162,15 @@ void xsg_window_init() {
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
 
-		if (window->copy_from_root)
+		if (window->copy_from_root) {
+			check_root_background(window);
 			grab_root_background(window);
+		}
 
-		if (window->copy_from_parent)
+		if (window->copy_from_parent) {
+			check_parent_background(window);
 			grab_parent_background(window);
+		}
 
 		update_visible(window);
 	}
