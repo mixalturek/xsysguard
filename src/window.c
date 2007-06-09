@@ -60,15 +60,22 @@ struct _xsg_window_t {
 	int layer;
 	bool decorations;
 	bool override_redirect;
-	Imlib_Color background;
+
+	Imlib_Color background_color;
+	Imlib_Image background_image;
+	bool background_image_update;
 	bool copy_from_parent;
 	bool copy_from_root;
+
 	unsigned xshape;
 	bool argb_visual;
 	Visual *visual;
 	Colormap colormap;
 	int depth;
+
 	Window window;
+
+	Window parent;
 
 	Pixmap pixmap;
 	Pixmap mask;
@@ -124,10 +131,13 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->decorations = TRUE;
 	window->override_redirect = FALSE;
 
-	window->background.red = 0;
-	window->background.green = 0;
-	window->background.blue = 0;
-	window->background.alpha = 0xff;
+	window->background_color.red = 0;
+	window->background_color.green = 0;
+	window->background_color.blue = 0;
+	window->background_color.alpha = 0xff;
+
+	window->background_image = NULL;
+	window->background_image_update = 0;
 
 	window->copy_from_parent = FALSE;
 	window->copy_from_root = FALSE;
@@ -137,7 +147,10 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->visual = NULL;
 	window->colormap = 0;
 	window->depth = 0;
-	window->window = 0;
+
+	window->window = None;
+
+	window->parent = None;
 
 	window->pixmap = 0;
 	window->mask = 0;
@@ -232,14 +245,17 @@ void xsg_window_parse_override_redirect(xsg_window_t * window) {
 }
 
 void xsg_window_parse_background(xsg_window_t * window) {
-	if (xsg_conf_find_command("CopyFromParent"))
+	if (xsg_conf_find_command("CopyFromParent")) {
 		window->copy_from_parent = TRUE;
-	else if (xsg_conf_find_command("CopyFromRoot"))
+		window->background_image_update = xsg_conf_read_uint();
+	} else if (xsg_conf_find_command("CopyFromRoot")) {
 		window->copy_from_root = TRUE;
-	else if (xsg_conf_find_command("Color"))
-		window->background = xsg_imlib_uint2color(xsg_conf_read_color());
-	else
+		window->background_image_update = xsg_conf_read_uint();
+	} else if (xsg_conf_find_command("Color")) {
+		window->background_color = xsg_imlib_uint2color(xsg_conf_read_color());
+	} else {
 		xsg_conf_error("CopyFromParent, CopyFromRoot or Color expected");
+	}
 	xsg_conf_read_newline();
 }
 
@@ -286,6 +302,128 @@ static void set_xatom(xsg_window_t *window, const char *type, const char *proper
 	xev.xclient.data.l[2] = 0;
 
 	XSendEvent(display, XRootWindow(display, screen), FALSE, SubstructureNotifyMask, &xev);
+}
+
+/******************************************************************************
+ *
+ * grab background
+ *
+ ******************************************************************************/
+
+static void grab_background(xsg_window_t *window, Window src_window) {
+	Imlib_Image background;
+	int status;
+	int x, y;
+	XEvent event;
+	Window src;
+	XSetWindowAttributes attrs;
+
+	status = XTranslateCoordinates(display, window->window, src_window, 0, 0, &x, &y, &src);
+
+	if (!status)
+		return;
+
+	attrs.background_pixmap = ParentRelative;
+	attrs.backing_store = Always;
+	attrs.override_redirect = True;
+	attrs.event_mask = ExposureMask;
+
+	src = XCreateWindow(display, src_window, x, y, window->width, window->height, 0,
+			window->depth, CopyFromParent, window->visual,
+			CWBackPixmap | CWBackingStore | CWOverrideRedirect | CWEventMask,
+			&attrs);
+
+	if (!src)
+		return;
+
+	imlib_context_set_drawable(src);
+	imlib_context_set_visual(window->visual);
+	imlib_context_set_colormap(window->colormap);
+
+	XGrabServer(display);
+	XMapRaised(display, src);
+	XSync(display, False);
+
+	do {
+		XWindowEvent(display, src, ExposureMask, &event);
+	} while (event.type != Expose);
+
+	background = imlib_create_image_from_drawable(0, 0, 0, window->width, window->height, 0);
+
+	XUngrabServer(display);
+	XDestroyWindow(display, src);
+
+	if (background) {
+		if (window->background_image) {
+			imlib_context_set_image(window->background_image);
+			imlib_free_image();
+		}
+		window->background_image = background;
+		xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
+	}
+}
+
+static bool check_root_background() {
+	static Pixmap old_pixmap = None;
+	static Atom id = None;
+	Pixmap pixmap = None;
+	Window root;
+	int status;
+	Atom act_type;
+	int act_format;
+	unsigned long nitems, bytes_after;
+	unsigned char *prop = NULL;
+
+	root = RootWindow(display, screen);
+
+	if (id == None)
+		id = XInternAtom(display, "_XROOTMAP_ID", True);
+
+	if (id == None)
+		return FALSE;
+
+	status = XGetWindowProperty(display, root, id, 0, 1, False, XA_PIXMAP, &act_type, &act_format,
+			&nitems, &bytes_after, &prop);
+
+	if (status == Success && prop != NULL) {
+		pixmap = *((Pixmap *)prop);
+		XFree(prop);
+		if(old_pixmap != pixmap) {
+			old_pixmap = pixmap;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+static void grab_root_background(xsg_window_t *window) {
+	grab_background(window, RootWindow(display, screen));
+}
+
+static bool check_parent_background(xsg_window_t *window) {
+	Status status;
+	unsigned int nchildren;
+	Window *children;
+	Window root;
+	Window parent = window->parent;
+
+	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
+
+	if (children != NULL)
+		XFree(children);
+
+	if (parent != window->parent) {
+		window->parent = parent;
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
+static void grab_parent_background(xsg_window_t *window) {
+	check_parent_background(window); // update window->parent
+	grab_background(window, window->parent);
 }
 
 /******************************************************************************
@@ -563,11 +701,18 @@ static void render(xsg_window_t *window) {
 
 		xsg_debug("%s: Render x=%d, y=%d, width=%d, height=%d", window->config, up_x, up_y, up_w, up_h);
 
-		buffer = imlib_create_image(up_w, up_h);
-		imlib_context_set_image(buffer);
-		imlib_image_set_has_alpha(1);
-		imlib_image_clear_color(window->background.red, window->background.green,
-				window->background.blue, window->background.alpha);
+		if (window->background_image) {
+			imlib_context_set_image(window->background_image);
+			buffer = imlib_create_cropped_image(up_x, up_y, up_w, up_h);
+			imlib_context_set_image(buffer);
+			imlib_image_set_has_alpha(1);
+		} else {
+			buffer = imlib_create_image(up_w, up_h);
+			imlib_context_set_image(buffer);
+			imlib_image_set_has_alpha(1);
+			imlib_image_clear_color(window->background_color.red, window->background_color.green,
+					window->background_color.blue, window->background_color.alpha);
+		}
 
 		/* TODO grab_root / parent */
 
@@ -594,7 +739,7 @@ static void render(xsg_window_t *window) {
 		XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
 		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
 		XClearWindow(display, window->window);
-		XSync(display, False);
+		//XSync(display, False);
 	}
 }
 
@@ -684,6 +829,14 @@ static void update(uint64_t tick) {
 
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
+
+		if (window->copy_from_root)
+			if (check_root_background() || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
+				grab_root_background(window);
+
+		if (window->copy_from_parent)
+			if (check_parent_background(window) || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
+				grab_parent_background(window);
 
 		if ((window->visible_update != 0) && (tick % window->visible_update) == 0)
 			update_visible(window);
@@ -817,7 +970,6 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 
 		if (window->xshape > 0) {
 			if (window->xexpose_updates != 0) {
-				XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
 				XClearWindow(display, window->window);
 				XSync(display, False);
 
@@ -865,6 +1017,11 @@ static void signal_cleanup(int signum) {
 
 		for (l = window_list; l; l = l->next) {
 			xsg_window_t *window = l->data;
+
+			if (window->copy_from_root)
+				grab_root_background(window);
+			if (window->copy_from_parent)
+				grab_parent_background(window);
 
 			xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
 		}
