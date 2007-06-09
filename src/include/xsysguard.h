@@ -274,6 +274,7 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path);
 
 int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y);
 int xsg_gettimeofday(struct timeval *tv, void *tz);
+void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usecs);
 
 /******************************************************************************
  * logging

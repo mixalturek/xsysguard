@@ -43,6 +43,8 @@ static uint64_t interval = 1000;
 
 static int last_received_signum = 0;
 
+static bool time_error = FALSE;
+
 /******************************************************************************/
 
 void xsg_main_set_interval(uint64_t i) {
@@ -202,6 +204,12 @@ void xsg_main_remove_signal_cleanup(void (*func)(int signum)) {
 
 /******************************************************************************/
 
+void xsg_main_set_time_error(void) {
+	time_error = TRUE;
+}
+
+/******************************************************************************/
+
 static void loop(void) {
 	struct timeval time_out;
 	struct timeval time_start;
@@ -231,6 +239,14 @@ static void loop(void) {
 
 		while (1) {
 			xsg_main_timeout_t *timeout = NULL;
+
+			if (time_error) {
+				xsg_warning("Running all timeout functions due to time error");
+				for (l = timeout_list; l; l = l->next) {
+					xsg_main_timeout_t *timeout = l->data;
+					timeout->func(timeout->arg);
+				}
+			}
 
 			if (last_received_signum != 0) {
 				last_received_signum = 0; // FIXME atomic?

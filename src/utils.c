@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include <endian.h>
 
+#include "main.h"
+
 /******************************************************************************
  *
  * mem
@@ -610,14 +612,41 @@ int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y
 }
 
 int xsg_gettimeofday(struct timeval *tv, void *tz) {
+	static struct timeval last = { 0, 0 };
 	int ret;
 
 	ret = gettimeofday(tv, tz);
 
 	if (unlikely(ret))
-		xsg_error("gettimeofday(%p, %p) failed", tv, tz);
+		xsg_error("gettimeofday failed", tv, tz);
+
+	if (unlikely(timercmp(tv, &last, <))) {
+		struct timeval diff;
+
+		xsg_timeval_sub(&diff, &last, tv);
+		xsg_warning("Time moved backwards: %u sec and %u usec", (unsigned) diff.tv_sec, (unsigned) diff.tv_usec);
+		xsg_main_set_time_error();
+	}
+
+	last.tv_sec = tv->tv_sec;
+	last.tv_usec = tv->tv_usec;
 
 	return ret;
+}
+
+void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec) {
+	if (unlikely(tv == NULL))
+		return;
+
+	xsg_gettimeofday(tv, NULL);
+
+	tv->tv_sec += tv_usec / 1000000;
+	tv->tv_usec += tv_usec % 1000000;
+
+	if (tv->tv_usec > 1000000) {
+		tv->tv_sec++;
+		tv->tv_usec -= 1000000;
+	}
 }
 
 
