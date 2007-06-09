@@ -640,6 +640,7 @@ void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_
 
 	xsg_gettimeofday(tv, NULL);
 
+	tv->tv_sec += tv_sec;
 	tv->tv_sec += tv_usec / 1000000;
 	tv->tv_usec += tv_usec % 1000000;
 
