@@ -64,8 +64,13 @@ struct _xsg_window_t {
 	Imlib_Color background_color;
 	Imlib_Image background_image;
 	bool background_image_update;
+
 	bool copy_from_parent;
+	Window copy_from_parent_window;
+
 	bool copy_from_root;
+	int copy_from_root_xoffset;
+	int copy_from_root_yoffset;
 
 	unsigned xshape;
 	bool argb_visual;
@@ -140,7 +145,11 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->background_image_update = 0;
 
 	window->copy_from_parent = FALSE;
+	window->copy_from_parent_window = None;
+
 	window->copy_from_root = FALSE;
+	window->copy_from_root_xoffset = 0;
+	window->copy_from_root_yoffset = 0;
 
 	window->xshape = 0;
 	window->argb_visual = FALSE;
@@ -149,8 +158,6 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->depth = 0;
 
 	window->window = None;
-
-	window->parent = None;
 
 	window->pixmap = 0;
 	window->mask = 0;
@@ -363,7 +370,7 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 	}
 }
 
-static bool check_root_background() {
+static bool check_root_background(xsg_window_t *window) {
 	static Pixmap old_pixmap = None;
 	static Atom id = None;
 	Pixmap pixmap = None;
@@ -373,8 +380,20 @@ static bool check_root_background() {
 	int act_format;
 	unsigned long nitems, bytes_after;
 	unsigned char *prop = NULL;
+	int x, y;
+	Window src;
 
 	root = RootWindow(display, screen);
+
+	status = XTranslateCoordinates(display, window->window, root, 0, 0, &x, &y, &src);
+
+	if (status != None) {
+		if ((x != window->copy_from_root_xoffset) || (y != window->copy_from_root_yoffset)) {
+			window->copy_from_root_xoffset = x;
+			window->copy_from_root_yoffset = y;
+			return TRUE;
+		}
+	}
 
 	if (id == None)
 		id = XInternAtom(display, "_XROOTMAP_ID", True);
@@ -406,15 +425,15 @@ static bool check_parent_background(xsg_window_t *window) {
 	unsigned int nchildren;
 	Window *children;
 	Window root;
-	Window parent = window->parent;
+	Window parent = window->copy_from_parent_window;
 
 	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
 
 	if (children != NULL)
 		XFree(children);
 
-	if (parent != window->parent) {
-		window->parent = parent;
+	if (parent != window->copy_from_parent_window) {
+		window->copy_from_parent_window = parent;
 		return TRUE;
 	} else {
 		return FALSE;
@@ -831,7 +850,7 @@ static void update(uint64_t tick) {
 		xsg_window_t *window = l->data;
 
 		if (window->copy_from_root)
-			if (check_root_background() || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
+			if (check_root_background(window) || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
 				grab_root_background(window);
 
 		if (window->copy_from_parent)
@@ -1050,6 +1069,12 @@ void xsg_window_init() {
 	if (screen == 0)
 		screen = XDefaultScreen(display);
 
+	imlib_context_set_blend(1);
+	imlib_context_set_dither(0);
+	imlib_context_set_dither_mask(0);
+	imlib_context_set_anti_alias(1);
+	imlib_context_set_display(display);
+
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
 		XSetWindowAttributes attrs;
@@ -1118,12 +1143,6 @@ void xsg_window_init() {
 		window->updates = xsg_update_append_rect(window->updates, 0, 0, window->width, window->height);
 	}
 
-	imlib_context_set_blend(1);
-	imlib_context_set_dither(0);
-	imlib_context_set_dither_mask(0);
-	imlib_context_set_anti_alias(1);
-	imlib_context_set_display(display);
-
 	xsg_main_add_update_func(update);
 
 	xsg_widgets_init();
@@ -1137,6 +1156,12 @@ void xsg_window_init() {
 
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
+
+		if (window->copy_from_root)
+			grab_root_background(window);
+
+		if (window->copy_from_parent)
+			grab_parent_background(window);
 
 		update_visible(window);
 	}
