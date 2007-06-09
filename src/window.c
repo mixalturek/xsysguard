@@ -439,13 +439,13 @@ static void grab_parent_background(xsg_window_t *window) {
 
 	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
 
+	if (children != NULL)
+		XFree(children);
+
 	if (parent == None) {
 		xsg_warning("%s: Cannot determine parent window", window->config);
 		return;
 	}
-
-	if (children != NULL)
-		XFree(children);
 
 	xsg_message("%s: Grabbing parent window: 0x%lx", window->config, (unsigned long) parent);
 
