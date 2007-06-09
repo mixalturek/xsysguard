@@ -574,7 +574,6 @@ static void xrender_pixmaps(xsg_window_t *window, Pixmap *colors, Pixmap *alpha,
 			width, height, 32, width * 4);
 
 	if (window->xshape) {
-
 		mask_data = xsg_new(DATA8, width * height);
 
 		mask_image = xsg_new(XImage, 1);
@@ -594,22 +593,33 @@ static void xrender_pixmaps(xsg_window_t *window, Pixmap *colors, Pixmap *alpha,
 		mask_image->green_mask = 0xff;
 		mask_image->blue_mask = 0xff;
 		XInitImage(mask_image);
-	}
 
-	for (i = 0; i < (width * height); i++) {
+		for (i = 0; i < (width * height); i++) {
+			A_VAL(colors_data + i) = 0xff;
+			R_VAL(colors_data + i) = R_VAL(data + i);
+			G_VAL(colors_data + i) = G_VAL(data + i);
+			B_VAL(colors_data + i) = B_VAL(data + i);
 
-		A_VAL(colors_data + i) = 0xff;
-		R_VAL(colors_data + i) = R_VAL(data + i);
-		G_VAL(colors_data + i) = G_VAL(data + i);
-		B_VAL(colors_data + i) = B_VAL(data + i);
+			A_VAL(alpha_data + i) = A_VAL(data + i);
+			R_VAL(alpha_data + i) = 0;
+			G_VAL(alpha_data + i) = 0;
+			B_VAL(alpha_data + i) = 0;
 
-		A_VAL(alpha_data + i) = A_VAL(data + i);
-		R_VAL(alpha_data + i) = 0;
-		G_VAL(alpha_data + i) = 0;
-		B_VAL(alpha_data + i) = 0;
+			//mask_data[i] = (A_VAL(data + i) == 0) ? 0 : 1;
+			mask_data[i] = (A_VAL(data + i) >= window->xshape) ? 1 : 0;
+		}
+	} else {
+		for (i = 0; i < (width * height); i++) {
+			A_VAL(colors_data + i) = 0xff;
+			R_VAL(colors_data + i) = R_VAL(data + i);
+			G_VAL(colors_data + i) = G_VAL(data + i);
+			B_VAL(colors_data + i) = B_VAL(data + i);
 
-		if (window->xshape)
-			mask_data[i] = (A_VAL(data + i) == 0) ? 0 : 1;
+			A_VAL(alpha_data + i) = A_VAL(data + i);
+			R_VAL(alpha_data + i) = 0;
+			G_VAL(alpha_data + i) = 0;
+			B_VAL(alpha_data + i) = 0;
+		}
 	}
 
 	*colors = XCreatePixmap(display, window->window, width, height, 32);
