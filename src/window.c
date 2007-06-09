@@ -1009,12 +1009,20 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 
 /******************************************************************************
  *
- * io error handler
+ * error handler
  *
  ******************************************************************************/
 
 static int io_error_handler(Display *display) {
 	xsg_error("X connection broken");
+	return 0;
+}
+
+static int error_handler(Display *display, XErrorEvent *event) {
+	char buf[1024];
+
+	XGetErrorText(display, event->error_code, buf, sizeof(buf));
+	xsg_error("X: %s", buf);
 	return 0;
 }
 
@@ -1064,6 +1072,7 @@ void xsg_window_init() {
 	xsg_list_t *l;
 
 	XSetIOErrorHandler(io_error_handler);
+	XSetErrorHandler(error_handler);
 
 	if (display == NULL)
 		display = XOpenDisplay(NULL);
@@ -1184,6 +1193,7 @@ bool xsg_window_color_lookup(char *name, uint32_t *color) {
 	XColor c;
 
 	XSetIOErrorHandler(io_error_handler);
+	XSetErrorHandler(error_handler);
 
 	if (display == NULL)
 		display = XOpenDisplay(NULL);
