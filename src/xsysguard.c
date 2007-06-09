@@ -419,6 +419,8 @@ int main(int argc, char **argv) {
 	bool list_fonts = FALSE;
 	bool print_usage = FALSE;
 	uint64_t interval = 1000;
+	int font_cache_size = 2 * 1024 * 1024;
+	int image_cache_size = 4 * 1024 * 1024;
 	xsg_list_t *filename_list = NULL;
 	xsg_list_t *l;
 
@@ -455,11 +457,11 @@ int main(int argc, char **argv) {
 				break;
 			case 'F':
 				if (optarg)
-					xsg_imlib_set_font_cache_size(atoi(optarg));
+					font_cache_size = atoi(optarg);
 				break;
 			case 'I':
 				if (optarg)
-					xsg_imlib_set_cache_size(atoi(optarg));
+					image_cache_size = atoi(optarg);
 				break;
 			case 'C':
 				if (optarg)
@@ -508,6 +510,8 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
+	xsg_imlib_set_font_cache_size(font_cache_size);
+	xsg_imlib_set_cache_size(image_cache_size);
 	xsg_conf_set_color_lookup(xsg_window_color_lookup);
 
 	for (l = filename_list; l; l = l->next) {
