@@ -66,7 +66,7 @@ struct _xsg_window_t {
 	bool background_image_update;
 
 	bool copy_from_parent;
-	Window copy_from_parent_window;
+	xsg_main_timeout_t copy_from_parent_timeout;
 
 	bool copy_from_root;
 	int copy_from_root_xoffset;
@@ -107,6 +107,8 @@ static xsg_main_poll_t poll = { 0 };
  *
  ******************************************************************************/
 
+static void copy_from_parent_timeout(void *arg);
+
 xsg_window_t *xsg_window_new(char *config_name) {
 	xsg_window_t *window;
 
@@ -143,7 +145,10 @@ xsg_window_t *xsg_window_new(char *config_name) {
 	window->background_image_update = 0;
 
 	window->copy_from_parent = FALSE;
-	window->copy_from_parent_window = None;
+	window->copy_from_parent_timeout.tv.tv_sec = 0;
+	window->copy_from_parent_timeout.tv.tv_usec = 0;
+	window->copy_from_parent_timeout.func = copy_from_parent_timeout;
+	window->copy_from_parent_timeout.arg = window;
 
 	window->copy_from_root = FALSE;
 	window->copy_from_root_xoffset = 0;
@@ -418,10 +423,14 @@ static bool check_root_background(xsg_window_t *window) {
 }
 
 static void grab_root_background(xsg_window_t *window) {
-	grab_background(window, RootWindow(display, screen));
+	Window root = RootWindow(display, screen);
+
+	xsg_message("%s: Grabbing root window: 0x%lx", window->config, (unsigned long) root);
+
+	grab_background(window, root);
 }
 
-static bool check_parent_background(xsg_window_t *window) {
+static void grab_parent_background(xsg_window_t *window) {
 	Status status;
 	unsigned int nchildren;
 	Window *children = NULL;
@@ -430,24 +439,23 @@ static bool check_parent_background(xsg_window_t *window) {
 
 	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
 
-	if (parent == None)
-		return FALSE;
+	if (parent == None) {
+		xsg_warning("%s: Cannot determine parent window", window->config);
+		return;
+	}
 
 	if (children != NULL)
 		XFree(children);
 
-	if (parent != window->copy_from_parent_window) {
-		window->copy_from_parent_window = parent;
-		xsg_message("%s: New parent window is: 0x%lx", window->config, (unsigned long) parent);
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	xsg_message("%s: Grabbing parent window: 0x%lx", window->config, (unsigned long) parent);
+
+	grab_background(window, parent);
 }
 
-static void grab_parent_background(xsg_window_t *window) {
-	check_parent_background(window); // update window->copy_from_parent_window
-	grab_background(window, window->copy_from_parent_window);
+static void copy_from_parent_timeout(void *arg) {
+	xsg_window_t *window = arg;
+	grab_parent_background(window);
+	xsg_main_remove_timeout(&window->copy_from_parent_timeout);
 }
 
 /******************************************************************************
@@ -859,7 +867,7 @@ static void update(uint64_t tick) {
 				grab_root_background(window);
 
 		if (window->copy_from_parent)
-			if (check_parent_background(window) || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
+			if ((window->background_image_update != 0) && (tick % window->background_image_update) == 0)
 				grab_parent_background(window);
 
 		if ((window->visible_update != 0) && (tick % window->visible_update) == 0)
@@ -976,15 +984,32 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 
 	while (XPending(display)) {
 		XNextEvent(display, &event);
-		if (event.type == Expose) {
-			for (l = window_list; l; l = l->next) {
-				xsg_window_t *window = l->data;
+		for (l = window_list; l; l = l->next) {
+			xsg_window_t *window = l->data;
 
-				if (window->window == event.xexpose.window) {
-					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
-							event.xexpose.x, event.xexpose.y,
-							event.xexpose.width, event.xexpose.height);
-				}
+			switch (event.type) {
+				case Expose:
+					if (window->window == event.xexpose.window) {
+						window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
+								event.xexpose.x, event.xexpose.y,
+								event.xexpose.width, event.xexpose.height);
+						xsg_debug("%s: Received Expose event: x=%d, y=%d, w=%d, h=%d",
+								window->config,
+								event.xexpose.x, event.xexpose.y,
+								event.xexpose.width, event.xexpose.height);
+					}
+					break;
+				case ReparentNotify:
+					if (window->window == event.xreparent.window) {
+						xsg_message("%s: Received ReparentNotify event. New parent is: 0x%lx",
+								window->config, (unsigned long) event.xreparent.parent);
+						xsg_gettimeofday_and_add(&window->copy_from_parent_timeout.tv, 0, 100 * 1000);
+						xsg_main_add_timeout(&window->copy_from_parent_timeout);
+					}
+					break;
+				default:
+					xsg_debug("Received XEvent: %d", event.type);
+					break;
 			}
 		}
 	}
@@ -1139,7 +1164,7 @@ void xsg_window_init() {
 
 		XStoreName(display, window->window, window->name);
 
-		XSelectInput(display, window->window, ExposureMask);
+		XSelectInput(display, window->window, ExposureMask | StructureNotifyMask);
 
 		if (window->argb_visual)
 			xrender_init(window);
@@ -1177,7 +1202,6 @@ void xsg_window_init() {
 		}
 
 		if (window->copy_from_parent) {
-			check_parent_background(window);
 			grab_parent_background(window);
 		}
 
