@@ -261,6 +261,7 @@ int xsg_asprintf(char **strp, const char *fmt, ...);
 /* misc */
 char *xsg_build_filename(const char *first_element, ...);
 const char *xsg_get_home_dir(void);
+char *xsg_dirname(const char *file_name);
 
 typedef enum {
 	XSG_FILE_TEST_IS_REGULAR    = 1 << 0,

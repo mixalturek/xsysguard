@@ -530,6 +530,30 @@ const char *xsg_get_home_dir(void) {
 	return home_dir;
 }
 
+char *xsg_dirname(const char *file_name) {
+	char *base;
+	size_t len;
+
+	if (unlikely(file_name == NULL))
+		return NULL;
+
+	base = strrchr(file_name, '/');
+
+	if (!base)
+		return xsg_strdup(".");
+
+	while (base > file_name && *base == '/')
+		base--;
+
+	len = (unsigned) 1  + base - file_name;
+
+	base = xsg_new(char, len + 1);
+	memmove(base, file_name, len);
+	base[len] = 0;
+
+	return base;
+}
+
 bool xsg_file_test(const char *filename, xsg_file_test_t test) {
 	if ((test & XSG_FILE_TEST_EXISTS) && (access(filename, F_OK) == 0))
 		return TRUE;
