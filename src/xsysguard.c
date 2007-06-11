@@ -48,6 +48,7 @@
 #include "widget_linechart.h"
 #include "widget_areachart.h"
 #include "widget_text.h"
+#include "fontconfig.h"
 
 /******************************************************************************/
 
@@ -364,6 +365,7 @@ static void usage(void) {
 		"  -h, --help         Print this help message to stdout\n"
 		"  -m, --modules      Print a list of all available modules to stdout\n"
 		"  -f, --fonts        Print a list of all available fonts to stdout\n"
+		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
 		"  -i, --interval=N   Set main interval to N milliseconds\n"
 		"  -C, --config=FILE  Read configuration from FILE\n"
 		"  -F, --fontcache=N  Set imlib's font cache size to N bytes\n"
@@ -373,7 +375,7 @@ static void usage(void) {
 		"  -l, --log=N        Set loglevel to N: "
 		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
 			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
-	printf("\n\n");
+	printf("\n");
 
 	printf("XSYSGUARD_CONFIG_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
@@ -406,6 +408,28 @@ static void usage(void) {
 			printf("  %s\n", *p);
 	xsg_strfreev(pathv);
 	printf("\n");
+
+	pathv = xsg_fontconfig_get_path();
+	if (pathv != NULL) {
+		unsigned n = 0;
+		for (p = pathv; *p; p++)
+			n++;
+		xsg_strfreev(pathv);
+		printf("Found libfontconfig (%u font dirs). Print list with `xsysguard -d`.\n", n);
+	}
+	printf("\n");
+}
+
+static void list_font_dirs(void) {
+	char **pathv;
+	char **p;
+
+	pathv = xsg_fontconfig_get_path();
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++)
+			printf("%s\n", *p);
+		xsg_strfreev(pathv);
+	}
 }
 
 /******************************************************************************
@@ -417,6 +441,7 @@ static void usage(void) {
 int main(int argc, char **argv) {
 	bool list_modules = FALSE;
 	bool list_fonts = FALSE;
+	bool list_dirs = FALSE;
 	bool print_usage = FALSE;
 	uint64_t interval = 1000;
 	int font_cache_size = 2 * 1024 * 1024;
@@ -435,6 +460,7 @@ int main(int argc, char **argv) {
 		{ "config",    1, NULL, 'C' },
 		{ "modules",   0, NULL, 'm' },
 		{ "fonts",     0, NULL, 'f' },
+		{ "fontdirs",  0, NULL, 'd' },
 		{ NULL,        0, NULL,  0  }
 	};
 
@@ -442,7 +468,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hi:F:I:l:C:mfct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hi:F:I:l:C:mfdct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -483,6 +509,9 @@ int main(int argc, char **argv) {
 			case 'f':
 				list_fonts = TRUE;
 				break;
+			case 'd':
+				list_dirs = TRUE;
+				break;
 			case '?':
 				print_usage = TRUE;
 				break;
@@ -493,6 +522,11 @@ int main(int argc, char **argv) {
 
 	if (print_usage) {
 		usage();
+		exit(EXIT_SUCCESS);
+	}
+
+	if (list_dirs) {
+		list_font_dirs();
 		exit(EXIT_SUCCESS);
 	}
 

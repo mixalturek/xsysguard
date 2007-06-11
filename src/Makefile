@@ -52,7 +52,7 @@ MODULE_DIR  := $(libdir)/xsysguard
 
 CONFIG_PATH ?= ~/.xsysguard/configs:$(CONFIG_DIR)
 IMAGE_PATH  ?= ~/.xsysguard/images:$(IMAGE_DIR)
-FONT_PATH   ?= ~/.xsysguard/fonts:$(FONT_DIR):~/.fonts:/usr/share/fonts/truetype:/usr/X11R6/lib/X11/fonts/TrueType
+FONT_PATH   ?= ~/.xsysguard/fonts:$(FONT_DIR)
 MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 CFLAGS      += -Wall
@@ -80,6 +80,7 @@ XSYSGUARD_SRC  += printf.c printf.h
 XSYSGUARD_SRC  += dump.c dump.h
 XSYSGUARD_SRC  += angle.c angle.h
 XSYSGUARD_SRC  += imlib.c imlib.h
+XSYSGUARD_SRC  += fontconfig.c fontconfig.h
 XSYSGUARD_SRC  += update.c update.h
 XSYSGUARD_SRC  += window.c window.h
 XSYSGUARD_SRC  += widgets.c widgets.h

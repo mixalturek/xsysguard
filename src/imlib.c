@@ -25,6 +25,7 @@
 #include <signal.h>
 
 #include "imlib.h"
+#include "fontconfig.h"
 
 /******************************************************************************/
 
@@ -615,6 +616,18 @@ void xsg_imlib_init_font_path(void) {
 	for (p = pathv; *p; p++) {
 		xsg_message("Adding dir to font path: \"%s\"", *p);
 		imlib_add_path_to_font_path(*p);
+	}
+
+	xsg_strfreev(pathv);
+
+	pathv = xsg_fontconfig_get_path();
+
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++) {
+			xsg_message("Adding dir to font path (fontconfig): \"%s\"", *p);
+			imlib_add_path_to_font_path(*p);
+		}
+		xsg_strfreev(pathv);
 	}
 }
 
