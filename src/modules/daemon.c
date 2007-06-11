@@ -264,6 +264,8 @@ static daemon_t *find_daemon(char *name) {
 	daemon->write_buffer_done = 0;
 	daemon->write_buffer_todo = 0;
 
+	daemon->var_list = NULL;
+
 	return daemon;;
 }
 
