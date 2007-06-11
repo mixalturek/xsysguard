@@ -88,7 +88,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 	font = imlib_load_font(text->font);
 
-	if (unlikely(text->font == NULL))
+	if (unlikely(font == NULL))
 		xsg_error("Cannot load font: \"%s\"", text->font);
 
 	imlib_context_set_font(font);
