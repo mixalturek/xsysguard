@@ -216,6 +216,8 @@ bool xsg_hash_table_lookup_extended(xsg_hash_table_t *hash_table, const void *ke
 bool xsg_hash_table_remove(xsg_hash_table_t *hash_table, const void *key);
 void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table);
 void xsg_hash_table_destroy(xsg_hash_table_t *hash_table);
+unsigned int xsg_hash_table_size(xsg_hash_table_t *hash_table);
+void xsg_hash_table_foreach(xsg_hash_table_t *hash_table, void (*func)(void *key, void *value, void *data), void *data);
 
 /******************************************************************************
  * utils.c

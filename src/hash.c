@@ -356,4 +356,25 @@ void xsg_hash_table_destroy(xsg_hash_table_t *hash_table) {
 	xsg_hash_table_unref(hash_table);
 }
 
+/******************************************************************************/
+
+unsigned int xsg_hash_table_size(xsg_hash_table_t *hash_table) {
+	if (unlikely(hash_table == NULL))
+		return 0;
+	return hash_table->nnodes;
+}
+
+void xsg_hash_table_foreach(xsg_hash_table_t *hash_table, void (*func)(void *key, void *value, void *data), void *data) {
+	xsg_hash_node_t *node;
+	int i;
+
+	if (unlikely(hash_table == NULL))
+		return;
+	if (unlikely(func == NULL))
+		return;
+
+	for (i = 0; i < hash_table->size; i++)
+		for (node = hash_table->nodes[i]; node; node = node->next)
+			(*func)(node->key, node->value, data);
+}
 
