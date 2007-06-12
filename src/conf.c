@@ -25,6 +25,7 @@
 #include <endian.h>
 
 #include "conf.h"
+#include "argb.h"
 
 /******************************************************************************/
 
@@ -392,17 +393,10 @@ uint32_t xsg_conf_read_color() {
 	else
 		ptr += n;
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-	((uint8_t *)(&argb))[0] = a;
-	((uint8_t *)(&argb))[1] = r;
-	((uint8_t *)(&argb))[2] = g;
-	((uint8_t *)(&argb))[3] = b;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-	((uint8_t *)(&argb))[3] = a;
-	((uint8_t *)(&argb))[2] = r;
-	((uint8_t *)(&argb))[1] = g;
-	((uint8_t *)(&argb))[0] = b;
-#endif
+	A_VAL(&argb) = a;
+	R_VAL(&argb) = r;
+	G_VAL(&argb) = g;
+	B_VAL(&argb) = b;
 
 	return argb;
 }
