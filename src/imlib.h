@@ -23,21 +23,6 @@
 
 #include <xsysguard.h>
 #include <Imlib2.h>
-#include <endian.h>
-
-/******************************************************************************/
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-# define A_VAL(p) ((DATA8 *)(p))[0]
-# define R_VAL(p) ((DATA8 *)(p))[1]
-# define G_VAL(p) ((DATA8 *)(p))[2]
-# define B_VAL(p) ((DATA8 *)(p))[3]
-#elif __BYTE_ORDER == __BIG_ENDIAN
-# define A_VAL(p) ((DATA8 *)(p))[3]
-# define R_VAL(p) ((DATA8 *)(p))[2]
-# define G_VAL(p) ((DATA8 *)(p))[1]
-# define B_VAL(p) ((DATA8 *)(p))[0]
-#endif
 
 /******************************************************************************/
 

@@ -26,12 +26,9 @@
 #include <X11/extensions/shape.h>
 #include <Imlib2.h>
 
-#ifdef ENABLE_XRENDER
-# include <X11/extensions/Xrender.h>
-# include <X11/extensions/Xcomposite.h>
-#endif
-
 #include "window.h"
+#include "argb.h"
+#include "xrender.h"
 #include "update.h"
 #include "widgets.h"
 #include "imlib.h"
@@ -460,237 +457,6 @@ static void copy_from_parent_timeout(void *arg) {
 
 /******************************************************************************
  *
- * XRender
- *
- ******************************************************************************/
-
-#ifndef ENABLE_XRENDER
-
-static Visual *find_argb_visual() {
-	xsg_error("Compiled without XRender support")
-	return NULL;
-}
-
-static void xrender_check() {
-	xsg_error("Compiled without XRender support")
-}
-
-static void xrender_init() {
-	xsg_error("Compiled without XRender support")
-}
-
-static void xrender(int xoffset, int yoffset) {
-	xsg_error("Compiled without XRender support")
-}
-
-#else
-
-static Visual *find_argb_visual() {
-	XVisualInfo *xvi;
-	XVisualInfo template;
-	int nvi, i;
-	XRenderPictFormat *format;
-	Visual *visual = NULL;
-
-	template.screen = screen;
-	template.depth = 32;
-	template.class = TrueColor;
-
-	xvi = XGetVisualInfo(display, VisualScreenMask | VisualDepthMask | VisualClassMask, &template, &nvi);
-
-	if (xvi == NULL)
-		xsg_error("Cannot find an argb visual.");
-
-	for (i = 0; i < nvi; i++) {
-		format = XRenderFindVisualFormat(display, xvi[i].visual);
-		if (format->type == PictTypeDirect && format->direct.alphaMask) {
-			visual = xvi[i].visual;
-			break;
-		}
-	}
-
-	XFree(xvi);
-
-	if (visual == NULL)
-		xsg_error("Cannot find an argb visual.");
-
-	return visual;
-}
-
-static void xrender_check() {
-	static bool checked = FALSE;
-	int render_event;
-	int render_error;
-	int composite_opcode;
-	int composite_event;
-	int composite_error;
-	int composite_major;
-	int composite_minor;
-
-	if (checked)
-		return;
-
-	checked = TRUE;
-
-	if (!XRenderQueryExtension(display, &render_event, &render_error))
-		xsg_error("No render extension found.");
-
-	if (!XQueryExtension(display, COMPOSITE_NAME, &composite_opcode, &composite_event, &composite_error))
-		xsg_error("No composite extension found.");
-
-	XCompositeQueryVersion(display, &composite_major, &composite_minor);
-
-	xsg_message("Composite extension found: %d.%d", composite_major, composite_minor);
-}
-
-static void xrender_init(xsg_window_t *window) {
-	XCompositeRedirectSubwindows(display, window->window, CompositeRedirectAutomatic);
-}
-
-static void xrender_pixmaps(xsg_window_t *window, Pixmap *colors, Pixmap *alpha, int xoffset, int yoffset) {
-	DATA32 *data;
-	DATA32 *colors_data;
-	DATA32 *alpha_data;
-	DATA8 *mask_data = NULL;
-	XImage *colors_image;
-	XImage *alpha_image;
-	XImage *mask_image = NULL;
-	unsigned int width;
-	unsigned int height;
-	int i;
-	GC gc, mask_gc;
-
-	width = imlib_image_get_width();
-	height = imlib_image_get_height();
-	data = imlib_image_get_data_for_reading_only();
-
-	colors_data = xsg_new(DATA32, width * height);
-	alpha_data = xsg_new(DATA32, width * height);
-
-	colors_image = XCreateImage(display, window->visual, 32, ZPixmap, 0, (char *) colors_data,
-			width, height, 32, width * 4);
-
-	alpha_image = XCreateImage(display, window->visual, 32, ZPixmap, 0, (char *) alpha_data,
-			width, height, 32, width * 4);
-
-	if (window->xshape) {
-		mask_data = xsg_new(DATA8, width * height);
-
-		mask_image = xsg_new(XImage, 1);
-		mask_image->width = width;
-		mask_image->height = height;
-		mask_image->xoffset = 0;
-		mask_image->format = ZPixmap;
-		mask_image->data = (char *) mask_data;
-		mask_image->byte_order = LSBFirst;
-		mask_image->bitmap_unit = 32;
-		mask_image->bitmap_bit_order = LSBFirst;
-		mask_image->bitmap_pad = 8;
-		mask_image->depth = 1;
-		mask_image->bytes_per_line = 0;
-		mask_image->bits_per_pixel = 8;
-		mask_image->red_mask = 0xff;
-		mask_image->green_mask = 0xff;
-		mask_image->blue_mask = 0xff;
-		XInitImage(mask_image);
-
-		for (i = 0; i < (width * height); i++) {
-			A_VAL(colors_data + i) = 0xff;
-			R_VAL(colors_data + i) = R_VAL(data + i);
-			G_VAL(colors_data + i) = G_VAL(data + i);
-			B_VAL(colors_data + i) = B_VAL(data + i);
-
-			A_VAL(alpha_data + i) = A_VAL(data + i);
-			R_VAL(alpha_data + i) = 0;
-			G_VAL(alpha_data + i) = 0;
-			B_VAL(alpha_data + i) = 0;
-
-			//mask_data[i] = (A_VAL(data + i) == 0) ? 0 : 1;
-			mask_data[i] = (A_VAL(data + i) >= window->xshape) ? 1 : 0;
-		}
-	} else {
-		for (i = 0; i < (width * height); i++) {
-			A_VAL(colors_data + i) = 0xff;
-			R_VAL(colors_data + i) = R_VAL(data + i);
-			G_VAL(colors_data + i) = G_VAL(data + i);
-			B_VAL(colors_data + i) = B_VAL(data + i);
-
-			A_VAL(alpha_data + i) = A_VAL(data + i);
-			R_VAL(alpha_data + i) = 0;
-			G_VAL(alpha_data + i) = 0;
-			B_VAL(alpha_data + i) = 0;
-		}
-	}
-
-	*colors = XCreatePixmap(display, window->window, width, height, 32);
-
-	*alpha = XCreatePixmap(display, window->window, width, height, 32);
-
-	gc = XCreateGC(display, window->window, 0, 0);
-
-	XPutImage(display, *colors, gc, colors_image, 0, 0, 0, 0, width, height);
-
-	XPutImage(display, *alpha, gc, alpha_image, 0, 0, 0, 0, width, height);
-
-	XDestroyImage(colors_image);
-	XDestroyImage(alpha_image);
-
-	XFreeGC(display, gc);
-
-	if (window->xshape) {
-		mask_gc = XCreateGC(display, window->mask, 0, 0);
-		XPutImage(display, window->mask, mask_gc, mask_image, 0, 0,
-				xoffset, yoffset, window->width, window->height);
-		xsg_free(mask_data);
-		xsg_free(mask_image);
-		XFreeGC(display, mask_gc);
-	}
-}
-
-static void xrender(xsg_window_t *window, int xoffset, int yoffset) {
-	Pixmap colors;
-	Pixmap alpha;
-	Picture root_picture;
-	Picture colors_picture;
-	Picture alpha_picture;
-	XRenderPictFormat *pict_format;
-	XRenderPictureAttributes root_pict_attrs;
-	unsigned int width;
-	unsigned int height;
-
-	width = imlib_image_get_width();
-	height = imlib_image_get_height();
-
-	xrender_pixmaps(window, &colors, &alpha, xoffset, yoffset);
-
-	pict_format = XRenderFindStandardFormat(display, PictStandardARGB32);
-
-	root_pict_attrs.subwindow_mode = IncludeInferiors;
-
-	root_picture = XRenderCreatePicture(display, window->window, XRenderFindVisualFormat(display, window->visual),
-			CPSubwindowMode, &root_pict_attrs);
-
-	colors_picture = XRenderCreatePicture(display, colors, pict_format, 0, 0);
-
-	alpha_picture = XRenderCreatePicture(display, alpha, pict_format, 0, 0);
-
-	XRenderComposite(display, PictOpSrc, colors_picture, alpha_picture, root_picture, 0, 0, 0, 0,
-			xoffset, yoffset, width, height);
-
-	XRenderFreePicture(display, colors_picture);
-	XRenderFreePicture(display, alpha_picture);
-
-	XFreePixmap(display, colors);
-	XFreePixmap(display, alpha);
-
-	if (window->xshape)
-		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
-}
-
-#endif /* ENABLE_XRENDER */
-
-/******************************************************************************
- *
  * render window
  *
  ******************************************************************************/
@@ -756,8 +522,6 @@ static void render(xsg_window_t *window) {
 					window->background_color.blue, window->background_color.alpha);
 		}
 
-		/* TODO grab_root / parent */
-
 		for (l = window->widget_list; l; l = l->next)
 			xsg_widgets_render(l->data, buffer, up_x, up_y, up_w, up_h);
 
@@ -765,7 +529,8 @@ static void render(xsg_window_t *window) {
 		imlib_context_set_blend(0);
 
 		if (window->argb_visual)
-			xrender(window, up_x, up_y);
+			xsg_xrender_render(window->window, window->visual, window->mask, window->xshape,
+					imlib_image_get_data_for_reading_only(), up_x, up_y, up_w, up_h);
 		else
 			imlib_render_image_on_drawable(up_x, up_y);
 
@@ -777,11 +542,15 @@ static void render(xsg_window_t *window) {
 	xsg_update_free(window->updates);
 	window->updates = NULL;
 
-	if (window->xshape > 0 && !window->argb_visual) {
-		XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
-		XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
-		XClearWindow(display, window->window);
-		//XSync(display, False);
+	if (window->xshape > 0) {
+		if (window->argb_visual) {
+			XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+		} else {
+			XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
+			XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+			XClearWindow(display, window->window);
+			//XSync(display, False);
+		}
 	}
 }
 
@@ -1078,7 +847,7 @@ static int error_handler(Display *display, XErrorEvent *event) {
 	char buf[1024];
 
 	XGetErrorText(display, event->error_code, buf, sizeof(buf));
-	xsg_error("X: %s", buf);
+	xsg_error("XError: %s", buf);
 	return 0;
 }
 
@@ -1161,8 +930,8 @@ void xsg_window_init() {
 		}
 
 		if (window->argb_visual) {
-			xrender_check();
-			window->visual = find_argb_visual();
+			xsg_xrender_init(display);
+			window->visual = xsg_xrender_find_visual(screen);
 			window->depth = 32;
 		} else {
 			window->visual = imlib_get_best_visual(display, screen, &window->depth);
@@ -1179,8 +948,9 @@ void xsg_window_init() {
 
 		attrs.event_mask = ExposureMask | StructureNotifyMask;
 		attrs.background_pixel = 0;
+		attrs.border_pixel = 0;
 		attrs.colormap = window->colormap;
-		valuemask = CWBackPixel | CWColormap | CWEventMask;
+		valuemask = CWEventMask | CWBackPixel | CWBorderPixel | CWColormap;
 
 		if (window->override_redirect) {
 			attrs.override_redirect = 1;
@@ -1197,7 +967,7 @@ void xsg_window_init() {
 		XStoreName(display, window->window, window->name);
 
 		if (window->argb_visual)
-			xrender_init(window);
+			xsg_xrender_redirect(window->window);
 
 		if (!window->decorations)
 			hide_decorations(window);

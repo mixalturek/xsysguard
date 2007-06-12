@@ -62,11 +62,6 @@ CFLAGS      += -g
 ALL_CFLAGS  := -Iinclude -rdynamic
 ALL_LDFLAGS := -lm -ldl
 
-ifndef DISABLE_XRENDER
-XSG_LDFLAGS += -lXrender -lXcomposite
-XSG_CFLAGS  += -D ENABLE_XRENDER=1
-endif
-
 COMMON_SRC     := include/xsysguard.h types.h
 COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
@@ -83,6 +78,7 @@ XSYSGUARD_SRC  += imlib.c imlib.h
 XSYSGUARD_SRC  += fontconfig.c fontconfig.h
 XSYSGUARD_SRC  += update.c update.h
 XSYSGUARD_SRC  += window.c window.h
+XSYSGUARD_SRC  += xrender.c xrender.h
 XSYSGUARD_SRC  += widgets.c widgets.h
 XSYSGUARD_SRC  += widget_line.c widget_line.h
 XSYSGUARD_SRC  += widget_rectangle.c widget_rectangle.h

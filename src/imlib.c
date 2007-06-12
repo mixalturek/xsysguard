@@ -25,6 +25,7 @@
 #include <signal.h>
 
 #include "imlib.h"
+#include "argb.h"
 #include "fontconfig.h"
 
 /******************************************************************************/
