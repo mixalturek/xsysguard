@@ -25,7 +25,7 @@
 
 /******************************************************************************/
 
-void xsg_main_loop(void);
+void xsg_main_loop(uint64_t num);
 void xsg_main_set_interval(uint64_t i);
 
 void xsg_main_set_time_error(void);

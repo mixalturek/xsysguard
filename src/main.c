@@ -210,7 +210,7 @@ void xsg_main_set_time_error(void) {
 
 /******************************************************************************/
 
-static void loop(void) {
+static void loop(uint64_t num) {
 	struct timeval time_out;
 	struct timeval time_start;
 	struct timeval time_now;
@@ -228,6 +228,9 @@ static void loop(void) {
 	xsg_message("Starting main loop");
 
 	while (1) {
+		if (num != 0 && tick == num)
+			exit(EXIT_SUCCESS);
+
 		xsg_gettimeofday(&time_start, 0);
 
 		xsg_debug("Tick %"PRIu64, tick);
@@ -394,7 +397,7 @@ static int ssigaction(int signum, const struct sigaction *act, struct sigaction 
 	return n;
 }
 
-void xsg_main_loop() {
+void xsg_main_loop(uint64_t num) {
 	xsg_list_t *l;
 	void (*func)(void);
 	struct sigaction action;
@@ -427,6 +430,6 @@ void xsg_main_loop() {
 		func();
 	}
 
-	loop();
+	loop(num);
 }
 

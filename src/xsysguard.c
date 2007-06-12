@@ -367,6 +367,7 @@ static void usage(void) {
 		"  -f, --fonts        Print a list of all available fonts to stdout\n"
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
 		"  -i, --interval=N   Set main interval to N milliseconds\n"
+		"  -n, --num=N        Exit after N tick's\n"
 		"  -C, --config=FILE  Read configuration from FILE\n"
 		"  -F, --fontcache=N  Set imlib's font cache size to N bytes\n"
 		"  -I, --imgcache=N   Set imlib's image cache size to N bytes\n"
@@ -444,6 +445,7 @@ int main(int argc, char **argv) {
 	bool list_dirs = FALSE;
 	bool print_usage = FALSE;
 	uint64_t interval = 1000;
+	uint64_t num = 0;
 	int font_cache_size = 2 * 1024 * 1024;
 	int image_cache_size = 4 * 1024 * 1024;
 	xsg_list_t *filename_list = NULL;
@@ -452,6 +454,7 @@ int main(int argc, char **argv) {
 	struct option long_options[] = {
 		{ "help",      0, NULL, 'h' },
 		{ "interval",  1, NULL, 'i' },
+		{ "num",       1, NULL, 'n' },
 		{ "fontcache", 1, NULL, 'F' },
 		{ "imgcache",  1, NULL, 'I' },
 		{ "log",       1, NULL, 'l' },
@@ -468,7 +471,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hi:F:I:l:C:mfdct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hi:n:F:I:l:C:mfdct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -480,6 +483,9 @@ int main(int argc, char **argv) {
 			case 'i':
 				sscanf(optarg, "%"SCNu64, &interval);
 				xsg_main_set_interval(interval);
+				break;
+			case 'n':
+				sscanf(optarg, "%"SCNu64, &num);
 				break;
 			case 'F':
 				if (optarg)
@@ -582,7 +588,7 @@ int main(int argc, char **argv) {
 
 	xsg_dump_atexit();
 
-	xsg_main_loop();
+	xsg_main_loop(num);
 
 	return EXIT_SUCCESS;
 }

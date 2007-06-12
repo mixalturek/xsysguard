@@ -337,7 +337,7 @@ int main(int argc, char **argv) {
 	xsg_rpn_init();
 	xsg_var_init();
 
-	xsg_main_loop();
+	xsg_main_loop(0);
 
 	return EXIT_SUCCESS;
 }
