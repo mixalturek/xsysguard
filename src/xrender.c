@@ -24,10 +24,21 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XShm.h>
+#include <string.h>
 #include <endian.h>
 
 #include "xrender.h"
 #include "argb.h"
+
+/******************************************************************************/
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+# define XIMAGE_BYTE_ORDER MSBFirst
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+# define XIMAGE_BYTE_ORDER LSBFirst
+#else
+# error unknown byte order
+#endif
 
 /******************************************************************************/
 
@@ -212,120 +223,124 @@ void xsg_xrender_redirect(Window window) {
 /******************************************************************************/
 
 void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xshape, uint32_t *data, int xoffset, int yoffset, unsigned width, unsigned height) {
-	Pixmap colors;
-	Pixmap alpha;
-	Picture root_picture;
-	Picture colors_picture;
-	Picture alpha_picture;
-	XRenderPictFormat *pict_format;
-	XRenderPictureAttributes root_pict_attrs;
-	uint32_t *colors_data;
-	uint32_t *alpha_data;
-	uint8_t *mask_data = NULL;
-	XImage *colors_image;
-	XImage *alpha_image;
-	XImage *mask_image = NULL;
-	int i;
-	GC gc, mask_gc;
+	XImage *ximage, *alpha_ximage;
+	Pixmap pixmap, alpha_pixmap;
+	Picture picture, alpha_picture, root_picture;
+	XRenderPictFormat *picture_format;
+	XRenderPictureAttributes root_picture_attrs;
+	XGCValues gcv;
+	GC gc;
+
+	gcv.graphics_exposures = False;
 
 	xsg_debug("XRender xoffset=%d, yoffset=%d, width=%d, height=%d", xoffset, yoffset, width, height);
 
-	colors_data = xsg_new(uint32_t, width * height);
-	alpha_data = xsg_new(uint32_t, width * height);
+	ximage = XCreateImage(display, visual, 32, ZPixmap, 0, NULL, width, height, 32, 0);
+	alpha_ximage = XCreateImage(display, visual, 32, ZPixmap, 0, NULL, width, height, 32, 0);
 
-	colors_image = XCreateImage(display, visual, 32, ZPixmap, 0, (char *) colors_data, width, height, 32, width * 4);
-	alpha_image = XCreateImage(display, visual, 32, ZPixmap, 0, (char *) alpha_data, width, height, 32, width * 4);
+	ximage->data = xsg_malloc(ximage->bytes_per_line * ximage->height);
+	alpha_ximage->data = xsg_malloc(alpha_ximage->bytes_per_line * alpha_ximage->height);
+
+	ximage->byte_order = XIMAGE_BYTE_ORDER;
+	alpha_ximage->byte_order = XIMAGE_BYTE_ORDER;
 
 	if (xshape) {
+		XImage *mask_ximage;
+		unsigned x, y;
+		GC mask_gc;
+
 		xsg_debug("XRender with xshape");
 
-		mask_data = xsg_new(uint8_t, width * height);
+		mask_ximage = XCreateImage(display, visual, 1, ZPixmap, 0, NULL, width, height, 32, 0);
+		mask_ximage->data = xsg_malloc(mask_ximage->bytes_per_line * mask_ximage->height);
 
-		mask_image = xsg_new(XImage, 1);
-		mask_image->width = width;
-		mask_image->height = height;
-		mask_image->xoffset = 0;
-		mask_image->format = ZPixmap;
-		mask_image->data = (char *) mask_data;
-		mask_image->byte_order = LSBFirst;
-		mask_image->bitmap_unit = 32;
-		mask_image->bitmap_bit_order = LSBFirst;
-		mask_image->bitmap_pad = 8;
-		mask_image->depth = 1;
-		mask_image->bytes_per_line = 0;
-		mask_image->bits_per_pixel = 8;
-		mask_image->red_mask = 0xff;
-		mask_image->green_mask = 0xff;
-		mask_image->blue_mask = 0xff;
+		mask_ximage->byte_order = XIMAGE_BYTE_ORDER;
 
-		XInitImage(mask_image);
+		memset(mask_ximage->data, 0, mask_ximage->bytes_per_line * mask_ximage->height);
 
-		for (i = 0; i < (width * height); i++) {
-			A_VAL(colors_data + i) = 0xff;
-			R_VAL(colors_data + i) = R_VAL(data + i);
-			G_VAL(colors_data + i) = G_VAL(data + i);
-			B_VAL(colors_data + i) = B_VAL(data + i);
+		for (y = 0; y < height; y++) {
+			uint8_t *m = (uint8_t *) mask_ximage->data + y * mask_ximage->bytes_per_line;
 
-			A_VAL(alpha_data + i) = A_VAL(data + i);
-			R_VAL(alpha_data + i) = 0x00;
-			G_VAL(alpha_data + i) = 0x00;
-			B_VAL(alpha_data + i) = 0x00;
+			for (x = 0; x < width; x++) {
+				unsigned i = x + y * width;
 
-			mask_data[i] = (A_VAL(data + i) >= xshape) ? 1 : 0;
+				A_VAL((uint32_t *) ximage->data + i) = 0xff;
+				R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
+				G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
+				B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+
+				A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
+				R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+
+				if (A_VAL(data + 1) >= xshape)
+#if __BYTE_ORDER == __BIG_ENDIAN
+					*m |= (1 << (0x7 - (x & 0x7)));
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+					*m |= (1 << (x & 0x7));
+#endif
+				if ((x & 0x7) == 0x7)
+					m++;
+			}
 		}
-	} else {
-		for (i = 0; i < (width * height); i++) {
-			A_VAL(colors_data + i) = 0xff;
-			R_VAL(colors_data + i) = R_VAL(data + i);
-			G_VAL(colors_data + i) = G_VAL(data + i);
-			B_VAL(colors_data + i) = B_VAL(data + i);
 
-			A_VAL(alpha_data + i) = A_VAL(data + i);
-			R_VAL(alpha_data + i) = 0x00;
-			G_VAL(alpha_data + i) = 0x00;
-			B_VAL(alpha_data + i) = 0x00;
+		mask_gc = XCreateGC(display, mask, GCGraphicsExposures, &gcv);
+
+		XPutImage(display, mask, mask_gc, mask_ximage, 0, 0, xoffset, yoffset, width, height);
+
+		XFreeGC(display, mask_gc);
+
+		XDestroyImage(mask_ximage);
+	} else {
+		unsigned i;
+
+		for (i = 0; i < (width * height); i++) {
+			A_VAL((uint32_t *) ximage->data + i) = 0xff;
+			R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
+			G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
+			B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+
+			A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
+			R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
 		}
 	}
 
-	colors = XCreatePixmap(display, window, width, height, 32);
-	alpha = XCreatePixmap(display, window, width, height, 32);
+	pixmap = XCreatePixmap(display, window, width, height, 32);
+	alpha_pixmap = XCreatePixmap(display, window, width, height, 32);
 
-	gc = XCreateGC(display, window, 0, 0);
+	gc = XCreateGC(display, window, GCGraphicsExposures, &gcv);
 
-	XPutImage(display, colors, gc, colors_image, 0, 0, 0, 0, width, height);
-	XPutImage(display, alpha, gc, alpha_image, 0, 0, 0, 0, width, height);
-
-	XDestroyImage(colors_image);
-	XDestroyImage(alpha_image);
+	XPutImage(display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+	XPutImage(display, alpha_pixmap, gc, alpha_ximage, 0, 0, 0, 0, width, height);
 
 	XFreeGC(display, gc);
 
-	if (xshape) {
-		mask_gc = XCreateGC(display, mask, 0, 0);
-		XPutImage(display, mask, mask_gc, mask_image, 0, 0, xoffset, yoffset, width, height);
-		xsg_free(mask_data);
-		xsg_free(mask_image);
-		XFreeGC(display, mask_gc);
-	}
+	XDestroyImage(ximage);
+	XDestroyImage(alpha_ximage);
 
-	pict_format = XRenderFindStandardFormat(display, 0);
+	picture_format = XRenderFindStandardFormat(display, 0);
 
-	root_pict_attrs.subwindow_mode = IncludeInferiors;
+	root_picture_attrs.subwindow_mode = IncludeInferiors;
 
 	root_picture = XRenderCreatePicture(display, window, XRenderFindVisualFormat(display, visual),
-			(1 << 8), &root_pict_attrs);
+			(1 << 8), &root_picture_attrs);
 
-	colors_picture = XRenderCreatePicture(display, colors, pict_format, 0, 0);
-	alpha_picture = XRenderCreatePicture(display, alpha, pict_format, 0, 0);
+	picture = XRenderCreatePicture(display, pixmap, picture_format, 0, 0);
+	alpha_picture = XRenderCreatePicture(display, alpha_pixmap, picture_format, 0, 0);
 
-	XRenderComposite(display, 1, colors_picture, alpha_picture, root_picture, 0, 0, 0, 0,
+	XRenderComposite(display, 1, picture, alpha_picture, root_picture, 0, 0, 0, 0,
 			xoffset, yoffset, width, height);
 
-	XRenderFreePicture(display, colors_picture);
+	XRenderFreePicture(display, picture);
 	XRenderFreePicture(display, alpha_picture);
 
-	XFreePixmap(display, colors);
-	XFreePixmap(display, alpha);
+	XFreePixmap(display, pixmap);
+	XFreePixmap(display, alpha_pixmap);
+
+	XSync(display, False);
 
 	xsg_debug("XRender finished");
 }

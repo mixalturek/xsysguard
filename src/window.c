@@ -607,7 +607,10 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 		for (l = window_list; l; l = l->next) {
 			xsg_window_t *window = l->data;
 
-			if (window->xshape > 0) {
+			if (window->argb_visual) {
+				if (window->xexpose_updates != 0)
+					xsg_xrender_redirect(window->window);
+			} else if (window->xshape > 0) {
 				if (window->xexpose_updates != 0) {
 					XClearWindow(display, window->window);
 					XSync(display, False);
@@ -731,10 +734,12 @@ void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffse
  ******************************************************************************/
 
 void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
-	if (widget == NULL)
+	if (widget == NULL) {
 		update_visible(window);
-	else
+		xsg_window_render();
+	} else {
 		xsg_widgets_update(widget, var);
+	}
 }
 
 /******************************************************************************
