@@ -230,6 +230,7 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 	Picture picture, alpha_picture, root_picture;
 	XRenderPictFormat *picture_format;
 	XRenderPictureAttributes root_picture_attrs;
+	unsigned i;
 	XGCValues gcv;
 	GC gc;
 
@@ -237,39 +238,25 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 
 	xsg_debug("XRender xoffset=%d, yoffset=%d, width=%d, height=%d", xoffset, yoffset, width, height);
 
-	ximage = create_ximage(visual, 32, width, height);
-	alpha_ximage = create_ximage(visual, 32, width, height);
-
 	if (xshape) {
 		XImage *mask_ximage;
 		unsigned x, y;
+		uint32_t *d;
 		GC mask_gc;
 
-		xsg_debug("XRender with xshape");
+		xsg_debug("Render xshape mask");
 
 		mask_ximage = create_ximage(visual, 1, width, height);
 
 		memset(mask_ximage->data, 0, mask_ximage->bytes_per_line * mask_ximage->height);
 
+		d = data;
+
 		for (y = 0; y < height; y++) {
 			uint8_t *m = (uint8_t *) mask_ximage->data + y * mask_ximage->bytes_per_line;
 
 			for (x = 0; x < width; x++) {
-				unsigned i = x + y * width;
-
-				//A_VAL((uint32_t *) ximage->data + i) = 0xff;
-				//R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
-				//G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
-				//B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
-				((uint32_t *)ximage->data)[i] = data[i];
-
-				//A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
-				//R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-				//G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-				//B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-				((uint32_t *)alpha_ximage->data)[i] = data[i];
-
-				if (A_VAL(data + i) >= xshape)
+				if ((*d >> 24) >= xshape)
 #if __BYTE_ORDER == __BIG_ENDIAN
 					*m |= (1 << (0x7 - (x & 0x7)));
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
@@ -277,6 +264,7 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 #endif
 				if ((x & 0x7) == 0x7)
 					m++;
+				d++;
 			}
 		}
 
@@ -287,22 +275,23 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 		XFreeGC(display, mask_gc);
 
 		XDestroyImage(mask_ximage);
-	} else {
-		unsigned i;
+	}
 
-		for (i = 0; i < (width * height); i++) {
-			//A_VAL((uint32_t *) ximage->data + i) = 0xff;
-			//R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
-			//G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
-			//B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
-			((uint32_t *)ximage->data)[i] = data[i];
+	ximage = create_ximage(visual, 32, width, height);
+	alpha_ximage = create_ximage(visual, 32, width, height);
 
-			//A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
-			//R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-			//G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-			//B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-			((uint32_t *)alpha_ximage->data)[i] = data[i];
-		}
+	for (i = 0; i < (width * height); i++) {
+		//A_VAL((uint32_t *) ximage->data + i) = 0xff;
+		//R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
+		//G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
+		//B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+		((uint32_t *)ximage->data)[i] = data[i];
+
+		//A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
+		//R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+		//G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+		//B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+		((uint32_t *)alpha_ximage->data)[i] = data[i];
 	}
 
 	pixmap = XCreatePixmap(display, window, width, height, 32);
