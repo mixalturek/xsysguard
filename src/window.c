@@ -608,11 +608,8 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
 			xsg_window_t *window = l->data;
 
 			if (window->argb_visual) {
-				if (window->xexpose_updates != 0) {
-					xsg_xrender_redirect(window->window);
-					imlib_updates_free(window->xexpose_updates);
-					window->xexpose_updates = 0;
-				}
+				if (window->xexpose_updates != 0)
+					render(window);
 			} else if (window->xshape > 0) {
 				if (window->xexpose_updates != 0) {
 					XClearWindow(display, window->window);
