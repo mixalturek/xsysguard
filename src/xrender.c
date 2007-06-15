@@ -23,7 +23,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <X11/extensions/XShm.h>
 #include <string.h>
 #include <endian.h>
 
@@ -32,19 +31,7 @@
 
 /******************************************************************************/
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-# define XIMAGE_BYTE_ORDER MSBFirst
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-# define XIMAGE_BYTE_ORDER LSBFirst
-#else
-# error unknown byte order
-#endif
-
-/******************************************************************************/
-
 static Display *display = NULL;
-
-static bool shm = FALSE;
 
 /******************************************************************************/
 
@@ -111,7 +98,8 @@ static void (*XRenderFreePicture)(Display *dpy, Picture picture) = NULL;
 void xsg_xrender_init(Display *dpy) {
 	static bool ok = FALSE;
 	void *librender, *libcomposite;
-	int opcode, event, error, major, minor;
+	int opcode = 0, event = 0, error = 0;
+	int major, minor;
 
 	if (ok)
 		return;
@@ -173,11 +161,6 @@ void xsg_xrender_init(Display *dpy) {
 
 	XCompositeQueryVersion(display, &major, &minor);
 	xsg_message("XCompositeQueryVersion: %d.%d", major, minor);
-
-	if (XShmQueryExtension(display))
-		shm = TRUE;
-	else
-		shm = FALSE;
 }
 
 /******************************************************************************/
@@ -222,6 +205,25 @@ void xsg_xrender_redirect(Window window) {
 
 /******************************************************************************/
 
+static XImage *create_ximage(Visual *visual, unsigned depth, unsigned width, unsigned height) {
+	XImage *ximage;
+
+	ximage = XCreateImage(display, visual, depth, ZPixmap, 0, NULL, width, height, 32, 0);
+	ximage->data = xsg_malloc(ximage->bytes_per_line * ximage->height);
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+	ximage->byte_order=  MSBFirst
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+	ximage->byte_order = LSBFirst;
+#else
+# error unknown byte order
+#endif
+
+	return ximage;
+}
+
+/******************************************************************************/
+
 void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xshape, uint32_t *data, int xoffset, int yoffset, unsigned width, unsigned height) {
 	XImage *ximage, *alpha_ximage;
 	Pixmap pixmap, alpha_pixmap;
@@ -235,14 +237,8 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 
 	xsg_debug("XRender xoffset=%d, yoffset=%d, width=%d, height=%d", xoffset, yoffset, width, height);
 
-	ximage = XCreateImage(display, visual, 32, ZPixmap, 0, NULL, width, height, 32, 0);
-	alpha_ximage = XCreateImage(display, visual, 32, ZPixmap, 0, NULL, width, height, 32, 0);
-
-	ximage->data = xsg_malloc(ximage->bytes_per_line * ximage->height);
-	alpha_ximage->data = xsg_malloc(alpha_ximage->bytes_per_line * alpha_ximage->height);
-
-	ximage->byte_order = XIMAGE_BYTE_ORDER;
-	alpha_ximage->byte_order = XIMAGE_BYTE_ORDER;
+	ximage = create_ximage(visual, 32, width, height);
+	alpha_ximage = create_ximage(visual, 32, width, height);
 
 	if (xshape) {
 		XImage *mask_ximage;
@@ -251,10 +247,7 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 
 		xsg_debug("XRender with xshape");
 
-		mask_ximage = XCreateImage(display, visual, 1, ZPixmap, 0, NULL, width, height, 32, 0);
-		mask_ximage->data = xsg_malloc(mask_ximage->bytes_per_line * mask_ximage->height);
-
-		mask_ximage->byte_order = XIMAGE_BYTE_ORDER;
+		mask_ximage = create_ximage(visual, 1, width, height);
 
 		memset(mask_ximage->data, 0, mask_ximage->bytes_per_line * mask_ximage->height);
 
@@ -264,17 +257,19 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 			for (x = 0; x < width; x++) {
 				unsigned i = x + y * width;
 
-				A_VAL((uint32_t *) ximage->data + i) = 0xff;
-				R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
-				G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
-				B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+				//A_VAL((uint32_t *) ximage->data + i) = 0xff;
+				//R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
+				//G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
+				//B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+				((uint32_t *)ximage->data)[i] = data[i];
 
-				A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
-				R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-				G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-				B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				//A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
+				//R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				//G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				//B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+				((uint32_t *)alpha_ximage->data)[i] = data[i];
 
-				if (A_VAL(data + 1) >= xshape)
+				if (A_VAL(data + i) >= xshape)
 #if __BYTE_ORDER == __BIG_ENDIAN
 					*m |= (1 << (0x7 - (x & 0x7)));
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
@@ -296,15 +291,17 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 		unsigned i;
 
 		for (i = 0; i < (width * height); i++) {
-			A_VAL((uint32_t *) ximage->data + i) = 0xff;
-			R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
-			G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
-			B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+			//A_VAL((uint32_t *) ximage->data + i) = 0xff;
+			//R_VAL((uint32_t *) ximage->data + i) = R_VAL(data + i);
+			//G_VAL((uint32_t *) ximage->data + i) = G_VAL(data + i);
+			//B_VAL((uint32_t *) ximage->data + i) = B_VAL(data + i);
+			((uint32_t *)ximage->data)[i] = data[i];
 
-			A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
-			R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-			G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
-			B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			//A_VAL((uint32_t *) alpha_ximage->data + i) = A_VAL(data + i);
+			//R_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			//G_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			//B_VAL((uint32_t *) alpha_ximage->data + i) = 0x00;
+			((uint32_t *)alpha_ximage->data)[i] = data[i];
 		}
 	}
 
