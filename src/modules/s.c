@@ -20,9 +20,6 @@
 
 #include <xsysguard.h>
 
-#undef XSG_LOG_DOMAIN
-#define XSG_LOG_DOMAIN "string"
-
 /******************************************************************************/
 
 static char *get_string(void *arg) {
@@ -37,28 +34,24 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void parse_fill(uint32_t count, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void pparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	unsigned i;
-	char *str;
+	char *s;
 
-	str = xsg_conf_read_string();
+	s = xsg_conf_read_string();
 
-	for (i = 0; i < count; i++) {
-		arg[i] = (void *) str;
-		s[i] = get_string;
+	for (i = 0; i < n; i++) {
+		arg[i] = (void *) s;
+		str[i] = get_string;
 	}
 }
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = xsg_conf_read_string();
-	*s = get_string;
+	*str = get_string;
 }
 
 char *info(void) {
 	return "always returns the same string";
-}
-
-int version(void) {
-	return XSG_API_VERSION;
 }
 

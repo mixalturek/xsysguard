@@ -773,7 +773,7 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	static bool first_time = TRUE;
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
@@ -812,12 +812,12 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 		daemon_var->type = NUM;
 		daemon_var->num = DNAN;
 		daemon_var->new_num = DNAN;
-		*n = get_num;
+		*num = get_num;
 	} else if (xsg_conf_find_command("s")) {
 		daemon_var->type = STR;
 		daemon_var->str = xsg_string_new(NULL);
 		daemon_var->new_str = xsg_string_new(NULL);
-		*s = get_str;
+		*str = get_str;
 	} else {
 		xsg_conf_error("n or s expected");
 	}
@@ -835,9 +835,5 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 
 char *info(void) {
 	return "executes daemon processes";
-}
-
-int version (void) {
-	return XSG_API_VERSION;
 }
 

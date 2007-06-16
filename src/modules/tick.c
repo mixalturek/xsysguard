@@ -34,15 +34,11 @@ static double get_tick(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
-	*n = get_tick;
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
+	*num = get_tick;
 }
 
 char *info(void) {
 	return "returns the current tick";
-}
-
-int version (void) {
-	return XSG_API_VERSION;
 }
 

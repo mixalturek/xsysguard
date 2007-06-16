@@ -20,9 +20,6 @@
 
 #include <xsysguard.h>
 
-#undef XSG_LOG_DOMAIN
-#define XSG_LOG_DOMAIN "number"
-
 /******************************************************************************/
 
 static double get_number(void *arg) {
@@ -37,33 +34,29 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse_fill(uint32_t count, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
-	double *num;
+void pparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	unsigned i;
+	double *d;
 
-	num = xsg_new(double, 1);
-	num[0] = xsg_conf_read_double();
+	d = xsg_new(double, 1);
+	d[0] = xsg_conf_read_double();
 
-	for (i = 0; i < count; i++) {
-		arg[i] = (void *) num;
-		n[i] = get_number;
+	for (i = 0; i < n; i++) {
+		arg[i] = (void *) d;
+		num[i] = get_number;
 	}
 }
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	double *d;
 
 	d = xsg_new(double, 1);
 	*d = xsg_conf_read_double();
 	*arg = (void *) d;
-	*n = get_number;
+	*num = get_number;
 }
 
 char *info(void) {
 	return "always returns the same number";
-}
-
-int version(void) {
-	return XSG_API_VERSION;
 }
 

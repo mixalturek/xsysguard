@@ -93,8 +93,7 @@ void xsg_modules_init(void) {
 
 /******************************************************************************/
 
-void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
-	xsg_modules_version_t *version;
+void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	xsg_modules_parse_t *parse;
 	char *filename = NULL;
 	void *module;
@@ -120,34 +119,25 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**n)(void *), ch
 	if (!module)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-	version = dlsym(module, "version");
-
-	if (!version)
-		xsg_error("Cannot load module %s: %s", m->name, dlerror());
-
-	if (version() != 1)
-		xsg_error("Cannot load module %s: Invalid api version: %d", m->name, version());
-
 	parse = dlsym(module, "parse");
 
 	if (!parse)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-	*n = NULL;
-	*s = NULL;
+	*num = NULL;
+	*str = NULL;
 	*arg = NULL;
 
-	parse(update, var, n, s, arg);
+	parse(update, var, num, str, arg);
 
-	if ((*n == NULL) && (*s == NULL))
-		xsg_error("module %s must set s != NULL or n != NULL", m->name);
+	if ((*num == NULL) && (*str == NULL))
+		xsg_error("module %s must set str != NULL or num != NULL", m->name);
 }
 
 void xsg_modules_list() {
-	xsg_modules_version_t *version;
-	xsg_modules_parse_t *parse;
-	xsg_modules_parse_fill_t *parse_fill;
 	xsg_modules_info_t *info;
+	xsg_modules_parse_t *parse;
+	xsg_modules_pparse_t *pparse;
 	char *filename;
 	void *module;
 	module_t *m = NULL;
@@ -167,19 +157,11 @@ void xsg_modules_list() {
 			continue;
 		}
 
-		version = dlsym(module, "version");
-
-		if (!version)
-			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
-
-		if (version() != 1)
-			xsg_warning("Cannot load module %s: Invalid api version: %d", m->name, version());
-
 		info = dlsym(module, "info");
-		parse_fill = dlsym(module, "parse_fill");
 		parse = dlsym(module, "parse");
+		pparse = dlsym(module, "pparse");
 
-		if (!parse && !parse_fill) {
+		if (!parse && !pparse) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
 		}

@@ -418,19 +418,19 @@ static double get_host_info_uptime(void *arg) {
 
 /******************************************************************************/
 
-static void parse_host_info(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_host_info(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("os_name"))
-		*s = get_host_info_os_name;
+		*str = get_host_info_os_name;
 	else if (xsg_conf_find_command("os_release"))
-		*s = get_host_info_os_release;
+		*str = get_host_info_os_release;
 	else if (xsg_conf_find_command("os_version"))
-		*s = get_host_info_os_version;
+		*str = get_host_info_os_version;
 	else if (xsg_conf_find_command("platform"))
-		*s = get_host_info_platform;
+		*str = get_host_info_platform;
 	else if (xsg_conf_find_command("hostname"))
-		*s = get_host_info_hostname;
+		*str = get_host_info_hostname;
 	else if (xsg_conf_find_command("uptime"))
-		*n = get_host_info_uptime;
+		*num = get_host_info_uptime;
 	else
 		xsg_conf_error("os_name, os_release, os_version, platform, hostname or uptime expected");
 }
@@ -514,21 +514,21 @@ static double get_cpu_stats_total(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_cpu_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("user"))
-		*n = get_cpu_stats_user;
+		*num = get_cpu_stats_user;
 	else if (xsg_conf_find_command("kernel"))
-		*n = get_cpu_stats_kernel;
+		*num = get_cpu_stats_kernel;
 	else if (xsg_conf_find_command("idle"))
-		*n = get_cpu_stats_idle;
+		*num = get_cpu_stats_idle;
 	else if (xsg_conf_find_command("iowait"))
-		*n = get_cpu_stats_iowait;
+		*num = get_cpu_stats_iowait;
 	else if (xsg_conf_find_command("swap"))
-		*n = get_cpu_stats_swap;
+		*num = get_cpu_stats_swap;
 	else if (xsg_conf_find_command("nice"))
-		*n = get_cpu_stats_nice;
+		*num = get_cpu_stats_nice;
 	else if (xsg_conf_find_command("total"))
-		*n = get_cpu_stats_total;
+		*num = get_cpu_stats_total;
 	else
 		xsg_conf_error("user, kernel, idle, iowait, swap, nice or total expected");
 }
@@ -611,21 +611,21 @@ static double get_cpu_stats_diff_total(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_stats_diff(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_cpu_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("user"))
-		*n = get_cpu_stats_diff_user;
+		*num = get_cpu_stats_diff_user;
 	else if (xsg_conf_find_command("kernel"))
-		*n = get_cpu_stats_diff_kernel;
+		*num = get_cpu_stats_diff_kernel;
 	else if (xsg_conf_find_command("idle"))
-		*n = get_cpu_stats_diff_idle;
+		*num = get_cpu_stats_diff_idle;
 	else if (xsg_conf_find_command("iowait"))
-		*n = get_cpu_stats_diff_iowait;
+		*num = get_cpu_stats_diff_iowait;
 	else if (xsg_conf_find_command("swap"))
-		*n = get_cpu_stats_diff_swap;
+		*num = get_cpu_stats_diff_swap;
 	else if (xsg_conf_find_command("nice"))
-		*n = get_cpu_stats_diff_nice;
+		*num = get_cpu_stats_diff_nice;
 	else if (xsg_conf_find_command("total"))
-		*n = get_cpu_stats_diff_total;
+		*num = get_cpu_stats_diff_total;
 	else
 		xsg_conf_error("user, kernel, idle, iowait, swap, nice or total expected");
 }
@@ -698,19 +698,19 @@ static double get_cpu_percents_nice(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_percents(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_cpu_percents(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("user"))
-		*n = get_cpu_percents_user;
+		*num = get_cpu_percents_user;
 	else if (xsg_conf_find_command("kernel"))
-		*n = get_cpu_percents_kernel;
+		*num = get_cpu_percents_kernel;
 	else if (xsg_conf_find_command("idle"))
-		*n = get_cpu_percents_idle;
+		*num = get_cpu_percents_idle;
 	else if (xsg_conf_find_command("iowait"))
-		*n = get_cpu_percents_iowait;
+		*num = get_cpu_percents_iowait;
 	else if (xsg_conf_find_command("swap"))
-		*n = get_cpu_percents_swap;
+		*num = get_cpu_percents_swap;
 	else if (xsg_conf_find_command("nice"))
-		*n = get_cpu_percents_nice;
+		*num = get_cpu_percents_nice;
 	else
 		xsg_conf_error("user, kernel, idle, iowait, swap or nice expected");
 }
@@ -763,15 +763,15 @@ static double get_mem_stats_cache(void *arg) {
 
 /******************************************************************************/
 
-static void parse_mem_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_mem_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
-		*n = get_mem_stats_total;
+		*num = get_mem_stats_total;
 	else if (xsg_conf_find_command("free"))
-		*n = get_mem_stats_free;
+		*num = get_mem_stats_free;
 	else if (xsg_conf_find_command("used"))
-		*n = get_mem_stats_used;
+		*num = get_mem_stats_used;
 	else if (xsg_conf_find_command("cache"))
-		*n = get_mem_stats_cache;
+		*num = get_mem_stats_cache;
 	else
 		xsg_conf_error("total, free, used or cache expected");
 }
@@ -814,13 +814,13 @@ static double get_load_stats_min15(void *arg) {
 
 /******************************************************************************/
 
-static void parse_load_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_load_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("min1"))
-		*n = get_load_stats_min1;
+		*num = get_load_stats_min1;
 	else if (xsg_conf_find_command("min5"))
-		*n = get_load_stats_min5;
+		*num = get_load_stats_min5;
 	else if (xsg_conf_find_command("min15"))
-		*n = get_load_stats_min15;
+		*num = get_load_stats_min15;
 	else
 		xsg_conf_error("min1, min5 or min15 expected");
 }
@@ -853,11 +853,11 @@ static double get_user_stats_num_entries(void *arg) {
 
 /******************************************************************************/
 
-static void parse_user_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_user_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("num_entries"))
-		*n = get_user_stats_num_entries;
+		*num = get_user_stats_num_entries;
 	else if (xsg_conf_find_command("name_list"))
-		*s = get_user_stats_name_list;
+		*str = get_user_stats_name_list;
 	else
 		xsg_conf_error("num_entries or name_list expected");
 }
@@ -900,13 +900,13 @@ static double get_swap_stats_free(void *arg) {
 
 /******************************************************************************/
 
-static void parse_swap_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_swap_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
-		*n = get_swap_stats_total;
+		*num = get_swap_stats_total;
 	else if (xsg_conf_find_command("used"))
-		*n = get_swap_stats_used;
+		*num = get_swap_stats_used;
 	else if (xsg_conf_find_command("free"))
-		*n = get_swap_stats_free;
+		*num = get_swap_stats_free;
 	else
 		xsg_conf_error("total, used or free expected");
 }
@@ -1223,40 +1223,40 @@ static double get_fs_stats_avail_blocks(void *arg) {
 
 /******************************************************************************/
 
-static void parse_fs_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_fs_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = (void *) xsg_conf_read_string();
 	if (xsg_conf_find_command("device_name"))
-		*s = get_fs_stats_device_name;
+		*str = get_fs_stats_device_name;
 	else if (xsg_conf_find_command("fs_type"))
-		*s = get_fs_stats_fs_type;
+		*str = get_fs_stats_fs_type;
 	else if (xsg_conf_find_command("mnt_point"))
-		*s = get_fs_stats_mnt_point;
+		*str = get_fs_stats_mnt_point;
 	else if (xsg_conf_find_command("size"))
-		*n = get_fs_stats_size;
+		*num = get_fs_stats_size;
 	else if (xsg_conf_find_command("used"))
-		*n = get_fs_stats_used;
+		*num = get_fs_stats_used;
 	else if (xsg_conf_find_command("avail"))
-		*n = get_fs_stats_avail;
+		*num = get_fs_stats_avail;
 	else if (xsg_conf_find_command("total_inodes"))
-		*n = get_fs_stats_total_inodes;
+		*num = get_fs_stats_total_inodes;
 	else if (xsg_conf_find_command("used_inodes"))
-		*n = get_fs_stats_used_inodes;
+		*num = get_fs_stats_used_inodes;
 	else if (xsg_conf_find_command("free_inodes"))
-		*n = get_fs_stats_free_inodes;
+		*num = get_fs_stats_free_inodes;
 	else if (xsg_conf_find_command("avail_inodes"))
-		*n = get_fs_stats_avail_inodes;
+		*num = get_fs_stats_avail_inodes;
 	else if (xsg_conf_find_command("io_size"))
-		*n = get_fs_stats_io_size;
+		*num = get_fs_stats_io_size;
 	else if (xsg_conf_find_command("block_size"))
-		*n = get_fs_stats_block_size;
+		*num = get_fs_stats_block_size;
 	else if (xsg_conf_find_command("total_blocks"))
-		*n = get_fs_stats_total_blocks;
+		*num = get_fs_stats_total_blocks;
 	else if (xsg_conf_find_command("free_blocks"))
-		*n = get_fs_stats_free_blocks;
+		*num = get_fs_stats_free_blocks;
 	else if (xsg_conf_find_command("used_blocks"))
-		*n = get_fs_stats_used_blocks;
+		*num = get_fs_stats_used_blocks;
 	else if (xsg_conf_find_command("avail_blocks"))
-		*n = get_fs_stats_avail_blocks;
+		*num = get_fs_stats_avail_blocks;
 	else
 		xsg_conf_error("device_name, fs_type, mnt_point, size, used, avail, "
 				"total_inodes, used_inodes, free_inodes, avail_inodes, "
@@ -1311,12 +1311,12 @@ static double get_disk_io_stats_write_bytes(void *arg) {
 
 /******************************************************************************/
 
-static void parse_disk_io_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_disk_io_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = (void *) xsg_conf_read_string();
 	if (xsg_conf_find_command("read_bytes"))
-		*n = get_disk_io_stats_read_bytes;
+		*num = get_disk_io_stats_read_bytes;
 	else if (xsg_conf_find_command("write_bytes"))
-		*n = get_disk_io_stats_write_bytes;
+		*num = get_disk_io_stats_write_bytes;
 	else
 		xsg_conf_error("read_bytes or write_bytes expected");
 }
@@ -1368,12 +1368,12 @@ static double get_disk_io_stats_diff_write_bytes(void *arg) {
 
 /******************************************************************************/
 
-static void parse_disk_io_stats_diff(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_disk_io_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = (void *) xsg_conf_read_string();
 	if (xsg_conf_find_command("read_bytes"))
-		*n = get_disk_io_stats_diff_read_bytes;
+		*num = get_disk_io_stats_diff_read_bytes;
 	else if (xsg_conf_find_command("write_bytes"))
-		*n = get_disk_io_stats_diff_write_bytes;
+		*num = get_disk_io_stats_diff_write_bytes;
 	else
 		xsg_conf_error("read_bytes or write_bytes expected");
 }
@@ -1500,22 +1500,22 @@ static double get_network_io_stats_collisions(void *arg) {
 
 /******************************************************************************/
 
-static void parse_network_io_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_network_io_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = (void *) xsg_conf_read_string();
 	if (xsg_conf_find_command("tx"))
-		*n = get_network_io_stats_tx;
+		*num = get_network_io_stats_tx;
 	else if (xsg_conf_find_command("rx"))
-		*n = get_network_io_stats_rx;
+		*num = get_network_io_stats_rx;
 	else if (xsg_conf_find_command("ipackets"))
-		*n = get_network_io_stats_ipackets;
+		*num = get_network_io_stats_ipackets;
 	else if (xsg_conf_find_command("opackets"))
-		*n = get_network_io_stats_opackets;
+		*num = get_network_io_stats_opackets;
 	else if (xsg_conf_find_command("ierrors"))
-		*n = get_network_io_stats_ierrors;
+		*num = get_network_io_stats_ierrors;
 	else if (xsg_conf_find_command("oerrors"))
-		*n = get_network_io_stats_oerrors;
+		*num = get_network_io_stats_oerrors;
 	else if (xsg_conf_find_command("collisions"))
-		*n = get_network_io_stats_collisions;
+		*num = get_network_io_stats_collisions;
 	else
 		xsg_conf_error("tx, rx, ipackets, opackets, ierrors, oerrors or collisions expected");
 }
@@ -1642,22 +1642,22 @@ static double get_network_io_stats_diff_collisions(void *arg) {
 
 /******************************************************************************/
 
-static void parse_network_io_stats_diff(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_network_io_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
 	*arg = (void *) xsg_conf_read_string();
 	if (xsg_conf_find_command("tx"))
-		*n = get_network_io_stats_diff_tx;
+		*num = get_network_io_stats_diff_tx;
 	else if (xsg_conf_find_command("rx"))
-		*n = get_network_io_stats_diff_rx;
+		*num = get_network_io_stats_diff_rx;
 	else if (xsg_conf_find_command("ipackets"))
-		*n = get_network_io_stats_diff_ipackets;
+		*num = get_network_io_stats_diff_ipackets;
 	else if (xsg_conf_find_command("opackets"))
-		*n = get_network_io_stats_diff_opackets;
+		*num = get_network_io_stats_diff_opackets;
 	else if (xsg_conf_find_command("ierrors"))
-		*n = get_network_io_stats_diff_ierrors;
+		*num = get_network_io_stats_diff_ierrors;
 	else if (xsg_conf_find_command("oerrors"))
-		*n = get_network_io_stats_diff_oerrors;
+		*num = get_network_io_stats_diff_oerrors;
 	else if (xsg_conf_find_command("collisions"))
-		*n = get_network_io_stats_diff_collisions;
+		*num = get_network_io_stats_diff_collisions;
 	else
 		xsg_conf_error("tx, rx, ipackets, opackets, ierrors, oerrors or collisions expected");
 }
@@ -1743,17 +1743,17 @@ static char *get_network_iface_stats_duplex_string(void *arg) {
 
 /******************************************************************************/
 
-static void parse_network_iface_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_network_iface_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
 
 	if (xsg_conf_find_command("speed")) {
-		*n = get_network_iface_stats_speed;
+		*num = get_network_iface_stats_speed;
 		*arg = (void *) interface_name;
 	} else if (xsg_conf_find_command("duplex")) {
 		if (xsg_conf_find_command("n")) {
-			*n = get_network_iface_stats_duplex_number;
+			*num = get_network_iface_stats_duplex_number;
 			*arg = (void *) interface_name;
 		} else if (xsg_conf_find_command("s")) {
 			network_iface_stats_duplex_data_t *data;
@@ -1764,7 +1764,7 @@ static void parse_network_iface_stats(double (**n)(void *), char *(**s)(void *),
 			data->half = xsg_conf_read_string();
 			data->unknown = xsg_conf_read_string();
 
-			*s = get_network_iface_stats_duplex_string;
+			*str = get_network_iface_stats_duplex_string;
 			*arg = (void *) data;
 		} else {
 			xsg_conf_error("n or s expected");
@@ -1802,11 +1802,11 @@ static double get_page_stats_pages_pageout(void *arg) {
 
 /******************************************************************************/
 
-static void parse_page_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_page_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("pages_pagein"))
-		*n = get_page_stats_pages_pagein;
+		*num = get_page_stats_pages_pagein;
 	else if (xsg_conf_find_command("pages_pageout"))
-		*n = get_page_stats_pages_pageout;
+		*num = get_page_stats_pages_pageout;
 	else
 		xsg_conf_error("pages_pagein or pages_pageout expected");
 }
@@ -1839,11 +1839,11 @@ static double get_page_stats_diff_pages_pageout(void *arg) {
 
 /******************************************************************************/
 
-static void parse_page_stats_diff(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_page_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("pages_pagein"))
-		*n = get_page_stats_diff_pages_pagein;
+		*num = get_page_stats_diff_pages_pagein;
 	else if (xsg_conf_find_command("pages_pageout"))
-		*n = get_page_stats_diff_pages_pageout;
+		*num = get_page_stats_diff_pages_pageout;
 	else
 		xsg_conf_error("pages_pagein or pages_pageout expected");
 }
@@ -2394,40 +2394,40 @@ static char *get_process_stats_state_string(void *arg) {
 
 /******************************************************************************/
 
-static void parse_process_stats(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_process_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
 	sg_process_stats *(*list_func)() = NULL;
 	bool ascending = TRUE;
 	uint32_t number = 0;
 	bool state_command = FALSE;
 
 	if (xsg_conf_find_command("process_name"))
-		*s = get_process_stats_process_name;
+		*str = get_process_stats_process_name;
 	else if (xsg_conf_find_command("proctitle"))
-		*s = get_process_stats_proctitle;
+		*str = get_process_stats_proctitle;
 	else if (xsg_conf_find_command("pid"))
-		*n = get_process_stats_pid;
+		*num = get_process_stats_pid;
 	else if (xsg_conf_find_command("parent"))
-		*n = get_process_stats_parent;
+		*num = get_process_stats_parent;
 	else if (xsg_conf_find_command("pgid"))
-		*n = get_process_stats_pgid;
+		*num = get_process_stats_pgid;
 	else if (xsg_conf_find_command("uid"))
-		*n = get_process_stats_uid;
+		*num = get_process_stats_uid;
 	else if (xsg_conf_find_command("euid"))
-		*n = get_process_stats_euid;
+		*num = get_process_stats_euid;
 	else if (xsg_conf_find_command("gid"))
-		*n = get_process_stats_gid;
+		*num = get_process_stats_gid;
 	else if (xsg_conf_find_command("egid"))
-		*n = get_process_stats_egid;
+		*num = get_process_stats_egid;
 	else if (xsg_conf_find_command("proc_size"))
-		*n = get_process_stats_proc_size;
+		*num = get_process_stats_proc_size;
 	else if (xsg_conf_find_command("proc_resident"))
-		*n = get_process_stats_proc_resident;
+		*num = get_process_stats_proc_resident;
 	else if (xsg_conf_find_command("time_spent"))
-		*n = get_process_stats_time_spent;
+		*num = get_process_stats_time_spent;
 	else if (xsg_conf_find_command("cpu_percent"))
-		*n = get_process_stats_cpu_percent;
+		*num = get_process_stats_cpu_percent;
 	else if (xsg_conf_find_command("nice"))
-		*n = get_process_stats_nice;
+		*num = get_process_stats_nice;
 	else if (xsg_conf_find_command("state"))
 		state_command = TRUE;
 	else
@@ -2465,14 +2465,14 @@ static void parse_process_stats(double (**n)(void *), char *(**s)(void *), void 
 
 	if (state_command) {
 		if (xsg_conf_find_command("n"))
-			*n = get_process_stats_state_number;
+			*num = get_process_stats_state_number;
 		else if (xsg_conf_find_command("s"))
-			*s = get_process_stats_state_string;
+			*str = get_process_stats_state_string;
 		else
 			xsg_conf_error("n or s expected");
 	}
 
-	if (*s == get_process_stats_state_string) {
+	if (*str == get_process_stats_state_string) {
 		process_stats_state_data_t *data;
 		data = xsg_new(process_stats_state_data_t, 1);
 		data->list_func = list_func;
@@ -2550,17 +2550,17 @@ static double get_process_count_zombie(void *arg) {
 
 /******************************************************************************/
 
-static void parse_process_count(double (**n)(void *), char *(**s)(void *), void **arg) {
+static void parse_process_count(double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
-		*n = get_process_count_total;
+		*num = get_process_count_total;
 	else if (xsg_conf_find_command("running"))
-		*n = get_process_count_running;
+		*num = get_process_count_running;
 	else if (xsg_conf_find_command("sleeping"))
-		*n = get_process_count_sleeping;
+		*num = get_process_count_sleeping;
 	else if (xsg_conf_find_command("stopped"))
-		*n = get_process_count_stopped;
+		*num = get_process_count_stopped;
 	else if (xsg_conf_find_command("zombie"))
-		*n = get_process_count_zombie;
+		*num = get_process_count_zombie;
 	else
 		xsg_conf_error("total, running, sleeping, stopped or zombie expected");
 }
@@ -2586,64 +2586,64 @@ static void shutdown_stats(void) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	xsg_main_add_init_func(init_stats);
 	xsg_main_add_update_func(update_stats);
 	xsg_main_add_shutdown_func(shutdown_stats);
 
 	if (xsg_conf_find_command("host_info")){
-		parse_host_info(n ,s, arg);
+		parse_host_info(num, str, arg);
 		add_stat(update, get_host_info);
 	} else if (xsg_conf_find_command("cpu_stats")) {
-		parse_cpu_stats(n, s, arg);
+		parse_cpu_stats(num, str, arg);
 		add_stat(update, get_cpu_stats);
 	} else if (xsg_conf_find_command("cpu_stats_diff")) {
-		parse_cpu_stats_diff(n, s, arg);
+		parse_cpu_stats_diff(num, str, arg);
 		add_stat(update, get_cpu_stats_diff);
 	} else if (xsg_conf_find_command("cpu_percents")) {
-		parse_cpu_percents(n, s, arg);
+		parse_cpu_percents(num, str, arg);
 		add_stat(update, get_cpu_percents);
 	} else if (xsg_conf_find_command("mem_stats")) {
-		parse_mem_stats(n, s, arg);
+		parse_mem_stats(num, str, arg);
 		add_stat(update, get_mem_stats);
 	} else if (xsg_conf_find_command("load_stats")) {
-		parse_load_stats(n, s, arg);
+		parse_load_stats(num, str, arg);
 		add_stat(update, get_load_stats);
 	} else if (xsg_conf_find_command("user_stats")) {
-		parse_user_stats(n, s, arg);
+		parse_user_stats(num, str, arg);
 		add_stat(update, get_user_stats);
 	} else if (xsg_conf_find_command("swap_stats")) {
-		parse_swap_stats(n, s, arg);
+		parse_swap_stats(num, str, arg);
 		add_stat(update, get_swap_stats);
 	} else if (xsg_conf_find_command("fs_stats")) {
-		parse_fs_stats(n, s, arg);
+		parse_fs_stats(num, str, arg);
 		add_stat(update, get_fs_stats);
 	} else if (xsg_conf_find_command("disk_io_stats")) {
-		parse_disk_io_stats(n, s, arg);
+		parse_disk_io_stats(num, str, arg);
 		add_stat(update, get_disk_io_stats);
 	} else if (xsg_conf_find_command("disk_io_stats_diff")) {
-		parse_disk_io_stats_diff(n, s, arg);
+		parse_disk_io_stats_diff(num, str, arg);
 		add_stat(update, get_disk_io_stats_diff);
 	} else if (xsg_conf_find_command("network_io_stats")) {
-		parse_network_io_stats(n, s, arg);
+		parse_network_io_stats(num, str, arg);
 		add_stat(update, get_network_io_stats);
 	} else if (xsg_conf_find_command("network_io_stats_diff")) {
-		parse_network_io_stats_diff(n, s, arg);
+		parse_network_io_stats_diff(num, str, arg);
 		add_stat(update, get_network_io_stats_diff);
 	} else if (xsg_conf_find_command("network_iface_stats")) {
-		parse_network_iface_stats(n, s, arg);
+		parse_network_iface_stats(num, str, arg);
 		add_stat(update, get_network_iface_stats);
 	} else if (xsg_conf_find_command("page_stats")) {
-		parse_page_stats(n, s, arg);
+		parse_page_stats(num, str, arg);
 		add_stat(update, get_page_stats);
 	} else if (xsg_conf_find_command("page_stats_diff")) {
-		parse_page_stats_diff(n, s, arg);
+		parse_page_stats_diff(num, str, arg);
 		add_stat(update, get_page_stats_diff);
 	} else if (xsg_conf_find_command("process_stats")) {
-		parse_process_stats(n, s, arg);
+		parse_process_stats(num, str, arg);
 		add_stat(update, get_process_stats);
 	} else if (xsg_conf_find_command("process_count")) {
-		parse_process_count(n, s, arg);
+		parse_process_count(num, str, arg);
 		add_stat(update, get_process_count);
 	} else {
 		xsg_conf_error("host_info, cpu_stats, cpu_stats_diff, cpu_percents, "
@@ -2656,9 +2656,5 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 
 char *info(void) {
 	return "interface for libstatgrab";
-}
-
-int version(void) {
-	return XSG_API_VERSION;
 }
 

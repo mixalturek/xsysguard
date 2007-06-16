@@ -18,6 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/*
+ * This code is based on code from GLIB released under the GNU Lesser
+ * General Public License.
+ *
+ * Copyright (C) 1995-1997 Peter Mattis, Spencer Kimball and Josh MacDonald
+ *
+ * ftp://ftp.gtk.org/pub/gtk/
+ *
+ */
+
 #include <xsysguard.h>
 #include <sys/time.h>
 #include <time.h>
@@ -25,8 +35,6 @@
 #include <errno.h>
 
 /******************************************************************************/
-
-/* NOTE: functions are c&p from glib/grand.c */
 
 #define N 624
 #define M 397
@@ -194,15 +202,11 @@ static double get_random(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
-	*n = get_random;
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
+	*num = get_random;
 }
 
 char *info(void) {
 	return "random number generator";
-}
-
-int version(void) {
-	return XSG_API_VERSION;
 }
 

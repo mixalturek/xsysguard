@@ -231,7 +231,7 @@ static double get_tm_isdst(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
 	bool local = TRUE;
 
 	if (xsg_conf_find_command("gm")) {
@@ -250,7 +250,7 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 		args->format = xsg_conf_read_string();
 		args->buffer = xsg_string_new(NULL);
 
-		*s = get_strftime;
+		*str = get_strftime;
 		*arg = args;
 	} else {
 		bool *args;
@@ -261,29 +261,29 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 		*arg = args;
 
 		if (xsg_conf_find_command("ctime")) {
-			*s = get_ctime;
+			*str = get_ctime;
 		} else if (xsg_conf_find_command("tv_sec")) {
-			*n = get_tv_sec;
+			*num = get_tv_sec;
 		} else if (xsg_conf_find_command("tv_usec")) {
-			*n = get_tv_usec;
+			*num = get_tv_usec;
 		} else if (xsg_conf_find_command("tm_sec")) {
-			*n = get_tm_sec;
+			*num = get_tm_sec;
 		} else if (xsg_conf_find_command("tm_min")) {
-			*n = get_tm_min;
+			*num = get_tm_min;
 		} else if (xsg_conf_find_command("tm_hour")) {
-			*n = get_tm_hour;
+			*num = get_tm_hour;
 		} else if (xsg_conf_find_command("tm_mday")) {
-			*n = get_tm_mday;
+			*num = get_tm_mday;
 		} else if (xsg_conf_find_command("tm_mon")) {
-			*n = get_tm_mon;
+			*num = get_tm_mon;
 		} else if (xsg_conf_find_command("tm_year")) {
-			*n = get_tm_year;
+			*num = get_tm_year;
 		} else if (xsg_conf_find_command("tm_wday")) {
-			*n = get_tm_wday;
+			*num = get_tm_wday;
 		} else if (xsg_conf_find_command("tm_yday")) {
-			*n = get_tm_yday;
+			*num = get_tm_yday;
 		} else if (xsg_conf_find_command("tm_isdst")) {
-			*n = get_tm_isdst;
+			*num = get_tm_isdst;
 		} else {
 			xsg_conf_error("strftime, ctime, tv_sec, tv_usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
 		}
@@ -292,9 +292,5 @@ void parse(uint64_t update, xsg_var_t *var, double (**n)(void *), char *(**s)(vo
 
 char *info(void) {
 	return "date and time functions";
-}
-
-int version(void) {
-	return XSG_API_VERSION;
 }
 
