@@ -618,6 +618,8 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path) {
 	return pathv;
 }
 
+/******************************************************************************/
+
 int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y) {
 	if (x->tv_usec < y->tv_usec) {
 		int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
@@ -668,8 +670,8 @@ void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_
 	tv->tv_sec += tv_usec / 1000000;
 	tv->tv_usec += tv_usec % 1000000;
 
-	if (tv->tv_usec > 1000000) {
-		tv->tv_sec++;
+	if (tv->tv_usec >= 1000000) {
+		++tv->tv_sec;
 		tv->tv_usec -= 1000000;
 	}
 }
