@@ -100,6 +100,13 @@ xsg_list_t *xsg_list_last(xsg_list_t *list) {
 	return list;
 }
 
+xsg_list_t *xsg_list_nth(xsg_list_t *list, unsigned int n) {
+	while ((n-- > 0) && list)
+		list = list->next;
+
+	return list;
+}
+
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n) {
 	while ((n-- > 0) && list)
 		list = list->next;
@@ -155,6 +162,81 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	}
 
 	return new_list;
+}
+
+xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position) {
+	xsg_list_t *new_list;
+	xsg_list_t *tmp_list;
+
+	if (position < 0)
+		return xsg_list_append(list, data);
+	else if (position == 0)
+		return xsg_list_prepend(list, data);
+
+	tmp_list = xsg_list_nth(list, position);
+	if (!tmp_list)
+		return xsg_list_append(list, data);
+
+	new_list = new_node();
+	new_list->data = data;
+	new_list->prev = tmp_list->prev;
+	if (tmp_list->prev)
+		tmp_list->prev->next = new_list;
+	new_list->next = tmp_list;
+	tmp_list->prev = new_list;
+
+	if (tmp_list == list)
+		return new_list;
+	else
+		return list;
+}
+
+xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(const void *a, const void * b)) {
+	xsg_list_t *tmp_list = list;
+	xsg_list_t *new_list;
+	int cmp;
+
+	if (unlikely(func == NULL))
+		return list;
+
+	if (!list) {
+		new_list = new_node();
+		new_list->data = data;
+		new_list->next = NULL;
+		new_list->prev = NULL;
+		return new_list;
+	}
+
+	cmp = func(data, tmp_list->data);
+
+	while ((tmp_list->next) && (cmp > 0)) {
+		tmp_list = tmp_list->next;
+		cmp = func(data, tmp_list->data);
+	}
+
+	new_list = new_node();
+	new_list->data = data;
+	new_list->next = NULL;
+	new_list->prev = NULL;
+
+	if ((!tmp_list->next) && (cmp > 0)) {
+		tmp_list->next = new_list;
+		new_list->prev = tmp_list;
+		return list;
+	}
+
+	if (tmp_list->prev) {
+		tmp_list->prev->next = new_list;
+		new_list->prev = tmp_list->prev;
+	}
+
+	new_list->next = tmp_list;
+	tmp_list->prev = new_list;
+
+	if (tmp_list == list)
+		return new_list;
+	else
+		return list;
 }
 
 xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {

@@ -158,9 +158,12 @@ struct _xsg_list_t {
 
 xsg_list_t *xsg_list_append(xsg_list_t *list, void *data);
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data);
+xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position);
+xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*compare_func)(const void *a, const void *b));
 xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data);
 xsg_list_t *xsg_list_last(xsg_list_t *list);
 unsigned int xsg_list_length(xsg_list_t *list);
+xsg_list_t *xsg_list_nth(xsg_list_t *list, unsigned int n);
 void *xsg_list_nth_data(xsg_list_t *list, unsigned int n);
 void xsg_list_free(xsg_list_t *list);
 xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link);
