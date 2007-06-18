@@ -137,7 +137,7 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**num)(void *), 
 void xsg_modules_list() {
 	xsg_modules_info_t *info;
 	xsg_modules_parse_t *parse;
-	xsg_modules_pparse_t *pparse;
+	xsg_modules_nparse_t *nparse;
 	char *filename;
 	void *module;
 	module_t *m = NULL;
@@ -159,9 +159,9 @@ void xsg_modules_list() {
 
 		info = dlsym(module, "info");
 		parse = dlsym(module, "parse");
-		pparse = dlsym(module, "pparse");
+		nparse = dlsym(module, "nparse");
 
-		if (!parse && !pparse) {
+		if (!parse && !nparse) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
 		}

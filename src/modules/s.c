@@ -34,7 +34,7 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void pparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+void nparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	unsigned i;
 	char *s;
 

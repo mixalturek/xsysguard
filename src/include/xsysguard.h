@@ -61,11 +61,11 @@ typedef struct _xsg_var_t xsg_var_t;
 
 typedef char *xsg_modules_info_t(void);
 typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg);
-typedef void xsg_modules_pparse_t(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+typedef void xsg_modules_nparse_t(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 
 xsg_modules_info_t info;
 xsg_modules_parse_t parse;
-xsg_modules_pparse_t pparse;
+xsg_modules_nparse_t nparse;
 
 /******************************************************************************
  * conf.c
@@ -142,7 +142,7 @@ typedef struct _xsg_funcapprox_t xsg_funcapprox_t;
 
 xsg_funcapprox_t *xsg_funcapprox_new(uint64_t update);
 void xsg_funcapprox_add(xsg_funcapprox_t *funcapprox, const struct timeval *tv, double value);
-double xsg_funcapprox_get(xsg_funcapprox_t *funcapprox, uint32_t index);
+double xsg_funcapprox_get(xsg_funcapprox_t *funcapprox, uint32_t back);
 
 /******************************************************************************
  * list.c
