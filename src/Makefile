@@ -67,7 +67,7 @@ COMMON_SRC     += main.c main.h
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
-COMMON_SRC     += string.c list.c hash.c utils.c
+COMMON_SRC     += utils.c string.c list.c hash.c funcapprox.c
 
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
@@ -98,6 +98,9 @@ XSYSGUARDD_SRC += writebuffer.c writebuffer.h
 all: xsysguardd xsysguard
 	$(MAKE) -C modules all
 
+endian: endian.c
+	$(CC) -o endian $^ && ./endian > include/endian.h
+
 xsysguard: $(XSYSGUARD_SRC)
 	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) \
 	$(ALL_CFLAGS) $(XSG_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(XSG_LDFLAGS) $(LDFLAGS) \
@@ -117,6 +120,7 @@ xsysguardd: $(XSYSGUARDD_SRC)
 clean:
 	rm -f xsysguardd
 	rm -f xsysguard
+	rm -f include/endian.h
 	$(MAKE) -C modules clean
 
 distclean: clean
