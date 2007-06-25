@@ -110,7 +110,7 @@ void xsg_writebuffer_flush(void) {
 	write_buffer->todo = write_buffer->len;
 	write_buffer->done = 0;
 
-	send_buffer-> len = 0;
+	send_buffer->len = 0;
 
 	xsg_main_add_poll(&poll);
 }
