@@ -1,4 +1,4 @@
 include Makefile
-LDFLAGS += -lstatgrab
+ALL_LDFLAGS += -lstatgrab
 all: stat.so
 
