@@ -1,7 +1,7 @@
 /* tick.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@
 /******************************************************************************/
 
 static double get_tick(void *arg) {
+	uint64_t *add_ticks = arg;
 	double d;
 
 	d = xsg_main_get_tick();
+	d += *add_ticks;
 
 	xsg_debug("get_tick: %f", d);
 
@@ -34,7 +36,17 @@ static double get_tick(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+	uint64_t *add_ticks;
+	uint32_t i;
+
+	add_ticks = xsg_new(uint64_t, n);
+
+	for (i = 0; i < n; i++) {
+		add_ticks[i] = i * update;
+		arg[i] = (void *) (add_ticks + i);
+	}
+
 	*num = get_tick;
 }
 

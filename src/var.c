@@ -1,7 +1,7 @@
 /* var.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,16 @@ void xsg_var_init(void) {
 
 /******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t *var) {
-	var->dirty = TRUE;
+void xsg_var_dirty(xsg_var_t **var, uint32_t n) {
+	uint32_t i;
+
+	if (unlikely(var == NULL))
+		return;
+
+	for (i = 0; i < n; n++)
+		if (likely(var[i] != NULL))
+			var[i]->dirty = TRUE;
+
 	dirty = TRUE;
 }
 
@@ -73,13 +81,45 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-xsg_var_t *xsg_var_parse(xsg_window_t *window, xsg_widget_t *widget, uint64_t update) {
+xsg_var_t **xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget, uint32_t n) {
+	xsg_rpn_t **rpn;
+	xsg_var_t **var;
+	xsg_var_t *mem;
+	uint32_t i;
+
+	rpn = alloca(sizeof(xsg_rpn_t **) * n);
+
+	var = xsg_new(xsg_var_t *, n);
+	mem = xsg_new(xsg_var_t, n);
+
+	for (i = 0; i < n; i++)
+		var[i] = mem + i;
+
+	xsg_rpn_parse(update, var, rpn, n);
+
+	for (i = 0; i < n; i++) {
+		var[i]->window = window;
+		var[i]->widget = widget;
+		var[i]->rpn = rpn[i];
+		var[i]->dirty = FALSE;
+
+		var_list = xsg_list_append(var_list, var[i]);
+	}
+
+	return var;
+}
+
+xsg_var_t *xsg_var_parse_one(uint64_t update, xsg_window_t *window, xsg_widget_t *widget) {
 	xsg_var_t *var;
+	xsg_rpn_t *rpn;
 
 	var = xsg_new(xsg_var_t, 1);
+
+	xsg_rpn_parse(update, &var, &rpn, 1);
+
 	var->window = window;
 	var->widget = widget;
-	var->rpn = xsg_rpn_parse(var, update);
+	var->rpn = rpn;
 	var->dirty = FALSE;
 
 	var_list = xsg_list_append(var_list, var);

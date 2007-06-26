@@ -1,7 +1,7 @@
 /* s.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void nparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
-	unsigned i;
+void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+	uint32_t i;
 	char *s;
 
 	s = xsg_conf_read_string();
@@ -44,11 +44,6 @@ void nparse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**st
 		arg[i] = (void *) s;
 		str[i] = get_string;
 	}
-}
-
-void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
-	*arg = xsg_conf_read_string();
-	*str = get_string;
 }
 
 char *info(void) {

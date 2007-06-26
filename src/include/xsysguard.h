@@ -1,7 +1,7 @@
 /* xsysguard.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,12 +60,10 @@ typedef struct _xsg_var_t xsg_var_t;
 /******************************************************************************/
 
 typedef char *xsg_modules_info_t(void);
-typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg);
-typedef void xsg_modules_nparse_t(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 
 xsg_modules_info_t info;
 xsg_modules_parse_t parse;
-xsg_modules_nparse_t nparse;
 
 /******************************************************************************
  * conf.c
@@ -85,7 +83,7 @@ void xsg_conf_error(const char *message);
  * var.c
  ******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t *var);
+void xsg_var_dirty(xsg_var_t **var, uint32_t n);
 
 /******************************************************************************
  * main.c

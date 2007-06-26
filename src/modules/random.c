@@ -1,7 +1,7 @@
 /* random.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -187,23 +187,59 @@ static double rand_double(rand_t *rand) {
 
 /******************************************************************************/
 
+typedef struct _random_t {
+	uint64_t update;
+	double value;
+} random_t;
+
+/******************************************************************************/
+
+static xsg_list_t *random_list = NULL;
+
+/******************************************************************************/
+
+static void init_random(void) {
+	global_random = rand_new();
+}
+
+static void update_random(uint64_t tick) {
+	xsg_list_t *l;
+
+	for (l = random_list; l; l = l->next) {
+		random_t *random = l->data;
+
+		if (tick % random->update == 0)
+			random->value = rand_double(global_random);
+	}
+}
+
 static double get_random(void *arg) {
-	double d;
+	random_t *random = arg;
 
-	if (!global_random)
-		global_random = rand_new();
+	xsg_debug("get_random: %f", random->value);
 
-	d = rand_double(global_random);
-
-	xsg_debug("get_random: %f", d);
-
-	return d;
+	return random->value;
 }
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
+void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+	random_t *random;
+
+	if (n > 1)
+		xsg_conf_error("Past values not supported by random module");
+
+	random = xsg_new(random_t, 1);
+	random->update = update;
+	random->value = DNAN;
+
+	*arg = (void *) random;
 	*num = get_random;
+
+	random_list = xsg_list_append(random_list, random);
+
+	xsg_main_add_update_func(update_random);
+	xsg_main_add_init_func(init_random);
 }
 
 char *info(void) {

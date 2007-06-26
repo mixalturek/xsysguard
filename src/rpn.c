@@ -1,7 +1,7 @@
 /* rpn.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#include <alloca.h>
 
 #include "rpn.h"
 #include "var.h"
@@ -393,216 +394,328 @@ void xsg_rpn_init(void) {
 /******************************************************************************/
 
 #define CHECK_NUM_STACK_SIZE(command, size) \
-	if (num_stack_size < size) xsg_error("RPN: " command ": number stack size smaller than " #size)
+	if (rpn[i]->num_stack_size < size) xsg_error("RPN: " command ": number stack size smaller than " #size)
 #define CHECK_STR_STACK_SIZE(command, size) \
-	if (str_stack_size < size) xsg_error("RPN: " command ": string stack size smaller than " #size)
+	if (rpn[i]->str_stack_size < size) xsg_error("RPN: " command ": string stack size smaller than " #size)
 
-xsg_rpn_t *xsg_rpn_parse(xsg_var_t *var, uint64_t update) {
-	int num_stack_size = 0;
-	int str_stack_size = 0;
-	xsg_rpn_t *rpn;
+void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint32_t n) {
+	xsg_rpn_t *mem;
+	uint32_t i;
 
-	rpn = xsg_new(xsg_rpn_t, 1);
-	rpn->op_list = NULL;
-	rpn->num_stack_size = 0;
-	rpn->str_stack_size = 0;
+	mem = xsg_new(xsg_rpn_t, n);
+
+	for (i = 0; i < n; i++)
+		rpn[i] = mem + i;
+
+	for (i = 0; i < n; i++) {
+		rpn[i]->op_list = NULL;
+		rpn[i]->num_stack_size = 0;
+		rpn[i]->str_stack_size = 0;
+
+		rpn_list = xsg_list_append(rpn_list, rpn[i]);
+	}
 
 	do {
 		op_t *op;
 
-		op = xsg_new(op_t, 1);
-		op->op = NULL;
-		op->num_func = NULL;
-		op->str_func = NULL;
-		op->arg = NULL;
+		op = xsg_new0(op_t, n);
 
 		if (xsg_conf_find_command("LT")) {
-			CHECK_NUM_STACK_SIZE("LT", 2);
-			op->op = op_lt;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("LT", 2);
+				op[i].op = op_lt;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("LE")) {
-			CHECK_NUM_STACK_SIZE("LE", 2);
-			op->op = op_le;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("LE", 2);
+				op[i].op = op_le;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("GT")) {
-			CHECK_NUM_STACK_SIZE("GT", 2);
-			op->op = op_gt;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("GT", 2);
+				op[i].op = op_gt;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("GE")) {
-			CHECK_NUM_STACK_SIZE("GE", 2);
-			op->op = op_ge;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("GE", 2);
+				op[i].op = op_ge;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("EQ")) {
-			CHECK_NUM_STACK_SIZE("EQ", 2);
-			op->op = op_eq;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("EQ", 2);
+				op[i].op = op_eq;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("NE")) {
-			CHECK_NUM_STACK_SIZE("NE", 2);
-			op->op = op_ne;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("NE", 2);
+				op[i].op = op_ne;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("UN")) {
-			CHECK_NUM_STACK_SIZE("UN", 1);
-			op->op = op_un;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("UN", 1);
+				op[i].op = op_un;
+			}
 		} else if (xsg_conf_find_command("ISINF")) {
-			CHECK_NUM_STACK_SIZE("ISINF", 1);
-			op->op = op_isinf;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("ISINF", 1);
+				op[i].op = op_isinf;
+			}
 		} else if (xsg_conf_find_command("IF")) {
-			CHECK_NUM_STACK_SIZE("IF", 3);
-			op->op = op_if;
-			num_stack_size -= 2;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("IF", 3);
+				op[i].op = op_if;
+				rpn[i]->num_stack_size -= 2;
+			}
 		} else if (xsg_conf_find_command("MIN")) {
-			CHECK_NUM_STACK_SIZE("MIN", 2);
-			op->op = op_min;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("MIN", 2);
+				op[i].op = op_min;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("MAX")) {
-			CHECK_NUM_STACK_SIZE("MAX", 2);
-			op->op = op_max;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("MAX", 2);
+				op[i].op = op_max;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("LIMIT")) {
-			CHECK_NUM_STACK_SIZE("LIMIT", 3);
-			op->op = op_limit;
-			num_stack_size -= 2;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("LIMIT", 3);
+				op[i].op = op_limit;
+				rpn[i]->num_stack_size -= 2;
+			}
 		} else if (xsg_conf_find_command("UNKN")) {
-			op->op = op_unkn;
-			num_stack_size += 1;
+			for (i = 0; i < n; i++) {
+				op[i].op = op_unkn;
+				rpn[i]->num_stack_size += 1;
+			}
 		} else if (xsg_conf_find_command("INF")) {
-			op->op = op_inf;
-			num_stack_size += 1;
+			for (i = 0; i < n; i++) {
+				op[i].op = op_inf;
+				rpn[i]->num_stack_size += 1;
+			}
 		} else if (xsg_conf_find_command("NEGINF")) {
-			op->op = op_neginf;
-			num_stack_size += 1;
+			for (i = 0; i < n; i++) {
+				op[i].op = op_neginf;
+				rpn[i]->num_stack_size += 1;
+			}
 		} else if (xsg_conf_find_command("ADD")) {
-			CHECK_NUM_STACK_SIZE("ADD", 2);
-			op->op = op_add;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("ADD", 2);
+				op[i].op = op_add;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("SUB")) {
-			CHECK_NUM_STACK_SIZE("SUB", 2);
-			op->op = op_sub;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("SUB", 2);
+				op[i].op = op_sub;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("MUL")) {
-			CHECK_NUM_STACK_SIZE("MUL", 2);
-			op->op = op_mul;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("MUL", 2);
+				op[i].op = op_mul;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("DIV")) {
-			CHECK_NUM_STACK_SIZE("DIV", 2);
-			op->op = op_div;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("DIV", 2);
+				op[i].op = op_div;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("MOD")) {
-			CHECK_NUM_STACK_SIZE("MOD", 2);
-			op->op = op_mod;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("MOD", 2);
+				op[i].op = op_mod;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("SIN")) {
-			CHECK_NUM_STACK_SIZE("SIN", 1);
-			op->op = op_sin;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("SIN", 1);
+				op[i].op = op_sin;
+			}
 		} else if (xsg_conf_find_command("COS")) {
-			CHECK_NUM_STACK_SIZE("COS", 1);
-			op->op = op_cos;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("COS", 1);
+				op[i].op = op_cos;
+			}
 		} else if (xsg_conf_find_command("LOG")) {
-			CHECK_NUM_STACK_SIZE("LOG", 1);
-			op->op = op_log;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("LOG", 1);
+				op[i].op = op_log;
+			}
 		} else if (xsg_conf_find_command("EXP")) {
-			CHECK_NUM_STACK_SIZE("EXP", 1);
-			op->op = op_exp;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("EXP", 1);
+				op[i].op = op_exp;
+			}
 		} else if (xsg_conf_find_command("SQRT")) {
-			CHECK_NUM_STACK_SIZE("SQRT", 1);
-			op->op = op_sqrt;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("SQRT", 1);
+				op[i].op = op_sqrt;
+			}
 		} else if (xsg_conf_find_command("ATAN")) {
-			CHECK_NUM_STACK_SIZE("ATAN", 1);
-			op->op = op_atan;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("ATAN", 1);
+				op[i].op = op_atan;
+			}
 		} else if (xsg_conf_find_command("ATAN2")) {
-			CHECK_NUM_STACK_SIZE("ATAN2", 2);
-			op->op = op_atan2;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("ATAN2", 2);
+				op[i].op = op_atan2;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("FLOOR")) {
-			CHECK_NUM_STACK_SIZE("FLOOR", 1);
-			op->op = op_floor;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("FLOOR", 1);
+				op[i].op = op_floor;
+			}
 		} else if (xsg_conf_find_command("CEIL")) {
-			CHECK_NUM_STACK_SIZE("CEIL", 1);
-			op->op = op_ceil;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("CEIL", 1);
+				op[i].op = op_ceil;
+			}
 		} else if (xsg_conf_find_command("DEG2RAD")) {
-			CHECK_NUM_STACK_SIZE("DEG2RAD", 1);
-			op->op = op_deg2rad;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("DEG2RAD", 1);
+				op[i].op = op_deg2rad;
+			}
 		} else if (xsg_conf_find_command("RAD2DEG")) {
-			CHECK_NUM_STACK_SIZE("RAD2DEG", 1);
-			op->op = op_rad2deg;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("RAD2DEG", 1);
+				op[i].op = op_rad2deg;
+			}
 		} else if (xsg_conf_find_command("ABS")) {
-			CHECK_NUM_STACK_SIZE("ABS", 1);
-			op->op = op_abs;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("ABS", 1);
+				op[i].op = op_abs;
+			}
 		} else if (xsg_conf_find_command("DUP")) {
-			CHECK_NUM_STACK_SIZE("DUP", 1);
-			op->op = op_dup;
-			num_stack_size += 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("DUP", 1);
+				op[i].op = op_dup;
+				rpn[i]->num_stack_size += 1;
+			}
 		} else if (xsg_conf_find_command("POP")) {
-			CHECK_NUM_STACK_SIZE("POP", 1);
-			op->op = op_pop;
-			num_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("POP", 1);
+				op[i].op = op_pop;
+				rpn[i]->num_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("EXC")) {
-			CHECK_NUM_STACK_SIZE("EXC", 2);
-			op->op = op_exc;
+			for (i = 0; i < n; i++) {
+				CHECK_NUM_STACK_SIZE("EXC", 2);
+				op[i].op = op_exc;
+			}
 		} else if (xsg_conf_find_command("STRDUP")) {
-			CHECK_STR_STACK_SIZE("STRDUP", 1);
-			op->op = op_strdup;
-			str_stack_size += 1;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRDUP", 1);
+				op[i].op = op_strdup;
+				rpn[i]->str_stack_size += 1;
+			}
 		} else if (xsg_conf_find_command("STRPOP")) {
-			CHECK_STR_STACK_SIZE("STRPOP", 1);
-			op->op = op_strpop;
-			str_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRPOP", 1);
+				op[i].op = op_strpop;
+				rpn[i]->str_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("STREXC")) {
-			CHECK_STR_STACK_SIZE("STREXC", 2);
-			op->op = op_strexc;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STREXC", 2);
+				op[i].op = op_strexc;
+			}
 		} else if (xsg_conf_find_command("STRLEN")) {
-			CHECK_STR_STACK_SIZE("STRLEN", 1);
-			op->op = op_strlen;
-			num_stack_size += 1;
-			str_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRLEN", 1);
+				op[i].op = op_strlen;
+				rpn[i]->num_stack_size += 1;
+				rpn[i]->str_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("STRCMP")) {
-			CHECK_STR_STACK_SIZE("STRCMP", 2);
-			op->op = op_strcmp;
-			num_stack_size += 1;
-			str_stack_size -= 2;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRCMP", 2);
+				op[i].op = op_strcmp;
+				rpn[i]->num_stack_size += 1;
+				rpn[i]->str_stack_size -= 2;
+			}
 		} else if (xsg_conf_find_command("STRCASECMP")) {
-			CHECK_STR_STACK_SIZE("STRCASECMP", 2);
-			op->op = op_strcasecmp;
-			num_stack_size += 1;
-			str_stack_size -= 2;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRCASECMP", 2);
+				op[i].op = op_strcasecmp;
+				rpn[i]->num_stack_size += 1;
+				rpn[i]->str_stack_size -= 2;
+			}
 		} else if (xsg_conf_find_command("STRUP")) {
-			CHECK_STR_STACK_SIZE("STRUP", 1);
-			op->op = op_strup;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRUP", 1);
+				op[i].op = op_strup;
+			}
 		} else if (xsg_conf_find_command("STRDOWN")) {
-			CHECK_STR_STACK_SIZE("STRDOWN", 1);
-			op->op = op_strdown;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRDOWN", 1);
+				op[i].op = op_strdown;
+			}
 		} else if (xsg_conf_find_command("STRREVERSE")) {
-			CHECK_STR_STACK_SIZE("STRREVERSE", 1);
-			op->op = op_strreverse;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRREVERSE", 1);
+				op[i].op = op_strreverse;
+			}
 		} else if (xsg_conf_find_command("STRINSERT")) {
-			CHECK_STR_STACK_SIZE("STRINSERT", 2);
-			CHECK_NUM_STACK_SIZE("STRINSERT", 2);
-			op->op = op_strinsert;
-			num_stack_size -= 2;
-			str_stack_size -= 1;
+			for (i = 0; i < n; i++) {
+				CHECK_STR_STACK_SIZE("STRINSERT", 2);
+				CHECK_NUM_STACK_SIZE("STRINSERT", 2);
+				op[i].op = op_strinsert;
+				rpn[i]->num_stack_size -= 2;
+				rpn[i]->str_stack_size -= 1;
+			}
 		} else if (xsg_conf_find_command("DUMP")) {
-			op->op = op_dump;
+			for (i = 0; i < n; i++) {
+				op[i].op = op_dump;
+			}
 		} else {
-			xsg_modules_parse(update, var, &op->num_func, &op->str_func, &op->arg);
-			if (op->num_func != NULL)
-				num_stack_size += 1;
-			if (op->str_func != NULL)
-				str_stack_size += 1;
+			double (**num)(void *) = alloca(sizeof(void *) * n);
+			char *(**str)(void *) = alloca(sizeof(void *) * n);
+			void **arg = alloca(sizeof(void *) * n);
+
+			for (i = 0; i < n; i++) {
+				num[i] = NULL;
+				str[i] = NULL;
+				arg[i] = NULL;
+			}
+
+			if (!xsg_modules_parse(update, var, num, str, arg, n))
+				xsg_conf_error("module name, LT, LE, GT, GE, EQ, NE, UN, ISINF, IF, MIN, MAX, "
+						"LIMIT, UNKN, INF, NEGINF, ADD, SUB, MUL, DIV, MOD, SIN, COS, "
+						"LOG, EXP, SQRT, ATAN, ATAN2, FLOOR, CEIL, DEG2RAD, RAD2DEG, "
+						"ABS, DUP, POP, EXC, STRDUP, STRPOP, STREXC, STRLEN, STRCMP, "
+						"STRCASECMP, STRUP, STRDOWN, STRREVERSE, STRINSERT or DUMP");
+
+			for (i = 0; i < n; i++) {
+				op[i].num_func = num[i];
+				op[i].str_func = str[i];
+				op[i].arg = arg[i];
+
+				if (num[i] != NULL)
+					rpn[i]->num_stack_size += 1;
+				if (str[i] != NULL)
+					rpn[i]->str_stack_size += 1;
+			}
 		}
 
-		max_num_stack_size = MAX(max_num_stack_size, num_stack_size);
-		max_str_stack_size = MAX(max_str_stack_size, str_stack_size);
+		for (i = 0; i < n; i++) {
+			max_num_stack_size = MAX(max_num_stack_size, rpn[i]->num_stack_size);
+			max_str_stack_size = MAX(max_str_stack_size, rpn[i]->str_stack_size);
 
-		rpn->op_list = xsg_list_append(rpn->op_list, op);
+			rpn[i]->op_list = xsg_list_append(rpn[i]->op_list, op + i);
+		}
 
 	} while (xsg_conf_find_comma());
-
-	rpn->num_stack_size = num_stack_size;
-	rpn->str_stack_size = str_stack_size;
-
-	rpn_list = xsg_list_append(rpn_list, rpn);
-
-	return rpn;
 }
 
 static void calc(xsg_rpn_t *rpn) {

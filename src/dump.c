@@ -1,7 +1,7 @@
 /* dump.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,6 @@
 /******************************************************************************/
 
 typedef struct _dump_t {
-	uint64_t first_tv_sec;
-	uint64_t first_tv_usec;
 	const char *filename;
 	const char *name;
 	uint64_t update;
@@ -40,12 +38,10 @@ typedef struct _dump_t {
 /******************************************************************************/
 
 typedef struct _dump_header_t {
-	uint64_t first_tv_sec;
-	uint64_t first_tv_usec;
-	uint64_t last_tv_sec;
-	uint64_t last_tv_usec;
-	uint64_t interval;
-	uint64_t update;
+	uint32_t last_tv_sec;
+	uint32_t last_tv_usec;
+	uint32_t diff_tv_sec;
+	uint32_t diff_tv_usec;
 } dump_header_t;
 
 /******************************************************************************/
@@ -56,14 +52,9 @@ static xsg_list_t *dump_list = NULL;
 
 void xsg_dump_register(const char *name, uint64_t update, unsigned count, double *values, unsigned *index) {
 	dump_t *d;
-	struct timeval tv;
-
-	xsg_gettimeofday(&tv, NULL);
 
 	d = xsg_new(dump_t, 1);
 
-	d->first_tv_sec = (uint64_t) tv.tv_sec;
-	d->first_tv_usec = (uint64_t) tv.tv_usec;
 	d->filename = xsg_build_filename(xsg_get_home_dir(), ".xsysguard", "dumps", name, NULL);
 	d->name = name;
 	d->update = update;
@@ -78,26 +69,25 @@ void xsg_dump_register(const char *name, uint64_t update, unsigned count, double
 
 static void dump(void) {
 	dump_header_t header;
-	struct timeval tv;
+	struct timeval now;
 	xsg_list_t *l;
 
-	xsg_gettimeofday(&tv, NULL);
+	xsg_gettimeofday(&now, NULL);
 
-	header.last_tv_sec  = xsg_uint64_be((uint64_t) tv.tv_sec);
-	header.last_tv_usec = xsg_uint64_be((uint64_t) tv.tv_usec);
-	header.interval     = xsg_uint64_be(xsg_main_get_interval());
+	header.last_tv_sec  = xsg_uint32_be(now.tv_sec);
+	header.last_tv_usec = xsg_uint32_be(now.tv_usec);
 
 	for (l = dump_list; l; l = l->next) {
-		dump_t *d;
+		dump_t *d = l->data;;
 		int fd;
 		unsigned i;
 		size_t index, count;
+		uint64_t diff;
 
-		d = l->data;
+		diff = d->update * xsg_main_get_interval();
 
-		header.first_tv_sec  = xsg_uint64_be(d->first_tv_sec);
-		header.first_tv_usec = xsg_uint64_be(d->first_tv_usec);
-		header.update        = xsg_uint64_be(d->update);
+		header.diff_tv_sec = xsg_uint32_be(diff / 1000);
+		header.diff_tv_usec = xsg_uint32_be(diff % 1000 * 1000);
 
 		// overwrite existing value array in network byte order
 		for (i = 0; i < d->count; i++)

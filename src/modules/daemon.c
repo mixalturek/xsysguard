@@ -1,7 +1,7 @@
 /* daemon.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <stdio.h>
+#include <alloca.h>
 
 /******************************************************************************/
 
@@ -48,6 +49,12 @@
 #endif
 
 /******************************************************************************/
+
+typedef enum _type_t {
+	END = 0,
+	NUM = 1,
+	STR = 2
+} type_t;
 
 typedef struct _daemon_t {
 	char *name;
@@ -87,14 +94,8 @@ typedef struct _daemon_t {
 typedef struct _daemon_var_t {
 	daemon_t *daemon;
 	xsg_var_t *var;
-	uint64_t update;
-	char *config;
 
-	enum {
-		END = 0x00,
-		NUM = 0x01,
-		STR = 0x02
-	} type;
+	type_t type;
 
 	xsg_string_t *str;
 	xsg_string_t *new_str;
@@ -271,81 +272,70 @@ static daemon_t *find_daemon(char *name) {
 
 /******************************************************************************/
 
-static void build_daemon_write_buffers(void) {
-	char *init = "\0\nxsysguard\n";
-	uint64_t interval = xsg_uint64_be(xsg_main_get_interval());
-	uint8_t log_level = xsg_log_level;
-	xsg_list_t *l;
-	uint32_t id = 0;
+static void daemon_write_buffer_add_var(daemon_t *daemon, uint64_t update, type_t t, char *config, uint32_t n) {
+	size_t header_len, config_len;
+	uint32_t id_be;
+	uint8_t type;
+	uint32_t config_len_be;
 
-	for (l = daemon_var_list; l; l = l->next) {
-		daemon_var_t *daemon_var = l->data;
-		daemon_t *daemon = daemon_var->daemon;
-		size_t header_len, config_len;
-		uint32_t id_be;
-		uint64_t update_be;
-		uint8_t type;
-		uint32_t config_len_be;
+	if (daemon->write_buffer_len == 0) {
+		static char *init = "\0\nxsysguard\n";
+		uint64_t interval;
+		uint8_t log_level;
 
-		if (daemon->write_buffer_len == 0) {
-			size_t init_len = sizeof(init) + sizeof(uint64_t) + sizeof(uint8_t);
+		interval = xsg_uint64_be(xsg_main_get_interval());
+		log_level = xsg_log_level;
 
-			daemon->write_buffer = xsg_realloc(daemon->write_buffer, init_len);
+		size_t init_len = sizeof(init) + sizeof(uint64_t) + sizeof(uint8_t);
 
-			// init
-			memcpy(daemon->write_buffer + daemon->write_buffer_len, init, sizeof(init));
-			daemon->write_buffer_len += sizeof(init);
+		daemon->write_buffer = xsg_realloc(daemon->write_buffer, init_len);
 
-			// interval
-			memcpy(daemon->write_buffer + daemon->write_buffer_len, &interval, sizeof(uint64_t));
-			daemon->write_buffer_len += sizeof(uint64_t);
+		// init
+		memcpy(daemon->write_buffer + daemon->write_buffer_len, init, sizeof(init));
+		daemon->write_buffer_len += sizeof(init);
 
-			// log level
-			memcpy(daemon->write_buffer + daemon->write_buffer_len, &log_level, sizeof(uint8_t));
-			daemon->write_buffer_len += sizeof(uint8_t);
-		}
-
-		header_len = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint32_t);
-		config_len = strlen(daemon_var->config);
-
-		daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + header_len + config_len);
-
-		// type
-		type = daemon_var->type;
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &type, sizeof(uint8_t));
-		daemon->write_buffer_len += sizeof(uint8_t);
-
-		// id
-		id_be = xsg_uint32_be(id);
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &id_be, sizeof(uint32_t));
-		daemon->write_buffer_len += sizeof(uint32_t);
-
-		// update
-		update_be = xsg_uint64_be(daemon_var->update);
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &update_be, sizeof(uint64_t));
+		// interval
+		memcpy(daemon->write_buffer + daemon->write_buffer_len, &interval, sizeof(uint64_t));
 		daemon->write_buffer_len += sizeof(uint64_t);
 
-		// config_len
-		config_len_be = xsg_uint32_be(config_len);
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &config_len_be, sizeof(uint32_t));
-		daemon->write_buffer_len += sizeof(uint32_t);
-
-		// config
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, daemon_var->config, config_len);
-		daemon->write_buffer_len += config_len;
-
-		id++;
-	}
-
-	for (l = daemon_list; l; l = l->next) {
-		daemon_t *daemon = l->data;
-		uint8_t end = END;
-
-		daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + sizeof(uint8_t));
-
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &end, sizeof(uint8_t));
+		// log level
+		memcpy(daemon->write_buffer + daemon->write_buffer_len, &log_level, sizeof(uint8_t));
 		daemon->write_buffer_len += sizeof(uint8_t);
 	}
+
+	header_len = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint32_t);
+	config_len = strlen(config);
+
+	daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + header_len + config_len);
+
+	// type
+	type = t;
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &type, sizeof(uint8_t));
+	daemon->write_buffer_len += sizeof(uint8_t);
+
+	// id
+	id_be = xsg_uint32_be(daemon_var_count);
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &id_be, sizeof(uint32_t));
+	daemon->write_buffer_len += sizeof(uint32_t);
+
+	// n
+	n = xsg_uint32_be(n);
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &n, sizeof(uint32_t));
+	daemon->write_buffer_len += sizeof(uint32_t);
+
+	// update
+	update = xsg_uint64_be(update);
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &update, sizeof(uint64_t));
+	daemon->write_buffer_len += sizeof(uint64_t);
+
+	// config_len
+	config_len_be = xsg_uint32_be(config_len);
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &config_len_be, sizeof(uint32_t));
+	daemon->write_buffer_len += sizeof(uint32_t);
+
+	// config
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, config, config_len);
+	daemon->write_buffer_len += config_len;
 }
 
 /******************************************************************************/
@@ -509,7 +499,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 					daemon_var->new_num_fill = 0;
 
-					xsg_var_dirty(daemon_var->var);
+					xsg_var_dirty(&daemon_var->var, 1);
 
 					daemon->id_buffer_fill = 0;
 				}
@@ -538,7 +528,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 				daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
 
-				xsg_var_dirty(daemon_var->var);
+				xsg_var_dirty(&daemon_var->var, 1);
 
 				daemon->id_buffer_fill = 0;
 			} else {
@@ -690,7 +680,7 @@ static double get_num(void *arg) {
 
 	num = daemon_var->num;
 
-	xsg_debug("%s: get_number for \"%s\": %f", daemon_var->daemon->name, daemon_var->config, num);
+	xsg_debug("%s: get_number: %f", daemon_var->daemon->name, num);
 
 	return num;
 }
@@ -701,7 +691,7 @@ static char *get_str(void *arg) {
 
 	str = daemon_var->str->str;
 
-	xsg_debug("%s: get_strint for \"%s\": \"%s\"", daemon_var->daemon->name, daemon_var->config, str);
+	xsg_debug("%s: get_string: \"%s\"", daemon_var->daemon->name, str);
 
 	return str;
 }
@@ -709,8 +699,30 @@ static char *get_str(void *arg) {
 /******************************************************************************/
 
 static void init_daemons(void) {
+	char *timeout, *len;
+	xsg_list_t *l;
+
+	timeout = getenv("XSYSGUARD_DAEMON_TIMEOUT");
+
+	if (timeout != NULL)
+		last_alive_timeout = atoll(timeout);
+
+	len = getenv("XSYSGUARD_DAEMON_MAXBUFLEN");
+
+	if (len != NULL)
+		max_buf_len = atoll(len);
+
 	build_daemon_var_array();
-	build_daemon_write_buffers();
+
+	for (l = daemon_list; l; l = l->next) {
+		daemon_t *daemon = l->data;
+		uint8_t end = END;
+
+		daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + sizeof(uint8_t));
+
+		memcpy(daemon->write_buffer + daemon->write_buffer_len, &end, sizeof(uint8_t));
+		daemon->write_buffer_len += sizeof(uint8_t);
+	}
 }
 
 static void shutdown_daemons(void) {
@@ -773,60 +785,56 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
-	static bool first_time = TRUE;
+void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
 	char *name;
+	uint32_t i;
+	type_t type = 0;
 
-	if (unlikely(first_time)) {
-		char *timeout, *len;
+	xsg_main_add_init_func(init_daemons);
+	xsg_main_add_shutdown_func(shutdown_daemons);
+	xsg_main_add_update_func(update_daemons);
 
-		timeout = getenv("XSYSGUARD_DAEMON_TIMEOUT");
-
-		if (timeout != NULL)
-			last_alive_timeout = atoll(timeout);
-
-		len = getenv("XSYSGUARD_DAEMON_MAXBUFLEN");
-
-		if (len != NULL)
-			max_buf_len = atoll(len);
-
-		xsg_main_add_init_func(init_daemons);
-		xsg_main_add_shutdown_func(shutdown_daemons);
-		xsg_main_add_update_func(update_daemons);
-
-		first_time = FALSE;
-	}
-
-	daemon_var = xsg_new(daemon_var_t, 1);
+	daemon_var = xsg_new(daemon_var_t, n);
 
 	name = xsg_conf_read_string();
 	daemon = find_daemon(name);
 	xsg_free(name);
 
-	daemon_var->daemon = daemon;
+	if (xsg_conf_find_command("n"))
+		type = NUM;
+	else if (xsg_conf_find_command("num"))
+		type = NUM;
+	else if (xsg_conf_find_command("number"))
+		type = NUM;
+	else if (xsg_conf_find_command("s"))
+		type = STR;
+	else if (xsg_conf_find_command("str"))
+		type = STR;
+	else if (xsg_conf_find_command("string"))
+		type = STR;
+	else
+		xsg_conf_error("n, num, number, s, str or string expected");
 
+	for (i = 0; i < n; i++) {
+		daemon_var[i].daemon = daemon;
+		daemon_var[i].var = var[i];
+		daemon_var[i].type = type;
 
-	if (xsg_conf_find_command("n")) {
-		daemon_var->type = NUM;
-		daemon_var->num = DNAN;
-		daemon_var->new_num = DNAN;
-		*num = get_num;
-	} else if (xsg_conf_find_command("s")) {
-		daemon_var->type = STR;
-		daemon_var->str = xsg_string_new(NULL);
-		daemon_var->new_str = xsg_string_new(NULL);
-		*str = get_str;
-	} else {
-		xsg_conf_error("n or s expected");
+		if (type == NUM) {
+			daemon_var[i].num = DNAN;
+			daemon_var[i].new_num = DNAN;
+			num[i] = get_num;
+		} else {
+			daemon_var->str = xsg_string_new(NULL);
+			daemon_var->new_str = xsg_string_new(NULL);
+			str[i] = get_str;
+		}
+		arg[i] = daemon_var + i;
 	}
 
-	daemon_var->var = var;
-	daemon_var->update = update;
-	daemon_var->config = xsg_conf_read_string();
-
-	*arg = (void *) daemon_var;
+	daemon_write_buffer_add_var(daemon, update, type, xsg_conf_read_string(), n);
 
 	daemon->var_list = xsg_list_append(daemon->var_list, daemon_var);
 	daemon_var_list = xsg_list_append(daemon_var_list, daemon_var);

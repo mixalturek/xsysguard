@@ -1,7 +1,7 @@
 /* xsysguard.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,7 +180,10 @@ static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t updat
 	if (!xsg_conf_find_command("+")) {
 		return FALSE;
 	} else {
-		*var = xsg_var_parse(window, widget, update);
+		xsg_var_t **v;
+		v = xsg_var_parse(update, window, widget, 1);
+		*var = *v;
+		xsg_free(v);
 		return TRUE;
 	}
 }

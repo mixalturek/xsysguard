@@ -1,7 +1,7 @@
 /* vard.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <alloca.h>
 
 #include "vard.h"
 #include "rpn.h"
@@ -134,8 +135,15 @@ static void update(uint64_t tick) {
 
 /******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t *var) {
-	update_var(var);
+void xsg_var_dirty(xsg_var_t **var, uint32_t n) {
+	uint32_t i;
+
+	if (unlikely(var == NULL))
+		return;
+
+	for (i = 0; i < n; i++)
+		if (likely(var[i] != NULL))
+			update_var(var[i]);
 }
 
 void xsg_var_flush_dirty(void) {
@@ -144,27 +152,39 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-void xsg_var_parse(uint32_t remote_id, uint64_t update, uint8_t type) {
-	xsg_var_t *var;
+void xsg_var_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t update) {
+	xsg_rpn_t **rpn;
+	xsg_var_t **var;
+	xsg_var_t *mem;
+	uint32_t i;
 
-	var = xsg_new(xsg_var_t, 1);
+	mem = xsg_new(xsg_var_t, n);
 
-	var->update = update;
-	var->remote_id = remote_id;
-	var->dirty = FALSE;
+	var = alloca(sizeof(xsg_var_t **) * n);
+	rpn = alloca(sizeof(xsg_rpn_t **) * n);
 
-	var->type = type;
+	for (i = 0; i < n; i++)
+		var[i] = mem + i;
 
-	if (var->type == STR)
-		var->str = xsg_string_new(NULL);
-	else
-		var->str = NULL;
+	xsg_rpn_parse(update, var, rpn, n);
 
-	var->num = DNAN;
+	for (i = 0; i < n; i++) {
+		var[i]->update = update;
+		var[i]->remote_id = remote_id;
+		var[i]->dirty = FALSE;
+		var[i]->type = type;
+		var[i]->rpn = rpn[i];
+		var[i]->num = DNAN;
 
-	var->rpn = xsg_rpn_parse(var, update);
+		if (type == STR)
+			var[i]->str = xsg_string_new(NULL);
+		else if (type == NUM)
+			var[i]->str = NULL;
+		else
+			xsg_error("invalid var type");
 
-	var_list = xsg_list_append(var_list, var);
+		var_list = xsg_list_append(var_list, var[i]);
+	}
 }
 
 void xsg_var_init() {

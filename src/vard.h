@@ -1,7 +1,7 @@
 /* vard.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,13 @@
 
 void xsg_var_init(void);
 
-void xsg_var_dirty(xsg_var_t *var);
+void xsg_var_dirty(xsg_var_t **var, uint32_t n);
+
 void xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-void xsg_var_parse(uint32_t remote_id, uint64_t update, uint8_t type);
+void xsg_var_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t update);
 
 void xsg_var_queue_vars(void);
 

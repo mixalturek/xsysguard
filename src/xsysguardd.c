@@ -1,7 +1,7 @@
 /* xsysguardd.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,6 +196,7 @@ static void read_config(FILE *stream, bool log_level_overwrite) {
 	while (TRUE) {
 		uint8_t type;
 		uint32_t id;
+		uint32_t n;
 		uint64_t update;
 		uint32_t config_len;
 		char *config;
@@ -209,6 +210,10 @@ static void read_config(FILE *stream, bool log_level_overwrite) {
 		// id
 		read_data(&id, sizeof(uint32_t), stream);
 		id = xsg_uint32_be(id);
+
+		// n
+		read_data(&n, sizeof(uint32_t), stream);
+		n = xsg_uint32_be(n);
 
 		// update
 		read_data(&update, sizeof(uint64_t), stream);
@@ -224,7 +229,7 @@ static void read_config(FILE *stream, bool log_level_overwrite) {
 		config[config_len] = '\0';
 
 		xsg_conf_set_buffer(NULL, config);
-		xsg_var_parse(id, update, type);
+		xsg_var_parse(type, id, n, update);
 
 		xsg_free(config);
 	}

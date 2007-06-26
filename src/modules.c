@@ -1,7 +1,7 @@
 /* modules.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,12 +93,13 @@ void xsg_modules_init(void) {
 
 /******************************************************************************/
 
-void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**num)(void *), char *(**str)(void *), void **arg) {
+bool xsg_modules_parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	xsg_modules_parse_t *parse;
 	char *filename = NULL;
 	void *module;
 	module_t *m = NULL;
 	xsg_list_t *l;
+	uint32_t i;
 
 	if (!modules_list)
 		xsg_modules_init();
@@ -112,7 +113,7 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**num)(void *), 
 	}
 
 	if (!filename)
-		xsg_conf_error("module name expected");
+		return FALSE;
 
 	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
 
@@ -124,20 +125,31 @@ void xsg_modules_parse(uint64_t update, xsg_var_t *var, double (**num)(void *), 
 	if (!parse)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-	*num = NULL;
-	*str = NULL;
-	*arg = NULL;
+	for (i = 0; i < n; i++) {
+		num[i] = NULL;
+		str[i] = NULL;
+		arg[i] = NULL;
+	}
 
-	parse(update, var, num, str, arg);
+	parse(update, var, num, str, arg, n);
 
-	if ((*num == NULL) && (*str == NULL))
-		xsg_error("module %s must set str != NULL or num != NULL", m->name);
+	for (i = 0; i < n; i++) {
+		if ((num[i] == NULL) && (str[i] == NULL)) {
+			if ((num[0] == NULL) && (str[0] == NULL)) {
+				xsg_error("Module %s must set str[%"PRIu32"] != NULL or num[%"PRIu32"] != NULL", m->name, i, i);
+			} else {
+				num[i] = num[0];
+				str[i] = str[0];
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 void xsg_modules_list() {
 	xsg_modules_info_t *info;
 	xsg_modules_parse_t *parse;
-	xsg_modules_nparse_t *nparse;
 	char *filename;
 	void *module;
 	module_t *m = NULL;
@@ -159,9 +171,8 @@ void xsg_modules_list() {
 
 		info = dlsym(module, "info");
 		parse = dlsym(module, "parse");
-		nparse = dlsym(module, "nparse");
 
-		if (!parse && !nparse) {
+		if (!parse) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
 			continue;
 		}

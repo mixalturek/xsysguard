@@ -1,7 +1,7 @@
 /* widget_line.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ void xsg_widget_line_parse(xsg_window_t *window) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(window, widget, widget->visible_update);
+			widget->visible_var = xsg_var_parse_one(widget->visible_update, window, widget);
 		} else {
 			xsg_conf_error("Visible expected");
 		}
