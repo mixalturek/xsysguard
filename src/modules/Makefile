@@ -29,7 +29,6 @@ mandir 		?= $(datarootdir)/man
 man1dir 	?= $(mandir)/man1
 
 SHELL 		:= /bin/sh
-CC 		?= gcc
 INSTALL 	?= install
 INSTALL_PROGRAM ?= $(INSTALL)
 INSTALL_DATA 	?= $(INSTALL) -m 644
@@ -44,17 +43,29 @@ VERSION := $(VERSION).r$(SVNVERSION)
 endif
 
 DATA_DIR    := $(datadir)/xsysguard
+
 CONFIG_DIR  := $(DATA_DIR)/configs
 IMAGE_DIR   := $(DATA_DIR)/images
 FONT_DIR    := $(DATA_DIR)/fonts
 MODULE_DIR  := $(libdir)/xsysguard
 
-CFLAGS  += -Wall
-CFLAGS  += -O3
-CFLAGS  += -g
+CONFIG_PATH ?= ~/.xsysguard/configs:$(CONFIG_DIR)
+IMAGE_PATH  ?= ~/.xsysguard/images:$(IMAGE_DIR)
+FONT_PATH   ?= ~/.xsysguard/fonts:$(FONT_DIR)
+MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
-ALL_CFLAGS  += -I../include
-ALL_LDFLAGS := -fPIC -shared -nostartfiles
+################################################################################
+
+CFLAGS  ?= -Wall -O3 -g
+
+ALL_CFLAGS  := -I../include $(CFLAGS)
+ALL_LDFLAGS := -fPIC -shared $(LDFLAGS)
+
+################################################################################
+
+UNAME ?= $(shell uname -s || uname)
+
+################################################################################
 
 MODULES := $(patsubst %.Makefile,%.Module,$(wildcard *.Makefile))
 
@@ -64,24 +75,21 @@ export RECURSIVE_MODULE_BUILD := 1
 all: $(MODULES)
 
 clean:
-	rm -f *.o
-	rm -f *.so
+	$(RM) *.o *.so
 
 distclean: clean
 
 install:
-	$(INSTALL_DATA) -d $(DESTDIR)$(MODULE_DIR)
+	$(INSTALL) -d $(DESTDIR)$(MODULE_DIR)
 	$(INSTALL_DATA) -t $(DESTDIR)$(MODULE_DIR) $(wildcard *.so)
 
 endif
 
 %.Module:%.Makefile
-	@echo make $^...
-	@$(MAKE) --no-print-directory --file=$^
+	-$(MAKE) --no-print-directory --file=$^
 
 %.so: %.c
-	-$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" \
-	$(ALL_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(LDFLAGS)
+	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS) -D UNAME=\"$(UNAME)\"
 
 .PHONY: all clean distclean install
 

@@ -29,7 +29,6 @@ mandir 		?= $(datarootdir)/man
 man1dir 	?= $(mandir)/man1
 
 SHELL 		:= /bin/sh
-CC 		?= gcc
 INSTALL 	?= install
 INSTALL_PROGRAM ?= $(INSTALL)
 INSTALL_DATA 	?= $(INSTALL) -m 644
@@ -55,14 +54,29 @@ IMAGE_PATH  ?= ~/.xsysguard/images:$(IMAGE_DIR)
 FONT_PATH   ?= ~/.xsysguard/fonts:$(FONT_DIR)
 MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
-CFLAGS      += -Wall
-CFLAGS      += -O3
-CFLAGS      += -g
+################################################################################
 
-ALL_CFLAGS  := -Iinclude -rdynamic
-ALL_LDFLAGS := -lm -ldl
+CFLAGS      ?= -Wall -O3 -g
 
-COMMON_SRC     := include/xsysguard.h types.h
+ALL_CFLAGS  := -Iinclude -rdynamic $(CFLAGS)
+ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
+
+################################################################################
+
+UNAME ?= $(shell uname -s || uname)
+
+################################################################################
+
+ifeq ($(UNAME),Linux)
+endif
+
+ifeq ($(UNAME),SunOS)
+COMMON_SRC += include/endian.h
+endif
+
+################################################################################
+
+COMMON_SRC     += include/xsysguard.h types.h
 COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
@@ -94,33 +108,62 @@ XSYSGUARDD_SRC := $(COMMON_SRC) xsysguardd.c
 XSYSGUARDD_SRC += vard.c vard.h
 XSYSGUARDD_SRC += writebuffer.c writebuffer.h
 
+################################################################################
 
-all: xsysguardd xsysguard
-	$(MAKE) -C modules all
+$(info )
+$(info **************** CONFIGURATION ****************)
+$(info UNAME:         $(UNAME))
+$(info VERSION:       $(VERSION))
+$(info DESTDIR:       $(DESTDIR))
+$(info prefix:        $(prefix))
+$(info bindir:        $(bindir))
+$(info mandir:        $(mandir))
+$(info docdir:        $(docdir))
+$(info includedir:    $(includedir))
+$(info CONFIG_DIR:    $(CONFIG_DIR))
+$(info IMAGE_DIR:     $(IMAGE_DIR))
+$(info FONT_DIR:      $(FONT_DIR))
+$(info MODULE_DIR:    $(MODULE_DIR))
+$(info CONFIG_PATH:   $(CONFIG_PATH))
+$(info IMAGE_PATH:    $(IMAGE_PATH))
+$(info FONT_PATH:     $(FONT_PATH))
+$(info MODULE_PATH:   $(MODULE_PATH))
+$(info ***********************************************)
+$(info )
 
-endian: endian.c
-	$(CC) -o endian $^ && ./endian > include/endian.h
+all: xsysguardd xsysguard modules
+
+include/endian.h: endian.c
+	@$(CC) -o endian $^
+	@./endian > $@
+	@echo '******** Generated $@ ********'
+	@./endian
+	@echo '********************************************'
+	@echo
 
 xsysguard: $(XSYSGUARD_SRC)
-	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) \
-	$(ALL_CFLAGS) $(XSG_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(XSG_LDFLAGS) $(LDFLAGS) \
-	$(filter %.c,$^) \
-	-D XSYSGUARD_CONFIG_PATH=\"$(CONFIG_PATH)\" \
-	-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
-	-D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\" \
-	-D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\" \
-	-D VERSION=\"$(VERSION)\"
+	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) \
+		-D XSYSGUARD_CONFIG_PATH=\"$(CONFIG_PATH)\" \
+		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
+		-D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\" \
+		-D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\" \
+		-D VERSION=\"$(VERSION)\" \
+		-D UNAME=\"$(UNAME)\"
 
 xsysguardd: $(XSYSGUARDD_SRC)
-	$(CC) -o $@ $(ALL_CFLAGS) $(CFLAGS) $(ALL_LDFLAGS) $(LDFLAGS) \
-	$(filter %.c,$^) \
-	-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
-	-D VERSION=\"$(VERSION)\"
+	$(CC) -o $@ $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) \
+		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
+		-D VERSION=\"$(VERSION)\" \
+		-D UNAME=\"$(UNAME)\"
+
+modules:
+	$(MAKE) -C modules all
 
 clean:
-	rm -f xsysguardd
-	rm -f xsysguard
-	rm -f include/endian.h
+	$(RM) xsysguardd
+	$(RM) xsysguard
+	$(RM) endian
+	$(RM) include/endian.h
 	$(MAKE) -C modules clean
 
 distclean: clean
@@ -131,5 +174,5 @@ install: all
 	$(INSTALL_DATA) -D include/xsysguard.h $(DESTDIR)$(includedir)/xsysguard.h
 	$(MAKE) -C modules install
 
-.PHONY: all clean distclean install
+.PHONY: all clean distclean install modules
 
