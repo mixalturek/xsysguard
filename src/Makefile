@@ -56,7 +56,7 @@ MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 ################################################################################
 
-CFLAGS      ?= -Wall -O3 -g
+CFLAGS      ?= -O3 -g
 
 ALL_CFLAGS  := -Iinclude -rdynamic $(CFLAGS)
 ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
@@ -64,6 +64,8 @@ ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
 ################################################################################
 
 UNAME ?= $(shell uname -s || uname)
+
+ALL_CFLAGS += -D$(UNAME)
 
 ################################################################################
 
@@ -81,7 +83,7 @@ COMMON_SRC     += main.c main.h
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
-COMMON_SRC     += utils.c string.c list.c hash.c funcapprox.c
+COMMON_SRC     += compat.c utils.c string.c list.c hash.c funcapprox.c
 
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
@@ -147,14 +149,12 @@ xsysguard: $(XSYSGUARD_SRC)
 		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
 		-D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\" \
 		-D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\" \
-		-D VERSION=\"$(VERSION)\" \
-		-D UNAME=\"$(UNAME)\"
+		-D VERSION=\"$(VERSION)\"
 
 xsysguardd: $(XSYSGUARDD_SRC)
 	$(CC) -o $@ $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) \
 		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
-		-D VERSION=\"$(VERSION)\" \
-		-D UNAME=\"$(UNAME)\"
+		-D VERSION=\"$(VERSION)\"
 
 modules:
 	$(MAKE) -C modules all

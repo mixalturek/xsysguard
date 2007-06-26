@@ -56,7 +56,7 @@ MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 ################################################################################
 
-CFLAGS  ?= -Wall -O3 -g
+CFLAGS      ?= -O3 -g
 
 ALL_CFLAGS  := -I../include $(CFLAGS)
 ALL_LDFLAGS := -fPIC -shared $(LDFLAGS)
@@ -64,6 +64,8 @@ ALL_LDFLAGS := -fPIC -shared $(LDFLAGS)
 ################################################################################
 
 UNAME ?= $(shell uname -s || uname)
+
+ALL_CFLAGS += -D$(UNAME)
 
 ################################################################################
 
@@ -89,7 +91,7 @@ endif
 	-$(MAKE) --no-print-directory --file=$^
 
 %.so: %.c
-	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS) -D UNAME=\"$(UNAME)\"
+	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS)
 
 .PHONY: all clean distclean install
 

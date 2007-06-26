@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <endian.h>
+#include <signal.h>
 
 #include "main.h"
 
@@ -676,4 +677,16 @@ void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_
 	}
 }
 
+/******************************************************************************/
+
+const char *xsg_sig2str(int signum) {
+#ifdef SunOS
+	static char signame[SIG2STR_MAX];
+
+	sig2str(signum, signame);
+	return signame;
+#else
+	return sys_siglist[signum];
+#endif /* SunOS */
+}
 
