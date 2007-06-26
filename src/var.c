@@ -55,7 +55,7 @@ void xsg_var_dirty(xsg_var_t **var, uint32_t n) {
 	if (unlikely(var == NULL))
 		return;
 
-	for (i = 0; i < n; n++)
+	for (i = 0; i < n; i++)
 		if (likely(var[i] != NULL))
 			var[i]->dirty = TRUE;
 
