@@ -60,6 +60,31 @@ static const char *read_dir_name(DIR *dir) {
 
 /******************************************************************************/
 
+static int module_compare_name(const void *a, const void *b) {
+	const module_t *m = a;
+	const module_t *n = b;
+
+	return strcmp(m->name, n->name);
+}
+
+static void modules_list_insert_sorted(module_t *module) {
+	xsg_list_t *l;
+
+	for (l = modules_list; l; l = l->next) {
+		module_t *m = l->data;
+
+		if (0 == strcmp(m->name, module->name)) {
+			xsg_warning("Found multiple \"%s\" modules. Using \"%s\".", m->name, m->file);
+			return;
+		}
+	}
+
+	modules_list = xsg_list_insert_sorted(modules_list, module, module_compare_name);
+}
+
+
+/******************************************************************************/
+
 void xsg_modules_init(void) {
 	DIR *dir;
 	char **pathv;
@@ -82,7 +107,7 @@ void xsg_modules_init(void) {
 				module_t *m = xsg_new(module_t, 1);
 				m->name = name;
 				m->file = xsg_build_filename(*p, filename, NULL);
-				modules_list = xsg_list_prepend(modules_list, m);
+				modules_list_insert_sorted(m);
 				xsg_message("Found module in \"%s\": \"%s\"", *p, filename);
 			}
 		}
@@ -178,9 +203,9 @@ void xsg_modules_list() {
 		}
 
 		if (info)
-			printf("%s:\t %s   (%s)\n", m->name, info(), m->file);
+			printf("%s:\t %s\n", m->name, info());
 		else
-			printf("%s:\t   (%s)\n", m->name, m->file);
+			printf("%s:\n", m->name);
 	}
 }
 
