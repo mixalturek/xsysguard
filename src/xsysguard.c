@@ -52,12 +52,13 @@
 
 /******************************************************************************/
 
-#define COLOR_MAGENTA "\e[35m"
-#define COLOR_YELLOW  "\e[33m"
-#define COLOR_CYAN    "\e[36m"
-#define COLOR_BLUE    "\e[34m"
-#define COLOR_RED     "\e[31m"
-#define COLOR_DEFAULT "\e[0m"
+#define ESCAPE "\033"
+#define COLOR_MAGENTA ESCAPE"[35m"
+#define COLOR_YELLOW  ESCAPE"[33m"
+#define COLOR_CYAN    ESCAPE"[36m"
+#define COLOR_BLUE    ESCAPE"[34m"
+#define COLOR_RED     ESCAPE"[31m"
+#define COLOR_DEFAULT ESCAPE"[0m"
 
 static bool colored_log = FALSE;
 
@@ -67,7 +68,7 @@ static bool timestamps = FALSE;
 
 xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
-static void xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
+static int xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
 	unsigned int pid;
 	char *prefix = NULL;
 
@@ -149,14 +150,19 @@ static void xsg_logv(const char *domain, xsg_log_level_t level, const char *form
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		exit(EXIT_FAILURE);
+
+	return 1;
 }
 
-void xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
+int xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
 	va_list args;
+	int i;
 
 	va_start(args, format);
-	xsg_logv(domain, level, format, args);
+	i = xsg_logv(domain, level, format, args);
 	va_end(args);
+
+	return i;
 }
 
 /******************************************************************************/

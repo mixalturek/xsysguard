@@ -1,7 +1,7 @@
 /* main.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ void xsg_main_add_init_func(void (*func)(void)) {
 		return;
 
 	for (l = init_list; l; l = l->next)
-		if (unlikely(func == l->data))
+		if (unlikely(func == (void (*)(void)) l->data))
 			return;
 
 	init_list = xsg_list_prepend(init_list, (void *) func);
@@ -79,7 +79,7 @@ void xsg_main_add_init_func(void (*func)(void)) {
 
 void xsg_main_remove_init_func(void (*func)(void)) {
 	if (likely(func != NULL))
-		init_list = xsg_list_remove(init_list, func);
+		init_list = xsg_list_remove(init_list, (void *) func);
 }
 
 /******************************************************************************/
@@ -91,15 +91,15 @@ void xsg_main_add_update_func(void (*func)(uint64_t)) {
 		return;
 
 	for (l = update_list; l; l = l->next)
-		if (unlikely(func == l->data))
+		if (unlikely(func == (void (*)(uint64_t)) l->data))
 			return;
 
-	update_list = xsg_list_prepend(update_list, func);
+	update_list = xsg_list_prepend(update_list, (void *) func);
 }
 
 void xsg_main_remove_update_func(void (*func)(uint64_t)) {
 	if (likely(func != NULL))
-		update_list = xsg_list_remove(update_list, func);
+		update_list = xsg_list_remove(update_list, (void *) func);
 }
 
 /******************************************************************************/
@@ -111,15 +111,15 @@ void xsg_main_add_shutdown_func(void (*func)(void)) {
 		return;
 
 	for (l = shutdown_list; l; l = l->next)
-		if (unlikely(func == l->data))
+		if (unlikely(func == (void (*)(void)) l->data))
 			return;
 
-	shutdown_list = xsg_list_prepend(shutdown_list, func);
+	shutdown_list = xsg_list_prepend(shutdown_list, (void *) func);
 }
 
 void xsg_main_remove_shutdown_func(void (*func)(void)) {
 	if (likely(func != NULL))
-		shutdown_list = xsg_list_remove(shutdown_list, func);
+		shutdown_list = xsg_list_remove(shutdown_list, (void *) func);
 }
 
 /******************************************************************************/
@@ -171,15 +171,15 @@ void xsg_main_add_signal_handler(void (*func)(int signum)) {
 		return;
 
 	for (l = signal_handler_list; l; l = l->next)
-		if (unlikely(func == l->data))
+		if (unlikely(func == (void (*)(int)) l->data))
 			return;
 
-	signal_handler_list = xsg_list_prepend(signal_handler_list, func);
+	signal_handler_list = xsg_list_prepend(signal_handler_list, (void *) func);
 }
 
 void xsg_main_remove_signal_handler(void (*func)(int signum)) {
 	if (likely(func != NULL))
-		signal_handler_list = xsg_list_remove(signal_handler_list, func);
+		signal_handler_list = xsg_list_remove(signal_handler_list, (void *) func);
 }
 
 /******************************************************************************/
@@ -191,15 +191,15 @@ void xsg_main_add_signal_cleanup(void (*func)(void)) {
 		return;
 
 	for (l = signal_cleanup_list; l; l = l->next)
-		if (unlikely(func == l->data))
+		if (unlikely(func == (void (*)(void)) l->data))
 			return;
 
-	signal_cleanup_list = xsg_list_prepend(signal_cleanup_list, func);
+	signal_cleanup_list = xsg_list_prepend(signal_cleanup_list, (void *) func);
 }
 
 void xsg_main_remove_signal_cleanup(void (*func)(void)) {
 	if (likely(func != NULL))
-		signal_cleanup_list = xsg_list_remove(signal_cleanup_list, func);
+		signal_cleanup_list = xsg_list_remove(signal_cleanup_list, (void *) func);
 }
 
 /******************************************************************************/
@@ -236,7 +236,7 @@ static void loop(uint64_t num) {
 		xsg_debug("Tick %"PRIu64, tick);
 
 		for (l = update_list; l; l = l->next) {
-			void (*func)(uint64_t) = l->data;
+			void (*func)(uint64_t) = (void (*)(uint64_t)) l->data;
 			func(tick);
 		}
 
@@ -255,7 +255,7 @@ static void loop(uint64_t num) {
 				last_received_signum = 0; // FIXME atomic?
 				xsg_message("Running signal cleanup functions...");
 				for (l = signal_cleanup_list; l; l = l->next) {
-					void (*func)(void) = l->data;
+					void (*func)(void) = (void (*)(void)) l->data;
 					func();
 				}
 			}
@@ -361,7 +361,7 @@ static void shutdown(void) {
 	xsg_message("Running shutdown functions");
 
 	for (l = shutdown_list; l; l = l->next) {
-		func = l->data;
+		func = (void (*)(void)) l->data;
 		func();
 	}
 
@@ -381,7 +381,7 @@ static void signal_handler(int signum) {
 	xsg_message("Received signal %d: %s", signum, xsg_sig2str(signum));
 
 	for (l = signal_handler_list; l; l = l->next) {
-		void (*func)(int) = l->data;
+		void (*func)(int) = (void (*)(int)) l->data;
 		func(signum);
 	}
 }
@@ -426,7 +426,7 @@ void xsg_main_loop(uint64_t num) {
 	xsg_message("Running init functions");
 
 	for (l = init_list; l; l = l->next) {
-		func = l->data;
+		func = (void (*)(void)) l->data;
 		func();
 	}
 

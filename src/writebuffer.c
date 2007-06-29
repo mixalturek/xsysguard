@@ -1,7 +1,7 @@
 /* writebuffer.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ static buffer_t *send_buffer = buffer_array + 1;
 static void buffer_writer(void *arg, xsg_main_poll_events_t events);
 
 static xsg_main_poll_t poll = {
-	fd: STDOUT_FILENO,
-	events: XSG_MAIN_POLL_WRITE,
-	func: buffer_writer,
-	arg: NULL
+	STDOUT_FILENO,		/* fd */
+	XSG_MAIN_POLL_WRITE,	/* events */
+	buffer_writer,		/* func */
+	NULL			/* arg */
 };
 
 /******************************************************************************/

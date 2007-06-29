@@ -145,7 +145,7 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t *const *var, double (**num)(vo
 	if (!module)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-	parse = dlsym(module, "parse");
+	parse = (xsg_modules_parse_t *) dlsym(module, "parse");
 
 	if (!parse)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
@@ -194,8 +194,8 @@ void xsg_modules_list() {
 			continue;
 		}
 
-		info = dlsym(module, "info");
-		parse = dlsym(module, "parse");
+		info = (xsg_modules_info_t *) dlsym(module, "info");
+		parse = (xsg_modules_parse_t *) dlsym(module, "parse");
 
 		if (!parse) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
