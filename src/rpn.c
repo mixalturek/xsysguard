@@ -394,9 +394,9 @@ void xsg_rpn_init(void) {
 /******************************************************************************/
 
 #define CHECK_NUM_STACK_SIZE(command, size) \
-	if (rpn[i]->num_stack_size < size) xsg_error("RPN: " command ": number stack size smaller than " #size)
+	if (rpn[i]->num_stack_size < size) xsg_error("RPN: %s: number stack size smaller than %s", command, #size)
 #define CHECK_STR_STACK_SIZE(command, size) \
-	if (rpn[i]->str_stack_size < size) xsg_error("RPN: " command ": string stack size smaller than " #size)
+	if (rpn[i]->str_stack_size < size) xsg_error("RPN: %s: string stack size smaller than %s", command, #size)
 
 void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint32_t n) {
 	xsg_rpn_t *mem;
