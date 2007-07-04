@@ -1,7 +1,7 @@
 /* fontconfig.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ static void (*FcFini)(void) = NULL;
 #define CHECK(var) if (!(var)) { \
 	xsg_message("Cannot load libfontconfig: %s", dlerror()); \
 	dlclose(lib); \
-	return FALSE; \
+	return NULL; \
 }
 
 char **xsg_fontconfig_get_path(void) {
