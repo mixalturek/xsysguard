@@ -56,20 +56,21 @@ MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 ################################################################################
 
-CFLAGS      ?= -O3 -g
+UNAME ?= $(shell uname -s || uname)
 
-ALL_CFLAGS  := -I../include $(CFLAGS)
+################################################################################
+
+CFLAGS      ?= -O2 -g
+LDFLAGS     ?= 
+
+ALL_CFLAGS  := -I../include -D$(UNAME) $(CFLAGS)
 ALL_LDFLAGS := -fPIC -shared $(LDFLAGS)
 
 ################################################################################
 
-UNAME ?= $(shell uname -s || uname)
-
-ALL_CFLAGS += -D$(UNAME)
+MODULES := $(patsubst %.Makefile,%.Module,$(wildcard *.Makefile))
 
 ################################################################################
-
-MODULES := $(patsubst %.Makefile,%.Module,$(wildcard *.Makefile))
 
 ifndef RECURSIVE_MODULE_BUILD
 export RECURSIVE_MODULE_BUILD := 1
@@ -88,7 +89,7 @@ install:
 endif
 
 %.Module:%.Makefile
-	-$(MAKE) --no-print-directory --file=$^
+	@-$(MAKE) --no-print-directory --file=$^
 
 %.so: %.c
 	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS)

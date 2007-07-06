@@ -56,21 +56,17 @@ MODULE_PATH ?= ~/.xsysguard/modules:$(MODULE_DIR)
 
 ################################################################################
 
-CFLAGS      ?= -O3 -g
+UNAME ?= $(shell uname -s || uname)
 
-ALL_CFLAGS  := -Iinclude -rdynamic $(CFLAGS)
+################################################################################
+
+CFLAGS      ?= -O2 -g
+LDFLAGS     ?= 
+
+ALL_CFLAGS  := -Iinclude -rdynamic -D$(UNAME) $(CFLAGS)
 ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
 
 ################################################################################
-
-UNAME ?= $(shell uname -s || uname)
-
-ALL_CFLAGS += -D$(UNAME)
-
-################################################################################
-
-ifeq ($(UNAME),Linux)
-endif
 
 ifeq ($(UNAME),SunOS)
 COMMON_SRC += include/endian.h
@@ -121,11 +117,8 @@ $(info prefix:        $(prefix))
 $(info bindir:        $(bindir))
 $(info mandir:        $(mandir))
 $(info docdir:        $(docdir))
+$(info datadir:       $(datadir))
 $(info includedir:    $(includedir))
-$(info CONFIG_DIR:    $(CONFIG_DIR))
-$(info IMAGE_DIR:     $(IMAGE_DIR))
-$(info FONT_DIR:      $(FONT_DIR))
-$(info MODULE_DIR:    $(MODULE_DIR))
 $(info CONFIG_PATH:   $(CONFIG_PATH))
 $(info IMAGE_PATH:    $(IMAGE_PATH))
 $(info FONT_PATH:     $(FONT_PATH))
@@ -133,7 +126,20 @@ $(info MODULE_PATH:   $(MODULE_PATH))
 $(info ***********************************************)
 $(info )
 
-all: xsysguardd xsysguard modules
+################################################################################
+
+XSYSGUARD_DEFINES := -D XSYSGUARD_VERSION=\"$(VERSION)\"
+XSYSGUARD_DEFINES += -D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\"
+XSYSGUARD_DEFINES += -D XSYSGUARD_CONFIG_PATH=\"$(CONFIG_PATH)\" 
+XSYSGUARD_DEFINES += -D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\"
+XSYSGUARD_DEFINES += -D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\"
+
+XSYSGUARDD_DEFINES := -D XSYSGUARD_VERSION=\"$(VERSION)\"
+XSYSGUARDD_DEFINES += -D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\"
+
+################################################################################
+
+all: modules xsysguardd xsysguard
 
 include/endian.h: endian.c
 	@$(CC) -o endian $^
@@ -144,17 +150,10 @@ include/endian.h: endian.c
 	@echo
 
 xsysguard: $(XSYSGUARD_SRC)
-	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) \
-		-D XSYSGUARD_CONFIG_PATH=\"$(CONFIG_PATH)\" \
-		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
-		-D XSYSGUARD_IMAGE_PATH=\"$(IMAGE_PATH)\" \
-		-D XSYSGUARD_FONT_PATH=\"$(FONT_PATH)\" \
-		-D VERSION=\"$(VERSION)\"
+	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) $(XSYSGUARD_DEFINES)
 
 xsysguardd: $(XSYSGUARDD_SRC)
-	$(CC) -o $@ $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) \
-		-D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\" \
-		-D VERSION=\"$(VERSION)\"
+	$(CC) -o $@ $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) $(XSYSGUARDD_DEFINES)
 
 modules:
 	$(MAKE) -C modules all
