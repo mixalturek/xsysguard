@@ -160,12 +160,10 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t *const *var, double (**num)(vo
 
 	for (i = 0; i < n; i++) {
 		if ((num[i] == NULL) && (str[i] == NULL)) {
-			if ((num[0] == NULL) && (str[0] == NULL)) {
-				xsg_error("Module %s must set str[%"PRIu32"] != NULL or num[%"PRIu32"] != NULL", m->name, i, i);
-			} else {
-				num[i] = num[0];
-				str[i] = str[0];
-			}
+			if (n == 1)
+				xsg_error("Module %s must set str[0] != NULL or num[0] != NULL", m->name); // TODO xsg_conf_error
+			else
+				xsg_error("Module %s does not support past variables for this configuration", m->name); // TODO xsg_conf_error
 		}
 	}
 
