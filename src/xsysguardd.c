@@ -235,7 +235,7 @@ static void read_config(FILE *stream, bool log_level_overwrite) {
 		config[config_len] = '\0';
 
 		xsg_conf_set_buffer(NULL, config);
-		xsg_var_parse(type, id, n, update);
+		xsg_vard_parse(type, id, n, update);
 
 		xsg_free(config);
 	}
@@ -247,7 +247,7 @@ static void usage(void) {
 	char **pathv;
 	char **p;
 
-	printf( "xsysguardd " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
+	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Print this help message to stdout\n"

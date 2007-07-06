@@ -88,7 +88,7 @@ static void buffer_writer(void *arg, xsg_main_poll_events_t events) {
 
 	if (write_buffer->todo < 1) {
 		xsg_main_remove_poll(&poll);
-		xsg_var_queue_vars();
+		xsg_vard_queue_vars();
 	}
 }
 

@@ -368,7 +368,7 @@ static void usage(void) {
 	char **pathv;
 	char **p;
 
-	printf( "xsysguard " VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
+	printf( "xsysguard " XSYSGUARD_VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguard [ARGUMENTS...] [CONFIGS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help         Print this help message to stdout\n"

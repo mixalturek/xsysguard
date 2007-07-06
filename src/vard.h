@@ -33,9 +33,9 @@ void xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-void xsg_var_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t update);
+void xsg_vard_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t update);
 
-void xsg_var_queue_vars(void);
+void xsg_vard_queue_vars(void);
 
 /*****************************************************************************/
 
