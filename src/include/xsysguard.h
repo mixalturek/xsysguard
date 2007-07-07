@@ -161,7 +161,7 @@ double xsg_funcapprox_get(xsg_funcapprox_t *funcapprox, uint32_t back) XSG_API;
 typedef struct _xsg_buffer_t xsg_buffer_t;
 
 xsg_buffer_t *xsg_buffer_new(void) XSG_API;
-void *xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
+void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
 void xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len) XSG_API;
 void xsg_buffer_clear(xsg_buffer_t *buffer) XSG_API;
 
@@ -320,26 +320,47 @@ int xsg_isinf(double x) XSG_API;
  * logging
  ******************************************************************************/
 
+#define XSG_LOG_LEVEL_ERROR	1
+#define XSG_LOG_LEVEL_WARNING	2
+#define XSG_LOG_LEVEL_MESSAGE	3
+#define XSG_LOG_LEVEL_DEBUG	4
+#define XSG_LOG_LEVEL_MEM	5
+
 #ifndef XSG_LOG_DOMAIN
-#define XSG_LOG_DOMAIN ((char *) 0)
+# define XSG_LOG_DOMAIN ((char *) 0)
 #endif /* XSG_LOG_DOMAIN */
 
-typedef enum {
-	XSG_LOG_LEVEL_ERROR   = 1,
-	XSG_LOG_LEVEL_WARNING = 2,
-	XSG_LOG_LEVEL_MESSAGE = 3,
-	XSG_LOG_LEVEL_DEBUG   = 4,
-	XSG_LOG_LEVEL_MEM     = 5
-} xsg_log_level_t;
+#ifndef XSG_MAX_LOG_LEVEL
+# define XSG_MAX_LOG_LEVEL XSG_LOG_LEVEL_DEBUG
+#endif /* XSG_MAX_LOG_LEVEL */
 
-extern xsg_log_level_t xsg_log_level XSG_API;
+extern int xsg_log_level XSG_API;
 
-int xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) XSG_API;
+int xsg_log(const char *domain, int level, const char *format, ...) XSG_API;
 
-#define xsg_error(...) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define xsg_warning(...) likely(xsg_log_level < XSG_LOG_LEVEL_WARNING) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__)
-#define xsg_message(...) likely(xsg_log_level < XSG_LOG_LEVEL_MESSAGE) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__)
-#define xsg_debug(...) likely(xsg_log_level < XSG_LOG_LEVEL_DEBUG) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__)
+#if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
+# define xsg_error(...) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
+#else
+# define xsg_error(...)
+#endif
+
+#if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL)
+# define xsg_warning(...) likely(xsg_log_level < XSG_LOG_LEVEL_WARNING) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__)
+#else
+# define xsg_warning(...)
+#endif
+
+#if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL)
+# define xsg_message(...) likely(xsg_log_level < XSG_LOG_LEVEL_MESSAGE) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__)
+#else
+# define xsg_message(...)
+#endif
+
+#if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL)
+# define xsg_debug(...) likely(xsg_log_level < XSG_LOG_LEVEL_DEBUG) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__)
+#else
+# define xsg_debug(...)
+#endif
 
 /******************************************************************************/
 

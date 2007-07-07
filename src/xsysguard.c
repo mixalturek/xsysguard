@@ -66,9 +66,9 @@ static bool timestamps = FALSE;
 
 /******************************************************************************/
 
-xsg_log_level_t xsg_log_level = XSG_LOG_LEVEL_WARNING;
+int xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
-static int xsg_logv(const char *domain, xsg_log_level_t level, const char *format, va_list args) {
+static int xsg_logv(const char *domain, int level, const char *format, va_list args) {
 	unsigned int pid;
 	char *prefix = NULL;
 
@@ -154,7 +154,7 @@ static int xsg_logv(const char *domain, xsg_log_level_t level, const char *forma
 	return 1;
 }
 
-int xsg_log(const char *domain, xsg_log_level_t level, const char *format, ...) {
+int xsg_log(const char *domain, int level, const char *format, ...) {
 	va_list args;
 	int i;
 
