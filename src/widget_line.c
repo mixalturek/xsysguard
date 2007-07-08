@@ -85,7 +85,6 @@ void xsg_widget_line_parse(xsg_window_t *window) {
 	line->x2 = xsg_conf_read_int();
 	line->y2 = xsg_conf_read_int();
 	line->color = xsg_imlib_uint2color(xsg_conf_read_color());
-	xsg_conf_read_newline();
 
 	widget->xoffset = MIN(line->x1, line->x2);
 	widget->yoffset = MIN(line->y1, line->y2);
