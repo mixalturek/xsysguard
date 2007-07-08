@@ -63,7 +63,7 @@ void xsg_conf_error(const char *message) {
 	n = error_ptr - ptr;
 
 	line2 = xsg_new(char, n + 1);
-	memset(line2, ' ', n - 1);
+	memset(line2, ' ', n);
 	line2[n-1] = '^';
 	line2[n] = '\0';
 
@@ -494,7 +494,7 @@ char *xsg_conf_read_string() {
 			if (is_space() || ptr[0] == '\n')
 				break;
 		}
-		if (quote == '\"' && is_env()) {
+		if ((quote == '\"' || quote == '\0') && is_env()) {
 			int n;
 
 			string = xsg_string_append(string, env(&n));
