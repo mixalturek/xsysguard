@@ -22,6 +22,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#include <strings.h>
 #include <alloca.h>
 
 #include "rpn.h"
