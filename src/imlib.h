@@ -26,26 +26,6 @@
 
 /******************************************************************************/
 
-#ifndef TRACE
-# define T(func) func
-#else
-# define T(func) { \
-	struct timeval timeval_begin, timeval_end, timeval_diff; \
-	xsg_gettimeofday(&timeval_begin, NULL); \
-	func; \
-	xsg_gettimeofday(&timeval_end, NULL); \
-	xsg_timeval_sub(&timeval_diff, &timeval_end, &timeval_begin); \
-	xsg_debug("T %u.%06us [%04d] %s: %s", \
-			(unsigned) timeval_diff.tv_sec, \
-			(unsigned) timeval_diff.tv_usec, \
-			__LINE__, \
-			__FUNCTION__, \
-			#func); \
-}
-#endif
-
-/******************************************************************************/
-
 void xsg_imlib_init(void);
 void xsg_imlib_init_font_path(void);
 void xsg_imlib_set_cache_size(int size);

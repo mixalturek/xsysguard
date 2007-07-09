@@ -101,7 +101,7 @@ void xsg_widgets_render(xsg_widget_t *w, Imlib_Image buffer, int up_x, int up_y,
 	xsg_widget_t *widget = w;
 
 	if (widget->visible && widget_rect(widget, up_x, up_y, up_w, up_h))
-		T((widget->render_func)(widget, buffer, up_x, up_y));
+		(widget->render_func)(widget, buffer, up_x, up_y);
 }
 
 /******************************************************************************

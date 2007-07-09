@@ -131,7 +131,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 				for (columnv = columns; *columnv != NULL; columnv++) {
 					int column_advance;
 
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+					imlib_get_text_advance(*columnv, &column_advance, NULL);
 
 					width += column_advance;
 
@@ -158,7 +158,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL);
 
 				width += column_advance;
 
@@ -206,7 +206,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 				for (columnv = columns; *columnv != NULL; columnv++) {
 					int column_advance;
 
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+					imlib_get_text_advance(*columnv, &column_advance, NULL);
 
 					height += column_advance;
 
@@ -233,7 +233,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
+				xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance);
 
 				height += column_advance;
 
@@ -281,7 +281,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 				for (columnv = columns; *columnv != NULL; columnv++) {
 					int column_advance;
 
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+					imlib_get_text_advance(*columnv, &column_advance, NULL);
 
 					width += column_advance;
 
@@ -308,7 +308,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL);
 
 				width += column_advance;
 
@@ -356,7 +356,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 				for (columnv = columns; *columnv != NULL; columnv++) {
 					int column_advance;
 
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+					imlib_get_text_advance(*columnv, &column_advance, NULL);
 
 					height += column_advance;
 
@@ -383,7 +383,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance));
+				xsg_imlib_text_draw_with_return_metrics(line_x, yoffset + height, *columnv, NULL, NULL, NULL, &column_advance);
 
 				height += column_advance;
 
@@ -409,7 +409,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 		imlib_context_set_image(tmp);
 		imlib_image_set_has_alpha(1);
-		T(imlib_image_clear());
+		imlib_image_clear();
 
 		imlib_context_set_direction(IMLIB_TEXT_TO_RIGHT);
 
@@ -433,7 +433,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 				for (columnv = columns; *columnv != NULL; columnv++) {
 					int column_advance;
 
-					T(imlib_get_text_advance(*columnv, &column_advance, NULL));
+					imlib_get_text_advance(*columnv, &column_advance, NULL);
 
 					width += column_advance;
 
@@ -460,7 +460,7 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				T(xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL));
+				xsg_imlib_text_draw_with_return_metrics(xoffset + width, line_y, *columnv, NULL, NULL, &column_advance, NULL);
 
 				width += column_advance;
 
@@ -479,10 +479,10 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 
 		imlib_context_set_image(buffer);
 
-		T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
 				text->angle->width, text->angle->height,
 				text->angle->xoffset - up_x, text->angle->yoffset - up_y,
-				text->angle->angle_x, text->angle->angle_y));
+				text->angle->angle_x, text->angle->angle_y);
 
 		imlib_context_set_image(tmp);
 		imlib_free_image();

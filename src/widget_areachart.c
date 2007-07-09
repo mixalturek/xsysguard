@@ -85,8 +85,8 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		double pixel_mult;
 
 		if (areachart->background)
-			T(xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
-					widget->width, widget->height, 0, widget->update));
+			xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+					widget->width, widget->height, 0, widget->update);
 
 		pixel_mult = ((double) widget->height) / (areachart->max - areachart->min);
 
@@ -198,8 +198,8 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		double pixel_mult;
 
 		if (areachart->background)
-			T(xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
-						widget->width, widget->height, 1, widget->update));
+			xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 1, widget->update);
 
 		pixel_mult = ((double) widget->width) / (areachart->max - areachart->min);
 
@@ -310,8 +310,8 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		double pixel_mult;
 
 		if (areachart->background)
-			T(xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
-						widget->width, widget->height, 2, widget->update));
+			xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 2, widget->update);
 
 		pixel_mult = ((double) widget->height) / (areachart->max - areachart->min);
 
@@ -422,8 +422,8 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		double pixel_mult;
 
 		if (areachart->background)
-			T(xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
-						widget->width, widget->height, 3, widget->update));
+			xsg_imlib_blend_background(areachart->background, widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, 3, widget->update);
 
 		pixel_mult = ((double) widget->width) / (areachart->max - areachart->min);
 
@@ -542,10 +542,10 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		tmp = imlib_create_image(chart_width, chart_height);
 		imlib_context_set_image(tmp);
 		imlib_image_set_has_alpha(1);
-		T(imlib_image_clear());
+		imlib_image_clear();
 
 		if (areachart->background)
-			T(xsg_imlib_blend_background(areachart->background, 0, 0, chart_width, chart_height, 0, widget->update));
+			xsg_imlib_blend_background(areachart->background, 0, 0, chart_width, chart_height, 0, widget->update);
 
 		pixel_mult = ((double) chart_height) / (areachart->max - areachart->min);
 
@@ -645,9 +645,9 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 		}
 
 		imlib_context_set_image(buffer);
-		T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
+		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
 				areachart->angle->xoffset - up_x, areachart->angle->yoffset - up_y,
-				areachart->angle->angle_x, areachart->angle->angle_y));
+				areachart->angle->angle_x, areachart->angle->angle_y);
 
 		imlib_context_set_image(tmp);
 		imlib_free_image();

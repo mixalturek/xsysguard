@@ -157,14 +157,14 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 				imlib_context_set_cliprect(widget->xoffset - up_x,
 						widget->yoffset - up_y + yoffset, widget->width, height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
-						widget->width, widget->height, range_angle));
+				imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, range_angle);
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(widget->xoffset - up_x,
-							widget->yoffset - up_y + yoffset, widget->width, height));
+				imlib_image_fill_rectangle(widget->xoffset - up_x,
+							widget->yoffset - up_y + yoffset, widget->width, height);
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 90.0)) {
@@ -241,14 +241,14 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 				imlib_context_set_cliprect(widget->xoffset - up_x + xoffset,
 						widget->yoffset - up_y, width, widget->height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
-							widget->width, widget->height, range_angle));
+				imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+							widget->width, widget->height, range_angle);
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
-							widget->yoffset - up_y, width, widget->height));
+				imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
+							widget->yoffset - up_y, width, widget->height);
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 180.0)) {
@@ -325,14 +325,14 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 				imlib_context_set_cliprect(widget->xoffset - up_x,
 						widget->yoffset - up_y + yoffset, widget->width, height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
-						widget->width, widget->height, range_angle));
+				imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+						widget->width, widget->height, range_angle);
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(widget->xoffset - up_x,
-							widget->yoffset - up_y + yoffset, widget->width, height));
+				imlib_image_fill_rectangle(widget->xoffset - up_x,
+							widget->yoffset - up_y + yoffset, widget->width, height);
 			}
 		}
 	} else if ((mask_img == NULL) && (barchart->angle->angle == 270.0)) {
@@ -409,14 +409,14 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 				imlib_context_set_cliprect(widget->xoffset - up_x + xoffset,
 						widget->yoffset - up_y, width, widget->height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
-							widget->width, widget->height, range_angle));
+				imlib_image_fill_color_range_rectangle(widget->xoffset - up_x, widget->yoffset - up_y,
+							widget->width, widget->height, range_angle);
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
-							widget->yoffset - up_y, width, widget->height));
+				imlib_image_fill_rectangle(widget->xoffset - up_x + xoffset,
+							widget->yoffset - up_y, width, widget->height);
 			}
 		}
 	} else {
@@ -505,27 +505,27 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 				double range_angle = barchart_var->range_angle;
 				imlib_context_set_cliprect(0, yoffset, chart_width, height);
 				imlib_context_set_color_range(barchart_var->range);
-				T(imlib_image_fill_color_range_rectangle(0, 0, chart_width, chart_height, range_angle));
+				imlib_image_fill_color_range_rectangle(0, 0, chart_width, chart_height, range_angle);
 				imlib_context_set_cliprect(0, 0, 0, 0);
 			} else {
 				imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
 						barchart_var->color.blue, barchart_var->color.alpha);
-				T(imlib_image_fill_rectangle(0, yoffset, chart_width, height));
+				imlib_image_fill_rectangle(0, yoffset, chart_width, height);
 			}
 		}
 
 		if (mask_img)
-			T(xsg_imlib_blend_mask(mask_img));
+			xsg_imlib_blend_mask(mask_img);
 
 		imlib_context_set_image(buffer);
 		if (barchart->angle) {
-			T(imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
+			imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0, chart_width, chart_height,
 					barchart->angle->xoffset - up_x, barchart->angle->yoffset - up_y,
-					barchart->angle->angle_x, barchart->angle->angle_y));
+					barchart->angle->angle_x, barchart->angle->angle_y);
 		} else {
-			T(imlib_blend_image_onto_image(tmp, 1, 0, 0, chart_width, chart_height,
+			imlib_blend_image_onto_image(tmp, 1, 0, 0, chart_width, chart_height,
 					widget->xoffset - up_x, widget->yoffset - up_y,
-					chart_width, chart_height));
+					chart_width, chart_height);
 		}
 
 		imlib_context_set_image(tmp);
