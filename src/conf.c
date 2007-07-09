@@ -45,34 +45,98 @@ void xsg_conf_set_buffer(char *name, char *buffer) {
 
 /******************************************************************************/
 
-void xsg_conf_error(const char *message) {
-	unsigned n;
-	char *error_ptr;
-	char *line2;
+static char *error_line(void) {
+	char *p, *line_begin, *line_end, *buffer;
+	size_t line_len, n;
 
-	error_ptr = ptr;
+	p = ptr;
 
-	while (ptr[0] != '\0' && ptr[0] != '\n')
-		ptr++;
+	while (p[0] != '\0' && p[0] != '\n')
+		p++;
+	p--;
 
-	ptr[0] = '\0';
+	line_end = p;
 
-	while (ptr[0] != '\n' && ptr > buf)
-		ptr--;
+	while (p[0] != '\n' && p >= buf)
+		p--;
+	p++;
 
-	n = error_ptr - ptr;
+	line_begin = p;
 
-	line2 = xsg_new(char, n + 1);
-	memset(line2, ' ', n);
-	line2[n-1] = '^';
-	line2[n] = '\0';
+	if (line_end <= line_begin)
+		return xsg_strdup("\n^");
+
+	line_len = line_end - line_begin;
+
+	if (ptr < p)
+		return xsg_strdup("\n^");
+
+	n = ptr - p;
+
+	buffer = xsg_new(char, line_len + 1 + n + 1 + 1);
+
+	memcpy(buffer, line_begin, line_len);
+	buffer[line_len] = '\n';
+	memset(buffer + line_len + 1, ' ', n);
+	buffer[line_len + 1 + n] = '^';
+	buffer[line_len + 1 + n + 1] = '\0';
+
+	return buffer;
+}
+
+int xsg_conf_error(const char *format, ...) {
+	char *message;
+	char *error;
+	unsigned length;
+	va_list args;
+	int ret;
+
+	va_start(args, format);
+	length = xsg_vasprintf(&message, format, args);
+	va_end(args);
+
+	if (length <= 0)
+		message = xsg_strdup("");
+
+	error = error_line();
 
 	if (log_name)
-		xsg_error("%s: Cannot parse configuration line %d: %s.\n%s\n%s\n",
-				log_name, line, message, ptr, line2);
+		ret = xsg_error("%s: config line %d: %s:\n%s", log_name, line, message, error);
 	else
-		xsg_error("Cannot parse configuration line %d: %s.\n%s\n%s\n",
-				line, message, ptr, line2);
+		ret = xsg_error("config line %d: %s:\n%s", line, message, error);
+
+	// xsg_error never returns, but...
+	xsg_free(message);
+	xsg_free(error);
+
+	return ret;
+}
+
+int xsg_conf_warning(const char *format, ...) {
+	char *message;
+	char *error;
+	unsigned length;
+	va_list args;
+	int ret;
+
+	va_start(args, format);
+	length = xsg_vasprintf(&message, format, args);
+	va_end(args);
+
+	if (length <= 0)
+		message = xsg_strdup("");
+
+	error = error_line();
+
+	if (log_name)
+		ret = xsg_warning("%s: config line %d: %s:\n%s", log_name, line, message, error);
+	else
+		ret = xsg_warning("config line %d: %s:\n%s", line, message, error);
+
+	xsg_free(message);
+	xsg_free(error);
+
+	return ret;
 }
 
 /******************************************************************************/

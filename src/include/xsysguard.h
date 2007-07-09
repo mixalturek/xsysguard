@@ -89,7 +89,8 @@ char *xsg_conf_read_string(void) XSG_API;
 
 bool xsg_conf_find_command(const char *command) XSG_API;
 
-void xsg_conf_error(const char *message) XSG_API;
+int xsg_conf_error(const char *format, ...) XSG_API;
+int xsg_conf_warning(const char *format, ...) XSG_API;
 
 /******************************************************************************
  * var.c
