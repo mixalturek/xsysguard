@@ -146,6 +146,9 @@ static void scroll_and_update(uint64_t tick) {
 			(widget->scroll_func)(widget);
 			(widget->update_func)(widget, NULL);
 		}
+
+		if (tick == 0)
+			(widget->update_func)(widget, NULL);
 	}
 }
 
