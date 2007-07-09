@@ -140,7 +140,7 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t *const *var, double (**num)(vo
 	if (!filename)
 		return FALSE;
 
-	module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
+	module = dlopen(filename, RTLD_NOW);
 
 	if (!module)
 		xsg_error("Cannot load module %s: %s", m->name, dlerror());
@@ -185,7 +185,7 @@ void xsg_modules_list() {
 		m = l->data;
 		filename = m->file;
 
-		module = dlopen(filename, RTLD_LAZY | RTLD_LOCAL);
+		module = dlopen(filename, RTLD_NOW);
 
 		if (!module) {
 			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
