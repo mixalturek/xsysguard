@@ -448,15 +448,25 @@ void xsg_imlib_text_draw_with_return_metrics(int x, int y, const char *text, int
 			case IMLIB_TEXT_TO_RIGHT:
 				angle = 0.0;
 				break;
-			case IMLIB_TEXT_TO_LEFT:
+			case IMLIB_TEXT_TO_DOWN:
+				{
+					int tmp = width;
+					width = height;
+					height = tmp;;
+				}
 				angle = 0.0;
 				imlib_image_orientate(1);
 				break;
-			case IMLIB_TEXT_TO_DOWN:
+			case IMLIB_TEXT_TO_LEFT:
 				angle = 0.0;
 				imlib_image_orientate(2);
 				break;
 			case IMLIB_TEXT_TO_UP:
+				{
+					int tmp = width;
+					width = height;
+					height = tmp;
+				}
 				angle = 0.0;
 				imlib_image_orientate(3);
 				break;
