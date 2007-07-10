@@ -24,18 +24,51 @@
 
 /******************************************************************************/
 
-xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height) {
-	xsg_angle_t *angle;
-	double arc, sa, ca;
-	double w, h;
+static void max_area(double sa, double ca, double *width, double *height) {
+	double ow, oh;
+	unsigned w, h;
+	unsigned max;
+	unsigned area;
 
-	arc = a / 180.0 * M_PI;
+	area = 0;
+
+	ow = *width;
+	oh = *height;
+
+	max = MAX(*width, *height);
+
+	for (w = 1; w <= max; w++) {
+		for (h = 1; h <= max; h++) {
+			double nw, nh;
+
+			nw = fabs(sa * (double) h) + fabs(ca * (double) w);
+			nh = fabs(ca * (double) h) + fabs(sa * (double) w);
+
+			if (nw <= ow && nh <= oh && w * h > area) {
+				area = w * h;
+				*width = (double) w;
+				*height = (double) h;
+			}
+		}
+	}
+}
+
+xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width, unsigned height) {
+	xsg_angle_t *angle;
+	double arc, sa, ca, w, h;
+
+	arc = fmod(a, 360.0) / 180.0 * M_PI;
 
 	sa = sin(arc);
 	ca = cos(arc);
 
-	w = *width;
-	h = *height;
+	w = width;
+	h = height;
+
+	max_area(sa, ca, &w, &h);
+
+	xoffset += (width - (int) (fabs(sa * h) + fabs(ca * w))) / 2;
+	yoffset += (height - (int) (fabs(ca * h) + fabs(sa * w))) / 2;
 
 	if (sa > 0.0)
 		xoffset += sa * h;
@@ -51,15 +84,11 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *w
 
 	angle->xoffset = xoffset;
 	angle->yoffset = yoffset;
-	angle->width = *width;
-	angle->height = *height;
+	angle->width = w;
+	angle->height = h;
 	angle->angle = a;
 	angle->angle_x = w * ca;
 	angle->angle_y = w * sa;
-
-	*width = fabs(sa * h) + fabs(ca * w);
-	*height = fabs(ca * h) + fabs(sa *w);
-
 	return angle;
 }
 

@@ -192,7 +192,7 @@ void xsg_widget_rectangle_parse(xsg_window_t *window) {
 	}
 
 	if (angle != 0.0)
-		rectangle->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+		rectangle->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
 

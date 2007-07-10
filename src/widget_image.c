@@ -138,7 +138,7 @@ xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update) {
 	}
 
 	if (angle != 0.0)
-		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	return widget;
 }

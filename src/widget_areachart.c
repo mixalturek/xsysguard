@@ -851,7 +851,7 @@ xsg_widget_t *xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update)
 	}
 
 	if (angle != 0.0)
-		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, &widget->width, &widget->height);
+		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	return widget;
 }

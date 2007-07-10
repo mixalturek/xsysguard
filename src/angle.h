@@ -37,7 +37,7 @@ typedef struct _xsg_angle_t {
 
 /******************************************************************************/
 
-xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned int *width, unsigned int *height);
+xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width, unsigned height);
 
 /******************************************************************************/
 
