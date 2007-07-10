@@ -53,12 +53,17 @@ static char *error_line(void) {
 
 	while (p[0] != '\0' && p[0] != '\n')
 		p++;
-	p--;
 
 	line_end = p;
 
+	p--;
+
+	if (p < ptr)
+		return xsg_strdup("\n^");
+
 	while (p[0] != '\n' && p >= buf)
 		p--;
+
 	p++;
 
 	line_begin = p;
