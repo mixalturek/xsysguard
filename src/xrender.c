@@ -24,10 +24,9 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <string.h>
-#include <endian.h>
 
 #include "xrender.h"
-#include "argb.h"
+//#include "argb.h"
 
 /******************************************************************************/
 
@@ -92,6 +91,13 @@ static XRenderPictFormat *(*XRenderFindStandardFormat)(Display *dpy, int format)
 static Picture (*XRenderCreatePicture)(Display *dpy, Drawable drawable, _Xconst XRenderPictFormat *format, unsigned long valuemask, _Xconst XRenderPictureAttributes *attributes) = NULL;
 static void (*XRenderComposite)(Display *dpy, int op, Picture src, Picture mask, Picture dst, int src_x, int src_y, int mask_x, int mask_y, int dst_x, int dst_y, unsigned int width, unsigned int height);
 static void (*XRenderFreePicture)(Display *dpy, Picture picture) = NULL;
+
+/******************************************************************************/
+
+static bool am_big_endian(void) {
+	long one = 1;
+	return !(*((char *)(&one)));
+}
 
 /******************************************************************************/
 
@@ -211,13 +217,10 @@ static XImage *create_ximage(Visual *visual, unsigned depth, unsigned width, uns
 	ximage = XCreateImage(display, visual, depth, ZPixmap, 0, NULL, width, height, 32, 0);
 	ximage->data = xsg_malloc(ximage->bytes_per_line * ximage->height);
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-	ximage->byte_order=  MSBFirst
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-	ximage->byte_order = LSBFirst;
-#else
-# error unknown byte order
-#endif
+	if (am_big_endian())
+		ximage->byte_order = MSBFirst;
+	else
+		ximage->byte_order = LSBFirst;
 
 	return ximage;
 }
@@ -256,12 +259,12 @@ void xsg_xrender_render(Window window, Visual *visual, Pixmap mask, unsigned xsh
 			uint8_t *m = (uint8_t *) mask_ximage->data + y * mask_ximage->bytes_per_line;
 
 			for (x = 0; x < width; x++) {
-				if ((*d >> 24) >= xshape)
-#if __BYTE_ORDER == __BIG_ENDIAN
-					*m |= (1 << (0x7 - (x & 0x7)));
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-					*m |= (1 << (x & 0x7));
-#endif
+				if ((*d >> 24) >= xshape) {
+					if (am_big_endian())
+						*m |= (1 << (0x7 - (x & 0x7)));
+					else
+						*m |= (1 << (x & 0x7));
+				}
 				if ((x & 0x7) == 0x7)
 					m++;
 				d++;

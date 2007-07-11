@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <endian.h>
 
 #include "conf.h"
 #include "argb.h"

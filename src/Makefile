@@ -68,12 +68,6 @@ ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
 
 ################################################################################
 
-ifeq ($(UNAME),SunOS)
-COMMON_SRC += include/endian.h
-endif
-
-################################################################################
-
 COMMON_SRC     += include/xsysguard.h types.h
 COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
@@ -141,14 +135,6 @@ XSYSGUARDD_DEFINES += -D XSYSGUARD_MODULE_PATH=\"$(MODULE_PATH)\"
 
 all: modules xsysguardd xsysguard
 
-include/endian.h: endian.c
-	@$(CC) -o endian $^
-	@./endian > $@
-	@echo '******** Generated $@ ********'
-	@./endian
-	@echo '********************************************'
-	@echo
-
 xsysguard: $(XSYSGUARD_SRC)
 	$(CC) -o $@ $(shell pkg-config --cflags --libs imlib2 || imlib2-config --cflags --libs) $(ALL_CFLAGS) $(ALL_LDFLAGS) $(filter %.c,$^) $(XSYSGUARD_DEFINES)
 
@@ -161,11 +147,9 @@ modules:
 clean:
 	$(RM) xsysguardd
 	$(RM) xsysguard
-	$(RM) endian
 	$(MAKE) -C modules clean
 
 distclean: clean
-	$(RM) include/endian.h
 
 install: all
 	$(INSTALL_PROGRAM) -D xsysguardd $(DESTDIR)$(bindir)/xsysguardd

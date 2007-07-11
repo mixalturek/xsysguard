@@ -22,23 +22,20 @@
 #define __ARGB_H__ 1
 
 #include <xsysguard.h>
-#include <endian.h>
 
 /******************************************************************************/
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-# define A_VAL(p) ((uint8_t *)(p))[0]
-# define R_VAL(p) ((uint8_t *)(p))[1]
-# define G_VAL(p) ((uint8_t *)(p))[2]
-# define B_VAL(p) ((uint8_t *)(p))[3]
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-# define A_VAL(p) ((uint8_t *)(p))[3]
-# define R_VAL(p) ((uint8_t *)(p))[2]
-# define G_VAL(p) ((uint8_t *)(p))[1]
-# define B_VAL(p) ((uint8_t *)(p))[0]
-#else
-# error unknown byte order
-#endif
+#define A_VAL(p) ((uint8_t *)(p))[xsg_argb_am_big_endian() ? 0 : 3]
+#define R_VAL(p) ((uint8_t *)(p))[xsg_argb_am_big_endian() ? 1 : 2]
+#define G_VAL(p) ((uint8_t *)(p))[xsg_argb_am_big_endian() ? 2 : 1]
+#define B_VAL(p) ((uint8_t *)(p))[xsg_argb_am_big_endian() ? 3 : 0]
+
+/******************************************************************************/
+
+static bool xsg_argb_am_big_endian(void) {
+	long one = 1;
+	return !(*((char *)(&one)));
+}
 
 /******************************************************************************/
 
