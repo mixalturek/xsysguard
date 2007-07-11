@@ -33,6 +33,7 @@ bool xsg_conf_find_commentline(void);
 bool xsg_conf_find_newline(void);
 bool xsg_conf_find_comma(void);
 bool xsg_conf_find_end(void);
+bool xsg_conf_find_double(double *double_return);
 
 void xsg_conf_read_newline(void);
 uint32_t xsg_conf_read_color(void);

@@ -388,6 +388,13 @@ static void op_dump(void) {
 
 /******************************************************************************/
 
+static double get_number(void *arg) {
+	double *d = (double *) arg;
+	return *d;
+}
+
+/******************************************************************************/
+
 void xsg_rpn_init(void) {
 	build_stacks();
 }
@@ -417,11 +424,20 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint
 	}
 
 	do {
+		double d;
 		op_t *op;
 
 		op = xsg_new0(op_t, n);
 
-		if (xsg_conf_find_command("LT")) {
+		if (xsg_conf_find_double(&d)) {
+			for (i = 0; i < n; i++) {
+				double *dp = xsg_new(double, 1);
+				*dp = d;
+				op[i].num_func = get_number;
+				op[i].arg = (void *) dp;
+				rpn[i]->num_stack_size += 1;
+			}
+		} else if (xsg_conf_find_command("LT")) {
 			for (i = 0; i < n; i++) {
 				CHECK_NUM_STACK_SIZE("LT", 2);
 				op[i].op = op_lt;

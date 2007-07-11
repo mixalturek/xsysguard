@@ -226,6 +226,28 @@ bool xsg_conf_find_command(const char *command) {
 	}
 }
 
+bool xsg_conf_find_double(double *double_return) {
+	double d;
+	int n = 0;
+	int m = 0;
+
+	skip_space();
+
+	if (is_env()) {
+		sscanf(env(&n), "%lf%n", &d, &m);
+		if (m < 1)
+			return FALSE;
+	} else {
+		sscanf(ptr, "%lf%n", &d, &n);
+		if (n < 1)
+			return FALSE;
+	}
+
+	ptr += n;
+	*double_return = d;
+	return TRUE;
+}
+
 bool xsg_conf_find_comma(void) {
 	skip_space();
 
