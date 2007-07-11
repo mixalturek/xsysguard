@@ -393,6 +393,10 @@ static double get_number(void *arg) {
 	return *d;
 }
 
+static char *get_string(void *arg) {
+	return (char *) arg;
+}
+
 /******************************************************************************/
 
 void xsg_rpn_init(void) {
@@ -424,18 +428,25 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint
 	}
 
 	do {
-		double d;
+		double number;
+		char *string;
 		op_t *op;
 
 		op = xsg_new0(op_t, n);
 
-		if (xsg_conf_find_double(&d)) {
+		if (xsg_conf_find_number(&number)) {
 			for (i = 0; i < n; i++) {
-				double *dp = xsg_new(double, 1);
-				*dp = d;
+				double *numberp = xsg_new(double, 1);
+				*numberp = number;
 				op[i].num_func = get_number;
-				op[i].arg = (void *) dp;
+				op[i].arg = (void *) numberp;
 				rpn[i]->num_stack_size += 1;
+			}
+		} else if (xsg_conf_find_string(&string)) {
+			for (i = 0; i < n; i++) {
+				op[i].str_func = get_string;
+				op[i].arg = (void *) string;
+				rpn[i]->str_stack_size += 1;
 			}
 		} else if (xsg_conf_find_command("LT")) {
 			for (i = 0; i < n; i++) {
@@ -707,11 +718,11 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint
 			}
 
 			if (!xsg_modules_parse(update, var, num, str, arg, n))
-				xsg_conf_error("module name, LT, LE, GT, GE, EQ, NE, UN, ISINF, IF, MIN, MAX, "
+				xsg_conf_error("number, string, module name, LT, LE, GT, GE, EQ, NE, UN, ISINF, IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, ADD, SUB, MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, ATAN, ATAN2, FLOOR, CEIL, DEG2RAD, RAD2DEG, "
 						"ABS, DUP, POP, EXC, STRDUP, STRPOP, STREXC, STRLEN, STRCMP, "
-						"STRCASECMP, STRUP, STRDOWN, STRREVERSE, STRINSERT or DUMP");
+						"STRCASECMP, STRUP, STRDOWN, STRREVERSE, STRINSERT or DUMP expected");
 
 			for (i = 0; i < n; i++) {
 				op[i].num_func = num[i];

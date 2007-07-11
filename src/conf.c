@@ -226,7 +226,7 @@ bool xsg_conf_find_command(const char *command) {
 	}
 }
 
-bool xsg_conf_find_double(double *double_return) {
+bool xsg_conf_find_number(double *number_return) {
 	double d;
 	int n = 0;
 	int m = 0;
@@ -244,7 +244,18 @@ bool xsg_conf_find_double(double *double_return) {
 	}
 
 	ptr += n;
-	*double_return = d;
+	*number_return = d;
+	return TRUE;
+}
+
+bool xsg_conf_find_string(char **string_return) {
+
+	skip_space();
+
+	if (ptr[0] != '\"' && ptr[0] != '\'')
+		return FALSE;
+
+	*string_return = xsg_conf_read_string();
 	return TRUE;
 }
 
