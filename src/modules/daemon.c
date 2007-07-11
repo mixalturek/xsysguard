@@ -798,6 +798,9 @@ void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char 
 
 	daemon_var = xsg_new(daemon_var_t, n);
 
+	if (!xsg_conf_find_command("exec"))
+		xsg_conf_error("exec expected");
+
 	name = xsg_conf_read_string();
 	daemon = find_daemon(name);
 	xsg_free(name);
