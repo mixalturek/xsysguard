@@ -1,3 +1,3 @@
 include Makefile
-all: n.so
+all: number.so
 

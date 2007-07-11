@@ -1,4 +1,4 @@
-/* n.c
+/* number.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
  * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
