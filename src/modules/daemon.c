@@ -21,7 +21,6 @@
 #include <xsysguard.h>
 #include <string.h>
 #include <errno.h>
-#include <endian.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -146,6 +145,13 @@ static void build_daemon_var_array(void) {
 		daemon_var_array[daemon_var_id] = l->data;
 		daemon_var_id++;
 	}
+}
+
+/******************************************************************************/
+
+static bool am_big_endian(void) {
+	long one = 1;
+	return !(*((char *)(&one)));
 }
 
 /******************************************************************************/
@@ -417,13 +423,11 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 	while (n != 0) {
 
 		while (daemon->id_buffer_fill < sizeof(uint32_t)) {
-#			if __BYTE_ORDER == __LITTLE_ENDIAN
-				((char *)(&daemon->id_buffer))[sizeof(uint32_t) - 1 - daemon->id_buffer_fill] = buffer[0];
-#			elif __BYTE_ORDER == __BIG_ENDIAN
+			if (am_big_endian())
 				((char *)(&daemon->id_buffer))[daemon->id_buffer_fill] = buffer[0];
-#			else
-#				error UNKNOWN BYTEORDER
-#			endif
+			else
+				((char *)(&daemon->id_buffer))[sizeof(uint32_t) - 1 - daemon->id_buffer_fill] = buffer[0];
+
 			daemon->id_buffer_fill++;
 			buffer++;
 			n--;
@@ -477,13 +481,11 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 			if (daemon_var->type == NUM) {
 				while (daemon_var->new_num_fill < sizeof(double)) {
-#					if __BYTE_ORDER == __LITTLE_ENDIAN
-						((char *)(&daemon_var->new_num))[sizeof(double) - 1 - daemon_var->new_num_fill] = buffer[0];
-#					elif __BYTE_ORDER == __BIG_ENDIAN
+					if (am_big_endian())
 						((char *)(&daemon_var->new_num))[daemon_var->new_num_fill] = buffer[0];
-#					else
-#						error UNKNOWN BYTEORDER
-#					endif
+					else
+						((char *)(&daemon_var->new_num))[sizeof(double) - 1 - daemon_var->new_num_fill] = buffer[0];
+
 					daemon_var->new_num_fill++;
 					buffer++;
 					n--;
