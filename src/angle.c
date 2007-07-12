@@ -57,7 +57,55 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width,
 	xsg_angle_t *angle;
 	double arc, sa, ca, w, h;
 
-	arc = fmod(a, 360.0) / 180.0 * M_PI;
+	angle = xsg_new(xsg_angle_t, 1);
+
+	a = fmod(a, 360.0);
+
+	if (a == 0.0) {
+		angle->xoffset = xoffset;
+		angle->yoffset = yoffset;
+		angle->width = width;
+		angle->height = height;
+		angle->angle = a;
+		angle->angle_x = width;
+		angle->angle_y = 0;
+		return angle;
+	}
+
+	if (a == 90.0) {
+		angle->xoffset = xoffset + width;
+		angle->yoffset = yoffset;
+		angle->width = height;
+		angle->height = width;
+		angle->angle = a;
+		angle->angle_x = 0;
+		angle->angle_y = height;
+		return angle;
+	}
+
+	if (a == 180.0) {
+		angle->xoffset = xoffset + width;
+		angle->yoffset = yoffset + height;
+		angle->width = width;
+		angle->height = height;
+		angle->angle = a;
+		angle->angle_x = - width;
+		angle->angle_y = 0;
+		return angle;
+	}
+
+	if (a == 270.0) {
+		angle->xoffset = xoffset;
+		angle->yoffset = yoffset + height;
+		angle->width = height;
+		angle->height = width;
+		angle->angle = a;
+		angle->angle_x = 0;
+		angle->angle_y = - height;
+		return angle;
+	}
+
+	arc = a / 180.0 * M_PI;
 
 	sa = sin(arc);
 	ca = cos(arc);
@@ -79,8 +127,6 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width,
 		xoffset -= ca * w;
 		yoffset -= ca * h;
 	}
-
-	angle = xsg_new(xsg_angle_t, 1);
 
 	angle->xoffset = xoffset;
 	angle->yoffset = yoffset;
