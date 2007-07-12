@@ -306,7 +306,7 @@ int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y
 int xsg_gettimeofday(struct timeval *tv, void *tz) XSG_API;
 void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usecs) XSG_API;
 
-const char *xsg_sig2str(int signum) XSG_API;
+char *xsg_strsignal(int signum) XSG_API;
 
 /******************************************************************************
  * compat.c

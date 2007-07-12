@@ -376,9 +376,9 @@ static void signal_handler(int signum) {
 	last_received_signum = signum;
 
 	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM || signum == SIGABRT)
-		xsg_error("Received signal %d: %s", signum, xsg_sig2str(signum));
+		xsg_error("Received signal %d: %s", signum, xsg_strsignal(signum));
 
-	xsg_message("Received signal %d: %s", signum, xsg_sig2str(signum));
+	xsg_message("Received signal %d: %s", signum, xsg_strsignal(signum));
 
 	for (l = signal_handler_list; l; l = l->next) {
 		void (*func)(int) = (void (*)(int)) l->data;
