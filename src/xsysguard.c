@@ -579,6 +579,7 @@ int main(int argc, char **argv) {
 		config_buffer = get_config_file("default", filename);
 		parse_config("default", config_buffer);
 		xsg_free(config_buffer);
+		xsg_free(filename);
 	}
 
 	while (optind < argc) {
@@ -588,6 +589,7 @@ int main(int argc, char **argv) {
 		config_buffer = get_config_file(argv[optind], filename);
 		parse_config(argv[optind], config_buffer);
 		xsg_free(config_buffer);
+		xsg_free(filename);
 		optind++;
 	}
 
