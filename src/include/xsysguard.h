@@ -49,6 +49,10 @@
 # endif
 #endif
 
+#ifdef __FAST_MATH__
+# warning xsysguard depends on -fno-finite-math-only
+#endif
+
 /******************************************************************************/
 
 #define TRUE (!FALSE)
