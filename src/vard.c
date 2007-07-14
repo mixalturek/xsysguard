@@ -158,6 +158,8 @@ void xsg_vard_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t updat
 	xsg_var_t *mem;
 	uint32_t i;
 
+	xsg_debug("parse: type=%d, remote_id=%"PRIu32", n=%"PRIu32", update=%"PRIu64, (int) type, remote_id, n, update);
+
 	mem = xsg_new(xsg_var_t, n);
 
 	var = alloca(sizeof(xsg_var_t **) * n);
@@ -182,9 +184,10 @@ void xsg_vard_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t updat
 			var[i]->str = NULL;
 		else
 			xsg_error("invalid var type");
-
-		var_list = xsg_list_append(var_list, var[i]);
 	}
+
+	if (n == 1)
+		var_list = xsg_list_append(var_list, var[0]);
 }
 
 void xsg_var_init() {
