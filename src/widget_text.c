@@ -114,9 +114,9 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if (text->alignment & TOP)
 			line_y = widget->yoffset - up_y;
 		else if (text->alignment & Y_CENTER)
-			line_y = widget->yoffset - up_y + ((widget->height - (line_advance * line_count)) / 2);
+			line_y = widget->yoffset - up_y + ((int) ((int) widget->height - (line_advance * line_count)) / 2);
 		else if (text->alignment & BOTTOM)
-			line_y = widget->yoffset - up_y + (widget->height - (line_advance * line_count));
+			line_y = widget->yoffset - up_y + ((int) widget->height - (line_advance * line_count));
 		else
 			xsg_error("unknown alignment: %x", text->alignment);
 
@@ -189,9 +189,9 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if (text->alignment & TOP)
 			line_x = widget->xoffset - up_x + widget->width - line_advance;
 		else if (text->alignment & Y_CENTER)
-			line_x = widget->xoffset - up_x + widget->width - line_advance - ((widget->width - (line_advance * line_count)) / 2);
+			line_x = widget->xoffset - up_x + widget->width - line_advance - ((int) ((int) widget->width - (line_advance * line_count)) / 2);
 		else if (text->alignment & BOTTOM)
-			line_x = widget->xoffset - up_x + widget->width - line_advance - (widget->width - (line_advance * line_count));
+			line_x = widget->xoffset - up_x + widget->width - line_advance - ((int) widget->width - (line_advance * line_count));
 		else
 			xsg_error("unknown alignment: %x", text->alignment);
 
@@ -264,9 +264,9 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if (text->alignment & TOP)
 			line_y = widget->yoffset - up_y + widget->height - line_advance;
 		else if (text->alignment & Y_CENTER)
-			line_y = widget->yoffset - up_y + widget->height - line_advance - ((widget->height - (line_advance * line_count)) / 2);
+			line_y = widget->yoffset - up_y + widget->height - line_advance - ((int) ((int) widget->height - (line_advance * line_count)) / 2);
 		else if (text->alignment & BOTTOM)
-			line_y = widget->yoffset - up_y + widget->height - line_advance - (widget->height - (line_advance * line_count));
+			line_y = widget->yoffset - up_y + widget->height - line_advance - ((int) widget->height - (line_advance * line_count));
 		else
 			xsg_error("unknown alignment: %x", text->alignment);
 
@@ -339,9 +339,9 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if (text->alignment & TOP)
 			line_x = widget->xoffset - up_x;
 		else if (text->alignment & Y_CENTER)
-			line_x = widget->xoffset - up_x + ((widget->width - (line_advance * line_count)) / 2);
+			line_x = widget->xoffset - up_x + ((int) ((int) widget->width - (line_advance * line_count)) / 2);
 		else if (text->alignment & BOTTOM)
-			line_x = widget->xoffset - up_x + (widget->width - (line_advance * line_count));
+			line_x = widget->xoffset - up_x + ((int) widget->width - (line_advance * line_count));
 		else
 			xsg_error("unknown alignment: %x", text->alignment);
 
@@ -416,9 +416,9 @@ static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 		if (text->alignment & TOP)
 			line_y = 0;
 		else if (text->alignment & Y_CENTER)
-			line_y = (text->angle->height - (line_advance * line_count)) / 2;
+			line_y = (int) ((int) text->angle->height - (line_advance * line_count)) / 2;
 		else if (text->alignment & BOTTOM)
-			line_y = text->angle->height - (line_advance * line_count);
+			line_y = (int) text->angle->height - (line_advance * line_count);
 		else
 			xsg_error("unknown alignment: %x", text->alignment);
 
