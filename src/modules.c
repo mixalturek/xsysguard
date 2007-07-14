@@ -104,11 +104,13 @@ void xsg_modules_init(void) {
 			continue;
 		while ((filename = read_dir_name(dir)) != NULL) {
 			if ((name = xsg_str_without_suffix(filename, ".so")) != NULL) {
-				module_t *m = xsg_new(module_t, 1);
-				m->name = name;
-				m->file = xsg_build_filename(*p, filename, NULL);
-				modules_list_insert_sorted(m);
-				xsg_message("Found module in \"%s\": \"%s\"", *p, filename);
+				if (strcmp(name, filename) != 0) {
+					module_t *m = xsg_new(module_t, 1);
+					m->name = name;
+					m->file = xsg_build_filename(*p, filename, NULL);
+					modules_list_insert_sorted(m);
+					xsg_message("Found module in \"%s\": \"%s\"", *p, filename);
+				}
 			}
 		}
 		closedir(dir);
