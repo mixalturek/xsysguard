@@ -543,7 +543,7 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse_one(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Alignment")) {

@@ -280,7 +280,7 @@ void xsg_window_parse_argb_visual(xsg_window_t *window) {
 
 void xsg_window_parse_visible(xsg_window_t *window) {
 	window->visible_update = xsg_conf_read_uint();
-	window->visible_var = xsg_var_parse_one(window->visible_update, window, NULL);
+	window->visible_var = xsg_var_parse(window->visible_update, window, NULL);
 }
 
 /******************************************************************************

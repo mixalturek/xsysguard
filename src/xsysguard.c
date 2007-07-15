@@ -186,10 +186,7 @@ static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t updat
 	if (!xsg_conf_find_command("+")) {
 		return FALSE;
 	} else {
-		xsg_var_t **v;
-		v = xsg_var_parse(update, window, widget, 1);
-		*var = *v;
-		xsg_free(v);
+		*var = xsg_var_parse(update, window, widget);
 		return TRUE;
 	}
 }
