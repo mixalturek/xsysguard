@@ -386,7 +386,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 	ssize_t n;
 
 	n = read(daemon->stdout_poll.fd, buffer, BUFFER_SIZE - 1);
-#if 0
+
 	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_DEBUG)) {
 		char *hex = alloca(n * 3 + 1);
 		ssize_t i;
@@ -396,7 +396,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 		xsg_debug("%s: received: %s", daemon->name, hex);
 	}
-#endif
+
 	if (daemon->state != RUNNING) {
 		return;
 	}
@@ -787,7 +787,7 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
 	char *name;
@@ -847,6 +847,6 @@ void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char 
 }
 
 char *info(void) {
-	return "executes daemon processes";
+	return "executes xsysguardd processes";
 }
 

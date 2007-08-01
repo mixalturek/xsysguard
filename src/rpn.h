@@ -28,7 +28,7 @@
 /******************************************************************************/
 
 void xsg_rpn_init(void);
-void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint32_t n);
+void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n);
 double xsg_rpn_get_num(xsg_rpn_t *rpn);
 char *xsg_rpn_get_str(xsg_rpn_t *rpn);
 

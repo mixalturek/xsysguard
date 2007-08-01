@@ -410,7 +410,7 @@ void xsg_rpn_init(void) {
 #define CHECK_STR_STACK_SIZE(command, size) \
 	if (rpn[i]->str_stack_size < size) xsg_error("RPN: %s: string stack size smaller than %s", command, #size)
 
-void xsg_rpn_parse(uint64_t update, xsg_var_t *const *var, xsg_rpn_t **rpn, uint32_t n) {
+void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n) {
 	xsg_rpn_t *mem;
 	uint32_t i;
 

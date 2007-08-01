@@ -76,7 +76,7 @@ typedef struct _xsg_var_t xsg_var_t;
 /******************************************************************************/
 
 typedef char *xsg_modules_info_t(void);
-typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 
 xsg_modules_info_t info XSG_API;
 xsg_modules_parse_t parse XSG_API;
@@ -148,16 +148,6 @@ typedef struct _xsg_main_timeout_t {
 
 void xsg_main_add_timeout(xsg_main_timeout_t *timeout) XSG_API;
 void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) XSG_API;
-
-/******************************************************************************
- * funcapprox.c
- ******************************************************************************/
-
-typedef struct _xsg_funcapprox_t xsg_funcapprox_t;
-
-xsg_funcapprox_t *xsg_funcapprox_new(uint64_t update) XSG_API;
-void xsg_funcapprox_add(xsg_funcapprox_t *funcapprox, const struct timeval *tv, double value) XSG_API;
-double xsg_funcapprox_get(xsg_funcapprox_t *funcapprox, uint32_t back) XSG_API;
 
 /******************************************************************************
  * buffer.c

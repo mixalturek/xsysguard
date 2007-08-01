@@ -95,13 +95,16 @@ xsg_var_t **xsg_var_parse_past(uint64_t update, xsg_window_t *window, xsg_widget
 	for (i = 0; i < n; i++)
 		var[i] = mem + i;
 
-	xsg_rpn_parse(update, var, rpn, n);
-
 	for (i = 0; i < n; i++) {
 		var[i]->window = window;
 		var[i]->widget = widget;
-		var[i]->rpn = rpn[i];
 		var[i]->dirty = FALSE;
+	}
+
+	xsg_rpn_parse(update, var, rpn, n);
+
+	for (i = 0; i < n; i++) {
+		var[i]->rpn = rpn[i];
 
 		var_list = xsg_list_append(var_list, var[i]);
 	}
@@ -115,12 +118,13 @@ xsg_var_t *xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *wi
 
 	var = xsg_new(xsg_var_t, 1);
 
-	xsg_rpn_parse(update, &var, &rpn, 1);
-
 	var->window = window;
 	var->widget = widget;
-	var->rpn = rpn;
 	var->dirty = FALSE;
+
+	xsg_rpn_parse(update, &var, &rpn, 1);
+
+	var->rpn = rpn;
 
 	var_list = xsg_list_append(var_list, var);
 

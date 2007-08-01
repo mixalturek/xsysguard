@@ -34,7 +34,7 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	uint32_t i;
 	double *d;
 
