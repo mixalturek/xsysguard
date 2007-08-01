@@ -272,7 +272,6 @@ static void loop(uint64_t num) {
 
 				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
 					t->func(t->arg);
-					xsg_var_flush_dirty();
 					continue;
 				}
 
@@ -282,6 +281,8 @@ static void loop(uint64_t num) {
 					timeout = t;
 				}
 			}
+
+			xsg_var_flush_dirty();
 
 			fd_max = 0;
 			FD_ZERO(&read_fds);
@@ -366,8 +367,6 @@ static void shutdown(void) {
 	}
 
 	xsg_message("Terminating...");
-
-	_exit(EXIT_SUCCESS);
 }
 
 static void signal_handler(int signum) {
