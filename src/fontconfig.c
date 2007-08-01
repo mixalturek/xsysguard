@@ -55,8 +55,14 @@ char **xsg_fontconfig_get_path(void) {
 	lib = dlopen("libfontconfig.so", RTLD_LAZY | RTLD_LOCAL);
 
 	if (!lib) {
-		xsg_message("Cannot load libfontconfig: %s", dlerror());
-		return NULL;
+		xsg_message("Cannot load libfontconfig.so: %s", dlerror());
+
+		lib = dlopen("libfontconfig.so.1", RTLD_LAZY | RTLD_LOCAL);
+
+		if (!lib) {
+			xsg_message("Cannot load libfontconfig.so.1: %s", dlerror());
+			return NULL;
+		}
 	}
 
 	FcInit = dlsym(lib, "FcInit");
