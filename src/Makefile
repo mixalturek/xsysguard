@@ -73,7 +73,7 @@ COMMON_SRC     += main.c main.h
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
-COMMON_SRC     += compat.c utils.c string.c list.c hash.c funcapprox.c
+COMMON_SRC     += compat.c utils.c string.c list.c hash.c
 
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
