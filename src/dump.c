@@ -120,7 +120,6 @@ static void dump(void) {
 }
 
 void xsg_dump_atexit(void) {
-	if (atexit(dump) != 0)
-		xsg_warning("Cannot set exit function: dump");
+	xsg_main_add_shutdown_func(dump);
 }
 
