@@ -44,6 +44,7 @@
 
 typedef struct {
 	xsg_var_t *var;
+	xsg_var_t **past_vars;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double range_angle;
@@ -671,6 +672,19 @@ static void update_areachart(xsg_widget_t *widget, xsg_var_t *var) {
 
 		if ((var == 0) || (areachart_var->var == var))
 			areachart_var->values[i] = xsg_var_get_num(areachart_var->var);
+
+		if (areachart_var->past_vars != NULL) {
+			unsigned width, j;
+
+			if (areachart->angle != NULL)
+				width = areachart->angle->width;
+			else
+				width = widget->width;
+
+			for (j = 0; j < width; j++)
+				if (areachart_var->past_vars[j] == var)
+					areachart_var->values[(i + j) % width] = xsg_var_get_num(var);
+		}
 	}
 
 	if (areachart->const_min && areachart->const_max)
@@ -873,6 +887,7 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 		width = widget->width;
 
 	areachart_var->var = var;
+	areachart_var->past_vars = NULL;
 	areachart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	areachart_var->range = NULL;
 	areachart_var->range_angle = 0.0;
@@ -926,8 +941,10 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 		} else if (xsg_conf_find_command("Dump")) {
 			xsg_dump_register(xsg_conf_read_string(), widget->update, width, areachart_var->values,
 					&areachart->value_index);
+		} else if (xsg_conf_find_command("Past")) {
+			areachart_var->past_vars = xsg_var_parse_past(widget->visible_update, widget->window, widget, width);
 		} else {
-			xsg_conf_error("ColorRange, Top, AddPrev or Dump expected");
+			xsg_conf_error("ColorRange, Top, AddPrev, Dump or Past expected");
 		}
 	}
 }
