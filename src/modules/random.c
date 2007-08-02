@@ -208,10 +208,12 @@ static void update_random(uint64_t tick) {
 	for (l = random_list; l; l = l->next) {
 		random_t *random = l->data;
 
-		if (tick % random->update == 0)
+		if (tick == 0 || tick % random->update == 0)
 			random->value = rand_double(global_random);
 	}
 }
+
+/******************************************************************************/
 
 static double get_random(void *arg) {
 	random_t *random = arg;
