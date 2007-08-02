@@ -65,12 +65,12 @@ static double get_dump(void *arg) {
 	last_ms = (uint64_t) dump_file->header->last_tv_sec * (uint64_t) 1000 + (uint64_t) dump_file->header->last_tv_usec / (uint64_t) 1000;
 	diff_ms = (uint64_t) dump_file->header->diff_tv_sec * (uint64_t) 1000 + (uint64_t) dump_file->header->diff_tv_usec / (uint64_t) 1000;
 
-	if (diff_ms * (uint64_t) dump->back + last_ms < now_ms) {
+	if (diff_ms * (uint64_t) dump->back + now_ms < last_ms) {
 		d = DNAN;
 	} else {
-		search_ms = diff_ms * (uint64_t) dump->back + last_ms - now_ms;
+		search_ms = diff_ms * (uint64_t) dump->back + now_ms - last_ms;
 
-		if (dump->back < (uint32_t) (search_ms / diff_ms))
+		if (dump_file->data_count < (uint32_t) (search_ms / diff_ms))
 			d = DNAN;
 		else
 			d = dump_file->data[search_ms / diff_ms];
