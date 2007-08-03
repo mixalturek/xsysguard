@@ -45,9 +45,8 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	for (i = 0; i < n; i++) {
 		add_ticks[i] = i * update;
 		arg[i] = (void *) (add_ticks + i);
+		num[i] = get_tick;
 	}
-
-	*num = get_tick;
 }
 
 char *info(void) {
