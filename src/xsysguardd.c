@@ -136,6 +136,7 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 			fprintf(stderr, "\n");
 
 	} else {
+		static bool shutdown = FALSE;
 		char buffer[1024];
 		size_t len = 0;
 
@@ -147,6 +148,12 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 		len += vsnprintf(buffer + len, sizeof(buffer) - 1 - len, format, args);
 
 		xsg_writebuffer_queue_log(level, buffer, len);
+
+		if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+			shutdown = TRUE;
+
+		if (shutdown)
+			xsg_writebuffer_forced_flush();
 	}
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))

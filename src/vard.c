@@ -31,6 +31,10 @@
 
 /******************************************************************************/
 
+#define LAST_ALIVE_TIMEOUT 8
+
+/******************************************************************************/
+
 struct _xsg_var_t {
 	uint64_t update;
 	uint32_t remote_id;
@@ -54,6 +58,11 @@ struct _xsg_var_t {
 static xsg_list_t *var_list = NULL;
 
 static bool dirty = FALSE;
+
+/******************************************************************************/
+
+static uint64_t last_alive_tick = 0;
+static uint64_t last_alive_timeout = LAST_ALIVE_TIMEOUT;
 
 /******************************************************************************/
 
@@ -119,6 +128,9 @@ static void update_var(xsg_var_t *var) {
 
 static void update(uint64_t tick) {
 	xsg_list_t *l;
+
+	if (tick - last_alive_tick > last_alive_timeout)
+		xsg_error("No alive message received for %"PRIu64" ticks", last_alive_timeout);
 
 	xsg_writebuffer_queue_alive();
 
@@ -190,7 +202,31 @@ void xsg_vard_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t updat
 		var_list = xsg_list_append(var_list, var[0]);
 }
 
+/******************************************************************************/
+
+static void read_alive(void *arg, xsg_main_poll_events_t events) {
+	char buffer;
+
+	read(STDIN_FILENO, &buffer, 1);
+
+	xsg_debug("Received alive message");
+
+	last_alive_tick = xsg_main_get_tick();
+}
+
+static xsg_main_poll_t alive_poll = { STDIN_FILENO, XSG_MAIN_POLL_READ, read_alive, NULL };
+
+/******************************************************************************/
+
 void xsg_var_init() {
+	char *timeout;
+
+	timeout = getenv("XSYSGUARD_DAEMON_TIMEOUT");
+
+	if (timeout != NULL)
+		last_alive_timeout = atoll(timeout);
+
+	xsg_main_add_poll(&alive_poll);
 	xsg_main_add_update_func(update);
 }
 

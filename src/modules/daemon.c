@@ -87,6 +87,8 @@ typedef struct _daemon_t {
 	ssize_t write_buffer_done;
 	ssize_t write_buffer_todo;
 
+	bool send_alive;
+
 	xsg_list_t *var_list;
 } daemon_t;
 
@@ -271,6 +273,8 @@ static daemon_t *find_daemon(char *name) {
 	daemon->write_buffer_done = 0;
 	daemon->write_buffer_todo = 0;
 
+	daemon->send_alive = FALSE;
+
 	daemon->var_list = NULL;
 
 	return daemon;;
@@ -350,6 +354,18 @@ static void stdin_daemon(void *arg, xsg_main_poll_events_t events) {
 	daemon_t *daemon = (daemon_t *) arg;
 	char *buffer;
 	ssize_t n;
+
+	if (daemon->write_buffer_todo < 1) {
+		if (daemon->send_alive) {
+			char end_buffer = END;
+
+			n = write(daemon->stdin_poll.fd, &end_buffer, 1);
+
+			daemon->send_alive = FALSE;
+		}
+		xsg_main_remove_poll(&daemon->stdin_poll);
+		return;
+	}
 
 	buffer = daemon->write_buffer + daemon->write_buffer_done;
 
@@ -460,7 +476,7 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 				n--;
 
 				if (xsg_log_level >= daemon->log_level_buffer)
-					xsg_log(XSG_LOG_DOMAIN, daemon->log_level_buffer, "[%d]%s: Received log message: %s",
+					xsg_log(XSG_LOG_DOMAIN, MAX(daemon->log_level_buffer, 2), "[%d]%s: Received log message: %s",
 							(int) daemon->pid, daemon->name, daemon->log_buffer->str);
 
 				daemon->log_buffer = xsg_string_truncate(daemon->log_buffer, 0);
@@ -553,14 +569,12 @@ static void stderr_daemon(void *arg, xsg_main_poll_events_t events) {
 	}
 
 	if (unlikely(n == -1)) {
-		xsg_warning("[%d]%s: read(stderr) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
-		kill_daemon(daemon);
+		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == 0)) {
-		xsg_warning("[%d]%s: read(stderr) returned EOF", (int) daemon->pid, daemon->name);
-		kill_daemon(daemon);
+		xsg_debug("[%d]%s: read(stderr) returned EOF", (int) daemon->pid, daemon->name);
 		return;
 	}
 
@@ -747,6 +761,9 @@ static void update_daemons(uint64_t tick) {
 
 	for (l = daemon_list; l; l = l->next) {
 		daemon_t *daemon = l->data;
+
+		daemon->send_alive = TRUE;
+		xsg_main_add_poll(&daemon->stdin_poll);
 
 		if ((tick > daemon->last_alive_tick) && (tick - daemon->last_alive_tick) > last_alive_timeout)
 			kill_daemon(daemon); // sets state = KILL
