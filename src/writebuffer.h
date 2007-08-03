@@ -28,6 +28,8 @@
 bool xsg_writebuffer_ready(void);
 void xsg_writebuffer_flush(void);
 
+void xsg_writebuffer_forced_flush(void);
+
 /******************************************************************************/
 
 void xsg_writebuffer_queue_num(uint32_t id, double num);

@@ -67,21 +67,15 @@ static void buffer_writer(void *arg, xsg_main_poll_events_t events) {
 	char *buffer;
 	ssize_t n;
 
-	xsg_debug("buffer_writer: flushing %u bytes", write_buffer->todo);
-
 	buffer = write_buffer->buf + write_buffer->done;
 
 	n = write(STDOUT_FILENO, buffer, write_buffer->todo);
 
-	if (unlikely(n == -1) && errno == EINTR) {
-		xsg_debug("buffer_writer: write failed: %s", strerror(errno));
+	if (unlikely(n == -1) && errno == EINTR)
 		return;
-	}
 
-	if (unlikely(n == -1)) {
-		fprintf(stderr, "buffer_writer: write failed: %s", strerror(errno));
+	if (unlikely(n == -1))
 		exit(EXIT_FAILURE);
-	}
 
 	write_buffer->done += n;
 	write_buffer->todo -= n;
@@ -113,6 +107,17 @@ void xsg_writebuffer_flush(void) {
 	send_buffer->len = 0;
 
 	xsg_main_add_poll(&poll);
+}
+
+/******************************************************************************/
+
+void xsg_writebuffer_forced_flush(void) {
+	// TODO add timeout
+	while (!xsg_writebuffer_ready())
+		buffer_writer(NULL, 0);
+	xsg_writebuffer_flush();
+	while (!xsg_writebuffer_ready())
+		buffer_writer(NULL, 0);
 }
 
 /******************************************************************************/
