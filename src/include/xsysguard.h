@@ -156,7 +156,7 @@ void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) XSG_API;
 typedef struct _xsg_buffer_t xsg_buffer_t;
 
 xsg_buffer_t *xsg_buffer_new(void) XSG_API;
-void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t *const *var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
+void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
 void xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len) XSG_API;
 void xsg_buffer_clear(xsg_buffer_t *buffer) XSG_API;
 
