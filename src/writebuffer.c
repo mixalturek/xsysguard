@@ -111,13 +111,44 @@ void xsg_writebuffer_flush(void) {
 
 /******************************************************************************/
 
+static void buffer_writer_timeout(void) {
+	while (!xsg_writebuffer_ready()) {
+		char *buffer;
+		ssize_t ret, n;
+		fd_set fds;
+		struct timeval tv;
+
+		FD_ZERO(&fds);
+		FD_SET(STDOUT_FILENO, &fds);
+
+		tv.tv_sec = 1;
+		tv.tv_usec = 0;
+
+		do {
+			ret = select(STDOUT_FILENO + 1, NULL, &fds, NULL, &tv);
+		} while (ret == -1 && errno == EINTR);
+
+		if (unlikely(ret == -1) || unlikely(ret == 0)) /* error || timeout */
+			return;
+
+		buffer = write_buffer->buf + write_buffer->done;
+
+		n = write(STDOUT_FILENO, buffer, write_buffer->todo);
+
+		if (unlikely(n == -1))
+			return;
+
+		write_buffer->done += n;
+		write_buffer->todo -= n;
+	}
+}
+
 void xsg_writebuffer_forced_flush(void) {
-	// TODO add timeout
-	while (!xsg_writebuffer_ready())
-		buffer_writer(NULL, 0);
-	xsg_writebuffer_flush();
-	while (!xsg_writebuffer_ready())
-		buffer_writer(NULL, 0);
+	buffer_writer_timeout();
+	if (xsg_writebuffer_ready()) {
+		xsg_writebuffer_flush();
+		buffer_writer_timeout();
+	}
 }
 
 /******************************************************************************/
