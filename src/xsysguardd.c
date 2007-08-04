@@ -54,7 +54,13 @@ static bool log_to_stderr = FALSE;
 int xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
 static int xsg_logv(const char *domain, int level, const char *format, va_list args) {
+	static bool running = FALSE;
 	unsigned int pid;
+
+	if (running)
+		return;
+
+	running = TRUE;
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
@@ -158,6 +164,8 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		exit(EXIT_FAILURE);
+
+	running = FALSE;
 
 	return 1;
 }
