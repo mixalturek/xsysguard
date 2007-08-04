@@ -206,8 +206,15 @@ void xsg_vard_parse(uint8_t type, uint32_t remote_id, uint32_t n, uint64_t updat
 
 static void read_alive(void *arg, xsg_main_poll_events_t events) {
 	char buffer;
+	ssize_t n;
 
-	read(STDIN_FILENO, &buffer, 1);
+	n = read(STDIN_FILENO, &buffer, 1);
+
+	if (n == -1 && errno != EINTR)
+		xsg_error("Read from stdin failed: %s", strerror(errno));
+
+	if (n == 0)
+		xsg_error("Read from stdin returned EOF");
 
 	xsg_debug("Received alive message");
 
