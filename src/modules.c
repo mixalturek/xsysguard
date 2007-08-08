@@ -209,3 +209,36 @@ void xsg_modules_list() {
 	}
 }
 
+char *xsg_modules_help(const char *name) {
+	xsg_modules_help_t *help;
+	void *module;
+	module_t *m;
+	xsg_list_t *l;
+
+	if (!modules_list)
+		xsg_modules_init();
+
+	for (l = modules_list; l; l = l->next) {
+		m = l->data;
+
+		if (strcmp(m->name, name) != 0)
+			continue;
+
+		module = dlopen(m->file, RTLD_NOW);
+
+		if (!module)
+			xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+		help = (xsg_modules_help_t *) dlsym(module, "help");
+
+		if (!help)
+			xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+		return help();
+	}
+
+	xsg_error("Cannot find module: %s", m->name);
+
+	return NULL;
+}
+

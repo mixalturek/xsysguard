@@ -28,6 +28,7 @@
 void xsg_modules_init(void);
 bool xsg_modules_parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 void xsg_modules_list(void);
+char *xsg_modules_help(const char *name);
 
 /******************************************************************************/
 

@@ -369,6 +369,7 @@ static void usage(void) {
 		"Usage: xsysguard [ARGUMENTS...] [CONFIGS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help         Print this help message to stdout\n"
+		"  -H, --mhelp=MODULE Print help message for MODULE to stdout\n"
 		"  -m, --modules      Print a list of all available modules to stdout\n"
 		"  -f, --fonts        Print a list of all available fonts to stdout\n"
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
@@ -449,6 +450,7 @@ int main(int argc, char **argv) {
 	bool list_modules = FALSE;
 	bool list_fonts = FALSE;
 	bool list_dirs = FALSE;
+	char *mhelp = NULL;
 	bool print_usage = FALSE;
 	uint64_t interval = 1000;
 	uint64_t num = 0;
@@ -459,6 +461,7 @@ int main(int argc, char **argv) {
 
 	struct option long_options[] = {
 		{ "help",      0, NULL, 'h' },
+		{ "mhelp",     1, NULL, 'H' },
 		{ "interval",  1, NULL, 'i' },
 		{ "num",       1, NULL, 'n' },
 		{ "fontcache", 1, NULL, 'F' },
@@ -477,7 +480,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hi:n:F:I:l:C:mfdct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hH:i:n:F:I:l:C:mfdct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -485,6 +488,10 @@ int main(int argc, char **argv) {
 		switch (option) {
 			case 'h':
 				print_usage = TRUE;
+				break;
+			case 'H':
+				if (optarg && !mhelp)
+					mhelp = xsg_strdup(optarg);
 				break;
 			case 'i':
 				sscanf(optarg, "%"SCNu64, &interval);
@@ -546,6 +553,11 @@ int main(int argc, char **argv) {
 
 	if (list_modules) {
 		xsg_modules_list();
+		exit(EXIT_SUCCESS);
+	}
+
+	if (mhelp != NULL) {
+		printf("%s", xsg_modules_help(mhelp));
 		exit(EXIT_SUCCESS);
 	}
 
