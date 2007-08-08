@@ -105,8 +105,8 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 			double value = DNAN;
 			feature_t *feature;
 
-			if (feature_data->mapping != SENSORS_NO_MAPPING)
-				continue;
+			//if (feature_data->mapping != SENSORS_NO_MAPPING)
+			//	continue;
 
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
@@ -155,8 +155,8 @@ char *help(void) {
 		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
 			double value = DNAN;
 
-			if (feature_data->mapping != SENSORS_NO_MAPPING)
-				continue;
+			//if (feature_data->mapping != SENSORS_NO_MAPPING)
+			//	continue;
 
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
