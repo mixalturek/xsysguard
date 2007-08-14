@@ -31,6 +31,45 @@ typedef struct _strftime_args_t {
 
 /******************************************************************************/
 
+static xsg_list_t *var_list = NULL;
+static xsg_main_timeout_t *timeout = NULL;
+
+/******************************************************************************/
+
+static void set_timeout(struct timeval *tv) {
+	struct timeval now;
+
+	xsg_gettimeofday(&now, NULL);
+
+	tv->tv_sec = (now.tv_sec / 60 + 1) * 60;
+	tv->tv_usec = 0;
+}
+
+static void timeout_handler(void *arg) {
+	xsg_list_t *l;
+
+	for (l = var_list; l; l = l->next) {
+		xsg_var_t *var = l->data;
+
+		xsg_var_dirty(&var, 1);
+	}
+
+	set_timeout(&timeout->tv);
+}
+
+static void init(void) {
+	timeout = xsg_new(xsg_main_timeout_t, 1);
+	timeout->tv.tv_sec = 0;
+	timeout->tv.tv_usec = 0;
+	timeout->func = timeout_handler;
+	timeout->arg = NULL;
+
+	set_timeout(&timeout->tv);
+	xsg_main_add_timeout(timeout);
+}
+
+/******************************************************************************/
+
 static struct tm *gm_time_tm() {
 	time_t curtime;
 	struct tm *tm;
@@ -87,20 +126,6 @@ static char *get_strftime(void *arg) {
 	xsg_debug("get_strftime: \"%s\"", args->buffer->str);
 
 	return args->buffer->str;
-}
-
-static char *get_ctime(void *arg) {
-	bool local = *((bool *) arg);
-	struct tm *tm;
-	char *s;
-
-	tm = time_tm(local);
-
-	s = asctime(tm);
-
-	xsg_debug("get_ctime: \"%s\"", s);
-
-	return s;
 }
 
 static double get_tv_sec(void *arg) {
@@ -263,9 +288,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 
 		*arg = args;
 
-		if (xsg_conf_find_command("ctime")) {
-			*str = get_ctime;
-		} else if (xsg_conf_find_command("tv_sec")) {
+		if (xsg_conf_find_command("tv_sec")) {
 			*num = get_tv_sec;
 		} else if (xsg_conf_find_command("tv_usec")) {
 			*num = get_tv_usec;
@@ -291,6 +314,10 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 			xsg_conf_error("strftime, ctime, tv_sec, tv_usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
 		}
 	}
+
+	var_list = xsg_list_append(var_list, (void *) var[0]);
+
+	xsg_main_add_init_func(init);
 }
 
 char *info(void) {
