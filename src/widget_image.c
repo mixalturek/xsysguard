@@ -152,5 +152,5 @@ void xsg_widget_image_parse_var(xsg_var_t *var) {
 
 	xsg_printf_add_var(image->print, var);
 	xsg_conf_read_newline();
-};
+}
 
