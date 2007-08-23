@@ -212,14 +212,13 @@ void xsg_modules_list() {
 char *xsg_modules_help(const char *name) {
 	xsg_modules_help_t *help;
 	void *module;
-	module_t *m;
 	xsg_list_t *l;
 
 	if (!modules_list)
 		xsg_modules_init();
 
 	for (l = modules_list; l; l = l->next) {
-		m = l->data;
+		module_t *m = l->data;
 
 		if (strcmp(m->name, name) != 0)
 			continue;
@@ -237,7 +236,7 @@ char *xsg_modules_help(const char *name) {
 		return help();
 	}
 
-	xsg_error("Cannot find module: %s", m->name);
+	xsg_error("Cannot find module: %s", name);
 
 	return NULL;
 }
