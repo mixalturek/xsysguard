@@ -58,7 +58,7 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 	unsigned int pid;
 
 	if (running)
-		return;
+		return 0;
 
 	running = TRUE;
 
