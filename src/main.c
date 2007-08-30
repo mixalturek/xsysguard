@@ -261,19 +261,26 @@ static void loop(uint64_t num) {
 			}
 
 			xsg_gettimeofday(&time_now, 0);
-			xsg_timeval_sub(&time_diff, &time_now, &time_start);
 
-			if (xsg_timeval_sub(&time_sleep, &time_out, &time_diff))
+			if (unlikely(xsg_timeval_sub(&time_diff, &time_now, &time_start))) {
+				time_start.tv_sec = time_now.tv_sec;
+				time_start.tv_usec = time_now.tv_usec;
+				time_diff.tv_sec = 0;
+				time_diff.tv_usec = 0;
+			}
+
+			if (unlikely(xsg_timeval_sub(&time_sleep, &time_out, &time_diff)))
 				break; // timeout
 
 			for (l = timeout_list; l; l = l->next) {
 				xsg_main_timeout_t *t = l->data;
 				struct timeval timeout_sleep;
 
-				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
+				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
 					t->func(t->arg);
+
+				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
 					continue;
-				}
 
 				if (timercmp(&timeout_sleep, &time_sleep, <)) {
 					time_sleep.tv_sec = timeout_sleep.tv_sec;
