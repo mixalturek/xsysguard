@@ -128,7 +128,7 @@ static char *get_strftime(void *arg) {
 	return args->buffer->str;
 }
 
-static double get_tv_sec(void *arg) {
+static double get_sec(void *arg) {
 	bool local = *((bool *) arg);
 	struct timeval tv;
 	double d;
@@ -145,7 +145,7 @@ static double get_tv_sec(void *arg) {
 	return d;
 }
 
-static double get_tv_usec(void *arg) {
+static double get_usec(void *arg) {
 	struct timeval tv;
 	double d;
 
@@ -288,10 +288,10 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 
 		*arg = args;
 
-		if (xsg_conf_find_command("tv_sec")) {
-			*num = get_tv_sec;
-		} else if (xsg_conf_find_command("tv_usec")) {
-			*num = get_tv_usec;
+		if (xsg_conf_find_command("sec")) {
+			*num = get_sec;
+		} else if (xsg_conf_find_command("usec")) {
+			*num = get_usec;
 		} else if (xsg_conf_find_command("tm_sec")) {
 			*num = get_tm_sec;
 		} else if (xsg_conf_find_command("tm_min")) {
@@ -311,7 +311,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 		} else if (xsg_conf_find_command("tm_isdst")) {
 			*num = get_tm_isdst;
 		} else {
-			xsg_conf_error("strftime, ctime, tv_sec, tv_usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
+			xsg_conf_error("strftime, sec, usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
 		}
 	}
 
