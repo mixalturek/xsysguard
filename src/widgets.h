@@ -28,9 +28,9 @@
 
 /******************************************************************************/
 
-void xsg_widgets_init(void);
+void xsg_widgets_update(uint64_t tick);
 
-void xsg_widgets_update(xsg_widget_t *widget, xsg_var_t *var);
+void xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var);
 
 xsg_widget_t *xsg_widgets_new(xsg_window_t *window);
 

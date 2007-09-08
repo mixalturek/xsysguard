@@ -110,7 +110,7 @@ void xsg_widgets_render(xsg_widget_t *w, Imlib_Image buffer, int up_x, int up_y,
  *
  ******************************************************************************/
 
-void xsg_widgets_update(xsg_widget_t *widget, xsg_var_t *var) {
+void xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var) {
 	if (widget->visible_var == var) {
 		bool visible = widget->visible;
 
@@ -126,7 +126,7 @@ void xsg_widgets_update(xsg_widget_t *widget, xsg_var_t *var) {
 	}
 }
 
-static void scroll_and_update(uint64_t tick) {
+void xsg_widgets_update(uint64_t tick) {
 	xsg_list_t *l;
 
 	for (l = widget_list; l; l = l->next) {
@@ -150,15 +150,5 @@ static void scroll_and_update(uint64_t tick) {
 		if (tick == 0)
 			(widget->update_func)(widget, NULL);
 	}
-}
-
-/******************************************************************************
- *
- * init
- *
- ******************************************************************************/
-
-void xsg_widgets_init() {
-	xsg_main_add_update_func(scroll_and_update);
 }
 

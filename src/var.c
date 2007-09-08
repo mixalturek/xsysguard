@@ -70,7 +70,7 @@ void xsg_var_flush_dirty(void) {
 			xsg_var_t *var = l->data;
 
 			if (unlikely(var->dirty)) {
-				xsg_window_update(var->window, var->widget, var);
+				xsg_window_update_var(var->window, var->widget, var);
 				var->dirty = FALSE;
 			}
 		}

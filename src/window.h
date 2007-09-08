@@ -31,7 +31,9 @@ void xsg_window_init(void);
 
 bool xsg_window_color_lookup(char *name, uint32_t *color);
 
-void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var);
+void xsg_window_update(uint64_t tick);
+
+void xsg_window_update_var(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var);
 
 /*****************************************************************************/
 

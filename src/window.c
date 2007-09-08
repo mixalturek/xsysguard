@@ -694,7 +694,7 @@ static void update_visible(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static void update(uint64_t tick) {
+void xsg_window_update(uint64_t tick) {
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
@@ -732,12 +732,12 @@ void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffse
  *
  ******************************************************************************/
 
-void xsg_window_update(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
+void xsg_window_update_var(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
 	if (widget == NULL) {
 		update_visible(window);
 		xsg_window_render();
 	} else {
-		xsg_widgets_update(widget, var);
+		xsg_widgets_update_var(widget, var);
 	}
 }
 
@@ -985,10 +985,6 @@ void xsg_window_init() {
 
 		window->updates = xsg_update_append_rect(window->updates, 0, 0, window->width, window->height);
 	}
-
-	xsg_main_add_update_func(update);
-
-	xsg_widgets_init();
 
 	poll.fd = ConnectionNumber(display);
 	poll.events = XSG_MAIN_POLL_READ;

@@ -39,6 +39,7 @@
 #include "imlib.h"
 #include "printf.h"
 #include "window.h"
+#include "widgets.h"
 #include "widget_line.h"
 #include "widget_rectangle.h"
 #include "widget_ellipse.h"
@@ -567,6 +568,9 @@ int main(int argc, char **argv) {
 		xsg_imlib_list_fonts();
 		exit(EXIT_SUCCESS);
 	}
+
+	xsg_main_add_update_func(xsg_window_update);
+	xsg_main_add_update_func(xsg_widgets_update);
 
 	xsg_imlib_set_font_cache_size(font_cache_size);
 	xsg_imlib_set_cache_size(image_cache_size);
