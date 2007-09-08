@@ -80,6 +80,7 @@ typedef char *xsg_modules_help_t(void);
 typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 
 xsg_modules_info_t info XSG_API;
+xsg_modules_help_t help XSG_API;
 xsg_modules_parse_t parse XSG_API;
 
 /******************************************************************************
