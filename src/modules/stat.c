@@ -25,53 +25,62 @@
 
 /******************************************************************************/
 
-typedef struct {
-	sg_host_info		*host_info;
-	sg_cpu_stats		*cpu_stats;
-	sg_cpu_stats		*cpu_stats_diff;
-	sg_cpu_percents		*cpu_percents;
-	sg_mem_stats		*mem_stats;
-	sg_load_stats		*load_stats;
-	sg_user_stats		*user_stats;
-	sg_swap_stats		*swap_stats;
+typedef struct _cpu_stats_diff_t {
+	uint64_t update;
+	sg_cpu_stats *diff;
+} cpu_stats_diff_t;
 
-	int fs_entries;
-	sg_fs_stats		*fs_stats_by_device_name;
-	sg_fs_stats             *fs_stats_by_mnt_point;
+typedef struct _disk_io_stats_diff_t {
+	uint64_t update;
+	int entries;
+	sg_disk_io_stats *diff;
+} disk_io_stats_diff_t;
 
-	int disk_io_entries;
-	sg_disk_io_stats	*disk_io_stats;
+typedef struct _network_io_stats_diff_t {
+	uint64_t update;
+	int entries;
+	sg_network_io_stats *diff;
+} network_io_stats_diff_t;
 
-	int disk_io_diff_entries;
-	sg_disk_io_stats	*disk_io_stats_diff;
+typedef struct _page_stats_diff_t {
+	uint64_t update;
+	sg_page_stats *diff;
+} page_stats_diff_t;
 
-	int network_io_entries;
-	sg_network_io_stats	*network_io_stats;
+/******************************************************************************/
 
-	int network_io_diff_entries;
-	sg_network_io_stats	*network_io_stats_diff;
-
-	int network_iface_entries;
-	sg_network_iface_stats  *network_iface_stats;
-
-	sg_page_stats		*page_stats;
-	sg_page_stats		*page_stats_diff;
-
-	int process_entries;
-	sg_process_stats	*process_stats;
-	sg_process_stats	*process_stats_by_name;
-	sg_process_stats	*process_stats_by_pid;
-	sg_process_stats	*process_stats_by_uid;
-	sg_process_stats	*process_stats_by_gid;
-	sg_process_stats	*process_stats_by_size;
-	sg_process_stats	*process_stats_by_res;
-	sg_process_stats	*process_stats_by_cpu;
-	sg_process_stats	*process_stats_by_time;
-
-	sg_process_count	*process_count;
-} stats_t;
-
-static stats_t stats = { 0 };
+static sg_host_info *host_info = NULL;
+static sg_cpu_stats *cpu_stats = NULL;
+static xsg_list_t *cpu_stats_diff_list = NULL;
+static sg_cpu_percents *cpu_percents = NULL;
+static sg_mem_stats *mem_stats = NULL;
+static sg_load_stats *load_stats = NULL;
+static sg_user_stats *user_stats = NULL;
+static sg_swap_stats *swap_stats = NULL;
+static int fs_entries = 0;
+static sg_fs_stats *fs_stats_by_device_name = NULL;
+static sg_fs_stats *fs_stats_by_mnt_point = NULL;
+static int disk_io_entries = 0;
+static sg_disk_io_stats * disk_io_stats = NULL;
+static xsg_list_t *disk_io_stats_diff_list = NULL;
+static int network_io_entries = 0;
+static sg_network_io_stats *network_io_stats = NULL;
+static xsg_list_t *network_io_stats_diff_list = NULL;
+static int network_iface_entries = 0;
+static sg_network_iface_stats *network_iface_stats = NULL;
+static sg_page_stats *page_stats = NULL;
+static xsg_list_t *page_stats_diff_list = NULL;
+static int process_entries = 0;
+static sg_process_stats *process_stats = NULL;
+static sg_process_stats *process_stats_by_name = NULL;
+static sg_process_stats *process_stats_by_pid = NULL;
+static sg_process_stats *process_stats_by_uid = NULL;
+static sg_process_stats *process_stats_by_gid = NULL;
+static sg_process_stats *process_stats_by_size = NULL;
+static sg_process_stats *process_stats_by_res = NULL;
+static sg_process_stats *process_stats_by_cpu = NULL;
+static sg_process_stats *process_stats_by_time = NULL;
+static sg_process_count *process_count = NULL;
 
 /******************************************************************************
  *
@@ -108,196 +117,346 @@ static void libstatgrab_error() {
  *
  ******************************************************************************/
 
-static void get_host_info() {
+static void get_host_info(uint64_t tick) {
 	xsg_debug("sg_get_host_info");
-	if (!(stats.host_info = sg_get_host_info())) {
+	if (!(host_info = sg_get_host_info())) {
 		xsg_warning("sg_get_host_info returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_cpu_stats() {
+static void get_cpu_stats(uint64_t tick) {
 	xsg_debug("sg_get_cpu_stats");
-	if (!(stats.cpu_stats = sg_get_cpu_stats())) {
+	if (!(cpu_stats = sg_get_cpu_stats())) {
 		xsg_warning("sg_get_cpu_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_cpu_stats_diff() {
+static void get_cpu_stats_diff(uint64_t tick) {
+	sg_cpu_stats *diff;
+	xsg_list_t *l;
+
 	xsg_debug("sg_get_cpu_stats_diff");
-	if (!(stats.cpu_stats_diff = sg_get_cpu_stats_diff())) {
+	if (!(diff = sg_get_cpu_stats_diff())) {
 		xsg_warning("sg_get_cpu_stats_diff returned NULL");
 		libstatgrab_error();
 	}
+
+	for (l = cpu_stats_diff_list; l; l = l->next) {
+		cpu_stats_diff_t *d = l->data;
+
+		if (tick % d->update == 0) {
+			d->diff->user = 0;
+			d->diff->kernel = 0;
+			d->diff->idle = 0;
+			d->diff->iowait = 0;
+			d->diff->swap = 0;
+			d->diff->nice = 0;
+			d->diff->total = 0;
+			d->diff->systime = 0;
+		}
+
+		d->diff->user += diff->user;
+		d->diff->kernel += diff->kernel;
+		d->diff->idle += diff->idle;
+		d->diff->iowait += diff->iowait;
+		d->diff->swap += diff->swap;
+		d->diff->nice += diff->nice;
+		d->diff->total += diff->total;
+		d->diff->systime += diff->systime;
+	}
 }
 
-static void get_cpu_percents() {
+static void get_cpu_percents(uint64_t tick) {
 	xsg_debug("sg_get_cpu_percents");
-	if (!(stats.cpu_percents = sg_get_cpu_percents())) {
+	if (!(cpu_percents = sg_get_cpu_percents())) {
 		xsg_warning("sg_get_cpu_percents returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_mem_stats() {
+static void get_mem_stats(uint64_t tick) {
 	xsg_debug("sg_get_mem_stats");
-	if (!(stats.mem_stats = sg_get_mem_stats())) {
+	if (!(mem_stats = sg_get_mem_stats())) {
 		xsg_warning("sg_get_mem_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_load_stats() {
+static void get_load_stats(uint64_t tick) {
 	xsg_debug("sg_get_load_stats");
-	if (!(stats.load_stats = sg_get_load_stats())) {
+	if (!(load_stats = sg_get_load_stats())) {
 		xsg_warning("sg_get_load_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_user_stats() {
+static void get_user_stats(uint64_t tick) {
 	xsg_debug("sg_get_user_stats");
-	if (!(stats.user_stats = sg_get_user_stats())) {
+	if (!(user_stats = sg_get_user_stats())) {
 		xsg_warning("sg_get_user_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_swap_stats() {
+static void get_swap_stats(uint64_t tick) {
 	xsg_debug("sg_get_swap_stats");
-	if (!(stats.swap_stats = sg_get_swap_stats())) {
+	if (!(swap_stats = sg_get_swap_stats())) {
 		xsg_warning("sg_get_swap_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_fs_stats() {
+static void get_fs_stats(uint64_t tick) {
 	size_t size;
 
 	xsg_debug("sg_get_fs_stats");
-	if (!(stats.fs_stats_by_device_name = sg_get_fs_stats(&stats.fs_entries))) {
+	if (!(fs_stats_by_device_name = sg_get_fs_stats(&fs_entries))) {
 		xsg_warning("sg_get_fs_stats returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	size = sizeof(sg_fs_stats) * stats.fs_entries;
-	stats.fs_stats_by_mnt_point = (sg_fs_stats *) xsg_realloc((void *) stats.fs_stats_by_mnt_point, size);
-	memcpy(stats.fs_stats_by_mnt_point, stats.fs_stats_by_device_name, size);
+	size = sizeof(sg_fs_stats) * fs_entries;
+	fs_stats_by_mnt_point = (sg_fs_stats *) xsg_realloc((void *) fs_stats_by_mnt_point, size);
+	memcpy(fs_stats_by_mnt_point, fs_stats_by_device_name, size);
 
-	qsort(stats.fs_stats_by_device_name, stats.fs_entries, sizeof(sg_fs_stats), sg_fs_compare_device_name);
-	qsort(stats.fs_stats_by_mnt_point, stats.fs_entries, sizeof(sg_fs_stats), sg_fs_compare_mnt_point);
+	qsort(fs_stats_by_device_name, fs_entries, sizeof(sg_fs_stats), sg_fs_compare_device_name);
+	qsort(fs_stats_by_mnt_point, fs_entries, sizeof(sg_fs_stats), sg_fs_compare_mnt_point);
 }
 
-static void get_disk_io_stats() {
+static void get_disk_io_stats(uint64_t tick) {
 	xsg_debug("sg_get_disk_io_stats");
-	if (!(stats.disk_io_stats = sg_get_disk_io_stats(&stats.disk_io_entries))) {
+	if (!(disk_io_stats = sg_get_disk_io_stats(&disk_io_entries))) {
 		xsg_warning("sg_get_disk_io_stats returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	qsort(stats.disk_io_stats, stats.disk_io_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
+	qsort(disk_io_stats, disk_io_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
 }
 
-static void get_disk_io_stats_diff() {
+static void get_disk_io_stats_diff(uint64_t tick) {
+	sg_disk_io_stats *diff;
+	int entries;
+	xsg_list_t *l;
+
 	xsg_debug("sg_get_disk_io_stats_diff");
-	if (!(stats.disk_io_stats_diff = sg_get_disk_io_stats_diff(&stats.disk_io_diff_entries))) {
+	if (!(diff = sg_get_disk_io_stats_diff(&entries))) {
 		xsg_warning("sg_get_disk_io_stats_diff returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	qsort(stats.disk_io_stats_diff, stats.disk_io_diff_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
+
+	for (l = disk_io_stats_diff_list; l; l = l->next) {
+		disk_io_stats_diff_t *d = l->data;
+		sg_disk_io_stats *old_diff = d->diff;
+		int old_entries = d->entries;
+		int i, j;
+
+		d->diff = xsg_new(sg_disk_io_stats, entries);
+
+		for (i = 0; i < entries; i++) {
+			d->diff[i].disk_name = xsg_strdup(diff[i].disk_name);
+			d->diff[i].read_bytes = diff[i].read_bytes;
+			d->diff[i].write_bytes = diff[i].write_bytes;
+			d->diff[i].systime = diff[i].systime;
+		}
+
+		if (tick % d->update != 0) {
+			for (i = 0; i < entries; i++) {
+				sg_disk_io_stats *now, *old = NULL;
+
+				now = &d->diff[i];
+
+				for (j = 0; j < old_entries; j++) {
+					old = &old_diff[(i + j) % old_entries];
+
+					if (strcmp(now->disk_name, old->disk_name) == 0)
+						break;
+				}
+
+				if (old == NULL)
+					continue;
+
+				now->read_bytes += old->read_bytes;
+				now->write_bytes += old->write_bytes;
+				now->systime += old->systime;
+			}
+		}
+
+		for (i = 0; i < old_entries; i++)
+			xsg_free(old_diff[i].disk_name);
+
+		xsg_free(old_diff);
+
+		qsort(d->diff, entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
+	}
 }
 
-static void get_network_io_stats() {
+static void get_network_io_stats(uint64_t tick) {
 	xsg_debug("sg_get_network_io_stats");
-	if (!(stats.network_io_stats = sg_get_network_io_stats(&stats.network_io_entries))) {
+	if (!(network_io_stats = sg_get_network_io_stats(&network_io_entries))) {
 		xsg_warning("sg_get_network_io_stats returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	qsort(stats.network_io_stats, stats.network_io_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
+	qsort(network_io_stats, network_io_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
 }
 
-static void get_network_io_stats_diff() {
+static void get_network_io_stats_diff(uint64_t tick) {
+	sg_network_io_stats *diff;
+	int entries;
+	xsg_list_t *l;
+
 	xsg_debug("sg_get_network_io_stats_diff");
-	if (!(stats.network_io_stats_diff = sg_get_network_io_stats_diff(&stats.network_io_diff_entries))) {
+	if (!(diff = sg_get_network_io_stats_diff(&entries))) {
 		xsg_warning("sg_get_network_io_stats_diff returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	qsort(stats.network_io_stats_diff, stats.network_io_diff_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
+
+	for (l = network_io_stats_diff_list; l; l = l->next) {
+		network_io_stats_diff_t *d = l->data;
+		sg_network_io_stats *old_diff = d->diff;
+		int old_entries = d->entries;
+		int i, j;
+
+		d->diff = xsg_new(sg_network_io_stats, entries);
+
+		for (i = 0; i < entries; i++) {
+			d->diff[i].interface_name = xsg_strdup(diff[i].interface_name);
+			d->diff[i].rx = diff[i].rx;
+			d->diff[i].tx = diff[i].tx;
+			d->diff[i].ipackets = diff[i].ipackets;
+			d->diff[i].opackets = diff[i].opackets;
+			d->diff[i].ierrors = diff[i].ierrors;
+			d->diff[i].oerrors = diff[i].oerrors;
+			d->diff[i].collisions = diff[i].collisions;
+			d->diff[i].systime = diff[i].systime;
+		}
+
+		if (tick % d->update != 0) {
+			for (i = 0; i < entries; i++) {
+				sg_network_io_stats *now, *old = NULL;
+
+				now = &d->diff[i];
+
+				for (j = 0; j < old_entries; j++) {
+					old = &old_diff[(i + j) % old_entries];
+
+					if (strcmp(now->interface_name, old->interface_name) == 0)
+						break;
+				}
+
+				if (old == NULL)
+					continue;
+
+				now->rx += old->rx;
+				now->tx += old->tx;
+				now->ipackets += old->ipackets;
+				now->opackets += old->opackets;
+				now->ierrors += old->ierrors;
+				now->oerrors += old->oerrors;
+				now->collisions += old->collisions;
+				now->systime += old->systime;
+			}
+		}
+
+		for (i = 0; i < old_entries; i++)
+			xsg_free(old_diff[i].interface_name);
+
+		xsg_free(old_diff);
+
+		qsort(d->diff, entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
+	}
 }
 
-static void get_network_iface_stats() {
+static void get_network_iface_stats(uint64_t tick) {
 	xsg_debug("sg_get_network_iface_stats");
-	if (!(stats.network_iface_stats = sg_get_network_iface_stats(&stats.network_iface_entries))) {
+	if (!(network_iface_stats = sg_get_network_iface_stats(&network_iface_entries))) {
 		xsg_warning("sg_get_network_iface_stats returned NULL");
 		libstatgrab_error();
 		return;
 	}
-	qsort(stats.network_iface_stats, stats.network_iface_entries, sizeof(sg_network_iface_stats), sg_network_iface_compare_name);
+	qsort(network_iface_stats, network_iface_entries, sizeof(sg_network_iface_stats), sg_network_iface_compare_name);
 }
 
-static void get_page_stats() {
+static void get_page_stats(uint64_t tick) {
 	xsg_debug("sg_get_page_stats");
-	if (!(stats.page_stats = sg_get_page_stats())) {
+	if (!(page_stats = sg_get_page_stats())) {
 		xsg_warning("sg_get_page_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_page_stats_diff() {
+static void get_page_stats_diff(uint64_t tick) {
+	sg_page_stats *diff;
+	xsg_list_t *l;
+
 	xsg_debug("sg_get_page_stats_diff");
-	if (!(stats.page_stats_diff = sg_get_page_stats_diff())) {
+	if (!(diff = sg_get_page_stats_diff())) {
 		xsg_warning("sg_get_page_stats_diff returned NULL");
 		libstatgrab_error();
 	}
+
+	for (l = page_stats_diff_list; l; l = l->next) {
+		page_stats_diff_t *d = l->data;
+
+		if (tick % d->update == 0) {
+			d->diff->pages_pagein = 0;
+			d->diff->pages_pageout = 0;
+			d->diff->systime = 0;
+		}
+
+		d->diff->pages_pagein += diff->pages_pagein;
+		d->diff->pages_pageout += diff->pages_pageout;
+		d->diff->systime += diff->systime;
+	}
 }
 
-static void get_process_stats() {
+static void get_process_stats(uint64_t tick) {
 	xsg_debug("sg_get_process_stats");
-	if (stats.process_stats_by_name) {
-		xsg_free(stats.process_stats_by_name);
-		stats.process_stats_by_name = 0;
+	if (process_stats_by_name) {
+		xsg_free(process_stats_by_name);
+		process_stats_by_name = NULL;
 	}
-	if (stats.process_stats_by_pid) {
-		xsg_free(stats.process_stats_by_pid);
-		stats.process_stats_by_pid = 0;
+	if (process_stats_by_pid) {
+		xsg_free(process_stats_by_pid);
+		process_stats_by_pid = NULL;
 	}
-	if (stats.process_stats_by_uid) {
-		xsg_free(stats.process_stats_by_uid);
-		stats.process_stats_by_uid = 0;
+	if (process_stats_by_uid) {
+		xsg_free(process_stats_by_uid);
+		process_stats_by_uid = NULL;
 	}
-	if (stats.process_stats_by_gid) {
-		xsg_free(stats.process_stats_by_gid);
-		stats.process_stats_by_gid = 0;
+	if (process_stats_by_gid) {
+		xsg_free(process_stats_by_gid);
+		process_stats_by_gid = NULL;
 	}
-	if (stats.process_stats_by_size) {
-		xsg_free(stats.process_stats_by_size);
-		stats.process_stats_by_size = 0;
+	if (process_stats_by_size) {
+		xsg_free(process_stats_by_size);
+		process_stats_by_size = NULL;
 	}
-	if (stats.process_stats_by_res) {
-		xsg_free(stats.process_stats_by_res);
-		stats.process_stats_by_res = 0;
+	if (process_stats_by_res) {
+		xsg_free(process_stats_by_res);
+		process_stats_by_res = NULL;
 	}
-	if (stats.process_stats_by_cpu) {
-		xsg_free(stats.process_stats_by_cpu);
-		stats.process_stats_by_cpu = 0;
+	if (process_stats_by_cpu) {
+		xsg_free(process_stats_by_cpu);
+		process_stats_by_cpu = NULL;
 	}
-	if (stats.process_stats_by_time) {
-		xsg_free(stats.process_stats_by_time);
-		stats.process_stats_by_time = 0;
+	if (process_stats_by_time) {
+		xsg_free(process_stats_by_time);
+		process_stats_by_time = NULL;
 	}
-	if (!(stats.process_stats = sg_get_process_stats(&stats.process_entries))) {
+	if (!(process_stats = sg_get_process_stats(&process_entries))) {
 		xsg_warning("sg_get_process_stats returned NULL");
 		libstatgrab_error();
 	}
 }
 
-static void get_process_count() {
+static void get_process_count(uint64_t tick) {
 	xsg_debug("sg_get_process_count");
-	if (!(stats.process_count = sg_get_process_count())) {
+	if (!(process_count = sg_get_process_count())) {
 		xsg_warning("sg_get_process_count returned NULL");
 		libstatgrab_error();
 	}
@@ -307,12 +466,12 @@ static void get_process_count() {
 
 typedef struct {
 	uint64_t update;
-	void (*func)();
+	void (*func)(uint64_t);
 } stat_t;
 
 xsg_list_t *stat_list = NULL;
 
-static void add_stat(uint64_t update, void (*func)()) {
+static void add_stat(uint64_t update, void (*func)(uint64_t)) {
 	stat_t *stat = NULL;
 	xsg_list_t *l;
 
@@ -346,7 +505,7 @@ void update_stats(uint64_t tick) {
 	for (l = stat_list; l; l = l->next) {
 		stat = l->data;
 		if (tick % stat->update == 0)
-			stat->func();
+			stat->func(tick);
 	}
 }
 
@@ -357,9 +516,9 @@ void update_stats(uint64_t tick) {
  ******************************************************************************/
 
 static char *get_host_info_os_name(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_os_name: \"%s\"", stats.host_info->os_name);
-		return stats.host_info->os_name;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_os_name: \"%s\"", host_info->os_name);
+		return host_info->os_name;
 	} else {
 		xsg_debug("get_host_info_os_name: UNKNOWN");
 		return NULL;
@@ -367,9 +526,9 @@ static char *get_host_info_os_name(void *arg) {
 }
 
 static char *get_host_info_os_release(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_os_release: \"%s\"", stats.host_info->os_release);
-		return stats.host_info->os_release;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_os_release: \"%s\"", host_info->os_release);
+		return host_info->os_release;
 	} else {
 		xsg_debug("get_host_info_os_release: UNKNOWN");
 		return NULL;
@@ -377,9 +536,9 @@ static char *get_host_info_os_release(void *arg) {
 }
 
 static char *get_host_info_os_version(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_os_version: \"%s\"", stats.host_info->os_version);
-		return stats.host_info->os_version;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_os_version: \"%s\"", host_info->os_version);
+		return host_info->os_version;
 	} else {
 		xsg_debug("get_host_info_os_version: UNKNOWN");
 		return NULL;
@@ -387,9 +546,9 @@ static char *get_host_info_os_version(void *arg) {
 }
 
 static char *get_host_info_platform(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_platform: \"%s\"", stats.host_info->platform);
-		return stats.host_info->platform;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_platform: \"%s\"", host_info->platform);
+		return host_info->platform;
 	} else {
 		xsg_debug("get_host_info_platform: UNKNOWN");
 		return NULL;
@@ -397,9 +556,9 @@ static char *get_host_info_platform(void *arg) {
 }
 
 static char *get_host_info_hostname(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_hostname: \"%s\"", stats.host_info->hostname);
-		return stats.host_info->hostname;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_hostname: \"%s\"", host_info->hostname);
+		return host_info->hostname;
 	} else {
 		xsg_debug("get_host_info_hostname: UNKNOWN");
 		return NULL;
@@ -407,9 +566,9 @@ static char *get_host_info_hostname(void *arg) {
 }
 
 static double get_host_info_uptime(void *arg) {
-	if (likely(stats.host_info != NULL)) {
-		xsg_debug("get_host_info_uptime: %f", (double) stats.host_info->uptime);
-		return (double) stats.host_info->uptime;
+	if (likely(host_info != NULL)) {
+		xsg_debug("get_host_info_uptime: %f", (double) host_info->uptime);
+		return (double) host_info->uptime;
 	} else {
 		xsg_debug("get_host_info_uptime: UNKNOWN");
 		return DNAN;
@@ -418,7 +577,7 @@ static double get_host_info_uptime(void *arg) {
 
 /******************************************************************************/
 
-static void parse_host_info(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_host_info(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("os_name"))
 		*str = get_host_info_os_name;
 	else if (xsg_conf_find_command("os_release"))
@@ -442,9 +601,9 @@ static void parse_host_info(double (**num)(void *), char *(**str)(void *), void 
  ******************************************************************************/
 
 static double get_cpu_stats_user(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_user: %f", (double) stats.cpu_stats->user);
-		return (double) stats.cpu_stats->user;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_user: %f", (double) cpu_stats->user);
+		return (double) cpu_stats->user;
 	} else {
 		xsg_debug("get_cpu_stats_user: UNKNOWN");
 		return DNAN;
@@ -453,9 +612,9 @@ static double get_cpu_stats_user(void *arg) {
 }
 
 static double get_cpu_stats_kernel(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_kernel: %f", (double) stats.cpu_stats->kernel);
-		return (double) stats.cpu_stats->kernel;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_kernel: %f", (double) cpu_stats->kernel);
+		return (double) cpu_stats->kernel;
 	} else {
 		xsg_debug("get_cpu_stats_kernel: UNKNOWN");
 		return DNAN;
@@ -463,9 +622,9 @@ static double get_cpu_stats_kernel(void *arg) {
 }
 
 static double get_cpu_stats_idle(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_idle: %f", (double) stats.cpu_stats->idle);
-		return (double) stats.cpu_stats->idle;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_idle: %f", (double) cpu_stats->idle);
+		return (double) cpu_stats->idle;
 	} else {
 		xsg_debug("get_cpu_stats_idle: UNKNOWN");
 		return DNAN;
@@ -473,9 +632,9 @@ static double get_cpu_stats_idle(void *arg) {
 }
 
 static double get_cpu_stats_iowait(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_iowait: %f", (double) stats.cpu_stats->iowait);
-		return (double) stats.cpu_stats->iowait;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_iowait: %f", (double) cpu_stats->iowait);
+		return (double) cpu_stats->iowait;
 	} else {
 		xsg_debug("get_cpu_stats_iowait: UNKNOWN");
 		return DNAN;
@@ -483,9 +642,9 @@ static double get_cpu_stats_iowait(void *arg) {
 }
 
 static double get_cpu_stats_swap(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_swap: %f", (double) stats.cpu_stats->swap);
-		return (double) stats.cpu_stats->swap;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_swap: %f", (double) cpu_stats->swap);
+		return (double) cpu_stats->swap;
 	} else {
 		xsg_debug("get_cpu_stats_swap: UNKNOWN");
 		return DNAN;
@@ -493,9 +652,9 @@ static double get_cpu_stats_swap(void *arg) {
 }
 
 static double get_cpu_stats_nice(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_nice: %f", (double) stats.cpu_stats->nice);
-		return (double) stats.cpu_stats->nice;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_nice: %f", (double) cpu_stats->nice);
+		return (double) cpu_stats->nice;
 	} else {
 		xsg_debug("get_cpu_stats_nice: UNKNOWN");
 		return DNAN;
@@ -503,9 +662,9 @@ static double get_cpu_stats_nice(void *arg) {
 }
 
 static double get_cpu_stats_total(void *arg) {
-	if (likely(stats.cpu_stats != NULL)) {
-		xsg_debug("get_cpu_stats_total: %f", (double) stats.cpu_stats->total);
-		return (double) stats.cpu_stats->total;
+	if (likely(cpu_stats != NULL)) {
+		xsg_debug("get_cpu_stats_total: %f", (double) cpu_stats->total);
+		return (double) cpu_stats->total;
 	} else {
 		xsg_debug("get_cpu_stats_total: UNKNOWN");
 		return DNAN;
@@ -514,7 +673,7 @@ static double get_cpu_stats_total(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_cpu_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("user"))
 		*num = get_cpu_stats_user;
 	else if (xsg_conf_find_command("kernel"))
@@ -540,9 +699,11 @@ static void parse_cpu_stats(double (**num)(void *), char *(**str)(void *), void 
  ******************************************************************************/
 
 static double get_cpu_stats_diff_user(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_user: %f", (double) stats.cpu_stats_diff->user);
-		return (double) stats.cpu_stats_diff->user;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_user: %f", (double) diff->user);
+		return (double) diff->user;
 	} else {
 		xsg_debug("get_cpu_stats_diff_user: UNKNOWN");
 		return DNAN;
@@ -550,9 +711,11 @@ static double get_cpu_stats_diff_user(void *arg) {
 }
 
 static double get_cpu_stats_diff_kernel(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_kernel: %f", (double) stats.cpu_stats_diff->kernel);
-		return (double) stats.cpu_stats_diff->kernel;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_kernel: %f", (double) diff->kernel);
+		return (double) diff->kernel;
 	} else {
 		xsg_debug("get_cpu_stats_diff_kernel: UNKNOWN");
 		return DNAN;
@@ -560,9 +723,11 @@ static double get_cpu_stats_diff_kernel(void *arg) {
 }
 
 static double get_cpu_stats_diff_idle(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_idle: %f", (double) stats.cpu_stats_diff->idle);
-		return (double) stats.cpu_stats_diff->idle;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_idle: %f", (double) diff->idle);
+		return (double) diff->idle;
 	} else {
 		xsg_debug("get_cpu_stats_diff_idle: UNKNOWN");
 		return DNAN;
@@ -570,9 +735,11 @@ static double get_cpu_stats_diff_idle(void *arg) {
 }
 
 static double get_cpu_stats_diff_iowait(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_iowait: %f", (double) stats.cpu_stats_diff->iowait);
-		return (double) stats.cpu_stats_diff->iowait;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_iowait: %f", (double) diff->iowait);
+		return (double) diff->iowait;
 	} else {
 		xsg_debug("get_cpu_stats_diff_iowait: UNKNOWN");
 		return DNAN;
@@ -580,9 +747,11 @@ static double get_cpu_stats_diff_iowait(void *arg) {
 }
 
 static double get_cpu_stats_diff_swap(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_swap: %f", (double) stats.cpu_stats_diff->swap);
-		return (double) stats.cpu_stats_diff->swap;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_swap: %f", (double) diff->swap);
+		return (double) diff->swap;
 	} else {
 		xsg_debug("get_cpu_stats_diff_swap: UNKNOWN");
 		return DNAN;
@@ -590,9 +759,11 @@ static double get_cpu_stats_diff_swap(void *arg) {
 }
 
 static double get_cpu_stats_diff_nice(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_nice: %f", (double) stats.cpu_stats_diff->nice);
-		return (double) stats.cpu_stats_diff->nice;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_nice: %f", (double) diff->nice);
+		return (double) diff->nice;
 	} else {
 		xsg_debug("get_cpu_stats_diff_nice: UNKNOWN");
 		return DNAN;
@@ -600,9 +771,11 @@ static double get_cpu_stats_diff_nice(void *arg) {
 }
 
 static double get_cpu_stats_diff_total(void *arg) {
-	if (likely(stats.cpu_stats_diff != NULL)) {
-		xsg_debug("get_cpu_stats_diff_total: %f", (double) stats.cpu_stats_diff->total);
-		return (double) stats.cpu_stats_diff->total;
+	sg_cpu_stats *diff = (sg_cpu_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_cpu_stats_diff_total: %f", (double) diff->total);
+		return (double) diff->total;
 	} else {
 		xsg_debug("get_cpu_stats_diff_total: UNKNOWN");
 		return DNAN;
@@ -611,7 +784,37 @@ static double get_cpu_stats_diff_total(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
+static sg_cpu_stats *find_cpu_stats_diff(uint64_t update) {
+	cpu_stats_diff_t *d;
+	xsg_list_t *l;
+
+	for (l = cpu_stats_diff_list; l; l = l->next) {
+		d = l->data;
+		if (update == d->update)
+			return d->diff;
+	}
+
+	d = xsg_new(cpu_stats_diff_t, 1);
+	d->update = update;
+	d->diff = xsg_new(sg_cpu_stats, 1);
+	d->diff->user = 0;
+	d->diff->kernel = 0;
+	d->diff->idle = 0;
+	d->diff->iowait = 0;
+	d->diff->swap = 0;
+	d->diff->nice = 0;
+	d->diff->total = 0;
+	d->diff->systime = 0;
+
+	cpu_stats_diff_list = xsg_list_append(cpu_stats_diff_list, (void *) d);
+
+	return d->diff;
+}
+
+static void parse_cpu_stats_diff(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+
+	*arg = find_cpu_stats_diff(update);
+
 	if (xsg_conf_find_command("user"))
 		*num = get_cpu_stats_diff_user;
 	else if (xsg_conf_find_command("kernel"))
@@ -637,9 +840,9 @@ static void parse_cpu_stats_diff(double (**num)(void *), char *(**str)(void *), 
  ******************************************************************************/
 
 static double get_cpu_percents_user(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_user: %f", stats.cpu_percents->user);
-		return stats.cpu_percents->user;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_user: %f", cpu_percents->user);
+		return cpu_percents->user;
 	} else {
 		xsg_debug("get_cpu_percents_user: UNKNOWN");
 		return DNAN;
@@ -647,9 +850,9 @@ static double get_cpu_percents_user(void *arg) {
 }
 
 static double get_cpu_percents_kernel(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_kernel: %f", stats.cpu_percents->kernel);
-		return stats.cpu_percents->kernel;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_kernel: %f", cpu_percents->kernel);
+		return cpu_percents->kernel;
 	} else {
 		xsg_debug("get_cpu_percents_kernel: UNKNOWN");
 		return DNAN;
@@ -657,9 +860,9 @@ static double get_cpu_percents_kernel(void *arg) {
 }
 
 static double get_cpu_percents_idle(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_idle: %f", stats.cpu_percents->idle);
-		return stats.cpu_percents->idle;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_idle: %f", cpu_percents->idle);
+		return cpu_percents->idle;
 	} else {
 		xsg_debug("get_cpu_percents_idle: UNKNOWN");
 		return DNAN;
@@ -667,9 +870,9 @@ static double get_cpu_percents_idle(void *arg) {
 }
 
 static double get_cpu_percents_iowait(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_iowait: %f", stats.cpu_percents->iowait);
-		return stats.cpu_percents->iowait;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_iowait: %f", cpu_percents->iowait);
+		return cpu_percents->iowait;
 	} else {
 		xsg_debug("get_cpu_percents_iowait: UNKNOWN");
 		return DNAN;
@@ -677,9 +880,9 @@ static double get_cpu_percents_iowait(void *arg) {
 }
 
 static double get_cpu_percents_swap(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_swap: %f", stats.cpu_percents->swap);
-		return stats.cpu_percents->swap;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_swap: %f", cpu_percents->swap);
+		return cpu_percents->swap;
 	} else {
 		xsg_debug("get_cpu_percents_swap: UNKNOWN");
 		return DNAN;
@@ -687,9 +890,9 @@ static double get_cpu_percents_swap(void *arg) {
 }
 
 static double get_cpu_percents_nice(void *arg) {
-	if (likely(stats.cpu_percents != NULL)) {
-		xsg_debug("get_cpu_percents_nice: %f", stats.cpu_percents->nice);
-		return stats.cpu_percents->nice;
+	if (likely(cpu_percents != NULL)) {
+		xsg_debug("get_cpu_percents_nice: %f", cpu_percents->nice);
+		return cpu_percents->nice;
 	} else {
 		xsg_debug("get_cpu_percents_nice: UNKNOWN");
 		return DNAN;
@@ -698,7 +901,7 @@ static double get_cpu_percents_nice(void *arg) {
 
 /******************************************************************************/
 
-static void parse_cpu_percents(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_cpu_percents(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("user"))
 		*num = get_cpu_percents_user;
 	else if (xsg_conf_find_command("kernel"))
@@ -722,9 +925,9 @@ static void parse_cpu_percents(double (**num)(void *), char *(**str)(void *), vo
  ******************************************************************************/
 
 static double get_mem_stats_total(void *arg) {
-	if (likely(stats.mem_stats != NULL)) {
-		xsg_debug("get_cpu_percents_nice: %f", (double) stats.mem_stats->total);
-		return (double) stats.mem_stats->total;
+	if (likely(mem_stats != NULL)) {
+		xsg_debug("get_cpu_percents_nice: %f", (double) mem_stats->total);
+		return (double) mem_stats->total;
 	} else {
 		xsg_debug("get_cpu_percents_nice: UNKNOWN");
 		return DNAN;
@@ -732,9 +935,9 @@ static double get_mem_stats_total(void *arg) {
 }
 
 static double get_mem_stats_free(void *arg) {
-	if (likely(stats.mem_stats != NULL)) {
-		xsg_debug("get_mem_stats_free: %f", (double) stats.mem_stats->free);
-		return (double) stats.mem_stats->free;
+	if (likely(mem_stats != NULL)) {
+		xsg_debug("get_mem_stats_free: %f", (double) mem_stats->free);
+		return (double) mem_stats->free;
 	} else {
 		xsg_debug("get_mem_stats_free: UNKNOWN");
 		return DNAN;
@@ -742,9 +945,9 @@ static double get_mem_stats_free(void *arg) {
 }
 
 static double get_mem_stats_used(void *arg) {
-	if (likely(stats.mem_stats != NULL)) {
-		xsg_debug("get_mem_stats_used: %f", (double) stats.mem_stats->used);
-		return (double) stats.mem_stats->used;
+	if (likely(mem_stats != NULL)) {
+		xsg_debug("get_mem_stats_used: %f", (double) mem_stats->used);
+		return (double) mem_stats->used;
 	} else {
 		xsg_debug("get_mem_stats_used: UNKNOWN");
 		return DNAN;
@@ -752,9 +955,9 @@ static double get_mem_stats_used(void *arg) {
 }
 
 static double get_mem_stats_cache(void *arg) {
-	if (likely(stats.mem_stats != NULL)) {
-		xsg_debug("get_mem_stats_cache: %f", (double) stats.mem_stats->cache);
-		return (double) stats.mem_stats->cache;
+	if (likely(mem_stats != NULL)) {
+		xsg_debug("get_mem_stats_cache: %f", (double) mem_stats->cache);
+		return (double) mem_stats->cache;
 	} else {
 		xsg_debug("get_mem_stats_cache: UNKNOWN");
 		return DNAN;
@@ -763,7 +966,7 @@ static double get_mem_stats_cache(void *arg) {
 
 /******************************************************************************/
 
-static void parse_mem_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_mem_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
 		*num = get_mem_stats_total;
 	else if (xsg_conf_find_command("free"))
@@ -783,9 +986,9 @@ static void parse_mem_stats(double (**num)(void *), char *(**str)(void *), void 
  ******************************************************************************/
 
 static double get_load_stats_min1(void *arg) {
-	if (likely(stats.load_stats != NULL)) {
-		xsg_debug("get_load_stats_min1: %f", stats.load_stats->min1);
-		return stats.load_stats->min1;
+	if (likely(load_stats != NULL)) {
+		xsg_debug("get_load_stats_min1: %f", load_stats->min1);
+		return load_stats->min1;
 	} else {
 		xsg_debug("get_load_stats_min1: UNKNOWN");
 		return DNAN;
@@ -793,9 +996,9 @@ static double get_load_stats_min1(void *arg) {
 }
 
 static double get_load_stats_min5(void *arg) {
-	if (likely(stats.load_stats != NULL)) {
-		xsg_debug("get_load_stats_min5: %f", stats.load_stats->min5);
-		return stats.load_stats->min5;
+	if (likely(load_stats != NULL)) {
+		xsg_debug("get_load_stats_min5: %f", load_stats->min5);
+		return load_stats->min5;
 	} else {
 		xsg_debug("get_load_stats_min5: UNKNOWN");
 		return DNAN;
@@ -803,9 +1006,9 @@ static double get_load_stats_min5(void *arg) {
 }
 
 static double get_load_stats_min15(void *arg) {
-	if (likely(stats.load_stats != NULL)) {
-		xsg_debug("get_load_stats_min15: %f", stats.load_stats->min15);
-		return stats.load_stats->min15;
+	if (likely(load_stats != NULL)) {
+		xsg_debug("get_load_stats_min15: %f", load_stats->min15);
+		return load_stats->min15;
 	} else {
 		xsg_debug("get_load_stats_min15: UNKNOWN");
 		return DNAN;
@@ -814,7 +1017,7 @@ static double get_load_stats_min15(void *arg) {
 
 /******************************************************************************/
 
-static void parse_load_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_load_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("min1"))
 		*num = get_load_stats_min1;
 	else if (xsg_conf_find_command("min5"))
@@ -832,9 +1035,9 @@ static void parse_load_stats(double (**num)(void *), char *(**str)(void *), void
  ******************************************************************************/
 
 static char *get_user_stats_name_list(void *arg) {
-	if (likely(stats.user_stats != NULL)) {
-		xsg_debug("get_user_stats_name_list: \"%s\"", stats.user_stats->name_list);
-		return stats.user_stats->name_list;
+	if (likely(user_stats != NULL)) {
+		xsg_debug("get_user_stats_name_list: \"%s\"", user_stats->name_list);
+		return user_stats->name_list;
 	} else {
 		xsg_debug("get_user_stats_name_list: UNKNOWN");
 		return NULL;
@@ -842,9 +1045,9 @@ static char *get_user_stats_name_list(void *arg) {
 }
 
 static double get_user_stats_num_entries(void *arg) {
-	if (likely(stats.user_stats != NULL)) {
-		xsg_debug("get_user_stats_num_entries: %f", (double) stats.user_stats->num_entries);
-		return (double) stats.user_stats->num_entries;
+	if (likely(user_stats != NULL)) {
+		xsg_debug("get_user_stats_num_entries: %f", (double) user_stats->num_entries);
+		return (double) user_stats->num_entries;
 	} else {
 		xsg_debug("get_user_stats_num_entries: UNKNOWN");
 		return DNAN;
@@ -853,7 +1056,7 @@ static double get_user_stats_num_entries(void *arg) {
 
 /******************************************************************************/
 
-static void parse_user_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_user_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("num_entries"))
 		*num = get_user_stats_num_entries;
 	else if (xsg_conf_find_command("name_list"))
@@ -869,9 +1072,9 @@ static void parse_user_stats(double (**num)(void *), char *(**str)(void *), void
  ******************************************************************************/
 
 static double get_swap_stats_total(void *arg) {
-	if (likely(stats.swap_stats != NULL)) {
-		xsg_debug("get_swap_stats_total: %f", (double) stats.swap_stats->total);
-		return (double) stats.swap_stats->total;
+	if (likely(swap_stats != NULL)) {
+		xsg_debug("get_swap_stats_total: %f", (double) swap_stats->total);
+		return (double) swap_stats->total;
 	} else {
 		xsg_debug("get_swap_stats_total: UNKNOWN");
 		return DNAN;
@@ -879,9 +1082,9 @@ static double get_swap_stats_total(void *arg) {
 }
 
 static double get_swap_stats_used(void *arg) {
-	if (likely(stats.swap_stats != NULL)) {
-		xsg_debug("get_swap_stats_used: %f", (double) stats.swap_stats->used);
-		return (double) stats.swap_stats->used;
+	if (likely(swap_stats != NULL)) {
+		xsg_debug("get_swap_stats_used: %f", (double) swap_stats->used);
+		return (double) swap_stats->used;
 	} else {
 		xsg_debug("get_swap_stats_used: UNKNOWN");
 		return DNAN;
@@ -889,9 +1092,9 @@ static double get_swap_stats_used(void *arg) {
 }
 
 static double get_swap_stats_free(void *arg) {
-	if (likely(stats.swap_stats != NULL)) {
-		xsg_debug("get_swap_stats_free: %f", (double) stats.swap_stats->free);
-		return (double) stats.swap_stats->free;
+	if (likely(swap_stats != NULL)) {
+		xsg_debug("get_swap_stats_free: %f", (double) swap_stats->free);
+		return (double) swap_stats->free;
 	} else {
 		xsg_debug("get_swap_stats_free: UNKNOWN");
 		return DNAN;
@@ -900,7 +1103,7 @@ static double get_swap_stats_free(void *arg) {
 
 /******************************************************************************/
 
-static void parse_swap_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_swap_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
 		*num = get_swap_stats_total;
 	else if (xsg_conf_find_command("used"))
@@ -921,14 +1124,14 @@ static sg_fs_stats *get_fs_stats_for_device_name(char *device_name) {
 	sg_fs_stats key;
 
 	key.device_name = device_name;
-	return bsearch(&key, stats.fs_stats_by_device_name, stats.fs_entries, sizeof(sg_fs_stats), sg_fs_compare_device_name);
+	return bsearch(&key, fs_stats_by_device_name, fs_entries, sizeof(sg_fs_stats), sg_fs_compare_device_name);
 }
 
 static sg_fs_stats *get_fs_stats_for_mnt_point(char *mnt_point) {
 	sg_fs_stats key;
 
 	key.mnt_point = mnt_point;
-	return bsearch(&key, stats.fs_stats_by_mnt_point, stats.fs_entries, sizeof(sg_fs_stats), sg_fs_compare_mnt_point);
+	return bsearch(&key, fs_stats_by_mnt_point, fs_entries, sizeof(sg_fs_stats), sg_fs_compare_mnt_point);
 }
 
 /******************************************************************************/
@@ -1223,8 +1426,10 @@ static double get_fs_stats_avail_blocks(void *arg) {
 
 /******************************************************************************/
 
-static void parse_fs_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_fs_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+
 	*arg = (void *) xsg_conf_read_string();
+
 	if (xsg_conf_find_command("device_name"))
 		*str = get_fs_stats_device_name;
 	else if (xsg_conf_find_command("fs_type"))
@@ -1274,7 +1479,7 @@ static sg_disk_io_stats *get_disk_io_stats_for_disk_name(char *disk_name) {
 	sg_disk_io_stats key;
 
 	key.disk_name = disk_name;
-	return bsearch(&key, stats.disk_io_stats, stats.disk_io_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
+	return bsearch(&key, disk_io_stats, disk_io_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
 }
 
 /******************************************************************************/
@@ -1311,8 +1516,10 @@ static double get_disk_io_stats_write_bytes(void *arg) {
 
 /******************************************************************************/
 
-static void parse_disk_io_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_disk_io_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+
 	*arg = (void *) xsg_conf_read_string();
+
 	if (xsg_conf_find_command("read_bytes"))
 		*num = get_disk_io_stats_read_bytes;
 	else if (xsg_conf_find_command("write_bytes"))
@@ -1327,49 +1534,83 @@ static void parse_disk_io_stats(double (**num)(void *), char *(**str)(void *), v
  *
  ******************************************************************************/
 
-static sg_disk_io_stats *get_disk_io_stats_diff_for_disk_name(char *disk_name) {
+typedef struct _disk_io_stats_diff_arg_t {
+	char *disk_name;
+	disk_io_stats_diff_t *d;
+} disk_io_stats_diff_arg_t;
+
+/******************************************************************************/
+
+static sg_disk_io_stats *get_disk_io_stats_diff_for_disk_name(disk_io_stats_diff_arg_t *a) {
 	sg_disk_io_stats key;
 
-	key.disk_name = disk_name;
-	return bsearch(&key, stats.disk_io_stats_diff, stats.disk_io_diff_entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
+	key.disk_name = a->disk_name;
+	return bsearch(&key, a->d->diff, a->d->entries, sizeof(sg_disk_io_stats), sg_disk_io_compare_name);
 }
 
 /******************************************************************************/
 
 static double get_disk_io_stats_diff_read_bytes(void *arg) {
+	disk_io_stats_diff_arg_t *a;
 	sg_disk_io_stats *ret;
-	char *disk_name;
 
-	disk_name = (char *) arg;
+	a = (disk_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_disk_io_stats_diff_for_disk_name(disk_name))) {
+	if ((ret = get_disk_io_stats_diff_for_disk_name(a))) {
 		xsg_debug("get_disk_io_stats_diff_read_bytes: %f", (double) ret->read_bytes);
 		return (double) ret->read_bytes;
 	} else {
-		xsg_debug("get_disk_io_stats_diff_read_bytes: disk_io_stats_diff for \"%s\" not found", disk_name);
+		xsg_debug("get_disk_io_stats_diff_read_bytes: disk_io_stats_diff for \"%s\" not found", a->disk_name);
 		return DNAN;
 	}
 }
 
 static double get_disk_io_stats_diff_write_bytes(void *arg) {
+	disk_io_stats_diff_arg_t *a;
 	sg_disk_io_stats *ret;
-	char *disk_name;
 
-	disk_name = (char *) arg;
+	a = (disk_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_disk_io_stats_diff_for_disk_name(disk_name))) {
+	if ((ret = get_disk_io_stats_diff_for_disk_name(a))) {
 		xsg_debug("get_disk_io_stats_diff_write_bytes: %f", (double) ret->write_bytes);
 		return (double) ret->write_bytes;
 	} else {
-		xsg_debug("get_disk_io_stats_diff_write_bytes: disk_io_stats_diff for \"%s\" not found", disk_name);
+		xsg_debug("get_disk_io_stats_diff_write_bytes: disk_io_stats_diff for \"%s\" not found", a->disk_name);
 		return DNAN;
 	}
 }
 
 /******************************************************************************/
 
-static void parse_disk_io_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
-	*arg = (void *) xsg_conf_read_string();
+static disk_io_stats_diff_t *find_disk_io_stats_diff(uint64_t update) {
+	disk_io_stats_diff_t *d;
+	xsg_list_t *l;
+
+	for (l = disk_io_stats_diff_list; l; l = l->next) {
+		d = l->data;
+		if (update == d->update)
+			return d;
+	}
+
+	d = xsg_new(disk_io_stats_diff_t, 1);
+	d->update = update;
+	d->entries = 0;
+	d->diff = NULL;
+
+	disk_io_stats_diff_list = xsg_list_append(disk_io_stats_diff_list, (void *) d);
+
+	return d;
+}
+
+static void parse_disk_io_stats_diff(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+	disk_io_stats_diff_arg_t *a;
+
+	a = xsg_new(disk_io_stats_diff_arg_t, 1);
+	a->disk_name = xsg_conf_read_string();
+	a->d = find_disk_io_stats_diff(update);
+
+	*arg = (void *) a;
+
 	if (xsg_conf_find_command("read_bytes"))
 		*num = get_disk_io_stats_diff_read_bytes;
 	else if (xsg_conf_find_command("write_bytes"))
@@ -1388,7 +1629,7 @@ static sg_network_io_stats *get_network_io_stats_for_interface_name(char *interf
 	sg_network_io_stats key;
 
 	key.interface_name = interface_name;
-	return bsearch(&key, stats.network_io_stats, stats.network_io_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
+	return bsearch(&key, network_io_stats, network_io_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
 }
 
 /******************************************************************************/
@@ -1500,8 +1741,10 @@ static double get_network_io_stats_collisions(void *arg) {
 
 /******************************************************************************/
 
-static void parse_network_io_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_network_io_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+
 	*arg = (void *) xsg_conf_read_string();
+
 	if (xsg_conf_find_command("tx"))
 		*num = get_network_io_stats_tx;
 	else if (xsg_conf_find_command("rx"))
@@ -1526,124 +1769,158 @@ static void parse_network_io_stats(double (**num)(void *), char *(**str)(void *)
  *
  ******************************************************************************/
 
-static sg_network_io_stats *get_network_io_stats_diff_for_interface_name(char *interface_name) {
+typedef struct _network_io_stats_diff_arg_t {
+	char *interface_name;
+	network_io_stats_diff_t *d;
+} network_io_stats_diff_arg_t;
+
+/******************************************************************************/
+
+static sg_network_io_stats *get_network_io_stats_diff_for_interface_name(network_io_stats_diff_arg_t *a) {
 	sg_network_io_stats key;
 
-	key.interface_name = interface_name;
-	return bsearch(&key, stats.network_io_stats_diff, stats.network_io_diff_entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
+	key.interface_name = a->interface_name;
+	return bsearch(&key, a->d->diff, a->d->entries, sizeof(sg_network_io_stats), sg_network_io_compare_name);
 }
 
 /******************************************************************************/
 
 static double get_network_io_stats_diff_tx(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_tx: %f", (double) ret->tx);
 		return (double) ret->tx;
 	} else {
-		xsg_debug("get_network_io_stats_diff_tx: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_tx: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_rx(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_rx: %f", (double) ret->rx);
 		return (double) ret->rx;
 	} else {
-		xsg_debug("get_network_io_stats_diff_rx: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_rx: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_ipackets(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_ipackets: %f", (double) ret->ipackets);
 		return (double) ret->ipackets;
 	} else {
-		xsg_debug("get_network_io_stats_diff_ipackets: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_ipackets: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_opackets(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_opackets: %f", (double) ret->opackets);
 		return (double) ret->opackets;
 	} else {
-		xsg_debug("get_network_io_stats_diff_opackets: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_opackets: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_ierrors(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_ierrors: %f", (double) ret->ierrors);
 		return (double) ret->ierrors;
 	} else {
-		xsg_debug("get_network_io_stats_diff_ierrors: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_ierrors: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_oerrors(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_oerrors: %f", (double) ret->oerrors);
 		return (double) ret->oerrors;
 	} else {
-		xsg_debug("get_network_io_stats_diff_oerrors: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_oerrors: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 static double get_network_io_stats_diff_collisions(void *arg) {
+	network_io_stats_diff_arg_t *a;
 	sg_network_io_stats *ret;
-	char *interface_name;
 
-	interface_name = (char *) arg;
+	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(interface_name))) {
+	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
 		xsg_debug("get_network_io_stats_diff_collisions: %f", (double) ret->collisions);
 		return (double) ret->collisions;
 	} else {
-		xsg_debug("get_network_io_stats_diff_collisions: network_io_stats_diff for \"%s\" not found", interface_name);
+		xsg_debug("get_network_io_stats_diff_collisions: network_io_stats_diff for \"%s\" not found", a->interface_name);
 		return DNAN;
 	}
 }
 
 /******************************************************************************/
 
-static void parse_network_io_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
-	*arg = (void *) xsg_conf_read_string();
+static network_io_stats_diff_t *find_network_io_stats_diff(uint64_t update) {
+	network_io_stats_diff_t *d;
+	xsg_list_t *l;
+
+	for (l = network_io_stats_diff_list; l; l = l->next) {
+		d = l->data;
+		if (update == d->update)
+			return d;
+	}
+
+	d = xsg_new(network_io_stats_diff_t, 1);
+	d->update = update;
+	d->entries = 0;
+	d->diff = NULL;
+
+	network_io_stats_diff_list = xsg_list_append(network_io_stats_diff_list, (void *) d);
+
+	return d;
+}
+
+static void parse_network_io_stats_diff(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+	network_io_stats_diff_arg_t *a;
+
+	a = xsg_new(network_io_stats_diff_arg_t, 1);
+	a->interface_name = xsg_conf_read_string();
+	a->d = find_network_io_stats_diff(update);
+
+	*arg = (void *) a;
+
 	if (xsg_conf_find_command("tx"))
 		*num = get_network_io_stats_diff_tx;
 	else if (xsg_conf_find_command("rx"))
@@ -1672,7 +1949,7 @@ static sg_network_iface_stats *get_network_iface_stats_for_interface_name(char *
 	sg_network_iface_stats key;
 
 	key.interface_name = interface_name;
-	return bsearch(&key, stats.network_iface_stats, stats.network_iface_entries, sizeof(sg_network_iface_stats), sg_network_iface_compare_name);
+	return bsearch(&key, network_iface_stats, network_iface_entries, sizeof(sg_network_iface_stats), sg_network_iface_compare_name);
 }
 
 /******************************************************************************/
@@ -1743,7 +2020,7 @@ static char *get_network_iface_stats_duplex_string(void *arg) {
 
 /******************************************************************************/
 
-static void parse_network_iface_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_network_iface_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
@@ -1781,9 +2058,9 @@ static void parse_network_iface_stats(double (**num)(void *), char *(**str)(void
  ******************************************************************************/
 
 static double get_page_stats_pages_pagein(void *arg) {
-	if (likely(stats.page_stats != NULL)) {
-		xsg_debug("get_page_stats_pages_pagein: %f", (double) stats.page_stats->pages_pagein);
-		return (double) stats.page_stats->pages_pagein;
+	if (likely(page_stats != NULL)) {
+		xsg_debug("get_page_stats_pages_pagein: %f", (double) page_stats->pages_pagein);
+		return (double) page_stats->pages_pagein;
 	} else {
 		xsg_debug("get_page_stats_pages_pagein: UNKNOWN");
 		return DNAN;
@@ -1791,9 +2068,9 @@ static double get_page_stats_pages_pagein(void *arg) {
 }
 
 static double get_page_stats_pages_pageout(void *arg) {
-	if (likely(stats.page_stats != NULL)) {
-		xsg_debug("get_page_stats_pages_pageout: %f", (double) stats.page_stats->pages_pageout);
-		return (double) stats.page_stats->pages_pageout;
+	if (likely(page_stats != NULL)) {
+		xsg_debug("get_page_stats_pages_pageout: %f", (double) page_stats->pages_pageout);
+		return (double) page_stats->pages_pageout;
 	} else {
 		xsg_debug("get_page_stats_pages_pageout: UNKNOWN");
 		return DNAN;
@@ -1802,7 +2079,7 @@ static double get_page_stats_pages_pageout(void *arg) {
 
 /******************************************************************************/
 
-static void parse_page_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_page_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("pages_pagein"))
 		*num = get_page_stats_pages_pagein;
 	else if (xsg_conf_find_command("pages_pageout"))
@@ -1818,9 +2095,11 @@ static void parse_page_stats(double (**num)(void *), char *(**str)(void *), void
  ******************************************************************************/
 
 static double get_page_stats_diff_pages_pagein(void *arg) {
-	if (likely(stats.page_stats != NULL)) {
-		xsg_debug("get_page_stats_diff_pages_pagein: %f", (double) stats.page_stats->pages_pagein);
-		return (double) stats.page_stats->pages_pagein;
+	sg_page_stats *diff = (sg_page_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_page_stats_diff_pages_pagein: %f", (double) diff->pages_pagein);
+		return (double) diff->pages_pagein;
 	} else {
 		xsg_debug("get_page_stats_diff_pages_pagein: UNKNOWN");
 		return DNAN;
@@ -1828,9 +2107,11 @@ static double get_page_stats_diff_pages_pagein(void *arg) {
 }
 
 static double get_page_stats_diff_pages_pageout(void *arg) {
-	if (likely(stats.page_stats != NULL)) {
-		xsg_debug("get_page_stats_diff_pages_pageout: %f", (double) stats.page_stats->pages_pageout);
-		return (double) stats.page_stats->pages_pageout;
+	sg_page_stats *diff = (sg_page_stats *) arg;
+
+	if (likely(diff != NULL)) {
+		xsg_debug("get_page_stats_diff_pages_pageout: %f", (double) diff->pages_pageout);
+		return (double) diff->pages_pageout;
 	} else {
 		xsg_debug("get_page_stats_diff_pages_pageout: UNKNOWN");
 		return DNAN;
@@ -1839,7 +2120,32 @@ static double get_page_stats_diff_pages_pageout(void *arg) {
 
 /******************************************************************************/
 
-static void parse_page_stats_diff(double (**num)(void *), char *(**str)(void *), void **arg) {
+static sg_page_stats *find_page_stats_diff(uint64_t update) {
+	page_stats_diff_t *d;
+	xsg_list_t *l;
+
+	for (l = page_stats_diff_list; l; l = l->next) {
+		d = l->data;
+		if (update == d->update)
+			return d->diff;
+	}
+
+	d = xsg_new(page_stats_diff_t, 1);
+	d->update = update;
+	d->diff = xsg_new(sg_page_stats, 1);
+	d->diff->pages_pagein = 0;
+	d->diff->pages_pageout = 0;
+	d->diff->systime = 0;
+
+	page_stats_diff_list = xsg_list_append(page_stats_diff_list, (void *) d);
+
+	return d->diff;
+}
+
+static void parse_page_stats_diff(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
+
+	*arg = find_page_stats_diff(update);
+
 	if (xsg_conf_find_command("pages_pagein"))
 		*num = get_page_stats_diff_pages_pagein;
 	else if (xsg_conf_find_command("pages_pageout"))
@@ -1857,105 +2163,105 @@ static void parse_page_stats_diff(double (**num)(void *), char *(**str)(void *),
 sg_process_stats *get_process_stats_orderedby_name() {
 	size_t size;
 
-	if (stats.process_stats_by_name)
-		return stats.process_stats_by_name;
+	if (process_stats_by_name)
+		return process_stats_by_name;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_name = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_name, stats.process_stats, size);
-	qsort(stats.process_stats_by_name, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_name);
-	return stats.process_stats_by_name;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_name = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_name, process_stats, size);
+	qsort(process_stats_by_name, process_entries, sizeof(sg_process_stats), sg_process_compare_name);
+	return process_stats_by_name;
 }
 
 sg_process_stats *get_process_stats_orderedby_pid() {
 	size_t size;
 
-	if (stats.process_stats_by_pid)
-		return stats.process_stats_by_pid;
+	if (process_stats_by_pid)
+		return process_stats_by_pid;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_pid = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_pid, stats.process_stats, size);
-	qsort(stats.process_stats_by_pid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_pid);
-	return stats.process_stats_by_pid;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_pid = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_pid, process_stats, size);
+	qsort(process_stats_by_pid, process_entries, sizeof(sg_process_stats), sg_process_compare_pid);
+	return process_stats_by_pid;
 }
 
 sg_process_stats *get_process_stats_orderedby_uid() {
 	size_t size;
 
-	if (stats.process_stats_by_uid)
-		return stats.process_stats_by_uid;
+	if (process_stats_by_uid)
+		return process_stats_by_uid;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_uid = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_uid, stats.process_stats, size);
-	qsort(stats.process_stats_by_uid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_uid);
-	return stats.process_stats_by_uid;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_uid = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_uid, process_stats, size);
+	qsort(process_stats_by_uid, process_entries, sizeof(sg_process_stats), sg_process_compare_uid);
+	return process_stats_by_uid;
 }
 
 sg_process_stats *get_process_stats_orderedby_gid() {
 	size_t size;
 
-	if (stats.process_stats_by_gid)
-		return stats.process_stats_by_gid;
+	if (process_stats_by_gid)
+		return process_stats_by_gid;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_gid = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_gid, stats.process_stats, size);
-	qsort(stats.process_stats_by_gid, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_gid);
-	return stats.process_stats_by_gid;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_gid = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_gid, process_stats, size);
+	qsort(process_stats_by_gid, process_entries, sizeof(sg_process_stats), sg_process_compare_gid);
+	return process_stats_by_gid;
 }
 
 sg_process_stats *get_process_stats_orderedby_size() {
 	size_t size;
 
-	if (stats.process_stats_by_size)
-		return stats.process_stats_by_size;
+	if (process_stats_by_size)
+		return process_stats_by_size;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_size = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_size, stats.process_stats, size);
-	qsort(stats.process_stats_by_size, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_size);
-	return stats.process_stats_by_size;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_size = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_size, process_stats, size);
+	qsort(process_stats_by_size, process_entries, sizeof(sg_process_stats), sg_process_compare_size);
+	return process_stats_by_size;
 }
 
 sg_process_stats *get_process_stats_orderedby_res() {
 	size_t size;
 
-	if (stats.process_stats_by_res)
-		return stats.process_stats_by_res;
+	if (process_stats_by_res)
+		return process_stats_by_res;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_res = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_res, stats.process_stats, size);
-	qsort(stats.process_stats_by_res, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_res);
-	return stats.process_stats_by_res;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_res = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_res, process_stats, size);
+	qsort(process_stats_by_res, process_entries, sizeof(sg_process_stats), sg_process_compare_res);
+	return process_stats_by_res;
 }
 
 sg_process_stats *get_process_stats_orderedby_cpu() {
 	size_t size;
 
-	if (stats.process_stats_by_cpu)
-		return stats.process_stats_by_cpu;
+	if (process_stats_by_cpu)
+		return process_stats_by_cpu;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_cpu = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_cpu, stats.process_stats, size);
-	qsort(stats.process_stats_by_cpu, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_cpu);
-	return stats.process_stats_by_cpu;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_cpu = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_cpu, process_stats, size);
+	qsort(process_stats_by_cpu, process_entries, sizeof(sg_process_stats), sg_process_compare_cpu);
+	return process_stats_by_cpu;
 }
 
 sg_process_stats *get_process_stats_orderedby_time() {
 	size_t size;
 
-	if (stats.process_stats_by_time)
-		return stats.process_stats_by_time;
+	if (process_stats_by_time)
+		return process_stats_by_time;
 
-	size = sizeof(sg_process_stats) * stats.process_entries;
-	stats.process_stats_by_time = (sg_process_stats *) xsg_malloc(size);
-	memcpy(stats.process_stats_by_time, stats.process_stats, size);
-	qsort(stats.process_stats_by_time, stats.process_entries, sizeof(sg_process_stats), sg_process_compare_time);
-	return stats.process_stats_by_time;
+	size = sizeof(sg_process_stats) * process_entries;
+	process_stats_by_time = (sg_process_stats *) xsg_malloc(size);
+	memcpy(process_stats_by_time, process_stats, size);
+	qsort(process_stats_by_time, process_entries, sizeof(sg_process_stats), sg_process_compare_time);
+	return process_stats_by_time;
 }
 
 /******************************************************************************/
@@ -1984,7 +2290,7 @@ static char *get_process_stats_process_name(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_process_name: process_stats for number %"PRIu32" not found", data->number);
 		return NULL;
 	}
@@ -1992,7 +2298,7 @@ static char *get_process_stats_process_name(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2009,7 +2315,7 @@ static char *get_process_stats_proctitle(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_proctitle: process_stats for number %"PRIu32" not found", data->number);
 		return NULL;
 	}
@@ -2017,7 +2323,7 @@ static char *get_process_stats_proctitle(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2034,7 +2340,7 @@ static double get_process_stats_pid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_pid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2042,7 +2348,7 @@ static double get_process_stats_pid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2059,7 +2365,7 @@ static double get_process_stats_parent(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_parent: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2067,7 +2373,7 @@ static double get_process_stats_parent(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2084,7 +2390,7 @@ static double get_process_stats_pgid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_pgid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2092,7 +2398,7 @@ static double get_process_stats_pgid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2109,7 +2415,7 @@ static double get_process_stats_uid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_uid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2117,7 +2423,7 @@ static double get_process_stats_uid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2134,7 +2440,7 @@ static double get_process_stats_euid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_euid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2142,7 +2448,7 @@ static double get_process_stats_euid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2159,7 +2465,7 @@ static double get_process_stats_gid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_gid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2167,7 +2473,7 @@ static double get_process_stats_gid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2184,7 +2490,7 @@ static double get_process_stats_egid(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_egid: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2192,7 +2498,7 @@ static double get_process_stats_egid(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2209,7 +2515,7 @@ static double get_process_stats_proc_size(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_proc_size: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2217,7 +2523,7 @@ static double get_process_stats_proc_size(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2234,7 +2540,7 @@ static double get_process_stats_proc_resident(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_proc_resident: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2242,7 +2548,7 @@ static double get_process_stats_proc_resident(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2259,7 +2565,7 @@ static double get_process_stats_time_spent(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_time_spent: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2267,7 +2573,7 @@ static double get_process_stats_time_spent(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2284,7 +2590,7 @@ static double get_process_stats_cpu_percent(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_cpu_percent: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2292,7 +2598,7 @@ static double get_process_stats_cpu_percent(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2309,7 +2615,7 @@ static double get_process_stats_nice(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_nice: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2317,7 +2623,7 @@ static double get_process_stats_nice(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2334,7 +2640,7 @@ static double get_process_stats_state_number(void *arg) {
 
 	data = (process_stats_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_state_number: process_stats for number %"PRIu32" not found", data->number);
 		return DNAN;
 	}
@@ -2342,7 +2648,7 @@ static double get_process_stats_state_number(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2359,7 +2665,7 @@ static char *get_process_stats_state_string(void *arg) {
 
 	data = (process_stats_state_data_t *) arg;
 
-	if (data->number >= stats.process_entries) {
+	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_state_string: process_stats for number %"PRIu32" not found", data->number);
 		return NULL;
 	}
@@ -2367,7 +2673,7 @@ static char *get_process_stats_state_string(void *arg) {
 	if (data->ascending)
 		index = data->number;
 	else
-		index = stats.process_entries - data->number;
+		index = process_entries - data->number;
 
 	sg_list = (data->list_func)();
 	sg = sg_list + index;
@@ -2394,7 +2700,7 @@ static char *get_process_stats_state_string(void *arg) {
 
 /******************************************************************************/
 
-static void parse_process_stats(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_process_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	sg_process_stats *(*list_func)() = NULL;
 	bool ascending = TRUE;
 	uint32_t number = 0;
@@ -2499,9 +2805,9 @@ static void parse_process_stats(double (**num)(void *), char *(**str)(void *), v
  ******************************************************************************/
 
 static double get_process_count_total(void *arg) {
-	if (likely(stats.process_count != NULL)) {
-		xsg_debug("get_process_count_total: %f", (double) stats.process_count->total);
-		return (double) stats.process_count->total;
+	if (likely(process_count != NULL)) {
+		xsg_debug("get_process_count_total: %f", (double) process_count->total);
+		return (double) process_count->total;
 	} else {
 		xsg_debug("get_process_count_total: UNKNOWN");
 		return DNAN;
@@ -2509,9 +2815,9 @@ static double get_process_count_total(void *arg) {
 }
 
 static double get_process_count_running(void *arg) {
-	if (likely(stats.process_count != NULL)) {
-		xsg_debug("get_process_count_running: %f", (double) stats.process_count->running);
-		return (double) stats.process_count->running;
+	if (likely(process_count != NULL)) {
+		xsg_debug("get_process_count_running: %f", (double) process_count->running);
+		return (double) process_count->running;
 	} else {
 		xsg_debug("get_process_count_running: UNKNOWN");
 		return DNAN;
@@ -2519,9 +2825,9 @@ static double get_process_count_running(void *arg) {
 }
 
 static double get_process_count_sleeping(void *arg) {
-	if (likely(stats.process_count != NULL)) {
-		xsg_debug("get_process_count_sleeping: %f", (double) stats.process_count->sleeping);
-		return (double) stats.process_count->sleeping;
+	if (likely(process_count != NULL)) {
+		xsg_debug("get_process_count_sleeping: %f", (double) process_count->sleeping);
+		return (double) process_count->sleeping;
 	} else {
 		xsg_debug("get_process_count_sleeping: UNKNOWN");
 		return DNAN;
@@ -2529,9 +2835,9 @@ static double get_process_count_sleeping(void *arg) {
 }
 
 static double get_process_count_stopped(void *arg) {
-	if (likely(stats.process_count != NULL)) {
-		xsg_debug("get_process_count_stopped: %f", (double) stats.process_count->stopped);
-		return (double) stats.process_count->stopped;
+	if (likely(process_count != NULL)) {
+		xsg_debug("get_process_count_stopped: %f", (double) process_count->stopped);
+		return (double) process_count->stopped;
 	} else {
 		xsg_debug("get_process_count_stopped: UNKNOWN");
 		return DNAN;
@@ -2539,9 +2845,9 @@ static double get_process_count_stopped(void *arg) {
 }
 
 static double get_process_count_zombie(void *arg) {
-	if (likely(stats.process_count != NULL)) {
-		xsg_debug("get_process_count_zombie: %f", (double) stats.process_count->zombie);
-		return (double) stats.process_count->zombie;
+	if (likely(process_count != NULL)) {
+		xsg_debug("get_process_count_zombie: %f", (double) process_count->zombie);
+		return (double) process_count->zombie;
 	} else {
 		xsg_debug("get_process_count_zombie: UNKNOWN");
 		return DNAN;
@@ -2550,7 +2856,7 @@ static double get_process_count_zombie(void *arg) {
 
 /******************************************************************************/
 
-static void parse_process_count(double (**num)(void *), char *(**str)(void *), void **arg) {
+static void parse_process_count(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
 	if (xsg_conf_find_command("total"))
 		*num = get_process_count_total;
 	else if (xsg_conf_find_command("running"))
@@ -2595,58 +2901,58 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 		xsg_conf_error("Past values not supported by stat module");
 
 	if (xsg_conf_find_command("host_info")){
-		parse_host_info(num, str, arg);
+		parse_host_info(update, num, str, arg);
 		add_stat(update, get_host_info);
 	} else if (xsg_conf_find_command("cpu_stats")) {
-		parse_cpu_stats(num, str, arg);
+		parse_cpu_stats(update, num, str, arg);
 		add_stat(update, get_cpu_stats);
 	} else if (xsg_conf_find_command("cpu_stats_diff")) {
-		parse_cpu_stats_diff(num, str, arg);
+		parse_cpu_stats_diff(update, num, str, arg);
 		add_stat(update, get_cpu_stats_diff);
 	} else if (xsg_conf_find_command("cpu_percents")) {
-		parse_cpu_percents(num, str, arg);
+		parse_cpu_percents(update, num, str, arg);
 		add_stat(update, get_cpu_percents);
 	} else if (xsg_conf_find_command("mem_stats")) {
-		parse_mem_stats(num, str, arg);
+		parse_mem_stats(update, num, str, arg);
 		add_stat(update, get_mem_stats);
 	} else if (xsg_conf_find_command("load_stats")) {
-		parse_load_stats(num, str, arg);
+		parse_load_stats(update, num, str, arg);
 		add_stat(update, get_load_stats);
 	} else if (xsg_conf_find_command("user_stats")) {
-		parse_user_stats(num, str, arg);
+		parse_user_stats(update, num, str, arg);
 		add_stat(update, get_user_stats);
 	} else if (xsg_conf_find_command("swap_stats")) {
-		parse_swap_stats(num, str, arg);
+		parse_swap_stats(update, num, str, arg);
 		add_stat(update, get_swap_stats);
 	} else if (xsg_conf_find_command("fs_stats")) {
-		parse_fs_stats(num, str, arg);
+		parse_fs_stats(update, num, str, arg);
 		add_stat(update, get_fs_stats);
 	} else if (xsg_conf_find_command("disk_io_stats")) {
-		parse_disk_io_stats(num, str, arg);
+		parse_disk_io_stats(update, num, str, arg);
 		add_stat(update, get_disk_io_stats);
 	} else if (xsg_conf_find_command("disk_io_stats_diff")) {
-		parse_disk_io_stats_diff(num, str, arg);
+		parse_disk_io_stats_diff(update, num, str, arg);
 		add_stat(update, get_disk_io_stats_diff);
 	} else if (xsg_conf_find_command("network_io_stats")) {
-		parse_network_io_stats(num, str, arg);
+		parse_network_io_stats(update, num, str, arg);
 		add_stat(update, get_network_io_stats);
 	} else if (xsg_conf_find_command("network_io_stats_diff")) {
-		parse_network_io_stats_diff(num, str, arg);
+		parse_network_io_stats_diff(update, num, str, arg);
 		add_stat(update, get_network_io_stats_diff);
 	} else if (xsg_conf_find_command("network_iface_stats")) {
-		parse_network_iface_stats(num, str, arg);
+		parse_network_iface_stats(update, num, str, arg);
 		add_stat(update, get_network_iface_stats);
 	} else if (xsg_conf_find_command("page_stats")) {
-		parse_page_stats(num, str, arg);
+		parse_page_stats(update, num, str, arg);
 		add_stat(update, get_page_stats);
 	} else if (xsg_conf_find_command("page_stats_diff")) {
-		parse_page_stats_diff(num, str, arg);
+		parse_page_stats_diff(update, num, str, arg);
 		add_stat(update, get_page_stats_diff);
 	} else if (xsg_conf_find_command("process_stats")) {
-		parse_process_stats(num, str, arg);
+		parse_process_stats(update, num, str, arg);
 		add_stat(update, get_process_stats);
 	} else if (xsg_conf_find_command("process_count")) {
-		parse_process_count(num, str, arg);
+		parse_process_count(update, num, str, arg);
 		add_stat(update, get_process_count);
 	} else {
 		xsg_conf_error("host_info, cpu_stats, cpu_stats_diff, cpu_percents, "
@@ -2659,5 +2965,9 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 
 char *info(void) {
 	return "interface for libstatgrab <http://www.i-scream.org/libstatgrab>";
+}
+
+char *help(void) {
+	return "TODO: list disks, network interfaces, ...";
 }
 
