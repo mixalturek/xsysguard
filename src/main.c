@@ -244,6 +244,7 @@ static void loop(uint64_t num) {
 			xsg_main_timeout_t *timeout = NULL;
 
 			if (time_error) {
+				time_error = FALSE;
 				xsg_warning("Running all timeout functions due to time error");
 				for (l = timeout_list; l; l = l->next) {
 					xsg_main_timeout_t *timeout = l->data;
