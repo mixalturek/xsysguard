@@ -73,7 +73,8 @@ COMMON_SRC     += main.c main.h
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
 COMMON_SRC     += rpn.c rpn.h
-COMMON_SRC     += compat.c utils.c string.c list.c hash.c
+COMMON_SRC     += scanf.c scanf.h
+COMMON_SRC     += compat.c utils.c string.c list.c hash.c buffer.c
 
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
@@ -102,6 +103,7 @@ XSYSGUARDD_SRC += writebuffer.c writebuffer.h
 
 ################################################################################
 
+ifeq (0,$(MAKELEVEL))
 $(info )
 $(info **************** CONFIGURATION ****************)
 $(info UNAME:         $(UNAME))
@@ -119,6 +121,7 @@ $(info FONT_PATH:     $(FONT_PATH))
 $(info MODULE_PATH:   $(MODULE_PATH))
 $(info ***********************************************)
 $(info )
+endif
 
 ################################################################################
 
