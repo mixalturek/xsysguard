@@ -266,6 +266,7 @@ static void usage(void) {
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Print this help message to stdout\n"
+		"  -H, --mhelp         Print help message for MODULE to stdout\n"
 		"  -m, --modules       Print a list of all available modules to stdout\n"
 		"  -s, --stderr        Print log messages to stderr\n"
 		"  -c, --color         Enable colored logging\n"
@@ -294,9 +295,11 @@ int main(int argc, char **argv) {
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;
 	bool log_level_overwrite = FALSE;
+	char *mhelp = NULL;
 
 	struct option long_options[] = {
 		{ "help",    0, NULL, 'h' },
+		{ "mhelp",   1, NULL, 'H' },
 		{ "log",     1, NULL, 'l' },
 		{ "color",   0, NULL, 'c' },
 		{ "time",    0, NULL, 't' },
@@ -309,7 +312,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hl:csmt", long_options, &option_index);
+		option = getopt_long(argc, argv, "hH:l:csmt", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -318,6 +321,10 @@ int main(int argc, char **argv) {
 			case 'h':
 				print_usage = TRUE;
 				log_to_stderr = TRUE;
+				break;
+			case 'H':
+				if (optarg && !mhelp)
+					mhelp = xsg_strdup(optarg);
 				break;
 			case 'l':
 				if (optarg)
@@ -355,6 +362,19 @@ int main(int argc, char **argv) {
 
 	if (list_modules) {
 		xsg_modules_list();
+		exit(EXIT_SUCCESS);
+	}
+
+	if (mhelp != NULL) {
+		char *info, *help = NULL;
+
+		info = xsg_modules_info(mhelp, &help);
+
+		if (help)
+			printf("%s - %s\n\n%s\n", mhelp, info, help);
+		else
+			printf("%s - %s\n", mhelp, info);
+
 		exit(EXIT_SUCCESS);
 	}
 
