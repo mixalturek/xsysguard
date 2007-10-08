@@ -1,7 +1,7 @@
 /* angle.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,12 @@
 #include <math.h>
 
 #include "angle.h"
+
+/******************************************************************************/
+
+#ifndef M_PI
+# define M_PI 3.14159265358979323846
+#endif
 
 /******************************************************************************/
 
