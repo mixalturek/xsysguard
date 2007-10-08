@@ -558,7 +558,15 @@ int main(int argc, char **argv) {
 	}
 
 	if (mhelp != NULL) {
-		printf("%s", xsg_modules_help(mhelp));
+		char *info, *help = NULL;
+
+		info = xsg_modules_info(mhelp, &help);
+
+		if (help)
+			printf("%s - %s\n\n%s\n", mhelp, info, help);
+		else
+			printf("%s - %s\n", mhelp, info);
+
 		exit(EXIT_SUCCESS);
 	}
 

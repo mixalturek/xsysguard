@@ -203,14 +203,14 @@ void xsg_modules_list() {
 		}
 
 		if (info)
-			printf("%s:\t %s\n", m->name, info());
+			printf("%s:\t %s\n", m->name, info(NULL));
 		else
 			printf("%s:\n", m->name);
 	}
 }
 
-char *xsg_modules_help(const char *name) {
-	xsg_modules_help_t *help;
+char *xsg_modules_info(const char *name, char **help) {
+	xsg_modules_info_t *info;
 	void *module;
 	xsg_list_t *l;
 
@@ -228,12 +228,12 @@ char *xsg_modules_help(const char *name) {
 		if (!module)
 			xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-		help = (xsg_modules_help_t *) dlsym(module, "help");
+		info = (xsg_modules_info_t *) dlsym(module, "info");
 
-		if (!help)
+		if (!info)
 			xsg_error("Cannot load module %s: %s", m->name, dlerror());
 
-		return help();
+		return info(help);
 	}
 
 	xsg_error("Cannot find module: %s", name);
