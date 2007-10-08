@@ -2963,11 +2963,8 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(void) {
+char *info(char **help) {
+	// TODO: help: list disks, network interfaces, ...
 	return "interface for libstatgrab <http://www.i-scream.org/libstatgrab>";
-}
-
-char *help(void) {
-	return "TODO: list disks, network interfaces, ...";
 }
 

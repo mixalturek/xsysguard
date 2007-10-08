@@ -244,7 +244,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_init_func(init_random);
 }
 
-char *info(void) {
+char *info(char **help) {
 	return "random number generator";
 }
 

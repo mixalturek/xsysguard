@@ -47,7 +47,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(void) {
+char *info(char **help) {
 	return "always returns the same number";
 }
 

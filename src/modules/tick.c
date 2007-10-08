@@ -49,7 +49,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(void) {
+char *info(char **help) {
 	return "returns the current tick";
 }
 

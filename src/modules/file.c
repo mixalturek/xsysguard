@@ -147,7 +147,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_update_func(update_files);
 }
 
-char *info(void) {
+char *info(char **help) {
 	return "read regular files";
 }
 

@@ -134,11 +134,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_conf_error("Cannot find chip: %s", chip_name_prefix);
 }
 
-char *info(void) {
-	return "interface for lm-sensors <http://www.lm-sensors.org>";
-}
-
-char *help(void) {
+static char *list_features(void) {
 	xsg_string_t *string;
 	const sensors_chip_name *chip_name;
 	int chip_nr = 0;
@@ -161,10 +157,18 @@ char *help(void) {
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
 
-			xsg_string_append_printf(string, ":%s:%-32s %6.2f\n", chip_name->prefix, feature_data->name, value);
+			xsg_string_append_printf(string, "%s:%-32s %6.2f\n", chip_name->prefix, feature_data->name, value);
 		}
 	}
 
 	return xsg_string_free(string, FALSE);
 }
+
+
+char *info(char **help) {
+	if (help)
+		*help = list_features();
+	return "interface for lm-sensors <http://www.lm-sensors.org>";
+}
+
 

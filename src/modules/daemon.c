@@ -863,7 +863,7 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	daemon_var_count++;
 }
 
-char *info(void) {
+char *info(char **help) {
 	return "executes xsysguardd processes";
 }
 
