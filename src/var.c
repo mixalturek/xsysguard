@@ -19,6 +19,7 @@
  */
 
 #include <xsysguard.h>
+#include <alloca.h>
 #include <math.h>
 
 #include "window.h"
