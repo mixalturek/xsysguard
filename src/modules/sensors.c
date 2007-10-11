@@ -73,7 +73,7 @@ static double get_sensors_feature(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	static bool initialized = FALSE;
 	const sensors_chip_name *chip_name;
 	char *chip_name_prefix;
@@ -134,15 +134,18 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_conf_error("Cannot find chip: %s", chip_name_prefix);
 }
 
-static char *list_features(void) {
-	xsg_string_t *string;
+static char *help(void) {
+	static xsg_string_t *string = NULL;
 	const sensors_chip_name *chip_name;
 	int chip_nr = 0;
 
 	if (!init())
 		return NULL;
 
-	string = xsg_string_new("Available features:\n");
+	if (!string)
+		string = xsg_string_new("Available features:\n");
+	else
+		return string->str;
 
 	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
 		const sensors_feature_data *feature_data;
@@ -161,14 +164,10 @@ static char *list_features(void) {
 		}
 	}
 
-	return xsg_string_free(string, FALSE);
+	return string->str;
 }
 
-
-char *info(char **help) {
-	if (help)
-		*help = list_features();
-	return "interface for lm-sensors <http://www.lm-sensors.org>";
-}
-
+xsg_module_t xsg_module = {
+	parse, help, "libsensors (lm-sensors) <http://www.lm-sensors.org>"
+};
 

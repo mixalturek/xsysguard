@@ -804,7 +804,7 @@ static void update_daemons(uint64_t tick) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
 	char *name;
@@ -863,7 +863,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	daemon_var_count++;
 }
 
-char *info(char **help) {
-	return "executes xsysguardd processes";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "execute xsysguardd processes"
+};
 

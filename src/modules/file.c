@@ -129,7 +129,7 @@ static void update_files(uint64_t update) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	char *filename;
 	xsg_buffer_t *buffer;
 
@@ -147,7 +147,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_update_func(update_files);
 }
 
-char *info(char **help) {
-	return "read regular files";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "read regular files"
+};
 

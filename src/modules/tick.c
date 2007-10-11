@@ -36,7 +36,7 @@ static double get_tick(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	uint64_t *add_ticks;
 	uint32_t i;
 
@@ -49,7 +49,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(char **help) {
-	return "returns the current tick";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "get the current tick"
+};
 

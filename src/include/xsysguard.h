@@ -75,11 +75,13 @@ typedef struct _xsg_var_t xsg_var_t;
 
 /******************************************************************************/
 
-typedef char *xsg_modules_info_t(char **help);
-typedef void xsg_modules_parse_t(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+typedef struct _xsg_module_t {
+	void (*parse)(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+	char *(*help)(void);
+	char *info;
+} xsg_module_t;
 
-xsg_modules_info_t info XSG_API;
-xsg_modules_parse_t parse XSG_API;
+extern xsg_module_t xsg_module XSG_API;
 
 /******************************************************************************
  * conf.c
@@ -333,7 +335,7 @@ int xsg_isinf(double x) XSG_API;
 #endif /* XSG_LOG_DOMAIN */
 
 #ifndef XSG_MAX_LOG_LEVEL
-# define XSG_MAX_LOG_LEVEL XSG_LOG_LEVEL_DEBUG
+# define XSG_MAX_LOG_LEVEL XSG_LOG_LEVEL_MESSAGE
 #endif /* XSG_MAX_LOG_LEVEL */
 
 extern int xsg_log_level XSG_API;

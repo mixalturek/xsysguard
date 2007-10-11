@@ -34,7 +34,7 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	uint32_t i;
 	double *d;
 
@@ -47,7 +47,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(char **help) {
-	return "always returns the same number";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "get a fixed number"
+};
 

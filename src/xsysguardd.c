@@ -366,9 +366,10 @@ int main(int argc, char **argv) {
 	}
 
 	if (mhelp != NULL) {
-		char *info, *help = NULL;
+		char *info, *help;
 
-		info = xsg_modules_info(mhelp, &help);
+		info = xsg_modules_info(mhelp);
+		help = xsg_modules_help(mhelp);
 
 		if (help)
 			printf("%s - %s\n\n%s\n", mhelp, info, help);

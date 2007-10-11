@@ -2892,7 +2892,7 @@ static void shutdown_stats(void) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	xsg_main_add_init_func(init_stats);
 	xsg_main_add_update_func(update_stats);
 	xsg_main_add_shutdown_func(shutdown_stats);
@@ -2963,8 +2963,12 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(char **help) {
-	// TODO: help: list disks, network interfaces, ...
-	return "interface for libstatgrab <http://www.i-scream.org/libstatgrab>";
+static char *help(void) {
+	// TODO: list disks, network interfaces, ...
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "libstatgrab <http://www.i-scream.org/libstatgrab>"
+};
 

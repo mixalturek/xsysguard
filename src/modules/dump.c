@@ -167,7 +167,7 @@ dump_file_t *read_dump_file(char *name, char *filename) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	char *name, *filename;
 	dump_file_t *dump_file;
 	uint32_t i;
@@ -200,7 +200,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	}
 }
 
-char *info(char **help) {
-	return "reads files created with the Dump command";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "read files created with the 'Dump' command"
+};
 

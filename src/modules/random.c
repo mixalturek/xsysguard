@@ -225,7 +225,7 @@ static double get_random(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	random_t *random;
 
 	if (n > 1)
@@ -244,7 +244,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_init_func(init_random);
 }
 
-char *info(char **help) {
-	return "random number generator";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "random number generator"
+};
 

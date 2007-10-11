@@ -256,7 +256,7 @@ static double get_tm_isdst(void *arg) {
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
 	bool local = TRUE;
 
 	if (n > 1)
@@ -320,7 +320,11 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_init_func(init);
 }
 
-char *info(char **help) {
-	return "date and time functions";
+static char *help(void) {
+	return NULL;
 }
+
+xsg_module_t xsg_module = {
+	parse, help, "date and time functions"
+};
 

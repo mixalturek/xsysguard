@@ -33,6 +33,7 @@
 typedef struct {
 	char *name;
 	char *file;
+	xsg_module_t *module;
 } module_t;
 
 /******************************************************************************/
@@ -108,6 +109,7 @@ void xsg_modules_init(void) {
 					module_t *m = xsg_new(module_t, 1);
 					m->name = name;
 					m->file = xsg_build_filename(*p, filename, NULL);
+					m->module = NULL;
 					modules_list_insert_sorted(m);
 					xsg_message("Found module in \"%s\": \"%s\"", *p, filename);
 				}
@@ -120,11 +122,49 @@ void xsg_modules_init(void) {
 
 /******************************************************************************/
 
+static xsg_module_t *module_load(module_t *m) {
+	void *handle;
+	xsg_module_t *module;
+
+	if (m == NULL)
+		xsg_error("Cannot load module NULL");
+
+	if (m->file == NULL)
+		xsg_error("Cannot load module: file is NULL");
+
+	if (m->name == NULL)
+		xsg_error("Cannot load module: name is NULL");
+
+	if (m->module != NULL)
+		return m->module;
+
+	handle = dlopen(m->file, RTLD_NOW);
+
+	if (!handle)
+		xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+	module = (xsg_module_t *) dlsym(handle, "xsg_module");
+
+	if (!module)
+		xsg_error("Cannot load module %s: %s", m->name, dlerror());
+
+	if (module->parse == NULL)
+		xsg_error("Cannot load module %s: parse function is NULL");
+
+	if (module->help == NULL)
+		xsg_error("Cannot load module %s: help function is NULL");
+
+	if (module->info == NULL)
+		xsg_error("Cannot load module %s: info char* is NULL");
+
+	return module;
+}
+
+/******************************************************************************/
+
 bool xsg_modules_parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
-	xsg_modules_parse_t *parse;
-	char *filename = NULL;
-	void *module;
 	module_t *m = NULL;
+	xsg_module_t *module;
 	xsg_list_t *l;
 	uint32_t i;
 
@@ -133,24 +173,16 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t **var, double (**num)(void *),
 
 	for (l = modules_list; l; l = l->next) {
 		m = l->data;
-		if (xsg_conf_find_command(m->name)) {
-			filename = m->file;
+		if (xsg_conf_find_command(m->name))
 			break;
-		}
+		else
+			m = NULL;
 	}
 
-	if (!filename)
+	if (!m)
 		return FALSE;
 
-	module = dlopen(filename, RTLD_NOW);
-
-	if (!module)
-		xsg_error("Cannot load module %s: %s", m->name, dlerror());
-
-	parse = (xsg_modules_parse_t *) dlsym(module, "parse");
-
-	if (!parse)
-		xsg_error("Cannot load module %s: %s", m->name, dlerror());
+	module = module_load(m);
 
 	for (i = 0; i < n; i++) {
 		num[i] = NULL;
@@ -158,14 +190,14 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t **var, double (**num)(void *),
 		arg[i] = NULL;
 	}
 
-	parse(update, var, num, str, arg, n);
+	module->parse(update, var, num, str, arg, n);
 
 	for (i = 0; i < n; i++) {
 		if ((num[i] == NULL) && (str[i] == NULL)) {
 			if (n == 1)
-				xsg_error("Module %s must set str[0] != NULL or num[0] != NULL", m->name); // TODO xsg_conf_error
+				xsg_conf_error("Module %s must set str[0] != NULL or num[0] != NULL", m->name);
 			else
-				xsg_error("Module %s does not support past variables for this configuration", m->name); // TODO xsg_conf_error
+				xsg_conf_error("Module %s does not support past variables for this configuration", m->name);
 		}
 	}
 
@@ -173,45 +205,23 @@ bool xsg_modules_parse(uint64_t update, xsg_var_t **var, double (**num)(void *),
 }
 
 void xsg_modules_list() {
-	xsg_modules_info_t *info;
-	xsg_modules_parse_t *parse;
-	char *filename;
-	void *module;
-	module_t *m = NULL;
 	xsg_list_t *l;
+	xsg_module_t *module;
 
 	if (!modules_list)
 		xsg_modules_init();
 
 	for (l = modules_list; l; l = l->next) {
-		m = l->data;
-		filename = m->file;
+		module_t *m = l->data;
 
-		module = dlopen(filename, RTLD_NOW);
+		module = module_load(m);
 
-		if (!module) {
-			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
-			continue;
-		}
-
-		info = (xsg_modules_info_t *) dlsym(module, "info");
-		parse = (xsg_modules_parse_t *) dlsym(module, "parse");
-
-		if (!parse) {
-			xsg_warning("Cannot load module %s: %s", m->name, dlerror());
-			continue;
-		}
-
-		if (info)
-			printf("%s:\t %s\n", m->name, info(NULL));
-		else
-			printf("%s:\n", m->name);
+		printf("%-12s %s\n", m->name, module->info);
 	}
 }
 
-char *xsg_modules_info(const char *name, char **help) {
-	xsg_modules_info_t *info;
-	void *module;
+char *xsg_modules_help(const char *name) {
+	xsg_module_t *module;
 	xsg_list_t *l;
 
 	if (!modules_list)
@@ -223,17 +233,32 @@ char *xsg_modules_info(const char *name, char **help) {
 		if (strcmp(m->name, name) != 0)
 			continue;
 
-		module = dlopen(m->file, RTLD_NOW);
+		module = module_load(m);
 
-		if (!module)
-			xsg_error("Cannot load module %s: %s", m->name, dlerror());
+		return module->help();
+	}
 
-		info = (xsg_modules_info_t *) dlsym(module, "info");
+	xsg_error("Cannot find module: %s", name);
 
-		if (!info)
-			xsg_error("Cannot load module %s: %s", m->name, dlerror());
+	return NULL;
+}
 
-		return info(help);
+char *xsg_modules_info(const char *name) {
+	xsg_module_t *module;
+	xsg_list_t *l;
+
+	if (!modules_list)
+		xsg_modules_init();
+
+	for (l = modules_list; l; l = l->next) {
+		module_t *m = l->data;
+
+		if (strcmp(m->name, name) != 0)
+			continue;
+
+		module = module_load(m);
+
+		return module->info;
 	}
 
 	xsg_error("Cannot find module: %s", name);
