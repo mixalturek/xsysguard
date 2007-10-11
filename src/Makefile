@@ -160,5 +160,8 @@ install: all
 	$(INSTALL_DATA) -D include/xsysguard.h $(DESTDIR)$(includedir)/xsysguard.h
 	$(MAKE) -C modules install
 
-.PHONY: all clean distclean install modules
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
+
+.PHONY: all clean distclean install install-strip modules
 
