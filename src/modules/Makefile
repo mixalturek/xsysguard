@@ -68,7 +68,7 @@ ALL_LDFLAGS := -fPIC -shared $(LDFLAGS)
 
 ################################################################################
 
-MODULES := $(patsubst %.Makefile,%.Module,$(wildcard *.Makefile))
+MODULES := $(patsubst %.mk,%.Module,$(wildcard *.mk))
 
 ################################################################################
 
@@ -86,13 +86,16 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(MODULE_DIR)
 	$(INSTALL_DATA) -t $(DESTDIR)$(MODULE_DIR) $(wildcard *.so)
 
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
+
 endif
 
-%.Module:%.Makefile
+%.Module:%.mk
 	@-$(MAKE) --no-print-directory --file=$^
 
 %.so: %.c
 	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS)
 
-.PHONY: all clean distclean install
+.PHONY: all clean distclean install install-strip
 
