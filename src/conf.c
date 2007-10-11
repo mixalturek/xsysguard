@@ -505,7 +505,7 @@ uint32_t xsg_conf_read_color() {
 /******************************************************************************/
 
 static char read_escape() {
-	char c;
+	unsigned char c;
 	int  n;
 
 	switch (ptr[0]) {
