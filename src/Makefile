@@ -72,6 +72,7 @@ COMMON_SRC     += include/xsysguard.h types.h
 COMMON_SRC     += main.c main.h 
 COMMON_SRC     += conf.c conf.h
 COMMON_SRC     += modules.c modules.h
+COMMON_SRC     += mem.c mem.h
 COMMON_SRC     += rpn.c rpn.h
 COMMON_SRC     += scanf.c scanf.h
 COMMON_SRC     += compat.c utils.c string.c list.c hash.c buffer.c

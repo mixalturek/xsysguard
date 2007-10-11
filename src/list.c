@@ -30,66 +30,7 @@
 
 #include <xsysguard.h>
 
-/******************************************************************************/
-
-typedef unsigned bitmask_t;
-
-typedef struct _mem_t {
-	xsg_list_t *nodes;
-	bitmask_t free_nodes;
-} mem_t;
-
-/******************************************************************************/
-
-static mem_t *mem = NULL;
-static unsigned mem_len = 0;
-
-/******************************************************************************/
-
-static xsg_list_t *new_node(void) {
-	unsigned i;
-	mem_t *m;
-
-	for (i = 0; i < mem_len; i++) {
-		m = mem + i;
-		if (m->free_nodes != 0) {
-			unsigned bit;
-
-			for (bit = 0; bit < sizeof(bitmask_t) * 8; bit++) {
-				if (m->free_nodes & (1 << bit)) {
-					m->free_nodes &= ~(1 << bit);
-					return m->nodes + bit;
-				}
-			}
-		}
-	}
-
-	mem_len++;
-	mem = xsg_realloc(mem, sizeof(mem_t) * mem_len);
-
-	m = mem + mem_len - 1;
-
-	m->nodes = xsg_new(xsg_list_t, sizeof(bitmask_t) * 8);
-	m->free_nodes = (bitmask_t)-1;
-
-	m->free_nodes &= ~1;
-	return m->nodes;
-}
-
-static void free_node(xsg_list_t *node) {
-	unsigned i;
-	mem_t *m;
-
-	for (i = 0; i < mem_len; i++) {
-		m = mem + i;
-		if ((m->nodes <= node) && (node <= (m->nodes + sizeof(bitmask_t) * 8))) {
-			m->free_nodes |= (1 << (node - m->nodes));
-			return;
-		}
-	}
-
-	xsg_error("free_node: cannot free node");
-}
+#include "mem.h"
 
 /******************************************************************************/
 
@@ -130,7 +71,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 	xsg_list_t *last;
 
-	new_list = new_node();
+	new_list = xsg_mem_new(xsg_list_t);
 	new_list->data = data;
 	new_list->next = NULL;
 
@@ -148,7 +89,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 
-	new_list = new_node();
+	new_list = xsg_mem_new(xsg_list_t);
 	new_list->data = data;
 	new_list->next = list;
 
@@ -177,7 +118,7 @@ xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position) {
 	if (!tmp_list)
 		return xsg_list_append(list, data);
 
-	new_list = new_node();
+	new_list = xsg_mem_new(xsg_list_t);
 	new_list->data = data;
 	new_list->prev = tmp_list->prev;
 	if (tmp_list->prev)
@@ -200,7 +141,7 @@ xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(con
 		return list;
 
 	if (!list) {
-		new_list = new_node();
+		new_list = xsg_mem_new(xsg_list_t);
 		new_list->data = data;
 		new_list->next = NULL;
 		new_list->prev = NULL;
@@ -214,7 +155,7 @@ xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(con
 		cmp = func(data, tmp_list->data);
 	}
 
-	new_list = new_node();
+	new_list = xsg_mem_new(xsg_list_t);
 	new_list->data = data;
 	new_list->next = NULL;
 	new_list->prev = NULL;
@@ -253,7 +194,7 @@ xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
 				tmp->next->prev = tmp->prev;
 			if (list == tmp)
 				list = list->next;
-			free_node(tmp);
+			xsg_mem_free(tmp);
 			break;
 		}
 	}
@@ -265,7 +206,7 @@ void xsg_list_free(xsg_list_t *list) {
 
 	while (list != NULL) {
 		next = list->next;
-		free_node(list);
+		xsg_mem_free(list);
 		list = next;
 	}
 }
@@ -280,7 +221,7 @@ xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link) {
 		if (link == list)
 			list = list->next;
 
-		free_node(link);
+		xsg_mem_free(link);
 	}
 
 	return list;

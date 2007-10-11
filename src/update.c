@@ -21,6 +21,7 @@
 #include <xsysguard.h>
 
 #include "update.h"
+#include "mem.h"
 
 /******************************************************************************/
 
@@ -30,67 +31,6 @@ typedef struct _rect_t {
 	int width;
 	int height;
 } rect_t;
-
-/******************************************************************************/
-
-typedef unsigned bitmask_t;
-
-typedef struct _mem_t {
-	rect_t *rects;
-	bitmask_t free_rects;
-} mem_t;
-
-/******************************************************************************/
-
-static mem_t *mem = NULL;
-static unsigned mem_len = 0;
-
-/******************************************************************************/
-
-static rect_t *new_rect(void) {
-	unsigned i;
-	mem_t *m;
-
-	for (i = 0; i < mem_len; i++) {
-		m = mem + i;
-		if (m->free_rects != 0) {
-			unsigned bit;
-
-			for (bit = 0; bit < sizeof(bitmask_t) * 8; bit++) {
-				if (m->free_rects & (1 << bit)) {
-					m->free_rects &= ~(1 << bit);
-					return m->rects + bit;
-				}
-			}
-		}
-	}
-
-	mem_len++;
-	mem = xsg_realloc(mem, sizeof(mem_t) * mem_len);
-
-	m = mem + mem_len - 1;
-
-	m->rects = xsg_new(rect_t, sizeof(bitmask_t) * 8);
-	m->free_rects = (bitmask_t)-1;
-
-	m->free_rects &= ~1;
-	return m->rects;
-}
-
-static void free_rect(rect_t *rect) {
-	unsigned i;
-	mem_t *m;
-
-	for (i = 0; i < mem_len; i++) {
-		m = mem + i;
-		if ((m->rects <= rect) && (rect <= (m->rects + sizeof(bitmask_t) * 8))) {
-			m->free_rects |= (1 << (rect - m->rects));
-			return;
-		}
-	}
-
-	xsg_error("free_rect: cannot free rect");
-}
 
 /******************************************************************************/
 
@@ -122,7 +62,7 @@ xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int
 		y_overlap = !((y2_2 <= y1_1) || (y2_1 <= y1_2));
 
 		if (x_overlap && y_overlap) {
-			free_rect(rect);
+			xsg_mem_free(rect);
 			updates = xsg_list_delete_link(updates, l);
 			x = MIN(x1_1, x1_2);
 			y = MIN(y1_1, y1_2);
@@ -132,7 +72,7 @@ xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int
 		}
 	}
 
-	rect = new_rect();
+	rect = xsg_mem_new(rect_t);
 	rect->xoffset = x;
 	rect->yoffset = y;
 	rect->width = w;
@@ -168,7 +108,7 @@ void xsg_update_free(xsg_list_t *updates) {
 	xsg_list_t *l;
 
 	for (l = updates; l; l = l->next) {
-		free_rect(l->data);
+		xsg_mem_free(l->data);
 	}
 
 	xsg_list_free(updates);

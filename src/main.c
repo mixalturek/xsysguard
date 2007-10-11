@@ -27,16 +27,27 @@
 
 #include "main.h"
 #include "var.h"
+#include "mem.h"
 
 /******************************************************************************/
 
-static xsg_list_t *init_list = NULL;
-static xsg_list_t *update_list = NULL;
-static xsg_list_t *shutdown_list = NULL;
+typedef struct flist_t flist_t;
+
+struct flist_t {
+	void (*func)(void);
+	flist_t *next;
+};
+
+/******************************************************************************/
+
+static flist_t *init_list = NULL;
+static flist_t *update_list = NULL;
+static flist_t *shutdown_list = NULL;
+static flist_t *signal_handler_list = NULL;
+static flist_t *signal_cleanup_list = NULL;
+
 static xsg_list_t *poll_list = NULL;
 static xsg_list_t *timeout_list = NULL;
-static xsg_list_t *signal_handler_list = NULL;
-static xsg_list_t *signal_cleanup_list = NULL;
 
 static uint64_t tick = 0;
 static uint64_t interval = 1000;
@@ -64,62 +75,74 @@ uint64_t xsg_main_get_tick(void) {
 
 /******************************************************************************/
 
-void xsg_main_add_init_func(void (*func)(void)) {
-	xsg_list_t *l;
+static flist_t *add_func(flist_t *list, void (*func)(void)) {
+	flist_t *tmp;
 
 	if (unlikely(func == NULL))
-		return;
+		return list;
 
-	for (l = init_list; l; l = l->next)
-		if (unlikely(func == (void (*)(void)) l->data))
-			return;
+	for (tmp = list; tmp; tmp = tmp->next)
+		if (unlikely(func == tmp->func))
+			return list;
 
-	init_list = xsg_list_prepend(init_list, (void *) func);
+	tmp = xsg_mem_new(flist_t);
+	tmp->func = func;
+	tmp->next = list;
+
+	return tmp;
+}
+
+static flist_t *remove_func(flist_t *list, void (*func)(void)) {
+	flist_t *tmp, *prev = NULL;
+
+	if (unlikely(func == NULL))
+		return list;
+
+	tmp = list;
+	while (tmp) {
+		if (tmp->func == func) {
+			if (prev)
+				prev->next = tmp->next;
+			else
+				list = tmp->next;
+			xsg_mem_free(tmp);
+			break;
+		}
+		prev = tmp;
+		tmp = prev->next;
+	}
+
+	return list;
+}
+
+/******************************************************************************/
+
+void xsg_main_add_init_func(void (*func)(void)) {
+	init_list = add_func(init_list, func);
 }
 
 void xsg_main_remove_init_func(void (*func)(void)) {
-	if (likely(func != NULL))
-		init_list = xsg_list_remove(init_list, (void *) func);
+	init_list = remove_func(init_list, func);
 }
 
 /******************************************************************************/
 
 void xsg_main_add_update_func(void (*func)(uint64_t)) {
-	xsg_list_t *l;
-
-	if (unlikely(func == NULL))
-		return;
-
-	for (l = update_list; l; l = l->next)
-		if (unlikely(func == (void (*)(uint64_t)) l->data))
-			return;
-
-	update_list = xsg_list_prepend(update_list, (void *) func);
+	update_list = add_func(update_list, (void (*)(void)) func);
 }
 
 void xsg_main_remove_update_func(void (*func)(uint64_t)) {
-	if (likely(func != NULL))
-		update_list = xsg_list_remove(update_list, (void *) func);
+	update_list = remove_func(update_list, (void (*)(void)) func);
 }
 
 /******************************************************************************/
 
 void xsg_main_add_shutdown_func(void (*func)(void)) {
-	xsg_list_t *l;
-
-	if (unlikely(func == NULL))
-		return;
-
-	for (l = shutdown_list; l; l = l->next)
-		if (unlikely(func == (void (*)(void)) l->data))
-			return;
-
-	shutdown_list = xsg_list_prepend(shutdown_list, (void *) func);
+	shutdown_list = add_func(shutdown_list, func);
 }
 
 void xsg_main_remove_shutdown_func(void (*func)(void)) {
-	if (likely(func != NULL))
-		shutdown_list = xsg_list_remove(shutdown_list, (void *) func);
+	shutdown_list = remove_func(shutdown_list, func);
 }
 
 /******************************************************************************/
@@ -165,41 +188,21 @@ void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
 /******************************************************************************/
 
 void xsg_main_add_signal_handler(void (*func)(int signum)) {
-	xsg_list_t *l;
-
-	if (unlikely(func == NULL))
-		return;
-
-	for (l = signal_handler_list; l; l = l->next)
-		if (unlikely(func == (void (*)(int)) l->data))
-			return;
-
-	signal_handler_list = xsg_list_prepend(signal_handler_list, (void *) func);
+	signal_handler_list = add_func(signal_handler_list, (void (*)(void)) func);
 }
 
 void xsg_main_remove_signal_handler(void (*func)(int signum)) {
-	if (likely(func != NULL))
-		signal_handler_list = xsg_list_remove(signal_handler_list, (void *) func);
+	signal_handler_list = remove_func(signal_handler_list, (void (*)(void)) func);
 }
 
 /******************************************************************************/
 
 void xsg_main_add_signal_cleanup(void (*func)(void)) {
-	xsg_list_t *l;
-
-	if (unlikely(func == NULL))
-		return;
-
-	for (l = signal_cleanup_list; l; l = l->next)
-		if (unlikely(func == (void (*)(void)) l->data))
-			return;
-
-	signal_cleanup_list = xsg_list_prepend(signal_cleanup_list, (void *) func);
+	signal_cleanup_list = add_func(signal_cleanup_list, func);
 }
 
 void xsg_main_remove_signal_cleanup(void (*func)(void)) {
-	if (likely(func != NULL))
-		signal_cleanup_list = xsg_list_remove(signal_cleanup_list, (void *) func);
+	signal_cleanup_list = remove_func(signal_cleanup_list, func);
 }
 
 /******************************************************************************/
@@ -221,6 +224,7 @@ static void loop(uint64_t num) {
 	fd_set except_fds;
 	int fd_count, fd_max;
 	xsg_list_t *l;
+	flist_t *fl;
 
 	time_out.tv_sec = interval / 1000;
 	time_out.tv_usec = (interval % 1000) * 1000;
@@ -235,8 +239,8 @@ static void loop(uint64_t num) {
 
 		xsg_debug("Tick %"PRIu64, tick);
 
-		for (l = update_list; l; l = l->next) {
-			void (*func)(uint64_t) = (void (*)(uint64_t)) l->data;
+		for (fl = update_list; fl; fl = fl->next) {
+			void (*func)(uint64_t) = (void (*)(uint64_t)) fl->func;
 			func(tick);
 		}
 
@@ -255,8 +259,8 @@ static void loop(uint64_t num) {
 			if (last_received_signum != 0) {
 				last_received_signum = 0; // FIXME atomic?
 				xsg_message("Running signal cleanup functions...");
-				for (l = signal_cleanup_list; l; l = l->next) {
-					void (*func)(void) = (void (*)(void)) l->data;
+				for (fl = signal_cleanup_list; fl; fl = fl->next) {
+					void (*func)(void) = (void (*)(void)) fl->func;
 					func();
 				}
 			}
@@ -358,7 +362,7 @@ static void loop(uint64_t num) {
 }
 
 static void shutdown(void) {
-	xsg_list_t *l;
+	flist_t *fl;
 	void (*func)(void);
 	static bool shutdown_active = FALSE;
 
@@ -369,8 +373,8 @@ static void shutdown(void) {
 
 	xsg_message("Running shutdown functions");
 
-	for (l = shutdown_list; l; l = l->next) {
-		func = (void (*)(void)) l->data;
+	for (fl = shutdown_list; fl; fl = fl->next) {
+		func = (void (*)(void)) fl->func;
 		func();
 	}
 
@@ -378,7 +382,7 @@ static void shutdown(void) {
 }
 
 static void signal_handler(int signum) {
-	xsg_list_t *l;
+	flist_t *fl;
 
 	last_received_signum = signum;
 
@@ -387,8 +391,8 @@ static void signal_handler(int signum) {
 
 	xsg_message("Received signal %d: %s", signum, xsg_strsignal(signum));
 
-	for (l = signal_handler_list; l; l = l->next) {
-		void (*func)(int) = (void (*)(int)) l->data;
+	for (fl = signal_handler_list; fl; fl = fl->next) {
+		void (*func)(int) = (void (*)(int)) fl->func;
 		func(signum);
 	}
 }
@@ -405,7 +409,7 @@ static int ssigaction(int signum, const struct sigaction *act, struct sigaction 
 }
 
 void xsg_main_loop(uint64_t num) {
-	xsg_list_t *l;
+	flist_t *fl;
 	void (*func)(void);
 	struct sigaction action;
 
@@ -432,8 +436,8 @@ void xsg_main_loop(uint64_t num) {
 
 	xsg_message("Running init functions");
 
-	for (l = init_list; l; l = l->next) {
-		func = (void (*)(void)) l->data;
+	for (fl = init_list; fl; fl = fl->next) {
+		func = (void (*)(void)) fl->func;
 		func();
 	}
 
