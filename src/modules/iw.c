@@ -48,13 +48,9 @@ static int handler(int skfd, char *ifname, char *args[], int count) {
 	return 0;
 }
 
-static xsg_list_t *get_device_list(void) {
-	if (device_list != NULL)
-		return device_list;
-
-	iw_enum_devices(skfd, handler, NULL, 0);
-
-	return device_list;
+static void get_device_list(void) {
+	if (device_list == NULL)
+		iw_enum_devices(skfd, handler, NULL, 0);
 }
 
 /******************************************************************************/
@@ -583,12 +579,15 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	if (strcmp(ifname, "*") == 0) {
 		xsg_free(ifname);
 
+		init();
 		get_device_list();
 
-		if (device_list == NULL)
+		if (device_list == NULL) {
 			xsg_conf_warning("No devices with wireless extensions found");
-
-		ifname = "";
+			ifname = "";
+		} else {
+			ifname = device_list->data;
+		}
 	}
 
 	arg[0] = (void *) ifname;
