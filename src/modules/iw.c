@@ -18,11 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- * TODO: wireless_scan
- *
- */
-
 #include <xsysguard.h>
 #include <math.h>
 #include <iwlib.h>
@@ -725,7 +720,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_shutdown_func(shut_down);
 }
 
-static char *help(void) {
+static const char *help(void) {
 	static xsg_string_t *string = NULL;
 	xsg_list_t *l;
 
@@ -736,6 +731,8 @@ static char *help(void) {
 
 	if (string == NULL)
 		string = xsg_string_new(NULL);
+	else
+		string = xsg_string_truncate(string, 0);;
 
 	get_device_list();
 
@@ -752,48 +749,48 @@ static char *help(void) {
 	for (l = device_list; l; l = l->next) {
 		char *ifname = (char *) l->data;
 
-		xsg_string_append_printf(string, "S iw:%s:config:name                         %s\n", ifname, get_name(ifname));
-		xsg_string_append_printf(string, "N iw:%s:config:nwid                         %.0f\n", ifname, get_nwid(ifname));
-		xsg_string_append_printf(string, "N iw:%s:config:freq:num                     %.0f\n", ifname, get_freq_number(ifname));
-		xsg_string_append_printf(string, "S iw:%s:config:freq:str                     %s\n", ifname, get_freq_string(ifname));
-		xsg_string_append_printf(string, "N iw:%s:config:channel                      %.0f\n", ifname, get_channel(ifname));
-		xsg_string_append_printf(string, "S iw:%s:config:key                          %s\n", ifname, get_key(ifname));
-		xsg_string_append_printf(string, "N iw:%s:config:keyid                        %.0f\n", ifname, get_keyid(ifname));
-		xsg_string_append_printf(string, "S iw:%s:config:essid                        %s\n", ifname, get_essid(ifname));
-		xsg_string_append_printf(string, "N iw:%s:config:mode:num                     %.0f\n", ifname, get_mode_number(ifname));
-		xsg_string_append_printf(string, "S iw:%s:config:mode:str                     %s\n", ifname, get_mode_string(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:sensitivity                    %.0f\n", ifname, get_sens(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:nickname                       %s\n", ifname, get_nickname(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:access_point                   %s\n", ifname, get_ap(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:bitrate:num                    %.0f\n", ifname, get_bitrate_number(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:bitrate:str                    %s\n", ifname, get_bitrate_string(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:rts:num                        %.0f\n", ifname, get_rts_number(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:rts:str                        %s\n", ifname, get_rts_string(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:fragment:num                   %.0f\n", ifname, get_frag_number(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:fragment:str                   %s\n", ifname, get_frag_string(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:power_management               %s\n", ifname, get_power_management(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:txpower:dbm                    %.0f\n", ifname, get_txpower_dbm(ifname));
-		xsg_string_append_printf(string, "N iw:%s:info:txpower:mw                     %.2f\n", ifname, get_txpower_mw(ifname));
-		xsg_string_append_printf(string, "S iw:%s:info:retry                          %s\n", ifname, get_retry(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:quality:quality               %.0f\n", ifname, get_stats_quality_quality(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:quality:signal:dbm            %.0f\n", ifname, get_stats_quality_signal_dbm(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:quality:signal:mw             %.6f\n", ifname, get_stats_quality_signal_mw(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:quality:noise:dbm             %.0f\n", ifname, get_stats_quality_noise_dbm(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:quality:noise:mw              %.6f\n", ifname, get_stats_quality_noise_mw(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:discarded:nwid                %.0f\n", ifname, get_stats_discarded_nwid(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:discarded:code                %.0f\n", ifname, get_stats_discarded_code(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:discarded:fragment            %.0f\n", ifname, get_stats_discarded_fragment(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:discarded:retries             %.0f\n", ifname, get_stats_discarded_retries(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:discarded:misc                %.0f\n", ifname, get_stats_discarded_misc(ifname));
-		xsg_string_append_printf(string, "N iw:%s:stats:missed:beacon                 %.0f\n", ifname, get_stats_missed_beacon(ifname));
-		xsg_string_append_printf(string, "N iw:%s:range:sensitivity                   %.0f\n", ifname, get_range_sensitivity(ifname));
-		xsg_string_append_printf(string, "N iw:%s:range:max_quality:quality           %.0f\n", ifname, get_range_max_quality_quality(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "config:name", get_name(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "config:nwid", get_nwid(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "config:freq:num", get_freq_number(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "config:freq:str", get_freq_string(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "config:channel", get_channel(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "config:key", get_key(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "config:keyid", get_keyid(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "config:essid", get_essid(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "config:mode:num", get_mode_number(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "config:mode:str", get_mode_string(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "info:sensitivity", get_sens(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:nickname", get_nickname(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:access_point", get_ap(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "info:bitrate:num", get_bitrate_number(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:bitrate:str", get_bitrate_string(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "info:rts:num", get_rts_number(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:rts:str", get_rts_string(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "info:fragment:num", get_frag_number(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:fragment:str", get_frag_string(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:power_management", get_power_management(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "info:txpower:dbm", get_txpower_dbm(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.2f\n", xsg_module.name, ifname, "info:txpower:mw", get_txpower_mw(ifname));
+		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",   xsg_module.name, ifname, "info:retry", get_retry(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:quality:quality", get_stats_quality_quality(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:quality:signal:dbm", get_stats_quality_signal_dbm(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n", xsg_module.name, ifname, "stats:quality:signal:mw", get_stats_quality_signal_mw(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:quality:noise:dbm", get_stats_quality_noise_dbm(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n", xsg_module.name, ifname, "stats:quality:noise:mw", get_stats_quality_noise_mw(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:discarded:nwid", get_stats_discarded_nwid(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:discarded:code", get_stats_discarded_code(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:discarded:fragment", get_stats_discarded_fragment(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:discarded:retries", get_stats_discarded_retries(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:discarded:misc", get_stats_discarded_misc(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "stats:missed:beacon", get_stats_missed_beacon(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "range:sensitivity", get_range_sensitivity(ifname));
+		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, ifname, "range:max_quality:quality", get_range_max_quality_quality(ifname));
 	}
 
 	return string->str;
 }
 
 xsg_module_t xsg_module = {
-	parse, help, "libiw (wireless extension library) <http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html>"
+	parse, help, "libiw (wireless extension library)"
 };
 
