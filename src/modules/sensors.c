@@ -134,7 +134,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_conf_error("Cannot find chip: %s", chip_name_prefix);
 }
 
-static char *help(void) {
+static const char *help(void) {
 	static xsg_string_t *string = NULL;
 	const sensors_chip_name *chip_name;
 	int chip_nr = 0;
@@ -142,10 +142,10 @@ static char *help(void) {
 	if (!init())
 		return NULL;
 
-	if (!string)
-		string = xsg_string_new("Available features:\n");
+	if (string == NULL)
+		string = xsg_string_new(NULL);
 	else
-		return string->str;
+		string = xsg_string_truncate(string, 0);;
 
 	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
 		const sensors_feature_data *feature_data;
@@ -160,7 +160,7 @@ static char *help(void) {
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
 
-			xsg_string_append_printf(string, "%s:%-32s %6.2f\n", chip_name->prefix, feature_data->name, value);
+			xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f\n", xsg_module.name, chip_name->prefix, feature_data->name, value);
 		}
 	}
 
@@ -168,6 +168,6 @@ static char *help(void) {
 }
 
 xsg_module_t xsg_module = {
-	parse, help, "libsensors (lm-sensors) <http://www.lm-sensors.org>"
+	parse, help, "libsensors (lm-sensors - Linux hardware monitoring)"
 };
 
