@@ -863,8 +863,18 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	daemon_var_count++;
 }
 
-static char *help(void) {
-	return NULL;
+static const char *help(void) {
+	static xsg_string_t *string = NULL;
+
+	if (string == NULL)
+		string = xsg_string_new(NULL);
+	else
+		string = xsg_string_truncate(string, 0);
+
+	xsg_string_append_printf(string, "N %s:exec:<name>:num:<variable>\n", xsg_module.name);
+	xsg_string_append_printf(string, "S %s:exec:<name>:str:<variable>\n", xsg_module.name);
+
+	return string->str;
 }
 
 xsg_module_t xsg_module = {
