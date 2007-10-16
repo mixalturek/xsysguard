@@ -153,17 +153,6 @@ void xsg_main_add_timeout(xsg_main_timeout_t *timeout) XSG_API;
 void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) XSG_API;
 
 /******************************************************************************
- * buffer.c
- ******************************************************************************/
-
-typedef struct _xsg_buffer_t xsg_buffer_t;
-
-xsg_buffer_t *xsg_buffer_new(void) XSG_API;
-void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
-void xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len) XSG_API;
-void xsg_buffer_clear(xsg_buffer_t *buffer) XSG_API;
-
-/******************************************************************************
  * list.c
  ******************************************************************************/
 
@@ -242,6 +231,18 @@ void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table) XSG_API;
 void xsg_hash_table_destroy(xsg_hash_table_t *hash_table) XSG_API;
 unsigned int xsg_hash_table_size(xsg_hash_table_t *hash_table) XSG_API;
 void xsg_hash_table_foreach(xsg_hash_table_t *hash_table, void (*func)(void *key, void *value, void *data), void *data) XSG_API;
+
+/******************************************************************************
+ * buffer.c
+ ******************************************************************************/
+
+typedef struct _xsg_buffer_t xsg_buffer_t;
+
+xsg_buffer_t *xsg_buffer_new(void) XSG_API;
+void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
+void xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len) XSG_API;
+void xsg_buffer_clear(xsg_buffer_t *buffer) XSG_API;
+void xsg_buffer_help(xsg_string_t *string, const char *module_name, const char *opt) XSG_API;
 
 /******************************************************************************
  * utils.c

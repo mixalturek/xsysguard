@@ -463,3 +463,19 @@ void xsg_buffer_clear(xsg_buffer_t *buffer) {
 	buffer->line_number = 1;
 }
 
+/******************************************************************************/
+
+static void xsg_buffer_help_helper(xsg_string_t *string, const char *module_name, const char *opt, const char *s) {
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name, opt, s, "complete");
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name, opt, s, "sscanf:<format>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", module_name, opt, s, "nscanf:<format>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", module_name, opt, s, "cscanf:<format>");
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name, opt, s, "grep:<pattern>:<index>");
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name, opt, s, "igrep:<pattern>:<index>");
+}
+
+void xsg_buffer_help(xsg_string_t *string, const char *module_name, const char *opt) {
+	xsg_buffer_help_helper(string, module_name, opt, "read");
+	xsg_buffer_help_helper(string, module_name, opt, "readline:<number>");
+}
+
