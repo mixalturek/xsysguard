@@ -320,7 +320,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_init_func(init);
 }
 
-static char *help(void) {
+static const char *help(void) {
 	static xsg_string_t *string = NULL;
 	bool local;
 
@@ -333,24 +333,24 @@ static char *help(void) {
 		char *format;
 
 		if (local) {
-			xsg_string_append_printf(string, "\nS time:local:strftime:<format>\n\n");
-			format = "N time:local:%-20s %.0f\n";
+			xsg_string_append_printf(string, "\nS %s:local:strftime:<format>\n\n", xsg_module.name);
+			format = "N %s:local:%-20s %.0f\n";
 		} else {
-			xsg_string_append_printf(string, "S time:gm:strftime:<format>\n\n");
-			format = "N time:gm:%-23s %.0f\n";
+			xsg_string_append_printf(string, "S %s:gm:strftime:<format>\n\n", xsg_module.name);
+			format = "N %s:gm:%-23s %.0f\n";
 		}
 
-		xsg_string_append_printf(string, format, "sec", get_sec(&local));
-		xsg_string_append_printf(string, format, "usec", get_usec(&local));
-		xsg_string_append_printf(string, format, "tm_sec", get_tm_sec(&local));
-		xsg_string_append_printf(string, format, "tm_min", get_tm_min(&local));
-		xsg_string_append_printf(string, format, "tm_hour", get_tm_hour(&local));
-		xsg_string_append_printf(string, format, "tm_mday", get_tm_mday(&local));
-		xsg_string_append_printf(string, format, "tm_mon", get_tm_mon(&local));
-		xsg_string_append_printf(string, format, "tm_year", get_tm_year(&local));
-		xsg_string_append_printf(string, format, "tm_wday", get_tm_wday(&local));
-		xsg_string_append_printf(string, format, "tm_yday", get_tm_yday(&local));
-		xsg_string_append_printf(string, format, "tm_isdst", get_tm_isdst(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "sec", get_sec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "usec", get_usec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_sec", get_tm_sec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_min", get_tm_min(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_hour", get_tm_hour(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_mday", get_tm_mday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_mon", get_tm_mon(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_year", get_tm_year(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_wday", get_tm_wday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_yday", get_tm_yday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name, "tm_isdst", get_tm_isdst(&local));
 	}
 
 	return string->str;
