@@ -147,8 +147,17 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_update_func(update_files);
 }
 
-static char *help(void) {
-	return NULL;
+static const char *help(void) {
+	static xsg_string_t *string = NULL;
+
+	if (string == NULL)
+		string = xsg_string_new(NULL);
+	else
+		string = xsg_string_truncate(string, 0);
+
+	xsg_buffer_help(string, xsg_module.name, "<filename>");
+
+	return string->str;
 }
 
 xsg_module_t xsg_module = {
