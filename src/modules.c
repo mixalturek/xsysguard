@@ -222,7 +222,7 @@ void xsg_modules_list() {
 	}
 }
 
-char *xsg_modules_help(const char *name) {
+const char *xsg_modules_help(const char *name) {
 	xsg_module_t *module;
 	xsg_list_t *l;
 
@@ -245,7 +245,7 @@ char *xsg_modules_help(const char *name) {
 	return NULL;
 }
 
-char *xsg_modules_info(const char *name) {
+const char *xsg_modules_info(const char *name) {
 	xsg_module_t *module;
 	xsg_list_t *l;
 

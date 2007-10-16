@@ -558,7 +558,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (mhelp != NULL) {
-		char *info, *help;
+		const char *info, *help;
 
 		info = xsg_modules_info(mhelp);
 		help = xsg_modules_help(mhelp);

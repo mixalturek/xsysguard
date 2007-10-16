@@ -77,9 +77,9 @@ typedef struct _xsg_var_t xsg_var_t;
 
 typedef struct _xsg_module_t {
 	void (*parse)(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
-	char *(*help)(void);
-	char *info;
-	char *name;
+	const char *(*help)(void);
+	const char *info;
+	char *name; // changed by xsysguard
 } xsg_module_t;
 
 extern xsg_module_t xsg_module XSG_API;
