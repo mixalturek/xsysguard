@@ -95,7 +95,7 @@ endif
 	@-$(MAKE) --no-print-directory --file=$^
 
 %.so: %.c
-	$(CC) -o $@ $^ -D XSG_LOG_DOMAIN=\"$(@:.so=)\" $(ALL_CFLAGS) $(ALL_LDFLAGS)
+	$(CC) -o $@ $^ $(ALL_CFLAGS) $(ALL_LDFLAGS)
 
 .PHONY: all clean distclean install install-strip
 

@@ -157,6 +157,8 @@ static xsg_module_t *module_load(module_t *m) {
 	if (module->info == NULL)
 		xsg_error("Cannot load module %s: info char* is NULL");
 
+	module->name = m->name;
+
 	return module;
 }
 

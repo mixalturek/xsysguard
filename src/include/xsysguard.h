@@ -79,6 +79,7 @@ typedef struct _xsg_module_t {
 	void (*parse)(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
 	char *(*help)(void);
 	char *info;
+	char *name;
 } xsg_module_t;
 
 extern xsg_module_t xsg_module XSG_API;
@@ -331,7 +332,7 @@ int xsg_isinf(double x) XSG_API;
 #define XSG_LOG_LEVEL_MEM	5
 
 #ifndef XSG_LOG_DOMAIN
-# define XSG_LOG_DOMAIN ((char *) 0)
+# define XSG_LOG_DOMAIN xsg_module.name
 #endif /* XSG_LOG_DOMAIN */
 
 #ifndef XSG_MAX_LOG_LEVEL
