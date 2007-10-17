@@ -120,7 +120,7 @@ static void libstatgrab_error() {
 static void get_host_info(uint64_t tick) {
 	xsg_debug("sg_get_host_info");
 	if (!(host_info = sg_get_host_info())) {
-		xsg_warning("sg_get_host_info returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_host_info");
 		libstatgrab_error();
 	}
 }
@@ -128,7 +128,7 @@ static void get_host_info(uint64_t tick) {
 static void get_cpu_stats(uint64_t tick) {
 	xsg_debug("sg_get_cpu_stats");
 	if (!(cpu_stats = sg_get_cpu_stats())) {
-		xsg_warning("sg_get_cpu_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_cpu_stats");
 		libstatgrab_error();
 	}
 }
@@ -139,7 +139,7 @@ static void get_cpu_stats_diff(uint64_t tick) {
 
 	xsg_debug("sg_get_cpu_stats_diff");
 	if (!(diff = sg_get_cpu_stats_diff())) {
-		xsg_warning("sg_get_cpu_stats_diff returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_cpu_stats_diff");
 		libstatgrab_error();
 	}
 
@@ -171,7 +171,7 @@ static void get_cpu_stats_diff(uint64_t tick) {
 static void get_cpu_percents(uint64_t tick) {
 	xsg_debug("sg_get_cpu_percents");
 	if (!(cpu_percents = sg_get_cpu_percents())) {
-		xsg_warning("sg_get_cpu_percents returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_cpu_percents");
 		libstatgrab_error();
 	}
 }
@@ -179,7 +179,7 @@ static void get_cpu_percents(uint64_t tick) {
 static void get_mem_stats(uint64_t tick) {
 	xsg_debug("sg_get_mem_stats");
 	if (!(mem_stats = sg_get_mem_stats())) {
-		xsg_warning("sg_get_mem_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_mem_stats");
 		libstatgrab_error();
 	}
 }
@@ -187,7 +187,7 @@ static void get_mem_stats(uint64_t tick) {
 static void get_load_stats(uint64_t tick) {
 	xsg_debug("sg_get_load_stats");
 	if (!(load_stats = sg_get_load_stats())) {
-		xsg_warning("sg_get_load_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_load_stats");
 		libstatgrab_error();
 	}
 }
@@ -195,7 +195,7 @@ static void get_load_stats(uint64_t tick) {
 static void get_user_stats(uint64_t tick) {
 	xsg_debug("sg_get_user_stats");
 	if (!(user_stats = sg_get_user_stats())) {
-		xsg_warning("sg_get_user_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_user_stats");
 		libstatgrab_error();
 	}
 }
@@ -203,7 +203,7 @@ static void get_user_stats(uint64_t tick) {
 static void get_swap_stats(uint64_t tick) {
 	xsg_debug("sg_get_swap_stats");
 	if (!(swap_stats = sg_get_swap_stats())) {
-		xsg_warning("sg_get_swap_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_swap_stats");
 		libstatgrab_error();
 	}
 }
@@ -213,7 +213,7 @@ static void get_fs_stats(uint64_t tick) {
 
 	xsg_debug("sg_get_fs_stats");
 	if (!(fs_stats_by_device_name = sg_get_fs_stats(&fs_entries))) {
-		xsg_warning("sg_get_fs_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_fs_stats");
 		libstatgrab_error();
 		return;
 	}
@@ -228,7 +228,7 @@ static void get_fs_stats(uint64_t tick) {
 static void get_disk_io_stats(uint64_t tick) {
 	xsg_debug("sg_get_disk_io_stats");
 	if (!(disk_io_stats = sg_get_disk_io_stats(&disk_io_entries))) {
-		xsg_warning("sg_get_disk_io_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_disk_io_stats");
 		libstatgrab_error();
 		return;
 	}
@@ -242,7 +242,7 @@ static void get_disk_io_stats_diff(uint64_t tick) {
 
 	xsg_debug("sg_get_disk_io_stats_diff");
 	if (!(diff = sg_get_disk_io_stats_diff(&entries))) {
-		xsg_warning("sg_get_disk_io_stats_diff returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_disk_io_stats_diff");
 		libstatgrab_error();
 		return;
 	}
@@ -296,7 +296,7 @@ static void get_disk_io_stats_diff(uint64_t tick) {
 static void get_network_io_stats(uint64_t tick) {
 	xsg_debug("sg_get_network_io_stats");
 	if (!(network_io_stats = sg_get_network_io_stats(&network_io_entries))) {
-		xsg_warning("sg_get_network_io_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_network_io_stats");
 		libstatgrab_error();
 		return;
 	}
@@ -310,7 +310,7 @@ static void get_network_io_stats_diff(uint64_t tick) {
 
 	xsg_debug("sg_get_network_io_stats_diff");
 	if (!(diff = sg_get_network_io_stats_diff(&entries))) {
-		xsg_warning("sg_get_network_io_stats_diff returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_network_io_stats_diff");
 		libstatgrab_error();
 		return;
 	}
@@ -374,7 +374,7 @@ static void get_network_io_stats_diff(uint64_t tick) {
 static void get_network_iface_stats(uint64_t tick) {
 	xsg_debug("sg_get_network_iface_stats");
 	if (!(network_iface_stats = sg_get_network_iface_stats(&network_iface_entries))) {
-		xsg_warning("sg_get_network_iface_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_network_iface_stats");
 		libstatgrab_error();
 		return;
 	}
@@ -384,7 +384,7 @@ static void get_network_iface_stats(uint64_t tick) {
 static void get_page_stats(uint64_t tick) {
 	xsg_debug("sg_get_page_stats");
 	if (!(page_stats = sg_get_page_stats())) {
-		xsg_warning("sg_get_page_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_page_stats");
 		libstatgrab_error();
 	}
 }
@@ -395,7 +395,7 @@ static void get_page_stats_diff(uint64_t tick) {
 
 	xsg_debug("sg_get_page_stats_diff");
 	if (!(diff = sg_get_page_stats_diff())) {
-		xsg_warning("sg_get_page_stats_diff returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_page_stats_diff");
 		libstatgrab_error();
 	}
 
@@ -449,7 +449,7 @@ static void get_process_stats(uint64_t tick) {
 		process_stats_by_time = NULL;
 	}
 	if (!(process_stats = sg_get_process_stats(&process_entries))) {
-		xsg_warning("sg_get_process_stats returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_process_stats");
 		libstatgrab_error();
 	}
 }
@@ -457,7 +457,7 @@ static void get_process_stats(uint64_t tick) {
 static void get_process_count(uint64_t tick) {
 	xsg_debug("sg_get_process_count");
 	if (!(process_count = sg_get_process_count())) {
-		xsg_warning("sg_get_process_count returned NULL");
+		xsg_warning("%s returned NULL", "sg_get_process_count");
 		libstatgrab_error();
 	}
 }
@@ -608,7 +608,6 @@ static double get_cpu_stats_user(void *arg) {
 		xsg_debug("get_cpu_stats_user: UNKNOWN");
 		return DNAN;
 	}
-
 }
 
 static double get_cpu_stats_kernel(void *arg) {
@@ -2029,10 +2028,10 @@ static void parse_network_iface_stats(uint64_t update, double (**num)(void *), c
 		*num = get_network_iface_stats_speed;
 		*arg = (void *) interface_name;
 	} else if (xsg_conf_find_command("duplex")) {
-		if (xsg_conf_find_command("n")) {
+		if (xsg_conf_find_command("num")) {
 			*num = get_network_iface_stats_duplex_number;
 			*arg = (void *) interface_name;
-		} else if (xsg_conf_find_command("s")) {
+		} else if (xsg_conf_find_command("str")) {
 			network_iface_stats_duplex_data_t *data;
 
 			data = xsg_new(network_iface_stats_duplex_data_t, 1);
@@ -2044,7 +2043,7 @@ static void parse_network_iface_stats(uint64_t update, double (**num)(void *), c
 			*str = get_network_iface_stats_duplex_string;
 			*arg = (void *) data;
 		} else {
-			xsg_conf_error("n or s expected");
+			xsg_conf_error("num or str expected");
 		}
 	} else {
 		xsg_conf_error("speed or duplex expected");
@@ -2770,12 +2769,12 @@ static void parse_process_stats(uint64_t update, double (**num)(void *), char *(
 	number = xsg_conf_read_uint();
 
 	if (state_command) {
-		if (xsg_conf_find_command("n"))
+		if (xsg_conf_find_command("num"))
 			*num = get_process_stats_state_number;
-		else if (xsg_conf_find_command("s"))
+		else if (xsg_conf_find_command("str"))
 			*str = get_process_stats_state_string;
 		else
-			xsg_conf_error("n or s expected");
+			xsg_conf_error("num or str expected");
 	}
 
 	if (*str == get_process_stats_state_string) {
@@ -2878,10 +2877,19 @@ static void parse_process_count(uint64_t update, double (**num)(void *), char *(
  ******************************************************************************/
 
 static void init_stats(void) {
+	static bool first_time = TRUE;
+
+	if (!first_time)
+		return;
+
+	first_time = FALSE;
+
 	xsg_message("Running sg_init()");
 	sg_init();
+
 	xsg_message("Running sg_snapshot()");
 	sg_snapshot();
+
 	update_stats(0);
 }
 
@@ -2963,12 +2971,230 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	}
 }
 
-static char *help(void) {
-	// TODO: list disks, network interfaces, ...
-	return NULL;
+static const char *help(void) {
+	static xsg_string_t *string = NULL;
+	xsg_string_t *tmp = xsg_string_new(NULL);;
+	int i;
+
+	init_stats();
+
+	if (string == NULL)
+		string = xsg_string_new(NULL);
+	else
+		string = xsg_string_truncate(string, 0);;
+
+	get_fs_stats(0);
+
+	for (i = 0; i < fs_entries; i++)
+		xsg_string_append_printf(tmp, "%s ", fs_stats_by_device_name[i].device_name);
+	xsg_string_append_printf(string, "XSG_STATGRAB_DEVICE_NAMES:      %s\n", tmp->str);
+	setenv("XSG_STATGRAB_FS_DEVICES", tmp->str, TRUE);
+
+	tmp = xsg_string_truncate(tmp, 0);
+	for (i = 0; i < fs_entries; i++)
+		xsg_string_append_printf(tmp, "%s ", fs_stats_by_mnt_point[i].mnt_point);
+	xsg_string_append_printf(string, "XSG_STATGRAB_MNT_POINTS:        %s\n", tmp->str);
+	setenv("XSG_STATGRAB_FS_MNT_POINTS", tmp->str, TRUE);
+
+	get_disk_io_stats(0);
+
+	tmp = xsg_string_truncate(tmp, 0);
+	for (i = 0; i < disk_io_entries; i++)
+		xsg_string_append_printf(tmp, "%s ", disk_io_stats[i].disk_name);
+	xsg_string_append_printf(string, "XSG_STATGRAB_DISK_NAMES:        %s\n", tmp->str);
+	setenv("XSG_STATGRAB_DISK_NAMES", tmp->str, TRUE);
+
+	get_network_iface_stats(0);\
+
+	tmp = xsg_string_truncate(tmp, 0);
+	for (i = 0; i < network_iface_entries; i++)
+		xsg_string_append_printf(tmp, "%s ", network_iface_stats[i].interface_name);
+	xsg_string_append_printf(string, "XSG_STATGRAB_INTERFACE_NAMES:   %s\n", tmp->str);
+	setenv("XSG_STATGRAB_INTERFACE_NAMES", tmp->str, TRUE);
+
+	xsg_string_free(tmp, TRUE);
+	xsg_string_append_printf(string, "\n");
+
+	get_host_info(0);
+	xsg_string_append_printf(string, "S %s:%s:%-31s%s\n", xsg_module.name, "host_info", "os_name", get_host_info_os_name(NULL));
+	xsg_string_append_printf(string, "S %s:%s:%-31s%s\n", xsg_module.name, "host_info", "os_release", get_host_info_os_release(NULL));
+	xsg_string_append_printf(string, "S %s:%s:%-31s%s\n", xsg_module.name, "host_info", "os_version", get_host_info_os_version(NULL));
+	xsg_string_append_printf(string, "S %s:%s:%-31s%s\n", xsg_module.name, "host_info", "platform", get_host_info_platform(NULL));
+	xsg_string_append_printf(string, "S %s:%s:%-31s%s\n", xsg_module.name, "host_info", "hostname", get_host_info_hostname(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "host_info", "uptime", get_host_info_uptime(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_cpu_stats(0);
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "user", get_cpu_stats_user(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "kernel", get_cpu_stats_kernel(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "idle", get_cpu_stats_idle(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "iowait", get_cpu_stats_iowait(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "swap", get_cpu_stats_swap(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats" ,"nice", get_cpu_stats_nice(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "cpu_stats", "total", get_cpu_stats_total(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_cpu_stats_diff(0);
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "user");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "kernel");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "idle");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "iowait");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "swap");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "nice");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_stats_diff", "total");
+	xsg_string_append_printf(string, "\n");
+
+	get_cpu_percents(0);
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "user");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "kernel");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "idle");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "iowait");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "swap");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "cpu_percents", "nice");
+	xsg_string_append_printf(string, "\n");
+
+	get_mem_stats(0);
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "mem_stats", "total", get_mem_stats_total(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "mem_stats", "free", get_mem_stats_free(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "mem_stats", "used", get_mem_stats_used(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-31s%.0f\n", xsg_module.name, "mem_stats", "cache", get_mem_stats_cache(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_load_stats(0);
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.2f\n", xsg_module.name, "load_stats", "min1", get_load_stats_min1(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.2f\n", xsg_module.name, "load_stats", "min5", get_load_stats_min5(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.2f\n", xsg_module.name, "load_stats", "min15", get_load_stats_min15(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_user_stats(0);
+	xsg_string_append_printf(string, "S %s:%s:%-30s%s\n", xsg_module.name, "user_stats", "name_list", get_user_stats_name_list(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.0f\n", xsg_module.name, "user_stats", "num_entries", get_user_stats_num_entries(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_swap_stats(0);
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.0f\n", xsg_module.name, "swap_stats", "total", get_swap_stats_total(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.0f\n", xsg_module.name, "swap_stats", "used", get_swap_stats_used(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-30s%.0f\n", xsg_module.name, "swap_stats", "free", get_swap_stats_free(NULL));
+	xsg_string_append_printf(string, "\n");
+
+	get_fs_stats(0);
+	for (i = 0; i < fs_entries + fs_entries; i++) {
+		char *s;
+
+		if (i < fs_entries)
+			s = fs_stats_by_device_name[i].device_name;
+		else
+			s = fs_stats_by_mnt_point[i - fs_entries].mnt_point;
+
+		xsg_string_append_printf(string, "S %s:%s:%s:%-22s%s\n", xsg_module.name, "fs_stats", s, "device_name", get_fs_stats_device_name(s));
+		xsg_string_append_printf(string, "S %s:%s:%s:%-22s%s\n", xsg_module.name, "fs_stats", s, "fs_type", get_fs_stats_fs_type(s));
+		xsg_string_append_printf(string, "S %s:%s:%s:%-22s%s\n", xsg_module.name, "fs_stats", s, "mnt_point", get_fs_stats_mnt_point(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "size", get_fs_stats_size(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "used", get_fs_stats_used(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "avail", get_fs_stats_avail(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "total_inodes", get_fs_stats_total_inodes(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "used_inodes", get_fs_stats_used_inodes(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "free_inodes", get_fs_stats_free_inodes(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "avail_inodes", get_fs_stats_avail_inodes(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "io_size", get_fs_stats_io_size(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "block_size", get_fs_stats_block_size(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "total_blocks", get_fs_stats_total_blocks(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "free_blocks", get_fs_stats_free_blocks(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "used_blocks", get_fs_stats_used_blocks(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "fs_stats", s, "avail_blocks", get_fs_stats_avail_blocks(s));
+		xsg_string_append_printf(string, "\n");
+	}
+
+	get_disk_io_stats(0);
+	for (i = 0; i < disk_io_entries; i++) {
+		char *s = disk_io_stats[i].disk_name;
+
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "disk_io_stats", s, "read_bytes", get_disk_io_stats_read_bytes(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "disk_io_stats", s, "write_bytes", get_disk_io_stats_write_bytes(s));
+		xsg_string_append_printf(string, "\n");
+	}
+	for (i = 0; i < disk_io_entries; i++) {
+		char *s = disk_io_stats[i].disk_name;
+
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "disk_io_stats_diff", s, "read_bytes");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "disk_io_stats_diff", s, "write_bytes");
+		xsg_string_append_printf(string, "\n");
+	}
+
+	get_network_io_stats(0);
+	for (i = 0; i < network_io_entries; i++) {
+		char *s = network_io_stats[i].interface_name;
+
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "tx", get_network_io_stats_tx(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "rx", get_network_io_stats_rx(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "ipackets", get_network_io_stats_ipackets(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "opackets", get_network_io_stats_opackets(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "ierrors", get_network_io_stats_ierrors(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "oerrors", get_network_io_stats_oerrors(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-22s%.0f\n", xsg_module.name, "network_io_stats", s, "collisions", get_network_io_stats_collisions(s));
+		xsg_string_append_printf(string, "\n");
+	}
+	for (i = 0; i < network_io_entries; i++) {
+		char *s = network_io_stats[i].interface_name;
+
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "tx");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "rx");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "ipackets");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "opackets");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "ierrors");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "oerrors");
+		xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "network_io_stats_diff", s, "collisions");
+		xsg_string_append_printf(string, "\n");
+	}
+
+	get_network_iface_stats(0);
+	for (i = 0; i < network_iface_entries; i++) {
+		char *s = network_iface_stats[i].interface_name;
+		network_iface_stats_duplex_data_t data = { s, "FULL", "HALF", "UNKNOWN" };
+
+		xsg_string_append_printf(string, "N %s:%s:%s:%-32s%.0f\n", xsg_module.name, "network_iface_stats", s, "speed", get_network_iface_stats_speed(s));
+		xsg_string_append_printf(string, "N %s:%s:%s:%-32s%.0f\n", xsg_module.name, "network_iface_stats", s, "duplex:num", get_network_iface_stats_duplex_number(s));
+		xsg_string_append_printf(string, "S %s:%s:%s:%-32s%s\n", xsg_module.name, "network_iface_stats", s, "duplex:str:FULL:HALF:UNKNOWN", get_network_iface_stats_duplex_string(&data));
+		xsg_string_append_printf(string, "\n");
+	}
+
+	get_page_stats(0);
+	xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, "page_stats", "pages_pagein", get_page_stats_pages_pagein(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n", xsg_module.name, "page_stats", "pages_pageout", get_page_stats_pages_pageout(NULL));
+	xsg_string_append_printf(string, "\n");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "page_stats_diff", "pages_pagein");
+	xsg_string_append_printf(string, "N %s:%s:%s\n", xsg_module.name, "page_stats_diff", "pages_pageout");
+	xsg_string_append_printf(string, "\n");
+
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", xsg_module.name, "process_stats", "process_name", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", xsg_module.name, "process_stats", "proctitle", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "pid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "parent", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "pgid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "uid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "euid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "gid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "egid", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "proc_size", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "proc_resident", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "time_spent", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "cpu_percent", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "nice", "<ordered_by>:{ascending|descending}:<number>");
+	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", xsg_module.name, "process_stats", "state", "<ordered_by>:{ascending|descending}:<number>:num");
+	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", xsg_module.name, "process_stats", "state", "<ordered_by>:{ascending|descending}:<number>:str:<running>:<sleeping>:<stopped>:<zombie>:<unknown>");
+	xsg_string_append_printf(string, "\n");
+
+	get_process_count(0);
+	xsg_string_append_printf(string, "N %s:%s:%-32s%.0f\n", xsg_module.name, "process_count", "total", get_process_count_total(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-32s%.0f\n", xsg_module.name, "process_count", "running", get_process_count_running(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-32s%.0f\n", xsg_module.name, "process_count", "sleeping", get_process_count_sleeping(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-32s%.0f\n", xsg_module.name, "process_count", "stopped", get_process_count_stopped(NULL));
+	xsg_string_append_printf(string, "N %s:%s:%-32s%.0f\n", xsg_module.name, "process_count", "zombie", get_process_count_zombie(NULL));
+
+	return string->str;
 }
 
 xsg_module_t xsg_module = {
-	parse, help, "libstatgrab <http://www.i-scream.org/libstatgrab>"
+	parse, help, "libstatgrab (get system statistics)"
 };
 
