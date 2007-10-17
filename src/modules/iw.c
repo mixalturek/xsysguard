@@ -722,6 +722,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 
 static const char *help(void) {
 	static xsg_string_t *string = NULL;
+	xsg_string_t *dev_list = xsg_string_new(NULL);
 	xsg_list_t *l;
 
 	init();
@@ -736,15 +737,13 @@ static const char *help(void) {
 
 	get_device_list();
 
-	xsg_string_append_printf(string, "XSG_IW_DEVICES: ");
+	for (l = device_list; l; l = l->next)
+		xsg_string_append_printf(dev_list, "%s ", (char *) l->data);
 
-	for (l = device_list; l; l = l->next) {
-		char *filename = (char *) l->data;
+	xsg_string_append_printf(string, "XSG_IW_DEVICES:   %s\n\n", dev_list->str);
+	setenv("XSG_IW_DEVICES", dev_list->str, TRUE);
 
-		xsg_string_append_printf(string, "%s ", filename);
-	}
-
-	xsg_string_append_printf(string, "\n\n");
+	xsg_string_free(dev_list, TRUE);
 
 	for (l = device_list; l; l = l->next) {
 		char *ifname = (char *) l->data;
