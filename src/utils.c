@@ -38,7 +38,6 @@
 
 #include "main.h"
 
-
 /******************************************************************************
  *
  * mem
@@ -724,5 +723,15 @@ char *xsg_strsignal(int signum) {
 		str = "unknown signal number";
 
 	return str;
+}
+
+/******************************************************************************/
+
+int xsg_setenv(const char *name, const char *value, int overwrite) {
+	return setenv(name, value, overwrite);
+}
+
+int xsg_unsetenv(const char *name) {
+	return unsetenv(name);
 }
 

@@ -306,6 +306,9 @@ void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_
 
 char *xsg_strsignal(int signum) XSG_API;
 
+int xsg_setenv(const char *name, const char *value, int overwrite);
+int xsg_unsetenv(const char *name);
+
 /******************************************************************************
  * compat.c
  ******************************************************************************/
