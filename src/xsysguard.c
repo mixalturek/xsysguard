@@ -179,7 +179,7 @@ static void parse_env(const char *config_name) {
 
 	xsg_message("%s: Setting environment variable %s=\"%s\"", config_name, variable, value);
 
-	if (setenv(variable, value, overwrite) != 0)
+	if (xsg_setenv(variable, value, overwrite) != 0)
 		xsg_warning("%s: Cannot set environment variable %s=\"%s\": %s", config_name, variable, value, strerror(errno));
 }
 
