@@ -3031,13 +3031,13 @@ static const char *help(void) {
 	for (i = 0; i < fs_entries; i++)
 		xsg_string_append_printf(tmp, "%s ", fs_stats_by_device_name[i].device_name);
 	xsg_string_append_printf(string, "XSG_STATGRAB_DEVICE_NAMES:      %s\n", tmp->str);
-	setenv("XSG_STATGRAB_FS_DEVICES", tmp->str, TRUE);
+	xsg_setenv("XSG_STATGRAB_FS_DEVICES", tmp->str, TRUE);
 
 	tmp = xsg_string_truncate(tmp, 0);
 	for (i = 0; i < fs_entries; i++)
 		xsg_string_append_printf(tmp, "%s ", fs_stats_by_mnt_point[i].mnt_point);
 	xsg_string_append_printf(string, "XSG_STATGRAB_MNT_POINTS:        %s\n", tmp->str);
-	setenv("XSG_STATGRAB_FS_MNT_POINTS", tmp->str, TRUE);
+	xsg_setenv("XSG_STATGRAB_FS_MNT_POINTS", tmp->str, TRUE);
 
 	get_disk_io_stats(0);
 
@@ -3045,7 +3045,7 @@ static const char *help(void) {
 	for (i = 0; i < disk_io_entries; i++)
 		xsg_string_append_printf(tmp, "%s ", disk_io_stats[i].disk_name);
 	xsg_string_append_printf(string, "XSG_STATGRAB_DISK_NAMES:        %s\n", tmp->str);
-	setenv("XSG_STATGRAB_DISK_NAMES", tmp->str, TRUE);
+	xsg_setenv("XSG_STATGRAB_DISK_NAMES", tmp->str, TRUE);
 
 	get_network_iface_stats(0);
 
@@ -3053,7 +3053,7 @@ static const char *help(void) {
 	for (i = 0; i < network_iface_entries; i++)
 		xsg_string_append_printf(tmp, "%s ", network_iface_stats[i].interface_name);
 	xsg_string_append_printf(string, "XSG_STATGRAB_INTERFACE_NAMES:   %s\n", tmp->str);
-	setenv("XSG_STATGRAB_INTERFACE_NAMES", tmp->str, TRUE);
+	xsg_setenv("XSG_STATGRAB_INTERFACE_NAMES", tmp->str, TRUE);
 
 	xsg_string_free(tmp, TRUE);
 	xsg_string_append_c(string, '\n');
