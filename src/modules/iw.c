@@ -743,7 +743,7 @@ static const char *help(void) {
 		xsg_string_append_printf(dev_list, "%s ", (char *) l->data);
 
 	xsg_string_append_printf(string, "XSG_IW_DEVICES:   %s\n\n", dev_list->str);
-	setenv("XSG_IW_DEVICES", dev_list->str, TRUE);
+	xsg_setenv("XSG_IW_DEVICES", dev_list->str, TRUE);
 
 	xsg_string_free(dev_list, TRUE);
 
