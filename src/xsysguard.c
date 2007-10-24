@@ -381,10 +381,20 @@ static void usage(void) {
 		"  -I, --imgcache=N   Set imlib's image cache size to N bytes\n"
 		"  -c, --color        Enable colored logging\n"
 		"  -t, --time         Add current time to each log line\n"
-		"  -l, --log=N        Set loglevel to N: "
-		"%d=ERROR, %d=WARNING, %d=MESSAGE, %d=DEBUG\n",
-			XSG_LOG_LEVEL_ERROR, XSG_LOG_LEVEL_WARNING, XSG_LOG_LEVEL_MESSAGE, XSG_LOG_LEVEL_DEBUG);
-	printf("\n");
+		"  -l, --log=N        Set loglevel to N: ");
+
+	if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
+		printf("%d=ERROR", XSG_LOG_LEVEL_ERROR);
+	if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL)
+		printf(", %d=WARNING", XSG_LOG_LEVEL_WARNING);
+	if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL)
+		printf(", %d=MESSAGE", XSG_LOG_LEVEL_MESSAGE);
+	if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL)
+		printf(", %d=DEBUG", XSG_LOG_LEVEL_DEBUG);
+	if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
+		printf(", %d=MEM", XSG_LOG_LEVEL_MEM);
+
+	printf("\n\n");
 
 	printf("XSYSGUARD_CONFIG_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
