@@ -53,6 +53,15 @@
 
 /******************************************************************************/
 
+#define DEFAULT_INTERVAL		((uint64_t)(1000))
+
+#define DEFAULT_FONT_CACHE_SIZE		(2 * 1024 * 1024)
+#define DEFAULT_IMAGE_CACHE_SIZE	(4 * 1024 * 1024)
+
+#define DEFAULT_LOG_LEVEL		XSG_LOG_LEVEL_WARNING
+
+/******************************************************************************/
+
 #define ESCAPE "\033"
 #define COLOR_MAGENTA ESCAPE"[35m"
 #define COLOR_YELLOW  ESCAPE"[33m"
@@ -67,7 +76,7 @@ static bool timestamps = FALSE;
 
 /******************************************************************************/
 
-int xsg_log_level = XSG_LOG_LEVEL_WARNING;
+int xsg_log_level = DEFAULT_LOG_LEVEL;
 
 static int xsg_logv(const char *domain, int level, const char *format, va_list args) {
 	unsigned int pid;
@@ -362,7 +371,7 @@ static char *get_config_file(const char *config_name, const char *filename) {
 	return buffer;
 }
 
-static void usage(uint64_t interval, int font_cache_size, int image_cache_size) {
+static void usage(void) {
 	char **pathv;
 	char **p;
 
@@ -382,7 +391,7 @@ static void usage(uint64_t interval, int font_cache_size, int image_cache_size) 
 		"  -c, --color        Enable colored logging\n"
 		"  -t, --time         Add current time to each log line\n"
 		"  -l, --log=N        Set loglevel to N: ",
-		interval, font_cache_size, image_cache_size);
+		DEFAULT_INTERVAL, DEFAULT_FONT_CACHE_SIZE, DEFAULT_IMAGE_CACHE_SIZE);
 
 	if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
 		printf("%d=ERROR", XSG_LOG_LEVEL_ERROR);
@@ -464,10 +473,10 @@ int main(int argc, char **argv) {
 	bool list_dirs = FALSE;
 	char *mhelp = NULL;
 	bool print_usage = FALSE;
-	uint64_t interval = 1000;
+	uint64_t interval = DEFAULT_INTERVAL;
 	uint64_t num = 0;
-	int font_cache_size = 2 * 1024 * 1024;
-	int image_cache_size = 4 * 1024 * 1024;
+	int font_cache_size = DEFAULT_FONT_CACHE_SIZE;
+	int image_cache_size = DEFAULT_IMAGE_CACHE_SIZE;
 	xsg_list_t *filename_list = NULL;
 	xsg_list_t *l;
 
@@ -552,7 +561,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (print_usage) {
-		usage(interval, font_cache_size, image_cache_size);
+		usage();
 		exit(EXIT_SUCCESS);
 	}
 
