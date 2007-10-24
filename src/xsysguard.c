@@ -294,10 +294,22 @@ static char *find_config_file(char *name) {
 	char **p;
 
 	if (unlikely(name == NULL))
-		name = "default";
+		xsg_error("Cannot find config file: NULL");
 
 	if (unlikely(strlen(name) < 1))
-		name = "default";
+		xsg_error("Cannot find config file: \"\"");
+
+	if (name[0] == '/')
+		return xsg_strdup(name);
+
+	if (name[0] == '.' && name[1] == '/')
+		return xsg_strdup(name);
+
+	if (name[0] == '.' && name[1] == '.' && name[2] == '/')
+		return xsg_strdup(name);
+
+	if (name[0] == '~')
+		return xsg_build_filename(xsg_get_home_dir(), name + 1, NULL);
 
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
 
@@ -317,7 +329,7 @@ static char *find_config_file(char *name) {
 
 	xsg_strfreev(pathv);
 	xsg_error("Cannot find config file: \"%s\"", name);
-	return 0;
+	return NULL;
 }
 
 static char *get_config_file(const char *config_name, const char *filename) {
@@ -376,7 +388,7 @@ static void usage(void) {
 	char **p;
 
 	printf( "xsysguard " XSYSGUARD_VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
-		"Usage: xsysguard [ARGUMENTS...] [CONFIGS...]\n\n"
+		"Usage: xsysguard [ARGUMENTS...] CONFIGS...\n\n"
 		"Arguments:\n"
 		"  -h, --help         Print this help message to stdout\n"
 		"  -H, --mhelp=MODULE Print help message for MODULE to stdout\n"
@@ -385,7 +397,6 @@ static void usage(void) {
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
 		"  -i, --interval=N   Set main interval to N milliseconds (default: %"PRIu64")\n"
 		"  -n, --num=N        Exit after N tick's\n"
-		"  -C, --config=FILE  Read configuration from FILE\n"
 		"  -F, --fontcache=N  Set imlib's font cache size to N bytes (default: %d)\n"
 		"  -I, --imgcache=N   Set imlib's image cache size to N bytes (default: %d)\n"
 		"  -c, --color        Enable colored logging\n"
@@ -477,8 +488,6 @@ int main(int argc, char **argv) {
 	uint64_t num = 0;
 	int font_cache_size = DEFAULT_FONT_CACHE_SIZE;
 	int image_cache_size = DEFAULT_IMAGE_CACHE_SIZE;
-	xsg_list_t *filename_list = NULL;
-	xsg_list_t *l;
 
 	struct option long_options[] = {
 		{ "help",      0, NULL, 'h' },
@@ -501,7 +510,7 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hH:i:n:F:I:l:C:mfdct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hH:i:n:F:I:l:mfdct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -528,10 +537,6 @@ int main(int argc, char **argv) {
 			case 'I':
 				if (optarg)
 					image_cache_size = atoi(optarg);
-				break;
-			case 'C':
-				if (optarg)
-					filename_list = xsg_list_append(filename_list, xsg_strdup(optarg));
 				break;
 			case 'l':
 				if (optarg)
@@ -605,23 +610,9 @@ int main(int argc, char **argv) {
 	xsg_imlib_set_cache_size(image_cache_size);
 	xsg_conf_set_color_lookup(xsg_window_color_lookup);
 
-	for (l = filename_list; l; l = l->next) {
-		char *filename = l->data;
-		char *config_buffer;
-
-		config_buffer = get_config_file(NULL, filename);
-		parse_config(filename, config_buffer);
-		xsg_free(config_buffer);
-	}
-
-	if ((filename_list == NULL) && (optind >= argc)) {
-		char *filename, *config_buffer;
-
-		filename = find_config_file("default");
-		config_buffer = get_config_file("default", filename);
-		parse_config("default", config_buffer);
-		xsg_free(config_buffer);
-		xsg_free(filename);
+	if (optind >= argc) {
+		usage();
+		exit(EXIT_SUCCESS);
 	}
 
 	while (optind < argc) {
