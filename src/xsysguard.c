@@ -362,7 +362,7 @@ static char *get_config_file(const char *config_name, const char *filename) {
 	return buffer;
 }
 
-static void usage(void) {
+static void usage(uint64_t interval, int font_cache_size, int image_cache_size) {
 	char **pathv;
 	char **p;
 
@@ -374,14 +374,15 @@ static void usage(void) {
 		"  -m, --modules      Print a list of all available modules to stdout\n"
 		"  -f, --fonts        Print a list of all available fonts to stdout\n"
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
-		"  -i, --interval=N   Set main interval to N milliseconds\n"
+		"  -i, --interval=N   Set main interval to N milliseconds (default: %"PRIu64")\n"
 		"  -n, --num=N        Exit after N tick's\n"
 		"  -C, --config=FILE  Read configuration from FILE\n"
-		"  -F, --fontcache=N  Set imlib's font cache size to N bytes\n"
-		"  -I, --imgcache=N   Set imlib's image cache size to N bytes\n"
+		"  -F, --fontcache=N  Set imlib's font cache size to N bytes (default: %d)\n"
+		"  -I, --imgcache=N   Set imlib's image cache size to N bytes (default: %d)\n"
 		"  -c, --color        Enable colored logging\n"
 		"  -t, --time         Add current time to each log line\n"
-		"  -l, --log=N        Set loglevel to N: ");
+		"  -l, --log=N        Set loglevel to N: ",
+		interval, font_cache_size, image_cache_size);
 
 	if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
 		printf("%d=ERROR", XSG_LOG_LEVEL_ERROR);
@@ -551,7 +552,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (print_usage) {
-		usage();
+		usage(interval, font_cache_size, image_cache_size);
 		exit(EXIT_SUCCESS);
 	}
 
