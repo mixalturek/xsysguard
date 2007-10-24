@@ -383,7 +383,7 @@ static char *get_config_file(const char *config_name, const char *filename) {
 	return buffer;
 }
 
-static void usage(void) {
+static void usage(bool enable_fontconfig) {
 	char **pathv;
 	char **p;
 
@@ -397,6 +397,7 @@ static void usage(void) {
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
 		"  -i, --interval=N   Set main interval to N milliseconds (default: %"PRIu64")\n"
 		"  -n, --num=N        Exit after N tick's\n"
+		"  -N, --nofontconfig Disable libfontconfig\n"
 		"  -F, --fontcache=N  Set imlib's font cache size to N bytes (default: %d)\n"
 		"  -I, --imgcache=N   Set imlib's image cache size to N bytes (default: %d)\n"
 		"  -c, --color        Enable colored logging\n"
@@ -449,6 +450,9 @@ static void usage(void) {
 	xsg_strfreev(pathv);
 	printf("\n");
 
+	if (!enable_fontconfig)
+		return;
+
 	pathv = xsg_fontconfig_get_path();
 	if (pathv != NULL) {
 		unsigned n = 0;
@@ -488,29 +492,30 @@ int main(int argc, char **argv) {
 	uint64_t num = 0;
 	int font_cache_size = DEFAULT_FONT_CACHE_SIZE;
 	int image_cache_size = DEFAULT_IMAGE_CACHE_SIZE;
+	bool enable_fontconfig = TRUE;
 
 	struct option long_options[] = {
-		{ "help",      0, NULL, 'h' },
-		{ "mhelp",     1, NULL, 'H' },
-		{ "interval",  1, NULL, 'i' },
-		{ "num",       1, NULL, 'n' },
-		{ "fontcache", 1, NULL, 'F' },
-		{ "imgcache",  1, NULL, 'I' },
-		{ "log",       1, NULL, 'l' },
-		{ "color",     0, NULL, 'c' },
-		{ "time",      0, NULL, 't' },
-		{ "config",    1, NULL, 'C' },
-		{ "modules",   0, NULL, 'm' },
-		{ "fonts",     0, NULL, 'f' },
-		{ "fontdirs",  0, NULL, 'd' },
-		{ NULL,        0, NULL,  0  }
+		{ "help",         0, NULL, 'h' },
+		{ "mhelp",        1, NULL, 'H' },
+		{ "interval",     1, NULL, 'i' },
+		{ "num",          1, NULL, 'n' },
+		{ "nofontconfig", 0, NULL, 'N' },
+		{ "fontcache",    1, NULL, 'F' },
+		{ "imgcache",     1, NULL, 'I' },
+		{ "log",          1, NULL, 'l' },
+		{ "color",        0, NULL, 'c' },
+		{ "time",         0, NULL, 't' },
+		{ "modules",      0, NULL, 'm' },
+		{ "fonts",        0, NULL, 'f' },
+		{ "fontdirs",     0, NULL, 'd' },
+		{ NULL,           0, NULL,  0  }
 	};
 
 	opterr = 0;
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hH:i:n:F:I:l:mfdct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hH:i:n:NF:I:l:mfdct", long_options, &option_index);
 
 		if (option == EOF)
 			break;
@@ -529,6 +534,9 @@ int main(int argc, char **argv) {
 				break;
 			case 'n':
 				sscanf(optarg, "%"SCNu64, &num);
+				break;
+			case 'N':
+				enable_fontconfig = FALSE;
 				break;
 			case 'F':
 				if (optarg)
@@ -566,12 +574,13 @@ int main(int argc, char **argv) {
 	}
 
 	if (print_usage) {
-		usage();
+		usage(enable_fontconfig);
 		exit(EXIT_SUCCESS);
 	}
 
 	if (list_dirs) {
-		list_font_dirs();
+		if (enable_fontconfig)
+			list_font_dirs();
 		exit(EXIT_SUCCESS);
 	}
 
@@ -596,7 +605,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	xsg_imlib_init_font_path();
+	xsg_imlib_init_font_path(enable_fontconfig);
 
 	if (list_fonts) {
 		xsg_imlib_list_fonts();
@@ -611,7 +620,7 @@ int main(int argc, char **argv) {
 	xsg_conf_set_color_lookup(xsg_window_color_lookup);
 
 	if (optind >= argc) {
-		usage();
+		usage(enable_fontconfig);
 		exit(EXIT_SUCCESS);
 	}
 

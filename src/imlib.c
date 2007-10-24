@@ -616,7 +616,7 @@ void xsg_imlib_list_fonts(void) {
  *
  ******************************************************************************/
 
-void xsg_imlib_init_font_path(void) {
+void xsg_imlib_init_font_path(bool enable_fontconfig) {
 	char **pathv, **p;
 
 	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
@@ -630,6 +630,9 @@ void xsg_imlib_init_font_path(void) {
 	}
 
 	xsg_strfreev(pathv);
+
+	if (!enable_fontconfig)
+		return;
 
 	pathv = xsg_fontconfig_get_path();
 
