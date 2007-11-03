@@ -53,12 +53,12 @@ static bool log_to_stderr = FALSE;
 
 int xsg_log_level = XSG_LOG_LEVEL_WARNING;
 
-static int xsg_logv(const char *domain, int level, const char *format, va_list args) {
+static void xsg_logv(const char *domain, int level, const char *format, va_list args) {
 	static bool running = FALSE;
 	unsigned int pid;
 
 	if (running)
-		return 0;
+		return;
 
 	running = TRUE;
 
@@ -166,19 +166,14 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 		exit(EXIT_FAILURE);
 
 	running = FALSE;
-
-	return 1;
 }
 
-int xsg_log(const char *domain, int level, const char *format, ...) {
+void xsg_log(const char *domain, int level, const char *format, ...) {
 	va_list args;
-	int i;
 
 	va_start(args, format);
-	i = xsg_logv(domain, level, format, args);
+	xsg_logv(domain, level, format, args);
 	va_end(args);
-
-	return i;
 }
 
 /******************************************************************************/

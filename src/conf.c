@@ -88,12 +88,11 @@ static char *error_line(void) {
 	return buffer;
 }
 
-int xsg_conf_error(const char *format, ...) {
+void xsg_conf_error(const char *format, ...) {
 	char *message;
 	char *error;
 	unsigned length;
 	va_list args;
-	int ret;
 
 	va_start(args, format);
 	length = xsg_vasprintf(&message, format, args);
@@ -105,23 +104,20 @@ int xsg_conf_error(const char *format, ...) {
 	error = error_line();
 
 	if (log_name)
-		ret = xsg_error("%s: config line %d: %s:\n%s", log_name, line, message, error);
+		xsg_error("%s: config line %d: %s:\n%s", log_name, line, message, error);
 	else
-		ret = xsg_error("config line %d: %s:\n%s", line, message, error);
+		xsg_error("config line %d: %s:\n%s", line, message, error);
 
 	// xsg_error never returns, but...
 	xsg_free(message);
 	xsg_free(error);
-
-	return ret;
 }
 
-int xsg_conf_warning(const char *format, ...) {
+void xsg_conf_warning(const char *format, ...) {
 	char *message;
 	char *error;
 	unsigned length;
 	va_list args;
-	int ret;
 
 	va_start(args, format);
 	length = xsg_vasprintf(&message, format, args);
@@ -133,14 +129,12 @@ int xsg_conf_warning(const char *format, ...) {
 	error = error_line();
 
 	if (log_name)
-		ret = xsg_warning("%s: config line %d: %s:\n%s", log_name, line, message, error);
+		xsg_warning("%s: config line %d: %s:\n%s", log_name, line, message, error);
 	else
-		ret = xsg_warning("config line %d: %s:\n%s", line, message, error);
+		xsg_warning("config line %d: %s:\n%s", line, message, error);
 
 	xsg_free(message);
 	xsg_free(error);
-
-	return ret;
 }
 
 /******************************************************************************/

@@ -96,8 +96,8 @@ char *xsg_conf_read_string(void) XSG_API;
 
 bool xsg_conf_find_command(const char *command) XSG_API;
 
-int xsg_conf_error(const char *format, ...) XSG_API;
-int xsg_conf_warning(const char *format, ...) XSG_API;
+void xsg_conf_error(const char *format, ...) XSG_API;
+void xsg_conf_warning(const char *format, ...) XSG_API;
 
 /******************************************************************************
  * var.c
@@ -345,28 +345,28 @@ int xsg_isinf(double x) XSG_API;
 
 extern int xsg_log_level XSG_API;
 
-int xsg_log(const char *domain, int level, const char *format, ...) XSG_API;
+void xsg_log(const char *domain, int level, const char *format, ...) XSG_API;
 
 #if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
-# define xsg_error(...) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__)
+# define xsg_error(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_ERROR)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__); } while(0)
 #else
 # define xsg_error(...)
 #endif
 
 #if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL)
-# define xsg_warning(...) likely(xsg_log_level < XSG_LOG_LEVEL_WARNING) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__)
+# define xsg_warning(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_WARNING)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__); } while (0)
 #else
 # define xsg_warning(...)
 #endif
 
 #if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL)
-# define xsg_message(...) likely(xsg_log_level < XSG_LOG_LEVEL_MESSAGE) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__)
+# define xsg_message(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MESSAGE)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__); } while(0)
 #else
 # define xsg_message(...)
 #endif
 
 #if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL)
-# define xsg_debug(...) likely(xsg_log_level < XSG_LOG_LEVEL_DEBUG) ? 0 : xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__)
+# define xsg_debug(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_DEBUG)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__); } while(0)
 #else
 # define xsg_debug(...)
 #endif
