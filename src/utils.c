@@ -613,7 +613,7 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path) {
 	pathv = xsg_strsplit_set(path, ":", 0);
 
 	for (p = pathv; *p; p++) {
-		if (*p[0] == '~') {
+		if (*p[0] == '~' && *p[1] == '/') {
 			char *q;
 
 			q = xsg_build_filename(xsg_get_home_dir(), (*p) + 1, NULL);
