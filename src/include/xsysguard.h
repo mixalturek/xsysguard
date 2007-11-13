@@ -268,10 +268,15 @@ double xsg_double_be(double d) XSG_API;
 double xsg_double_le(double d) XSG_API;
 
 /* mem */
-void *xsg_malloc(size_t size) XSG_API;
-void *xsg_malloc0(size_t size) XSG_API;
-void *xsg_realloc(void *mem, size_t size) XSG_API;
-void xsg_free(void *mem) XSG_API;
+void *xsg_malloc_(size_t size, const char *file, int line) XSG_API;
+void *xsg_malloc0_(size_t size, const char *file, int line) XSG_API;
+void *xsg_realloc_(void *mem, size_t size, const char *file, int line) XSG_API;
+void xsg_free_(void *mem, const char *file, int line) XSG_API;
+
+#define xsg_malloc(size) xsg_malloc_(size, __FILE__, __LINE__)
+#define xsg_malloc0(size) xsg_malloc0_(size, __FILE__, __LINE__)
+#define xsg_realloc(mem, size) xsg_realloc_(mem, size, __FILE__, __LINE__)
+#define xsg_free(mem) xsg_free_(mem, __FILE__, __LINE__)
 
 #define xsg_new(struct_type, n_structs) \
 	((struct_type *) xsg_malloc(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))

@@ -44,7 +44,7 @@
  *
  ******************************************************************************/
 
-void *xsg_malloc(size_t size) {
+void *xsg_malloc_(size_t size, const char *file, int line) {
 	if (likely(size)) {
 		void *mem;
 
@@ -52,18 +52,18 @@ void *xsg_malloc(size_t size) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc:  %4lu bytes / %9p", size, mem);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc:  %4lu bytes / %9p \t(%s.%d)", size, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes", size);
+		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
 	}
 	return NULL;
 }
 
-void *xsg_malloc0(size_t size) {
+void *xsg_malloc0_(size_t size, const char *file, int line) {
 	if (likely(size)) {
 		void *mem;
 
@@ -71,18 +71,18 @@ void *xsg_malloc0(size_t size) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc0: %4lu bytes / %9p", size, mem);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc0: %4lu bytes / %9p \t(%s.%d)", size, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes", size);
+		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
 	}
 	return NULL;
 }
 
-void *xsg_realloc(void *mem, size_t size) {
+void *xsg_realloc_(void *mem, size_t size, const char *file, int line) {
 	if (likely(size)) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
@@ -96,13 +96,13 @@ void *xsg_realloc(void *mem, size_t size) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "realloc: %4lu bytes / %9p -> %9p", size, old, mem);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "realloc: %4lu bytes / %9p -> %9p \t(%s.%d)", size, old, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes", size);
+		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
 	}
 	if (mem)
 		free(mem);
@@ -110,11 +110,11 @@ void *xsg_realloc(void *mem, size_t size) {
 	return NULL;
 }
 
-void xsg_free(void *mem) {
+void xsg_free_(void *mem, const char *file, int line) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-		xsg_log(NULL, XSG_LOG_LEVEL_MEM, "free: %9p", mem);
+		xsg_log(NULL, XSG_LOG_LEVEL_MEM, "free: %9p \t(%s.%d)", mem, file, line);
 #endif
 
 	free(mem);
