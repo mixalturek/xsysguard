@@ -52,13 +52,13 @@ void *xsg_malloc_(size_t size, const char *file, int line) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc:  %4lu bytes / %9p \t(%s.%d)", size, mem, file, line);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc:  %4zu bytes / %9p \t(%s.%d)", size, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
+		xsg_error("Failed to allocate %zu bytes: %s.%d", size, file, line);
 	}
 	return NULL;
 }
@@ -71,13 +71,13 @@ void *xsg_malloc0_(size_t size, const char *file, int line) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc0: %4lu bytes / %9p \t(%s.%d)", size, mem, file, line);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "malloc0: %4zu bytes / %9p \t(%s.%d)", size, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
+		xsg_error("Failed to allocate %zu bytes: %s.%d", size, file, line);
 	}
 	return NULL;
 }
@@ -96,13 +96,13 @@ void *xsg_realloc_(void *mem, size_t size, const char *file, int line) {
 
 #if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
 		if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MEM))
-			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "realloc: %4lu bytes / %9p -> %9p \t(%s.%d)", size, old, mem, file, line);
+			xsg_log(NULL, XSG_LOG_LEVEL_MEM, "realloc: %4zu bytes / %9p -> %9p \t(%s.%d)", size, old, mem, file, line);
 #endif
 
 		if (likely(mem != NULL))
 			return mem;
 
-		xsg_error("Failed to allocate %lu bytes: %s.%d", size, file, line);
+		xsg_error("Failed to allocate %zu bytes: %s.%d", size, file, line);
 	}
 	if (mem)
 		free(mem);
@@ -290,13 +290,13 @@ int xsg_strvcmp(char **strv1, char **strv2) {
 		return 1;
 }
 
-char *xsg_strdup(const char *str) {
+char *xsg_strdup_(const char *str, const char *file, int line) {
 	char *new_str;
 	size_t length;
 
 	if (str) {
 		length = strlen(str) + 1;
-		new_str = xsg_new(char, length);
+		new_str = (char *) xsg_malloc_(length, file, line);
 		memcpy(new_str, str, length);
 	} else {
 		new_str = NULL;
@@ -305,11 +305,11 @@ char *xsg_strdup(const char *str) {
 	return new_str;
 }
 
-char *xsg_strndup(const char *str, size_t n) {
+char *xsg_strndup_(const char *str, size_t n, const char *file, int line) {
 	char *new_str;
 
 	if (str) {
-		new_str = xsg_new(char, n+ 1);
+		new_str = (char *) xsg_malloc_(n + 1, file, line);
 		strncpy(new_str, str, n);
 		new_str[n] = '\0';
 	} else {

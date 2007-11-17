@@ -254,8 +254,12 @@ char *xsg_str_without_suffix(const char *str, const char *suffix) XSG_API;
 char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens) XSG_API;
 void xsg_strfreev(char **str_array) XSG_API;
 int xsg_strvcmp(char **strv1, char **strv2) XSG_API;
-char *xsg_strdup(const char *str) XSG_API;
-char *xsg_strndup(const char *str, size_t n) XSG_API;
+
+#define xsg_strdup(str) xsg_strdup_(str, __FILE__, __LINE__)
+#define xsg_strndup(str, n) xsg_strndup_(str, n, __FILE__, __LINE__)
+
+char *xsg_strdup_(const char *str, const char *file, int line) XSG_API;
+char *xsg_strndup_(const char *str, size_t n, const char *file, int line) XSG_API;
 
 /* byte order */
 uint16_t xsg_uint16_be(uint16_t u) XSG_API;
