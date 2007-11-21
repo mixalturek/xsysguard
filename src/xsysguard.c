@@ -246,6 +246,10 @@ static void parse_config(char *config_name, char *config_buffer) {
 						"Decorations, OverrideRedirect, Background, XShape, "
 						"ARGBVisual or Visible expected");
 			}
+		} else if (xsg_conf_find_command("Module")) {
+			char *module_name = xsg_conf_read_string();
+			xsg_modules_help(module_name);
+			xsg_free(module_name);
 		} else if (xsg_conf_find_command("SetEnv")) {
 			parse_env(config_name);
 		} else if (xsg_conf_find_command("Line")) {
