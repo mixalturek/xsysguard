@@ -78,7 +78,7 @@ static bool timestamps = FALSE;
 
 int xsg_log_level = DEFAULT_LOG_LEVEL;
 
-static int xsg_logv(const char *domain, int level, const char *format, va_list args) {
+static void xsg_logv(const char *domain, int level, const char *format, va_list args) {
 	unsigned int pid;
 	char *prefix = NULL;
 
@@ -160,19 +160,14 @@ static int xsg_logv(const char *domain, int level, const char *format, va_list a
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
 		exit(EXIT_FAILURE);
-
-	return 1;
 }
 
-int xsg_log(const char *domain, int level, const char *format, ...) {
+void xsg_log(const char *domain, int level, const char *format, ...) {
 	va_list args;
-	int i;
 
 	va_start(args, format);
-	i = xsg_logv(domain, level, format, args);
+	xsg_logv(domain, level, format, args);
 	va_end(args);
-
-	return i;
 }
 
 /******************************************************************************/
