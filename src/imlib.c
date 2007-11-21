@@ -117,7 +117,7 @@ Imlib_Image xsg_imlib_load_image(const char *filename) {
 	char *file;
 
 	if (unlikely(image_hash_table == NULL))
-		image_hash_table = xsg_hash_table_new_full(xsg_str_hash, xsg_str_equal, xsg_free, xsg_free);
+		image_hash_table = xsg_hash_table_new_full(xsg_str_hash, xsg_str_equal, free, free);
 
 	if (unlikely(pathv == NULL)) {
 		pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
