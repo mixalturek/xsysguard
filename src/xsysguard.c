@@ -303,7 +303,7 @@ static char *find_config_file(char *name) {
 	if (name[0] == '.' && name[1] == '.' && name[2] == '/')
 		return xsg_strdup(name);
 
-	if (name[0] == '~')
+	if (name[0] == '~' && name[1] == '/')
 		return xsg_build_filename(xsg_get_home_dir(), name + 1, NULL);
 
 	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
