@@ -1,7 +1,7 @@
 /* string.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,6 +208,64 @@ xsg_string_t *xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c) {
 	string->str[pos] = c;
 	string->len += 1;
 	string->str[string->len] = 0;
+	return string;
+}
+
+xsg_string_t *xsg_string_erase(xsg_string_t *string, ssize_t pos, ssize_t len) {
+	if (unlikely(string == NULL))
+		return NULL;
+	if (unlikely(pos < 0))
+		return string;
+	if (unlikely(pos > string->len))
+		return string;
+	if (len < 0) {
+		len = string->len - pos;
+	} else {
+		if (unlikely(pos + len > string->len))
+			return string;
+		if (pos + len < string->len)
+			memmove(string->str + pos, string->str + pos + len, string->len - (pos + len));
+	}
+	string->len -= len;
+	string->str[string->len] = 0;
+	return string;
+}
+
+xsg_string_t *xsg_string_up(xsg_string_t *string) {
+	unsigned char *s;
+	long n;
+
+	if (unlikely(string == NULL))
+		return NULL;
+
+	n = string->len;
+	s = (unsigned char *) string->str;
+
+	while (n) {
+		if (islower(*s))
+			*s = toupper(*s);
+		s++;
+		n--;
+	}
+	return string;
+}
+
+xsg_string_t *xsg_string_down(xsg_string_t *string) {
+	unsigned char *s;
+	long n;
+
+	if (unlikely(string == NULL))
+		return NULL;
+
+	n = string->len;
+	s = (unsigned char *) string->str;
+
+	while (n) {
+		if (isupper(*s))
+			*s = tolower(*s);
+		s++;
+		n--;
+	}
 	return string;
 }
 
