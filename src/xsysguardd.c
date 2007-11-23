@@ -260,7 +260,7 @@ static void usage(void) {
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Print this help message to stdout\n"
-		"  -H, --mhelp         Print help message for MODULE to stdout\n"
+		"  -H, --mhelp=MODULE  Print help message for MODULE to stdout\n"
 		"  -m, --modules       Print a list of all available modules to stdout\n"
 		"  -s, --stderr        Print log messages to stderr\n"
 		"  -c, --color         Enable colored logging\n"
