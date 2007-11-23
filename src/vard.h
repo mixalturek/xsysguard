@@ -25,8 +25,6 @@
 
 /******************************************************************************/
 
-void xsg_var_init(void);
-
 void xsg_var_dirty(xsg_var_t **var, uint32_t n);
 
 void xsg_var_flush_dirty(void);

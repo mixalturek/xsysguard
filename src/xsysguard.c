@@ -34,7 +34,6 @@
 #include "conf.h"
 #include "main.h"
 #include "var.h"
-#include "rpn.h"
 #include "dump.h"
 #include "imlib.h"
 #include "printf.h"
@@ -281,7 +280,7 @@ static void parse_config(char *config_name, char *config_buffer) {
 			while (parse_var(window, widget, update, &var) != 0)
 				xsg_widget_text_parse_var(var);
 		} else {
-			xsg_conf_error("#, Set, SetEnv, Line, Rectangle, Ellipse, Polygon, "
+			xsg_conf_error("#, Set, Module, SetEnv, Line, Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, AreaChart or Text expected");
 		}
 	}
@@ -634,7 +633,6 @@ int main(int argc, char **argv) {
 		optind++;
 	}
 
-	xsg_rpn_init();
 	xsg_window_init();
 	xsg_imlib_init();
 

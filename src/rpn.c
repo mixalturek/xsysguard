@@ -32,322 +32,329 @@
 
 /******************************************************************************/
 
-typedef struct _op_t op_t;
+struct _xsg_rpn_t {
+	xsg_list_t *op_list;
+	xsg_string_t *stack; // S=string, N=number, X=both
+};
 
-/******************************************************************************/
-
-struct _op_t {
+typedef struct _op_t {
 	void (*op)(void);
 	double (*num_func)(void *arg);
 	char *(*str_func)(void *arg);
 	void *arg;
-};
-
-struct _xsg_rpn_t {
-	xsg_list_t *op_list;
-	unsigned num_stack_size;
-	unsigned str_stack_size;
-};
+} op_t;
 
 /******************************************************************************/
 
 static xsg_list_t *rpn_list = NULL;
 
 static double *num_stack = NULL;
-static double *num_stptr = NULL;
 static xsg_string_t **str_stack = NULL;
-static xsg_string_t **str_stptr = NULL;
 
-static unsigned max_num_stack_size = 0;
-static unsigned max_str_stack_size = 0;
-
-/******************************************************************************/
-
-static void build_stacks(void) {
-	unsigned i;
-
-	num_stack = xsg_new(double, max_num_stack_size);
-	str_stack = xsg_new(xsg_string_t *, max_str_stack_size);
-
-	for (i = 0; i < max_str_stack_size; i++)
-		str_stack[i] = xsg_string_new(NULL);
-}
+static unsigned stack_index;
+static unsigned max_stack_size = 0;
 
 /******************************************************************************/
 
 static void op_lt(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] < num_stptr[0] ? 1.0 : 0.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] < num_stack[stack_index] ? 1.0 : 0.0;
+	stack_index -= 1;
 }
 
 static void op_le(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] <= num_stptr[0] ? 1.0 : 0.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] <= num_stack[stack_index] ? 1.0 : 0.0;
+	stack_index -= 1;
 }
 
 static void op_gt(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] > num_stptr[0] ? 1.0 : 0.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] > num_stack[stack_index] ? 1.0 : 0.0;
+	stack_index -= 1;
 }
 
 static void op_ge(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] >= num_stptr[0] ? 1.0 : 0.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] >= num_stack[stack_index] ? 1.0 : 0.0;
+	stack_index -= 1;
 }
 
 static void op_eq(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] == num_stptr[0] ? 1.0 : 0.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] == num_stack[stack_index] ? 1.0 : 0.0;
+	stack_index -= 1;
 }
 
 static void op_ne(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
 	else
-		num_stptr[-1] = num_stptr[-1] == num_stptr[0] ? 0.0 : 1.0;
-	num_stptr -= 1;
+		num_stack[stack_index - 1] = num_stack[stack_index - 1] == num_stack[stack_index] ? 0.0 : 1.0;
+	stack_index -= 1;
 }
 
 static void op_un(void) {
-	num_stptr[0] = isnan(num_stptr[0]) ? 1.0 : 0.0;
+	num_stack[stack_index] = isnan(num_stack[stack_index]) ? 1.0 : 0.0;
 }
 
 static void op_isinf(void) {
-	num_stptr[0] = isinf(num_stptr[0]) ? 1.0 : 0.0;
+	num_stack[stack_index] = isinf(num_stack[stack_index]) ? 1.0 : 0.0;
 }
 
 static void op_if(void) {
-	num_stptr[-2] = num_stptr[-2] != 0.0 ? num_stptr[-1] : num_stptr[0];
-	num_stptr -= 2;
+	xsg_string_t *str_tmp;
+	unsigned index;
+
+	index = num_stack[stack_index - 2] != 0.0 ? stack_index - 1 : stack_index;
+	str_tmp = str_stack[stack_index - 2];
+	str_stack[stack_index - 2] = str_stack[index];
+	str_stack[index] = str_tmp;
+	num_stack[stack_index - 2] = num_stack[index];
+	stack_index -= 2;
+}
+
+static void op_if_str(void) {
+	xsg_string_t *str_tmp;
+	unsigned index;
+
+	index = num_stack[stack_index - 2] != 0.0 ? stack_index - 1 : stack_index;
+	str_tmp = str_stack[stack_index - 2];
+	str_stack[stack_index - 2] = str_stack[index];
+	str_stack[index] = str_tmp;
+	stack_index -= 2;
+}
+
+static void op_if_num(void) {
+	num_stack[stack_index - 2] = num_stack[stack_index - 2] != 0.0 ? num_stack[stack_index - 1] : num_stack[stack_index];
+	stack_index -= 2;
 }
 
 static void op_min(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
-	else if (num_stptr[-1] > num_stptr[0])
-		num_stptr[-1] = num_stptr[0];
-	num_stptr -= 1;
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
+	else if (num_stack[stack_index - 1] > num_stack[stack_index])
+		num_stack[stack_index - 1] = num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_max(void) {
-	if (isnan(num_stptr[-1]))
+	if (isnan(num_stack[stack_index - 1]))
 		;
-	else if (isnan(num_stptr[0]))
-		num_stptr[-1] = num_stptr[0];
-	else if (num_stptr[-1] < num_stptr[0])
-		num_stptr[-1] = num_stptr[0];
-	num_stptr -= 1;
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 1] = num_stack[stack_index];
+	else if (num_stack[stack_index - 1] < num_stack[stack_index])
+		num_stack[stack_index - 1] = num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_limit(void) {
-	if (isnan(num_stptr[-2]))
+	if (isnan(num_stack[stack_index - 2]))
 		;
-	else if (isnan(num_stptr[-1]))
-		num_stptr[-2] = num_stptr[-1];
-	else if (isnan(num_stptr[0]))
-		num_stptr[-2] = num_stptr[0];
-	else if (num_stptr[-2] < num_stptr[-1])
-		num_stptr[-2] = DNAN;
-	else if (num_stptr[-2] > num_stptr[0])
-		num_stptr[-2] = DNAN;
-	num_stptr -= 2;
+	else if (isnan(num_stack[stack_index - 1]))
+		num_stack[stack_index - 2] = num_stack[stack_index - 1];
+	else if (isnan(num_stack[stack_index]))
+		num_stack[stack_index - 2] = num_stack[stack_index];
+	else if (num_stack[stack_index - 2] < num_stack[stack_index - 1])
+		num_stack[stack_index - 2] = DNAN;
+	else if (num_stack[stack_index - 2] > num_stack[stack_index])
+		num_stack[stack_index - 2] = DNAN;
+	stack_index -= 2;
 }
 
 static void op_unkn(void) {
-	num_stptr[+1] = DNAN;
-	num_stptr += 1;
+	num_stack[stack_index + 1] = DNAN;
+	stack_index += 1;
 }
 
 static void op_inf(void) {
-	num_stptr[+1] = DINF;
-	num_stptr += 1;
+	num_stack[stack_index + 1] = DINF;
+	stack_index += 1;
 }
 
 static void op_neginf(void) {
-	num_stptr[+1] = -DINF;
-	num_stptr += 1;
+	num_stack[stack_index + 1] = -DINF;
+	stack_index += 1;
 }
 
 static void op_add(void) {
-	num_stptr[-1] += num_stptr[0];
-	num_stptr -= 1;
+	num_stack[stack_index - 1] += num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_sub(void) {
-	num_stptr[-1] -= num_stptr[0];
-	num_stptr -= 1;
+	num_stack[stack_index - 1] -= num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_mul(void) {
-	num_stptr[-1] *= num_stptr[0];
-	num_stptr -= 1;
+	num_stack[stack_index - 1] *= num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_div(void) {
-	num_stptr[-1] /= num_stptr[0];
-	num_stptr -= 1;
+	num_stack[stack_index - 1] /= num_stack[stack_index];
+	stack_index -= 1;
 }
 
 static void op_mod(void) {
-	num_stptr[-1] = fmod(num_stptr[-1], num_stptr[0]);
-	num_stptr -= 1;
+	num_stack[stack_index - 1] = fmod(num_stack[stack_index - 1], num_stack[stack_index]);
+	stack_index -= 1;
 }
 
 static void op_sin(void) {
-	num_stptr[0] = sin(num_stptr[0]);
+	num_stack[stack_index] = sin(num_stack[stack_index]);
 }
 
 static void op_cos(void) {
-	num_stptr[0] = cos(num_stptr[0]);
+	num_stack[stack_index] = cos(num_stack[stack_index]);
 }
 
 static void op_log(void) {
-	num_stptr[0] = log(num_stptr[0]);
+	num_stack[stack_index] = log(num_stack[stack_index]);
 }
 
 static void op_exp(void) {
-	num_stptr[0] = exp(num_stptr[0]);
+	num_stack[stack_index] = exp(num_stack[stack_index]);
 }
 
 static void op_sqrt(void) {
-	num_stptr[0] = sqrt(num_stptr[0]);
+	num_stack[stack_index] = sqrt(num_stack[stack_index]);
 }
 
 static void op_atan(void) {
-	num_stptr[0] = atan(num_stptr[0]);
+	num_stack[stack_index] = atan(num_stack[stack_index]);
 }
 
 static void op_atan2(void) {
-	num_stptr[-1] = atan2(num_stptr[-1], num_stptr[0]);
-	num_stptr -= 1;
+	num_stack[stack_index - 1] = atan2(num_stack[stack_index - 1], num_stack[stack_index]);
+	stack_index -= 1;
 }
 
 static void op_floor(void) {
-	num_stptr[0] = floor(num_stptr[0]);
+	num_stack[stack_index] = floor(num_stack[stack_index]);
 }
 
 static void op_ceil(void) {
-	num_stptr[0] = ceil(num_stptr[0]);
+	num_stack[stack_index] = ceil(num_stack[stack_index]);
 }
 
 static void op_deg2rad(void) {
-	num_stptr[0] *= 0.0174532952;
+	num_stack[stack_index] *= 0.0174532952;
 }
 
 static void op_rad2deg(void) {
-	num_stptr[0] *= 57.29577951;
+	num_stack[stack_index] *= 57.29577951;
 }
 
 static void op_abs(void) {
-	num_stptr[0] = fabs(num_stptr[0]);
+	num_stack[stack_index] = fabs(num_stack[stack_index]);
 }
 
 static void op_dup(void) {
-	num_stptr[+1] = num_stptr[0];
-	num_stptr += 1;
+	num_stack[stack_index + 1] = num_stack[stack_index];
+	str_stack[stack_index + 1] = xsg_string_assign(str_stack[stack_index + 1], str_stack[stack_index]->str);
+	stack_index += 1;
+}
+
+static void op_dup_num(void) {
+	num_stack[stack_index + 1] = num_stack[stack_index];
+	stack_index += 1;
+}
+
+static void op_dup_str(void) {
+	str_stack[stack_index + 1] = xsg_string_assign(str_stack[stack_index + 1], str_stack[stack_index]->str);
+	stack_index += 1;
 }
 
 static void op_pop(void) {
-	num_stptr -= 1;
-}
-
-static void op_exc(void) {
-	double tmp;
-	tmp = num_stptr[0];
-	num_stptr[0] = num_stptr[-1];
-	num_stptr[-1] = tmp;
+	stack_index -= 1;
 }
 
 /******************************************************************************/
 
-static void op_strdup(void) {
-	str_stptr[+1] = xsg_string_assign(str_stptr[+1], str_stptr[0]->str);
-	str_stptr += 1;
+static void op_exc_nn(void) {
+	double num_tmp;
+
+	num_tmp = num_stack[stack_index];
+	num_stack[stack_index] = num_stack[stack_index - 1];
+	num_stack[stack_index - 1] = num_tmp;
 }
 
-static void op_strpop(void) {
-	str_stptr -= 1;
+static void op_exc_ss(void) {
+	xsg_string_t *str_tmp;
+
+	str_tmp = str_stack[stack_index];
+	str_stack[stack_index] = str_stack[stack_index - 1];
+	str_stack[stack_index - 1] = str_tmp;
 }
 
-static void op_strexc(void) {
-	xsg_string_t *tmp;
-	tmp = str_stptr[0];
-	str_stptr[0] = str_stptr[-1];
-	str_stptr[-1] = tmp;
+static void op_exc(void) {
+	xsg_string_t *str_tmp;
+	double num_tmp;
+
+	str_tmp = str_stack[stack_index];
+	str_stack[stack_index] = str_stack[stack_index - 1];
+	str_stack[stack_index - 1] = str_tmp;
+
+	num_tmp = num_stack[stack_index];
+	num_stack[stack_index] = num_stack[stack_index - 1];
+	num_stack[stack_index - 1] = num_tmp;
 }
+
+/******************************************************************************/
 
 static void op_strlen(void) {
-	num_stptr[+1] = (double) strlen(str_stptr[0]->str);
-	num_stptr += 1;
-	str_stptr -= 1;
+	num_stack[stack_index] = (double) str_stack[stack_index]->len;
 }
 
 static void op_strcmp(void) {
-	num_stptr[+1] = (double) strcmp(str_stptr[-1]->str, str_stptr[0]->str);
-	num_stptr += 1;
-	str_stptr -= 2;
+	num_stack[stack_index - 1] = (double) strcmp(str_stack[stack_index - 1]->str, str_stack[stack_index]->str);
+	stack_index -= 1;
 }
 
 static void op_strcasecmp(void) {
-	num_stptr[+1] = (double) strcasecmp(str_stptr[-1]->str, str_stptr[0]->str);
-	num_stptr += 1;
-	str_stptr -= 2;
+	num_stack[stack_index - 1] = (double) strcasecmp(str_stack[stack_index - 1]->str, str_stack[stack_index]->str);
+	stack_index -= 1;
 }
 
 static void op_strup(void) {
-	char *s = str_stptr[0]->str;
-
-	while (*s) {
-		if (islower(*s))
-			*s = toupper(*s);
-		s++;
-	}
+	str_stack[stack_index] = xsg_string_up(str_stack[stack_index]);
 }
 
 static void op_strdown(void) {
-	char *s = str_stptr[0]->str;
-
-	while (*s) {
-		if (isupper(*s))
-			*s = tolower(*s);
-		s++;
-	}
+	str_stack[stack_index] = xsg_string_down(str_stack[stack_index]);
 }
 
 static void op_strreverse(void) {
 	char *h, *t;
 
-	h = str_stptr[0]->str;
-	t = h + str_stptr[0]->len - 1;
+	h = str_stack[stack_index]->str;
+	t = h + str_stack[stack_index]->len - 1;
 
 	if (*h) {
 		while (h < t) {
@@ -360,30 +367,6 @@ static void op_strreverse(void) {
 			t--;
 		}
 	}
-}
-
-static void op_strinsert(void) {
-	ssize_t pos = num_stptr[-1];
-	ssize_t len = num_stptr[0];
-
-	str_stptr[-1] = xsg_string_insert_len(str_stptr[-1], pos, str_stptr[0]->str, len);
-
-	num_stptr -= 2;
-	str_stptr -= 1;
-}
-
-/******************************************************************************/
-
-static void op_dump(void) {
-	int num_stack_size, str_stack_size, i;
-	num_stack_size = (num_stptr + 1 - num_stack);
-	str_stack_size = (str_stptr + 1 - str_stack);
-	xsg_message("RPN: STACKPOINTER:  NUMBER=%02u/%02u  STRING=%02u/%02u",
-			num_stack_size, max_num_stack_size, str_stack_size, max_str_stack_size);
-	for (i = 0; i < num_stack_size; i++)
-		xsg_message("RPN: NUMBER[%i]: % 12.6f  %e", i, num_stack[i], num_stack[i]);
-	for (i = 0; i < str_stack_size; i++)
-		xsg_message("RPN: STRING[%i]: \"%s\"", i, str_stack[i]->str);
 }
 
 /******************************************************************************/
@@ -399,16 +382,33 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-void xsg_rpn_init(void) {
-	build_stacks();
+static bool pop(xsg_string_t *stack, const char *str) {
+	size_t len, i;
+
+	len = strlen(str);
+
+	if (stack->len < len)
+		return FALSE;
+
+	for (i = 1; i <= len; i++) {
+		char c1, c2;
+
+		c1 = stack->str[stack->len - i];
+		c2 = str[len - i];
+
+		if (c1 != c2 && c1 != 'X')
+			return FALSE;
+	}
+
+	stack->len -= len;
+	stack->str[stack->len] = 0;
+
+	return TRUE;
 }
 
-/******************************************************************************/
-
-#define CHECK_NUM_STACK_SIZE(command, size) \
-	if (rpn[i]->num_stack_size < size) xsg_error("RPN: %s: number stack size smaller than %s", command, #size)
-#define CHECK_STR_STACK_SIZE(command, size) \
-	if (rpn[i]->str_stack_size < size) xsg_error("RPN: %s: string stack size smaller than %s", command, #size)
+#define PUSH(s) rpn[i]->stack = xsg_string_append(rpn[i]->stack, s)
+#define POP(s, log) if (!pop(rpn[i]->stack, s)) { \
+	xsg_conf_error("RPN: %s: stack was '%s', but '%s' expected", log, rpn[i]->stack->str, s); }
 
 void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n) {
 	xsg_rpn_t *mem;
@@ -421,8 +421,7 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n
 
 	for (i = 0; i < n; i++) {
 		rpn[i]->op_list = NULL;
-		rpn[i]->num_stack_size = 0;
-		rpn[i]->str_stack_size = 0;
+		rpn[i]->stack = xsg_string_new(NULL);
 
 		rpn_list = xsg_list_append(rpn_list, rpn[i]);
 	}
@@ -440,271 +439,311 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n
 				*numberp = number;
 				op[i].num_func = get_number;
 				op[i].arg = (void *) numberp;
-				rpn[i]->num_stack_size += 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_string(&string)) {
 			for (i = 0; i < n; i++) {
 				op[i].str_func = get_string;
 				op[i].arg = (void *) string;
-				rpn[i]->str_stack_size += 1;
+				PUSH("S");
 			}
 		} else if (xsg_conf_find_command("LT")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("LT", 2);
+				POP("NN", "LT");
 				op[i].op = op_lt;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("LE")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("LE", 2);
+				POP("NN", "LE");
 				op[i].op = op_le;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("GT")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("GT", 2);
+				POP("NN", "GT");
 				op[i].op = op_gt;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("GE")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("GE", 2);
+				POP("NN", "GE");
 				op[i].op = op_ge;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("EQ")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("EQ", 2);
+				POP("NN", "EQ");
 				op[i].op = op_eq;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("NE")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("NE", 2);
+				POP("NN", "NE");
 				op[i].op = op_ne;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("UN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("UN", 1);
+				POP("N", "UN");
 				op[i].op = op_un;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("ISINF")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("ISINF", 1);
+				POP("N", "ISINF");
 				op[i].op = op_isinf;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("IF")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("IF", 3);
-				op[i].op = op_if;
-				rpn[i]->num_stack_size -= 2;
+				// NOTE: "NXX" needs to be first! ("NNN" and "NSS" will match "NXX" too)
+				if (pop(rpn[i]->stack, "NXX")) {
+					op[i].op = op_if;
+					PUSH("X");
+				} else if (pop(rpn[i]->stack, "NNN")) {
+					op[i].op = op_if_num;
+					PUSH("N");
+				} else if (pop(rpn[i]->stack, "NSS")) {
+					op[i].op = op_if_str;
+					PUSH("S");
+				} else {
+					xsg_conf_error("RPN: IF: stack was '%s', but 'NNN' or 'NSS' expected",
+							rpn[i]->stack->str);
+				}
 			}
 		} else if (xsg_conf_find_command("MIN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("MIN", 2);
+				POP("NN", "MIN");
 				op[i].op = op_min;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("MAX")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("MAX", 2);
+				POP("NN", "MAX");
 				op[i].op = op_max;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("LIMIT")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("LIMIT", 3);
+				POP("NNN", "LIMIT");
 				op[i].op = op_limit;
-				rpn[i]->num_stack_size -= 2;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("UNKN")) {
 			for (i = 0; i < n; i++) {
 				op[i].op = op_unkn;
-				rpn[i]->num_stack_size += 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("INF")) {
 			for (i = 0; i < n; i++) {
 				op[i].op = op_inf;
-				rpn[i]->num_stack_size += 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("NEGINF")) {
 			for (i = 0; i < n; i++) {
 				op[i].op = op_neginf;
-				rpn[i]->num_stack_size += 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("ADD")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("ADD", 2);
+				POP("NN", "ADD");
 				op[i].op = op_add;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("SUB")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("SUB", 2);
+				POP("NN", "SUB");
 				op[i].op = op_sub;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("MUL")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("MUL", 2);
+				POP("NN", "MUL");
 				op[i].op = op_mul;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("DIV")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("DIV", 2);
+				POP("NN", "DIV");
 				op[i].op = op_div;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("MOD")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("MOD", 2);
+				POP("NN", "MOD");
 				op[i].op = op_mod;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("SIN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("SIN", 1);
+				POP("N", "SIN");
 				op[i].op = op_sin;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("COS")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("COS", 1);
+				POP("N", "COS");
 				op[i].op = op_cos;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("LOG")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("LOG", 1);
+				POP("N", "LOG");
 				op[i].op = op_log;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("EXP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("EXP", 1);
+				POP("N", "EXP");
 				op[i].op = op_exp;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("SQRT")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("SQRT", 1);
+				POP("N", "SQRT");
 				op[i].op = op_sqrt;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("ATAN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("ATAN", 1);
+				POP("N", "ATAN");
 				op[i].op = op_atan;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("ATAN2")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("ATAN2", 2);
+				POP("NN", "ATAN2");
 				op[i].op = op_atan2;
-				rpn[i]->num_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("FLOOR")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("FLOOR", 1);
+				POP("N", "FLOOR");
 				op[i].op = op_floor;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("CEIL")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("CEIL", 1);
+				POP("N", "CEIL");
 				op[i].op = op_ceil;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("DEG2RAD")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("DEG2RAD", 1);
+				POP("N", "DEG2RAD");
 				op[i].op = op_deg2rad;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("RAD2DEG")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("RAD2DEG", 1);
+				POP("N", "RAD2DEG");
 				op[i].op = op_rad2deg;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("ABS")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("ABS", 1);
+				POP("N", "ABS");
 				op[i].op = op_abs;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("DUP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("DUP", 1);
-				op[i].op = op_dup;
-				rpn[i]->num_stack_size += 1;
+				// NOTE: "X" needs to be first! ("N" and "S" will match "X" too)
+				if (pop(rpn[i]->stack, "X")) {
+					op[i].op = op_dup;
+					PUSH("XX");
+				} else if (pop(rpn[i]->stack, "N")) {
+					op[i].op = op_dup_num;
+					PUSH("NN");
+				} else if (pop(rpn[i]->stack, "S")) {
+					op[i].op = op_dup_str;
+					PUSH("SS");
+				} else {
+					xsg_conf_error("RPN: DUP: no element on the stack");
+				}
 			}
 		} else if (xsg_conf_find_command("POP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("POP", 1);
-				op[i].op = op_pop;
-				rpn[i]->num_stack_size -= 1;
+				if (pop(rpn[i]->stack, "X")) {
+					op[i].op = op_pop;
+				} else if (pop(rpn[i]->stack, "N")) {
+					op[i].op = op_pop;
+				} else if (pop(rpn[i]->stack, "S")) {
+					op[i].op = op_pop;
+				} else {
+					xsg_conf_error("RPN: POP: no element on the stack");
+				}
 			}
 		} else if (xsg_conf_find_command("EXC")) {
 			for (i = 0; i < n; i++) {
-				CHECK_NUM_STACK_SIZE("EXC", 2);
-				op[i].op = op_exc;
-			}
-		} else if (xsg_conf_find_command("STRDUP")) {
-			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRDUP", 1);
-				op[i].op = op_strdup;
-				rpn[i]->str_stack_size += 1;
-			}
-		} else if (xsg_conf_find_command("STRPOP")) {
-			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRPOP", 1);
-				op[i].op = op_strpop;
-				rpn[i]->str_stack_size -= 1;
-			}
-		} else if (xsg_conf_find_command("STREXC")) {
-			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STREXC", 2);
-				op[i].op = op_strexc;
+				// NOTE: order is important! "XX" needs to be first! then "XN", "XS", "NX", "SX"
+				if (pop(rpn[i]->stack, "XX")) {
+					op[i].op = op_exc;
+					PUSH("XX");
+				} else if (pop(rpn[i]->stack, "XN")) {
+					op[i].op = op_exc;
+					PUSH("NX");
+				} else if (pop(rpn[i]->stack, "XS")) {
+					op[i].op = op_exc;
+					PUSH("SX");
+				} else if (pop(rpn[i]->stack, "NX")) {
+					op[i].op = op_exc;
+					PUSH("XN");
+				} else if (pop(rpn[i]->stack, "SX")) {
+					op[i].op = op_exc;
+					PUSH("XS");
+				} else if (pop(rpn[i]->stack, "NS")) {
+					op[i].op = op_exc;
+					PUSH("SN");
+				} else if (pop(rpn[i]->stack, "SN")) {
+					op[i].op = op_exc;
+					PUSH("NS");
+				} else if (pop(rpn[i]->stack, "NN")) {
+					op[i].op = op_exc_nn;
+					PUSH("NN");
+				} else if (pop(rpn[i]->stack, "SS")) {
+					op[i].op = op_exc_ss;
+					PUSH("SS");
+				} else {
+					xsg_conf_error("RPN: EXC: no two elements on the stack");
+				}
 			}
 		} else if (xsg_conf_find_command("STRLEN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRLEN", 1);
+				POP("S", "STRLEN");
 				op[i].op = op_strlen;
-				rpn[i]->num_stack_size += 1;
-				rpn[i]->str_stack_size -= 1;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("STRCMP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRCMP", 2);
+				POP("SS", "STRCMP");
 				op[i].op = op_strcmp;
-				rpn[i]->num_stack_size += 1;
-				rpn[i]->str_stack_size -= 2;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("STRCASECMP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRCASECMP", 2);
+				POP("SS", "STRCASECMP");
 				op[i].op = op_strcasecmp;
-				rpn[i]->num_stack_size += 1;
-				rpn[i]->str_stack_size -= 2;
+				PUSH("N");
 			}
 		} else if (xsg_conf_find_command("STRUP")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRUP", 1);
+				POP("S", "STRUP");
 				op[i].op = op_strup;
+				PUSH("S");
 			}
 		} else if (xsg_conf_find_command("STRDOWN")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRDOWN", 1);
+				POP("S", "STRDOWN");
 				op[i].op = op_strdown;
+				PUSH("S");
 			}
 		} else if (xsg_conf_find_command("STRREVERSE")) {
 			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRREVERSE", 1);
+				POP("S", "STRREVERSE");
 				op[i].op = op_strreverse;
-			}
-		} else if (xsg_conf_find_command("STRINSERT")) {
-			for (i = 0; i < n; i++) {
-				CHECK_STR_STACK_SIZE("STRINSERT", 2);
-				CHECK_NUM_STACK_SIZE("STRINSERT", 2);
-				op[i].op = op_strinsert;
-				rpn[i]->num_stack_size -= 2;
-				rpn[i]->str_stack_size -= 1;
-			}
-		} else if (xsg_conf_find_command("DUMP")) {
-			for (i = 0; i < n; i++) {
-				op[i].op = op_dump;
+				PUSH("S");
 			}
 		} else {
 			double (**num)(void *) = alloca(sizeof(void *) * n);
@@ -721,80 +760,98 @@ void xsg_rpn_parse(uint64_t update, xsg_var_t **var, xsg_rpn_t **rpn, uint32_t n
 				xsg_conf_error("number, string, module name, LT, LE, GT, GE, EQ, NE, UN, ISINF, IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, ADD, SUB, MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, ATAN, ATAN2, FLOOR, CEIL, DEG2RAD, RAD2DEG, "
-						"ABS, DUP, POP, EXC, STRDUP, STRPOP, STREXC, STRLEN, STRCMP, "
-						"STRCASECMP, STRUP, STRDOWN, STRREVERSE, STRINSERT or DUMP expected");
+						"ABS, DUP, POP, EXC, STRLEN, STRCMP, "
+						"STRCASECMP, STRUP, STRDOWN or STRREVERSE expected");
 
 			for (i = 0; i < n; i++) {
 				op[i].num_func = num[i];
 				op[i].str_func = str[i];
 				op[i].arg = arg[i];
 
-				if (num[i] != NULL)
-					rpn[i]->num_stack_size += 1;
-				if (str[i] != NULL)
-					rpn[i]->str_stack_size += 1;
+				if (num[i] != NULL && str[i] != NULL)
+					PUSH("X");
+				else if (num[i] != NULL)
+					PUSH("N");
+				else if (str[i] != NULL)
+					PUSH("S");
 			}
 		}
 
 		for (i = 0; i < n; i++) {
-			max_num_stack_size = MAX(max_num_stack_size, rpn[i]->num_stack_size);
-			max_str_stack_size = MAX(max_str_stack_size, rpn[i]->str_stack_size);
+			if (rpn[i]->stack->len > max_stack_size) {
+				size_t j;
 
+				num_stack = xsg_renew(double, num_stack, rpn[i]->stack->len);
+				str_stack = xsg_renew(xsg_string_t *, str_stack, rpn[i]->stack->len);
+
+				for (j = max_stack_size; j < rpn[i]->stack->len; j++)
+					str_stack[j] = xsg_string_new(NULL);
+
+				max_stack_size = rpn[i]->stack->len;
+			}
 			rpn[i]->op_list = xsg_list_append(rpn[i]->op_list, op + i);
 		}
-
 	} while (xsg_conf_find_comma());
+
+	for (i = 0; i < n; i++)
+		if (rpn[i]->stack->len < 1)
+			xsg_conf_error("RPN: no element on the stack");
 }
+
+/******************************************************************************/
 
 static void calc(xsg_rpn_t *rpn) {
 	xsg_list_t *l;
 
-	num_stptr = num_stack - 1;
-	str_stptr = str_stack - 1;
+	stack_index = -1;
 
 	for (l = rpn->op_list; l; l = l->next) {
-		op_t *op = l->data;
+		op_t *op = (op_t *) l->data;
+
 		if (op->op) {
 			op->op();
 		} else {
-			if (op->num_func) {
-				num_stptr[+1] = op->num_func(op->arg);
-				num_stptr++;
-			}
-			if (op->str_func) {
-				str_stptr[+1] = xsg_string_assign(str_stptr[+1], op->str_func(op->arg));
-				str_stptr++;
-			}
+			stack_index++;
+			if (op->num_func)
+				num_stack[stack_index] = op->num_func(op->arg);
+			if (op->str_func)
+				str_stack[stack_index] = xsg_string_assign(str_stack[stack_index], op->str_func(op->arg));
 		}
 	}
 }
 
 double xsg_rpn_get_num(xsg_rpn_t *rpn) {
 	double num;
+	char type;
 
-	if (unlikely(rpn->num_stack_size < 1)) {
-		xsg_warning("RPN: no number left on stack");
+	type = rpn->stack->str[rpn->stack->len - 1];
+
+	if (unlikely(type != 'N') && unlikely(type != 'X')) {
+		xsg_warning("RPN: no number on the stack");
 		return DNAN;
 	}
 
 	calc(rpn);
 
-	num = num_stptr[0];
+	num = num_stack[stack_index];
 
 	return num;
 }
 
 char *xsg_rpn_get_str(xsg_rpn_t *rpn) {
 	char *str;
+	char type;
 
-	if (unlikely(rpn->str_stack_size < 1)) {
-		xsg_warning("RPN: no string left on stack");
+	type = rpn->stack->str[rpn->stack->len - 1];
+
+	if (unlikely(type != 'S') && unlikely(type != 'X')) {
+		xsg_warning("RPN: no string on the stack");
 		return NULL;
 	}
 
 	calc(rpn);
 
-	str = str_stptr[0]->str;
+	str = str_stack[stack_index]->str;
 
 	return str;
 }

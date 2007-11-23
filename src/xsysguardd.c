@@ -30,7 +30,6 @@
 #include "conf.h"
 #include "main.h"
 #include "vard.h"
-#include "rpn.h"
 #include "writebuffer.h"
 
 /******************************************************************************/
@@ -384,11 +383,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	xsg_var_init();
-
 	read_config(stdin, log_level_overwrite);
-
-	xsg_rpn_init();
 
 	xsg_main_loop(0);
 
