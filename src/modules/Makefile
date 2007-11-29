@@ -17,6 +17,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+-include ../../Makefile.config
+
 prefix 		?= /usr/local
 exec_prefix 	?= $(prefix)
 bindir 		?= $(exec_prefix)/bin
@@ -28,7 +30,6 @@ docdir 		?= $(datarootdir)/doc/xsysguard
 mandir 		?= $(datarootdir)/man
 man1dir 	?= $(mandir)/man1
 
-SHELL 		:= /bin/sh
 INSTALL 	?= install
 INSTALL_PROGRAM ?= $(INSTALL)
 INSTALL_DATA 	?= $(INSTALL) -m 644
