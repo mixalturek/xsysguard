@@ -252,7 +252,7 @@ static void loop(uint64_t num) {
 				xsg_warning("Running all timeout functions due to time error");
 				for (l = timeout_list; l; l = l->next) {
 					xsg_main_timeout_t *timeout = l->data;
-					timeout->func(timeout->arg);
+					timeout->func(timeout->arg, TRUE);
 				}
 			}
 
@@ -282,7 +282,7 @@ static void loop(uint64_t num) {
 				struct timeval timeout_sleep;
 
 				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
-					t->func(t->arg);
+					t->func(t->arg, FALSE);
 
 				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
 					continue;
@@ -332,7 +332,7 @@ static void loop(uint64_t num) {
 
 			if (fd_count == 0) {
 				if (timeout != NULL) {
-					timeout->func(timeout->arg);
+					timeout->func(timeout->arg, FALSE);
 					xsg_var_flush_dirty();
 					continue;
 				} else {

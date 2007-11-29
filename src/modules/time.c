@@ -45,7 +45,7 @@ static void set_timeout(struct timeval *tv) {
 	tv->tv_usec = 0;
 }
 
-static void timeout_handler(void *arg) {
+static void timeout_handler(void *arg, bool time_error) {
 	xsg_list_t *l;
 
 	for (l = var_list; l; l = l->next) {

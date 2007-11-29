@@ -104,7 +104,7 @@ static xsg_main_poll_t poll = { 0 };
  *
  ******************************************************************************/
 
-static void copy_from_parent_timeout(void *arg);
+static void copy_from_parent_timeout(void *arg, bool time_error);
 
 xsg_window_t *xsg_window_new(char *config_name) {
 	xsg_window_t *window;
@@ -449,7 +449,7 @@ static void grab_parent_background(xsg_window_t *window) {
 	grab_background(window, parent);
 }
 
-static void copy_from_parent_timeout(void *arg) {
+static void copy_from_parent_timeout(void *arg, bool time_error) {
 	xsg_window_t *window = arg;
 	grab_parent_background(window);
 	xsg_main_remove_timeout(&window->copy_from_parent_timeout);

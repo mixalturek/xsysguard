@@ -145,7 +145,7 @@ void xsg_main_remove_poll(xsg_main_poll_t *poll) XSG_API;
 
 typedef struct _xsg_main_timeout_t {
 	struct timeval tv; // absolute time
-	void (*func)(void *arg);
+	void (*func)(void *arg, bool time_error);
 	void *arg;
 } xsg_main_timeout_t;
 
