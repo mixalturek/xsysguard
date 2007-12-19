@@ -65,15 +65,15 @@ char **xsg_fontconfig_get_path(void) {
 		}
 	}
 
-	FcInit = dlsym(lib, "FcInit");
+	FcInit = (FcBool (*)(void)) (intptr_t) dlsym(lib, "FcInit");
 	CHECK(FcInit);
-	FcConfigGetFontDirs = dlsym(lib, "FcConfigGetFontDirs");
+	FcConfigGetFontDirs = (FcStrList *(*)(FcConfig *)) (intptr_t) dlsym(lib, "FcConfigGetFontDirs");
 	CHECK(FcConfigGetFontDirs);
-	FcStrListNext = dlsym(lib, "FcStrListNext");
+	FcStrListNext = (FcChar8 *(*)(FcStrList *)) (intptr_t) dlsym(lib, "FcStrListNext");
 	CHECK(FcStrListNext);
-	FcStrListDone = dlsym(lib, "FcStrListDone");
+	FcStrListDone = (void (*)(FcStrList *)) (intptr_t) dlsym(lib, "FcStrListDone");
 	CHECK(FcStrListDone);
-	FcFini = dlsym(lib, "FcFini");
+	FcFini = (void (*)(void)) (intptr_t) dlsym(lib, "FcFini");
 	CHECK(FcFini);
 
 	if (!FcInit()) {

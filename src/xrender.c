@@ -118,34 +118,34 @@ void xsg_xrender_init(Display *dpy) {
 	if ((libcomposite = dlopen("libXcomposite.so", RTLD_LAZY | RTLD_LOCAL)) == NULL)
 		xsg_error("Cannot open libXcomposite.so: %s", dlerror());
 
-	if ((XRenderQueryExtension = dlsym(librender, "XRenderQueryExtension")) == NULL)
+	if ((XRenderQueryExtension = (Bool (*)(Display *, int *, int *)) (intptr_t) dlsym(librender, "XRenderQueryExtension")) == NULL)
 		xsg_error("Cannot find symbol XRenderQueryExtension: %s", dlerror());
 
-	if ((XRenderQueryVersion = dlsym(librender, "XRenderQueryVersion")) == NULL)
+	if ((XRenderQueryVersion = (Status (*)(Display *, int *, int *)) (intptr_t) dlsym(librender, "XRenderQueryVersion")) == NULL)
 		xsg_error("Cannot find symbol XRenderQueryVersion: %S", dlerror());
 
-	if ((XCompositeQueryExtension = dlsym(libcomposite, "XCompositeQueryExtension")) == NULL)
+	if ((XCompositeQueryExtension = (Bool (*)(Display *, int *, int *)) (intptr_t) dlsym(libcomposite, "XCompositeQueryExtension")) == NULL)
 		xsg_error("Cannot find symbol XCompositeQueryExtension: %s", dlerror());
 
-	if ((XCompositeQueryVersion = dlsym(libcomposite, "XCompositeQueryVersion")) == NULL)
+	if ((XCompositeQueryVersion = (Status (*)(Display *, int *, int *)) (intptr_t) dlsym(libcomposite, "XCompositeQueryVersion")) == NULL)
 		xsg_error("Cannot find symbol XCompositeQueryVersion: %s", dlerror());
 
-	if ((XRenderFindVisualFormat = dlsym(librender, "XRenderFindVisualFormat")) == NULL)
+	if ((XRenderFindVisualFormat = (XRenderPictFormat *(*)(Display *, _Xconst Visual *)) (intptr_t) dlsym(librender, "XRenderFindVisualFormat")) == NULL)
 		xsg_error("Cannot find symbol XRenderFindVisualFormat: %s", dlerror());
 
-	if ((XCompositeRedirectSubwindows = dlsym(libcomposite, "XCompositeRedirectSubwindows")) == NULL)
+	if ((XCompositeRedirectSubwindows = (void (*)(Display *, Window, int)) (intptr_t) dlsym(libcomposite, "XCompositeRedirectSubwindows")) == NULL)
 		xsg_error("Cannot find symbol XCompositeRedirectSubwindows: %s", dlerror());
 
-	if ((XRenderFindStandardFormat = dlsym(librender, "XRenderFindStandardFormat")) == NULL)
+	if ((XRenderFindStandardFormat = (XRenderPictFormat *(*)(Display *, int)) (intptr_t) dlsym(librender, "XRenderFindStandardFormat")) == NULL)
 		xsg_error("Cannot find symbol XRenderFindStandardFormat: %s", dlerror());
 
-	if ((XRenderCreatePicture = dlsym(librender, "XRenderCreatePicture")) == NULL)
+	if ((XRenderCreatePicture = (Picture (*)(Display *, Drawable, _Xconst XRenderPictFormat *, unsigned long, _Xconst XRenderPictureAttributes *)) (intptr_t) dlsym(librender, "XRenderCreatePicture")) == NULL)
 		xsg_error("Cannot find symbol XRenderCreatePicture: %s", dlerror());
 
-	if ((XRenderComposite = dlsym(librender, "XRenderComposite")) == NULL)
+	if ((XRenderComposite = (void (*)(Display *, int, Picture, Picture, Picture, int, int, int, int, int, int, unsigned int, unsigned int)) (intptr_t) dlsym(librender, "XRenderComposite")) == NULL)
 		xsg_error("Cannot find symbol XRenderComposite: %s", dlerror());
 
-	if ((XRenderFreePicture = dlsym(librender, "XRenderFreePicture")) == NULL)
+	if ((XRenderFreePicture = (void (*)(Display *, Picture)) (intptr_t) dlsym(librender, "XRenderFreePicture")) == NULL)
 		xsg_error("Cannot find symbol XRenderFreePicture: %s", dlerror());
 
 	display = dpy;
