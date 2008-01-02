@@ -1,7 +1,7 @@
 /* xsysguardd.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -256,7 +256,7 @@ static void usage(void) {
 	char **pathv;
 	char **p;
 
-	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2007 by Sascha Wessel <sawe@users.sf.net>\n\n"
+	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
 		"Arguments:\n"
 		"  -h, --help          Print this help message to stdout\n"
