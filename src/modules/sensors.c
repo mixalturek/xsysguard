@@ -1,7 +1,7 @@
 /* sensors.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	int chip_nr = 0;
 
 	if (n > 1)
-		xsg_conf_error("Past values not supported by sensors module");
+		xsg_conf_error("Past values not supported");
 
 	if (!initialized) {
 		if (!init())
@@ -104,6 +104,8 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
 			double value = DNAN;
 			feature_t *feature;
+			char *label = NULL;
+			bool found = FALSE;
 
 			//if (feature_data->mapping != SENSORS_NO_MAPPING)
 			//	continue;
@@ -111,7 +113,17 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
 
-			if (!feature_data->name || strcmp(feature_data->name, feature_data_name) != 0)
+			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0)
+				continue;
+
+			if (feature_data->name && !strcmp(feature_data->name, feature_data_name))
+				found = TRUE;
+			else if (label && !strcmp(label, feature_data_name))
+				found = TRUE;
+
+			if (label)
+				free(label);
+			if (!found)
 				continue;
 
 			feature = xsg_new(feature_t, 1);
@@ -153,6 +165,7 @@ static const char *help(void) {
 
 		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
 			double value = DNAN;
+			char *label = NULL;
 
 			//if (feature_data->mapping != SENSORS_NO_MAPPING)
 			//	continue;
@@ -160,7 +173,16 @@ static const char *help(void) {
 			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
 				continue;
 
-			xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f\n", xsg_module.name, chip_name->prefix, feature_data->name, value);
+			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0)
+				continue;
+
+			if (label && feature_data->name && strcmp(label, feature_data->name))
+				xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f  %s\n", xsg_module.name, chip_name->prefix, feature_data->name, value, label);
+			else
+				xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f\n", xsg_module.name, chip_name->prefix, feature_data->name, value);
+
+			if (label)
+				free(label);
 		}
 	}
 
