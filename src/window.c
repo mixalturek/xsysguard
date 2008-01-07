@@ -1,7 +1,7 @@
 /* window.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -502,7 +502,7 @@ static void render(xsg_window_t *window) {
 		return;
 
 	for (update = window->updates; update; update = update->next) {
-		int up_x, up_y, up_w, up_h;
+		int up_x = 0, up_y = 0, up_w = 0, up_h = 0;
 		xsg_list_t *l;
 
 		xsg_update_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
