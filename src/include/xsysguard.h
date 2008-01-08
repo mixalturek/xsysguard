@@ -1,7 +1,7 @@
 /* xsysguard.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -318,6 +318,7 @@ void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_
 
 char *xsg_strsignal(int signum) XSG_API;
 
+char *xsg_getenv(const char *name) XSG_API;
 int xsg_setenv(const char *name, const char *value, int overwrite) XSG_API;
 int xsg_unsetenv(const char *name) XSG_API;
 

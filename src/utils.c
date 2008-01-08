@@ -1,7 +1,7 @@
 /* utils.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -533,7 +533,7 @@ static const char *home_dir = NULL;
 
 const char *xsg_get_home_dir(void) {
 	if (!home_dir)
-		home_dir = xsg_strdup(getenv("HOME"));
+		home_dir = xsg_strdup(xsg_getenv("HOME"));
 	return home_dir;
 }
 
@@ -602,7 +602,7 @@ char **xsg_get_path_from_env(const char *env_name, const char *default_path) {
 	char **pathv;
 	char **p;
 
-	path = getenv(env_name);
+	path = xsg_getenv(env_name);
 
 	if (path == NULL)
 		path = default_path;
@@ -726,6 +726,10 @@ char *xsg_strsignal(int signum) {
 }
 
 /******************************************************************************/
+
+char *xsg_getenv(const char *name) {
+	return getenv(name);
+}
 
 int xsg_setenv(const char *name, const char *value, int overwrite) {
 	return setenv(name, value, overwrite);
