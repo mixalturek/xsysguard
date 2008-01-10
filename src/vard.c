@@ -1,7 +1,7 @@
 /* vard.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ static xsg_main_poll_t alive_poll = { STDIN_FILENO, XSG_MAIN_POLL_READ, read_ali
 void xsg_var_init() {
 	char *timeout;
 
-	timeout = getenv("XSYSGUARD_DAEMON_TIMEOUT");
+	timeout = xsg_getenv("XSYSGUARD_DAEMON_TIMEOUT");
 
 	if (timeout != NULL)
 		last_alive_timeout = atoll(timeout);
