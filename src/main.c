@@ -1,7 +1,7 @@
 /* main.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@
 
 #include "main.h"
 #include "var.h"
-#include "mem.h"
 
 /******************************************************************************/
 
@@ -85,7 +84,7 @@ static flist_t *add_func(flist_t *list, void (*func)(void)) {
 		if (unlikely(func == tmp->func))
 			return list;
 
-	tmp = xsg_mem_new(flist_t);
+	tmp = xsg_new(flist_t, 1);
 	tmp->func = func;
 	tmp->next = list;
 
@@ -105,7 +104,7 @@ static flist_t *remove_func(flist_t *list, void (*func)(void)) {
 				prev->next = tmp->next;
 			else
 				list = tmp->next;
-			xsg_mem_free(tmp);
+			xsg_free(tmp);
 			break;
 		}
 		prev = tmp;

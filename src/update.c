@@ -1,7 +1,7 @@
 /* update.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include <xsysguard.h>
 
 #include "update.h"
-#include "mem.h"
 
 /******************************************************************************/
 
@@ -62,7 +61,7 @@ xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int
 		y_overlap = !((y2_2 <= y1_1) || (y2_1 <= y1_2));
 
 		if (x_overlap && y_overlap) {
-			xsg_mem_free(rect);
+			xsg_free(rect);
 			updates = xsg_list_delete_link(updates, l);
 			x = MIN(x1_1, x1_2);
 			y = MIN(y1_1, y1_2);
@@ -72,7 +71,7 @@ xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int
 		}
 	}
 
-	rect = xsg_mem_new(rect_t);
+	rect = xsg_new(rect_t, 1);
 	rect->xoffset = x;
 	rect->yoffset = y;
 	rect->width = w;
@@ -108,7 +107,7 @@ void xsg_update_free(xsg_list_t *updates) {
 	xsg_list_t *l;
 
 	for (l = updates; l; l = l->next) {
-		xsg_mem_free(l->data);
+		xsg_free(l->data);
 	}
 
 	xsg_list_free(updates);

@@ -1,7 +1,7 @@
 /* list.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,6 @@
  */
 
 #include <xsysguard.h>
-
-#include "mem.h"
 
 /******************************************************************************/
 
@@ -71,7 +69,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 	xsg_list_t *last;
 
-	new_list = xsg_mem_new(xsg_list_t);
+	new_list = xsg_new(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = NULL;
 
@@ -89,7 +87,7 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	xsg_list_t *new_list;
 
-	new_list = xsg_mem_new(xsg_list_t);
+	new_list = xsg_new(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = list;
 
@@ -118,7 +116,7 @@ xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position) {
 	if (!tmp_list)
 		return xsg_list_append(list, data);
 
-	new_list = xsg_mem_new(xsg_list_t);
+	new_list = xsg_new(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->prev = tmp_list->prev;
 	if (tmp_list->prev)
@@ -141,7 +139,7 @@ xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(con
 		return list;
 
 	if (!list) {
-		new_list = xsg_mem_new(xsg_list_t);
+		new_list = xsg_new(xsg_list_t, 1);
 		new_list->data = data;
 		new_list->next = NULL;
 		new_list->prev = NULL;
@@ -155,7 +153,7 @@ xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(con
 		cmp = func(data, tmp_list->data);
 	}
 
-	new_list = xsg_mem_new(xsg_list_t);
+	new_list = xsg_new(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->next = NULL;
 	new_list->prev = NULL;
@@ -194,7 +192,7 @@ xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
 				tmp->next->prev = tmp->prev;
 			if (list == tmp)
 				list = list->next;
-			xsg_mem_free(tmp);
+			xsg_free(tmp);
 			break;
 		}
 	}
@@ -206,7 +204,7 @@ void xsg_list_free(xsg_list_t *list) {
 
 	while (list != NULL) {
 		next = list->next;
-		xsg_mem_free(list);
+		xsg_free(list);
 		list = next;
 	}
 }
@@ -221,7 +219,7 @@ xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link) {
 		if (link == list)
 			list = list->next;
 
-		xsg_mem_free(link);
+		xsg_free(link);
 	}
 
 	return list;
