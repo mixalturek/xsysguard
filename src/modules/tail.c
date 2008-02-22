@@ -1,7 +1,7 @@
 /* tail.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -205,6 +205,6 @@ static const char *help(void) {
 }
 
 xsg_module_t xsg_module = {
-	parse, help, "read files like `tail -F`"
+	parse, help, "tail files in follow mode (`tail -F`)"
 };
 
