@@ -46,8 +46,8 @@ typedef enum {
 	CENTER        = 1 << 4,
 	CENTER_RIGHT  = 1 << 5,
 	BOTTOM_LEFT   = 1 << 6,
-	BOTTOM_CENTER = 1 << 8,
-	BOTTOM_RIGHT  = 1 << 9,
+	BOTTOM_CENTER = 1 << 7,
+	BOTTOM_RIGHT  = 1 << 8,
 	TOP           = TOP_LEFT    | TOP_CENTER    | TOP_RIGHT,
 	Y_CENTER      = CENTER_LEFT | CENTER        | CENTER_RIGHT,
 	BOTTOM        = BOTTOM_LEFT | BOTTOM_CENTER | BOTTOM_RIGHT,
@@ -70,7 +70,9 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	text_t *text;
 	Imlib_Font font;
 	unsigned line_count, line_index;
