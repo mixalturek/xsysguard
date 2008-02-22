@@ -34,7 +34,6 @@
 #include "conf.h"
 #include "main.h"
 #include "var.h"
-#include "dump.h"
 #include "imlib.h"
 #include "printf.h"
 #include "window.h"
@@ -635,8 +634,6 @@ int main(int argc, char **argv) {
 
 	xsg_window_init();
 	xsg_imlib_init();
-
-	xsg_dump_atexit();
 
 	xsg_main_loop(num);
 

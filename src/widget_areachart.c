@@ -1,7 +1,7 @@
 /* widget_areachart.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@
 #include "imlib.h"
 #include "conf.h"
 #include "var.h"
-#include "dump.h"
 
 /******************************************************************************/
 
@@ -938,13 +937,8 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 
 		} else if (xsg_conf_find_command("AddPrev")) {
 			areachart_var->add_prev = TRUE;
-		} else if (xsg_conf_find_command("Dump")) {
-			xsg_dump_register(xsg_conf_read_string(), widget->update, width, areachart_var->values,
-					&areachart->value_index);
-		} else if (xsg_conf_find_command("Past")) {
-			areachart_var->past_vars = xsg_var_parse_past(widget->visible_update, widget->window, widget, width);
 		} else {
-			xsg_conf_error("ColorRange, Top, AddPrev, Dump or Past expected");
+			xsg_conf_error("ColorRange, Top or AddPrev expected");
 		}
 	}
 }

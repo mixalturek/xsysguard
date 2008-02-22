@@ -80,7 +80,6 @@ COMMON_SRC     += compat.c utils.c string.c list.c hash.c buffer.c
 XSYSGUARD_SRC  := $(COMMON_SRC) xsysguard.c
 XSYSGUARD_SRC  += var.c var.h
 XSYSGUARD_SRC  += printf.c printf.h
-XSYSGUARD_SRC  += dump.c dump.h
 XSYSGUARD_SRC  += angle.c angle.h
 XSYSGUARD_SRC  += imlib.c imlib.h
 XSYSGUARD_SRC  += fontconfig.c fontconfig.h
