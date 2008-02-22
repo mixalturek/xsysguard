@@ -37,7 +37,7 @@ static bool init(void) {
 	char *config;
 	FILE *f;
 
-	config = getenv("XSYSGUARD_SENSORS_CONFIG");
+	config = xsg_getenv("XSYSGUARD_SENSORS_CONFIG");
 
 	if (config == NULL)
 		config = DEFAULT_SENSORS_CONF;
