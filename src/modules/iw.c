@@ -726,6 +726,7 @@ static const char *help(void) {
 	static xsg_string_t *string = NULL;
 	xsg_string_t *dev_list = xsg_string_new(NULL);
 	xsg_list_t *l;
+	int i = 0;
 
 	init();
 
@@ -735,15 +736,23 @@ static const char *help(void) {
 	if (string == NULL)
 		string = xsg_string_new(NULL);
 	else
-		string = xsg_string_truncate(string, 0);;
+		string = xsg_string_truncate(string, 0);
 
 	get_device_list();
 
-	for (l = device_list; l; l = l->next)
-		xsg_string_append_printf(dev_list, "%s ", (char *) l->data);
+	for (l = device_list; l; l = l->next) {
+		char name[128];
 
-	xsg_string_append_printf(string, "XSG_IW_DEVICES:   %s\n\n", dev_list->str);
-	xsg_setenv("XSG_IW_DEVICES", dev_list->str, TRUE);
+		sprintf(name, "IW_DEVICE%d", i++);
+		xsg_setenv(name, (char *) device_list->data, TRUE);
+
+		xsg_string_append_printf(string, "%s:   %s\n", name, (char *) device_list->data);
+
+		xsg_string_append_printf(dev_list, "%s ", (char *) l->data);
+	}
+
+	xsg_string_append_printf(string, "IW_DEVICES:   %s\n\n", dev_list->str);
+	xsg_setenv("IW_DEVICES", dev_list->str, TRUE);
 
 	xsg_string_free(dev_list, TRUE);
 
