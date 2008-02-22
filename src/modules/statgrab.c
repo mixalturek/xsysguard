@@ -1,7 +1,7 @@
 /* statgrab.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1017,12 +1017,12 @@ static double get_load_stats_min15(void *arg) {
 /******************************************************************************/
 
 static void parse_load_stats(uint64_t update, double (**num)(void *), char *(**str)(void *), void **arg) {
-	if (xsg_conf_find_command("min1"))
-		*num = get_load_stats_min1;
+	if (xsg_conf_find_command("min15"))
+		*num = get_load_stats_min15;
 	else if (xsg_conf_find_command("min5"))
 		*num = get_load_stats_min5;
-	else if (xsg_conf_find_command("min15"))
-		*num = get_load_stats_min15;
+	else if (xsg_conf_find_command("min1"))
+		*num = get_load_stats_min1;
 	else
 		xsg_conf_error("min1, min5 or min15 expected");
 }
@@ -2906,7 +2906,7 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_shutdown_func(shutdown_stats);
 
 	if (n > 1)
-		xsg_conf_error("Past values not supported by stat module");
+		xsg_conf_error("Past values not supported");
 
 	if (xsg_conf_find_command("host_info")){
 		parse_host_info(update, num, str, arg);
