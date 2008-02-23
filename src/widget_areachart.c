@@ -35,7 +35,6 @@
 
 typedef struct {
 	xsg_var_t *var;
-	xsg_var_t **past_vars;
 	Imlib_Color color;
 	Imlib_Color_Range range;
 	double range_angle;
@@ -665,30 +664,20 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 	for (l = areachart->var_list; l; l = l->next) {
 		areachart_var = l->data;
 
-		if ((var == 0) || (areachart_var->var == var))
+		if ((var == 0) || (areachart_var->var == var)) {
 			areachart_var->values[i] = xsg_var_get_num(areachart_var->var);
-
-		if (areachart_var->past_vars != NULL) {
-			unsigned width, j;
-
-			if (areachart->angle != NULL)
-				width = areachart->angle->width;
-			else
-				width = widget->width;
-
-			for (j = 0; j < width; j++)
-				if (areachart_var->past_vars[j] == var)
-					areachart_var->values[(i + j) % width] = xsg_var_get_num(var);
 		}
 	}
 
-	if (areachart->const_min && areachart->const_max)
+	if (areachart->const_min && areachart->const_max) {
 		return;
+	}
 
-	if (areachart->angle)
+	if (areachart->angle) {
 		count = areachart->angle->width;
-	else
+	} else {
 		count = widget->width;
+	}
 
 	if (!areachart->const_min && !areachart->const_max) {
 		areachart->min = DBL_MAX;
@@ -892,7 +881,6 @@ xsg_widget_areachart_parse_var(xsg_var_t *var)
 	}
 
 	areachart_var->var = var;
-	areachart_var->past_vars = NULL;
 	areachart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	areachart_var->range = NULL;
 	areachart_var->range_angle = 0.0;

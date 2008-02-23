@@ -34,7 +34,6 @@
 
 typedef struct {
 	xsg_var_t *var;
-	xsg_var_t **past_vars;
 	Imlib_Color color;
 	double *values;
 } linechart_var_t;
@@ -361,30 +360,20 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 	for (l = linechart->var_list; l; l = l->next) {
 		linechart_var = l->data;
 
-		if ((var == NULL) || (linechart_var->var == var))
+		if ((var == NULL) || (linechart_var->var == var)) {
 			linechart_var->values[i] = xsg_var_get_num(linechart_var->var);
-
-		if (linechart_var->past_vars != NULL) {
-			unsigned width, j;
-
-			if (linechart->angle != NULL)
-				width = linechart->angle->width;
-			else
-				width = widget->width;
-
-			for (j = 0; j < width; j++)
-				if (linechart_var->past_vars[j] == var)
-					linechart_var->values[(i + j) % width] = xsg_var_get_num(var);
 		}
 	}
 
-	if (linechart->const_min && linechart->const_max)
+	if (linechart->const_min && linechart->const_max) {
 		return;
+	}
 
-	if (linechart->angle)
+	if (linechart->angle) {
 		count = linechart->angle->width;
-	else
+	} else {
 		count = widget->width;
+	}
 
 	if (!linechart->const_min && !linechart->const_max) {
 		linechart->min = DBL_MAX;
@@ -518,7 +507,6 @@ xsg_widget_linechart_parse_var(xsg_var_t *var)
 	}
 
 	linechart_var->var = var;
-	linechart_var->past_vars = NULL;
 	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	linechart_var->values = xsg_new(double, width);
 
