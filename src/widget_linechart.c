@@ -18,15 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * LineChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color>
- *
- */
-
-/******************************************************************************/
-
+#include <xsysguard.h>
 #include <math.h>
 #include <float.h>
 
@@ -62,13 +54,15 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	linechart_t *linechart;
 	xsg_list_t *l;
 
 	linechart = widget->data;
 
-	xsg_debug("%s: Render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
 			xsg_window_get_config_name(widget->window),
 			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
@@ -350,13 +344,15 @@ static void render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	}
 }
 
-static void update_linechart(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_linechart(xsg_widget_t *widget, xsg_var_t *var)
+{
 	linechart_t *linechart;
 	linechart_var_t *linechart_var;
 	xsg_list_t *l;
 	unsigned int i, count;
 
-	// TODO: dirty flag + smalller update rect
+	/* TODO: dirty flag + smalller update rect */
 	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	linechart = (linechart_t *) widget->data;
@@ -425,7 +421,9 @@ static void update_linechart(xsg_widget_t *widget, xsg_var_t *var) {
 	}
 }
 
-static void scroll_linechart(xsg_widget_t *widget) {
+static void
+scroll_linechart(xsg_widget_t *widget)
+{
 	linechart_t *linechart;
 	unsigned int width;
 
@@ -441,7 +439,9 @@ static void scroll_linechart(xsg_widget_t *widget) {
 	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
-xsg_widget_t *xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update) {
+xsg_widget_t *
+xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
+{
 	xsg_widget_t *widget;
 	linechart_t *linechart;
 	double angle = 0.0;
@@ -498,7 +498,9 @@ xsg_widget_t *xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
 	return widget;
 }
 
-void xsg_widget_linechart_parse_var(xsg_var_t *var) {
+void
+xsg_widget_linechart_parse_var(xsg_var_t *var)
+{
 	xsg_widget_t *widget;
 	linechart_t *linechart;
 	linechart_var_t * linechart_var;
@@ -509,18 +511,20 @@ void xsg_widget_linechart_parse_var(xsg_var_t *var) {
 	linechart_var = xsg_new(linechart_var_t, 1);
 	linechart->var_list = xsg_list_append(linechart->var_list, linechart_var);
 
-	if (linechart->angle)
+	if (linechart->angle) {
 		width = linechart->angle->width;
-	else
+	} else {
 		width = widget->width;
+	}
 
 	linechart_var->var = var;
 	linechart_var->past_vars = NULL;
 	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	linechart_var->values = xsg_new(double, width);
 
-	for (i = 0; i < width; i++)
+	for (i = 0; i < width; i++) {
 		linechart_var->values[i] = DNAN;
+	}
 
 	xsg_conf_read_newline();
 }

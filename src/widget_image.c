@@ -1,7 +1,7 @@
 /* widget_image.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Image <x> <y> <image> [Angle <angle>] [Scale <width> <height>]
- *
- */
-
-/******************************************************************************/
-
+#include <xsysguard.h>
 #include <string.h>
 
 #include "widgets.h"
@@ -47,21 +40,26 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	image_t *image;
 	Imlib_Image img;
 
 	image = (image_t *) widget->data;
 
-	xsg_debug("%s: Render Image: x=%d, y=%d, widht=%u, height=%u, filename=%s",
+	xsg_debug("%s: render Image: x=%d, y=%d, "
+			"widht=%u, height=%u, filename=%s",
 			xsg_window_get_config_name(widget->window),
-			widget->xoffset, widget->yoffset, widget->width, widget->height, image->filename);
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height, image->filename);
 
 	img = xsg_imlib_load_image(image->filename);
 
 	if (unlikely(img == NULL)) {
-		xsg_warning("%s: Render Image: Cannot load image \"%s\"",
-				xsg_window_get_config_name(widget->window), image->filename);
+		xsg_warning("%s: render Image: cannot load image \"%s\"",
+				xsg_window_get_config_name(widget->window),
+				image->filename);
 		return;
 	}
 
@@ -69,12 +67,14 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 
 	if ((image->angle == NULL) || (image->angle->angle == 0.0)) {
 		imlib_blend_image_onto_image(img, 1, 0, 0,
-				widget->width, widget->height, widget->xoffset - up_x,
-				widget->yoffset - up_y, widget->width, widget->height);
+				widget->width, widget->height,
+				widget->xoffset - up_x, widget->yoffset - up_y,
+				widget->width, widget->height);
 	} else {
 		imlib_blend_image_onto_image_at_angle(img, 1, 0, 0,
 				image->angle->width, image->angle->height,
-				image->angle->xoffset - up_x, image->angle->yoffset - up_y,
+				image->angle->xoffset - up_x,
+				image->angle->yoffset - up_y,
 				image->angle->angle_x, image->angle->angle_y);
 	}
 
@@ -82,7 +82,9 @@ static void render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int
 	imlib_free_image();
 }
 
-static void update_image(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_image(xsg_widget_t *widget, xsg_var_t *var)
+{
 	image_t *image;
 	char *filename;
 
@@ -92,18 +94,25 @@ static void update_image(xsg_widget_t *widget, xsg_var_t *var) {
 
 	image->filename = xsg_printf(image->print, var);
 
-	if (filename != NULL && strcmp(filename, image->filename) != 0)
-		xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	if (filename != NULL && strcmp(filename, image->filename) != 0) {
+		xsg_window_update_append_rect(widget->window, widget->xoffset,
+				widget->yoffset, widget->width, widget->height);
+	}
 
-	if (filename != NULL)
+	if (filename != NULL) {
 		xsg_free(filename);
+	}
 }
 
-static void scroll_image(xsg_widget_t *widget) {
+static void
+scroll_image(xsg_widget_t *widget)
+{
 	return;
 }
 
-xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update) {
+xsg_widget_t *
+xsg_widget_image_parse(xsg_window_t *window, uint64_t *update)
+{
 	xsg_widget_t *widget;
 	image_t *image;
 	double angle = 0.0;
@@ -129,7 +138,8 @@ xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else {
@@ -137,13 +147,17 @@ xsg_widget_t *xsg_widget_image_parse(xsg_window_t *window, uint64_t *update) {
 		}
 	}
 
-	if (angle != 0.0)
-		image->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	if (angle != 0.0) {
+		image->angle = xsg_angle_parse(angle, widget->xoffset,
+				widget->yoffset, widget->width, widget->height);
+	}
 
 	return widget;
 }
 
-void xsg_widget_image_parse_var(xsg_var_t *var) {
+void
+xsg_widget_image_parse_var(xsg_var_t *var)
+{
 	xsg_widget_t *widget;
 	image_t *image;
 

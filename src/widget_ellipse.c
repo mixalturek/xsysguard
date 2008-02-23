@@ -1,7 +1,7 @@
 /* widget_ellipse.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Ellipse <xc> <yc> <a> <b> <color> [Filled]
- *
- */
-
-/******************************************************************************/
+#include <xsysguard.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -46,38 +40,49 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_ellipse(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	ellipse_t *ellipse;
 
 	ellipse = (ellipse_t *) widget->data;
 
-	xsg_debug("%s: Render Ellipse: xc=%d, yc=%d, a=%d, b=%d, red=%d, green=%d, blue=%d, alpha=%d",
+	xsg_debug("%s: render Ellipse: xc=%d, yc=%d, a=%d, b=%d, red=%d, "
+			"green=%d, blue=%d, alpha=%d",
 			xsg_window_get_config_name(widget->window),
 			ellipse->xc, ellipse->yc, ellipse->a, ellipse->b,
-			ellipse->color.red, ellipse->color.green, ellipse->color.blue, ellipse->color.alpha);
+			ellipse->color.red, ellipse->color.green,
+			ellipse->color.blue, ellipse->color.alpha);
 
 	imlib_context_set_image(buffer);
 
 	imlib_context_set_color(ellipse->color.red, ellipse->color.green,
 			ellipse->color.blue, ellipse->color.alpha);
 
-	if (ellipse->filled)
+	if (ellipse->filled) {
 		imlib_image_fill_ellipse(ellipse->xc - up_x, ellipse->yc - up_y,
 				ellipse->a, ellipse->b);
-	else
+	} else {
 		imlib_image_draw_ellipse(ellipse->xc - up_x, ellipse->yc - up_y,
 				ellipse->a, ellipse->b);
+	}
 }
 
-static void update_ellipse(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_ellipse(xsg_widget_t *widget, xsg_var_t *var)
+{
 	return;
 }
 
-static void scroll_ellipse(xsg_widget_t *widget) {
+static void
+scroll_ellipse(xsg_widget_t *widget)
+{
 	return;
 }
 
-void xsg_widget_ellipse_parse(xsg_window_t *window) {
+void
+xsg_widget_ellipse_parse(xsg_window_t *window)
+{
 	xsg_widget_t *widget;
 	ellipse_t *ellipse;
 
@@ -104,14 +109,14 @@ void xsg_widget_ellipse_parse(xsg_window_t *window) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Filled")) {
 			ellipse->filled = TRUE;
 		} else {
 			xsg_conf_error("Visible or Filled expected");
 		}
 	}
-
 }
 
 

@@ -1,7 +1,7 @@
 /* widget_line.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Line <x1> <y1> <x2> <y2> <color>
- *
- */
-
-/******************************************************************************/
+#include <xsysguard.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -45,15 +39,19 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	line_t *line;
 
 	line = (line_t *) widget->data;
 
-	xsg_debug("%s: Render Line: x1=%d, y1=%d, x2=%d, y2=%d, red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
+	xsg_debug("%s: render Line: x1=%d, y1=%d, x2=%d, y2=%d, "
+			"red=0x%x, green=0x%x, blue=0x%x, alpha=0x%x",
 			xsg_window_get_config_name(widget->window),
 			line->x1, line->y1, line->x2, line->y2,
-			line->color.red, line->color.green, line->color.blue, line->color.alpha);
+			line->color.red, line->color.green, line->color.blue,
+			line->color.alpha);
 
 	imlib_context_set_image(buffer);
 
@@ -64,11 +62,15 @@ static void render_line(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int 
 			line->x2 - up_x, line->y2 - up_y, 0);
 }
 
-static void update_line(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_line(xsg_widget_t *widget, xsg_var_t *var)
+{
 	return;
 }
 
-static void scroll_line(xsg_widget_t *widget) {
+static void
+scroll_line(xsg_widget_t *widget)
+{
 	return;
 }
 
@@ -98,11 +100,11 @@ void xsg_widget_line_parse(xsg_window_t *window) {
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else {
 			xsg_conf_error("Visible expected");
 		}
 	}
 }
-
 

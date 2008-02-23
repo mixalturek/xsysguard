@@ -1,7 +1,7 @@
 /* widget_rectangle.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Rectangle <x> <y> <width> <height> <color> [Angle <angle>] [ColorRange <angle> <count> <distance> <color> ...] [Filled]
- *
- */
-
-/******************************************************************************/
+#include <xsysguard.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -46,13 +40,15 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	rectangle_t *rectangle;
 	int xoffset, yoffset;
 	unsigned int width, height;
 	double angle;
 
-	xsg_debug("%s: Render Rectangle", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Rectangle", xsg_window_get_config_name(widget->window));
 
 	rectangle = (rectangle_t *) widget->data;
 
@@ -122,15 +118,21 @@ static void render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	}
 }
 
-static void update_rectangle(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_rectangle(xsg_widget_t *widget, xsg_var_t *var)
+{
 	return;
 }
 
-static void scroll_rectangle(xsg_widget_t *widget) {
+static void
+scroll_rectangle(xsg_widget_t *widget)
+{
 	return;
 }
 
-void xsg_widget_rectangle_parse(xsg_window_t *window) {
+void
+xsg_widget_rectangle_parse(xsg_window_t *window)
+{
 	xsg_widget_t *widget;
 	rectangle_t *rectangle;
 	double angle = 0.0;

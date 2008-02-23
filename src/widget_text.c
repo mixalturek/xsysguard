@@ -1,7 +1,7 @@
 /* widget_text.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Text <update> <x> <y> <width> <height> <color> <font> <format> [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
- * + <variable>
- *
- */
-
-/******************************************************************************/
+#include <xsysguard.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -79,11 +72,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	int line_advance, space_advance;
 	char **linev;
 
-	xsg_debug("%s: Render Text", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Text", xsg_window_get_config_name(widget->window));
 
 	text = widget->data;
 
-	// count lines
+	/* count lines */
 	line_count = 0;
 	for (linev = text->lines; *linev != NULL; linev++)
 		line_count++;
@@ -492,7 +485,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	imlib_free_font();
 }
 
-static void update_text(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_text(xsg_widget_t *widget, xsg_var_t *var)
+{
 	text_t *text;
 	char **lines;
 
@@ -509,11 +504,15 @@ static void update_text(xsg_widget_t *widget, xsg_var_t *var) {
 		xsg_strfreev(lines);
 }
 
-static void scroll_text(xsg_widget_t *widget) {
+static void
+scroll_text(xsg_widget_t *widget)
+{
 	return;
 }
 
-xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
+xsg_widget_t *
+xsg_widget_text_parse(xsg_window_t *window, uint64_t *update)
+{
 	xsg_widget_t *widget;
 	text_t *text;
 	double angle = 0.0;
@@ -583,7 +582,9 @@ xsg_widget_t *xsg_widget_text_parse(xsg_window_t *window, uint64_t *update) {
 	return widget;
 }
 
-void xsg_widget_text_parse_var(xsg_var_t *var) {
+void
+xsg_widget_text_parse_var(xsg_var_t *var)
+{
 	xsg_widget_t *widget;
 	text_t *text;
 

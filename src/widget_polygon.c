@@ -1,7 +1,7 @@
 /* widget_polygon.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * Polygon <color> <count> <x> <y> <x> <y> ... [Filled|Closed]
- *
- */
-
-/******************************************************************************/
+#include <xsysguard.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -50,12 +44,14 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	polygon_t *polygon;
 	ImlibPolygon poly;
 	unsigned int i;
 
-	xsg_debug("%s: Render Polygon", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Polygon", xsg_window_get_config_name(widget->window));
 
 	polygon = (polygon_t *) widget->data;
 
@@ -77,15 +73,21 @@ static void render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, i
 	imlib_polygon_free(poly);
 }
 
-static void update_polygon(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_polygon(xsg_widget_t *widget, xsg_var_t *var)
+{
 	return;
 }
 
-static void scroll_polygon(xsg_widget_t *widget) {
+static void
+scroll_polygon(xsg_widget_t *widget)
+{
 	return;
 }
 
-void xsg_widget_polygon_parse(xsg_window_t *window) {
+void
+xsg_widget_polygon_parse(xsg_window_t *window)
+{
 	xsg_widget_t *widget;
 	polygon_t *polygon;
 	ImlibPolygon poly;

@@ -18,15 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * AreaChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Background <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color> ...] [AddPrev]
- *
- */
-
-/******************************************************************************/
-
+#include <xsysguard.h>
 #include <math.h>
 #include <float.h>
 #include <alloca.h>
@@ -68,13 +60,15 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	areachart_t *areachart;
 	xsg_list_t *l;
 
 	areachart = widget->data;
 
-	xsg_debug("%s: Render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
 			xsg_window_get_config_name(widget->window),
 			widget->xoffset, widget->yoffset, widget->width, widget->height);
 
@@ -654,13 +648,15 @@ static void render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x,
 	}
 }
 
-static void update_areachart(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_areachart(xsg_widget_t *widget, xsg_var_t *var)
+{
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	xsg_list_t *l;
 	unsigned int i, count;
 
-	// TODO: dirty flag + smaller update rect
+	/* TODO: dirty flag + smaller update rect */
 	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
 	areachart = (areachart_t *) widget->data;
@@ -794,25 +790,31 @@ static void update_areachart(xsg_widget_t *widget, xsg_var_t *var) {
 	}
 }
 
-static void scroll_areachart(xsg_widget_t *widget) {
+static void
+scroll_areachart(xsg_widget_t *widget)
+{
 	areachart_t *areachart;
 	unsigned int width;
 
 	areachart = (areachart_t *) widget->data;
 
-	if (areachart->angle)
+	if (areachart->angle) {
 		width = areachart->angle->width;
-	else
+	} else {
 		width = widget->width;
+	}
 
 	areachart->value_index = (areachart->value_index + 1) % width;
 
-	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	xsg_window_update_append_rect(widget->window, widget->xoffset,
+			widget->yoffset, widget->width, widget->height);
 }
 
 /******************************************************************************/
 
-xsg_widget_t *xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update) {
+xsg_widget_t *
+xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update)
+{
 	xsg_widget_t *widget;
 	areachart_t *areachart;
 	double angle = 0.0;
@@ -863,13 +865,16 @@ xsg_widget_t *xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update)
 		}
 	}
 
-	if (angle != 0.0)
+	if (angle != 0.0) {
 		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	}
 
 	return widget;
 }
 
-void xsg_widget_areachart_parse_var(xsg_var_t *var) {
+void
+xsg_widget_areachart_parse_var(xsg_var_t *var)
+{
 	xsg_widget_t *widget;
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
@@ -880,10 +885,11 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 	areachart_var = xsg_new(areachart_var_t, 1);
 	areachart->var_list = xsg_list_append(areachart->var_list, areachart_var);
 
-	if (areachart->angle)
+	if (areachart->angle) {
 		width = areachart->angle->width;
-	else
+	} else {
 		width = widget->width;
+	}
 
 	areachart_var->var = var;
 	areachart_var->past_vars = NULL;
@@ -895,8 +901,9 @@ void xsg_widget_areachart_parse_var(xsg_var_t *var) {
 	areachart_var->add_prev = FALSE;
 	areachart_var->values = xsg_new(double, width);
 
-	for (i = 0; i < width; i++)
+	for (i = 0; i < width; i++) {
 		areachart_var->values[i] = DNAN;
+	}
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {

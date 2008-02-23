@@ -1,7 +1,7 @@
 /* widget_barchart.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/*
- *
- * BarChart <update> <x> <y> <width> <height> [Angle <angle>] [Min <min>] [Max <max>] [Mask <image>]
- * + <variable> <color> [ColorRange <angle> <count> <distance> <color> ...] [AddPrev]
- *
- */
-
-/******************************************************************************/
-
+#include <xsysguard.h>
 #include <math.h>
 #include <float.h>
 
@@ -63,24 +55,29 @@ typedef struct {
 
 /******************************************************************************/
 
-static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y) {
+static void
+render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
+{
 	barchart_t *barchart;
 	xsg_list_t *l;
 	Imlib_Image mask_img;
 
-	xsg_debug("%s: Render BarChart", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render BarChart",
+			xsg_window_get_config_name(widget->window));
 
 	barchart = (barchart_t *) widget->data;
 
-	if (barchart->min >= barchart->max)
+	if (barchart->min >= barchart->max) {
 		return;
+	}
 
 	mask_img = NULL;
 	if (barchart->mask) {
 		mask_img = xsg_imlib_load_image(barchart->mask);
 
-		if (unlikely(mask_img == NULL))
-			xsg_warning("Cannot load image \"%s\"", barchart->mask);
+		if (unlikely(mask_img == NULL)) {
+			xsg_warning("cannot load image \"%s\"", barchart->mask);
+		}
 	}
 
 	if ((mask_img == NULL) && ((barchart->angle == NULL) || (barchart->angle->angle == 0.0))) {
@@ -538,7 +535,9 @@ static void render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, 
 	}
 }
 
-static void update_barchart(xsg_widget_t *widget, xsg_var_t *var) {
+static void
+update_barchart(xsg_widget_t *widget, xsg_var_t *var)
+{
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 	xsg_list_t *l;
@@ -680,11 +679,15 @@ static void update_barchart(xsg_widget_t *widget, xsg_var_t *var) {
 				widget->width, widget->height);
 }
 
-static void scroll_barchart(xsg_widget_t *widget) {
+static void
+scroll_barchart(xsg_widget_t *widget)
+{
 	return;
 }
 
-xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update) {
+xsg_widget_t *
+xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update)
+{
 	xsg_widget_t *widget;
 	barchart_t *barchart;
 	double angle = 0.0;
@@ -716,7 +719,8 @@ xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update) 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
@@ -734,13 +738,17 @@ xsg_widget_t *xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update) 
 		}
 	}
 
-	if (angle != 0.0)
-		barchart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	if (angle != 0.0) {
+		barchart->angle = xsg_angle_parse(angle, widget->xoffset,
+				widget->yoffset, widget->width, widget->height);
+	}
 
 	return widget;
 }
 
-void xsg_widget_barchart_parse_var(xsg_var_t *var) {
+void
+xsg_widget_barchart_parse_var(xsg_var_t *var)
+{
 	xsg_widget_t *widget;
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
@@ -759,14 +767,17 @@ void xsg_widget_barchart_parse_var(xsg_var_t *var) {
 			unsigned int count, i;
 
 			if (barchart_var->range != NULL) {
-				imlib_context_set_color_range(barchart_var->range);
+				imlib_context_set_color_range(
+						barchart_var->range);
 				imlib_free_color_range();
 			}
 
 			barchart_var->range = imlib_create_color_range();
 			imlib_context_set_color_range(barchart_var->range);
-			imlib_context_set_color(barchart_var->color.red, barchart_var->color.green,
-					barchart_var->color.blue, barchart_var->color.alpha);
+			imlib_context_set_color(barchart_var->color.red,
+					barchart_var->color.green,
+					barchart_var->color.blue,
+					barchart_var->color.alpha);
 			imlib_add_color_to_color_range(0);
 			barchart_var->range_angle = xsg_conf_read_double();
 			count = xsg_conf_read_uint();
@@ -774,7 +785,8 @@ void xsg_widget_barchart_parse_var(xsg_var_t *var) {
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_imlib_uint2color(xsg_conf_read_color());
+				color = xsg_imlib_uint2color(
+						xsg_conf_read_color());
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);
