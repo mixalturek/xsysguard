@@ -40,10 +40,9 @@ struct flist_t {
 /******************************************************************************/
 
 static flist_t *init_list = NULL;
-static flist_t *update_list = NULL;
 static flist_t *shutdown_list = NULL;
+static flist_t *update_list = NULL;
 static flist_t *signal_handler_list = NULL;
-static flist_t *signal_cleanup_list = NULL;
 
 static xsg_list_t *poll_list = NULL;
 static xsg_list_t *timeout_list = NULL;
@@ -57,32 +56,43 @@ static bool time_error = FALSE;
 
 /******************************************************************************/
 
-void xsg_main_set_interval(uint64_t i) {
-	xsg_message("Setting interval to %"PRIu64, i);
+void
+xsg_main_set_interval(uint64_t i)
+{
+	xsg_message("setting interval to %"PRIu64, i);
 	interval = i;
 }
 
-uint64_t xsg_main_get_interval() {
+uint64_t
+xsg_main_get_interval(void)
+{
 	return interval;
 }
 
 /******************************************************************************/
 
-uint64_t xsg_main_get_tick(void) {
+uint64_t
+xsg_main_get_tick(void)
+{
 	return tick;
 }
 
 /******************************************************************************/
 
-static flist_t *add_func(flist_t *list, void (*func)(void)) {
+static flist_t *
+add_func(flist_t *list, void (*func)(void))
+{
 	flist_t *tmp;
 
-	if (unlikely(func == NULL))
+	if (unlikely(func == NULL)) {
 		return list;
+	}
 
-	for (tmp = list; tmp; tmp = tmp->next)
-		if (unlikely(func == tmp->func))
+	for (tmp = list; tmp; tmp = tmp->next) {
+		if (unlikely(func == tmp->func)) {
 			return list;
+		}
+	}
 
 	tmp = xsg_new(flist_t, 1);
 	tmp->func = func;
@@ -91,19 +101,23 @@ static flist_t *add_func(flist_t *list, void (*func)(void)) {
 	return tmp;
 }
 
-static flist_t *remove_func(flist_t *list, void (*func)(void)) {
+static flist_t *
+remove_func(flist_t *list, void (*func)(void))
+{
 	flist_t *tmp, *prev = NULL;
 
-	if (unlikely(func == NULL))
+	if (unlikely(func == NULL)) {
 		return list;
+	}
 
 	tmp = list;
 	while (tmp) {
 		if (tmp->func == func) {
-			if (prev)
+			if (prev) {
 				prev->next = tmp->next;
-			else
+			} else {
 				list = tmp->next;
+			}
 			xsg_free(tmp);
 			break;
 		}
@@ -116,103 +130,131 @@ static flist_t *remove_func(flist_t *list, void (*func)(void)) {
 
 /******************************************************************************/
 
-void xsg_main_add_init_func(void (*func)(void)) {
+void
+xsg_main_add_init_func(void (*func)(void))
+{
 	init_list = add_func(init_list, func);
 }
 
-void xsg_main_remove_init_func(void (*func)(void)) {
+void
+xsg_main_remove_init_func(void (*func)(void))
+{
 	init_list = remove_func(init_list, func);
 }
 
 /******************************************************************************/
 
-void xsg_main_add_update_func(void (*func)(uint64_t)) {
-	update_list = add_func(update_list, (void (*)(void)) func);
-}
-
-void xsg_main_remove_update_func(void (*func)(uint64_t)) {
-	update_list = remove_func(update_list, (void (*)(void)) func);
-}
-
-/******************************************************************************/
-
-void xsg_main_add_shutdown_func(void (*func)(void)) {
+void
+xsg_main_add_shutdown_func(void (*func)(void))
+{
 	shutdown_list = add_func(shutdown_list, func);
 }
 
-void xsg_main_remove_shutdown_func(void (*func)(void)) {
+void
+xsg_main_remove_shutdown_func(void (*func)(void))
+{
 	shutdown_list = remove_func(shutdown_list, func);
 }
 
 /******************************************************************************/
 
-void xsg_main_add_poll(xsg_main_poll_t *poll) {
+void
+xsg_main_add_update_func(void (*func)(uint64_t))
+{
+	update_list = add_func(update_list, (void (*)(void)) func);
+}
+
+void
+xsg_main_remove_update_func(void (*func)(uint64_t))
+{
+	update_list = remove_func(update_list, (void (*)(void)) func);
+}
+
+/******************************************************************************/
+
+void
+xsg_main_add_poll(xsg_main_poll_t *poll)
+{
 	xsg_list_t *l;
 
-	if (unlikely(poll == NULL))
+	if (unlikely(poll == NULL)) {
 		return;
+	}
 
-	for (l = poll_list; l; l = l->next)
-		if (unlikely(poll == l->data))
+	for (l = poll_list; l; l = l->next) {
+		if (unlikely(poll == l->data)) {
 			return;
+		}
+	}
 
 	poll_list = xsg_list_prepend(poll_list, poll);
 }
 
-void xsg_main_remove_poll(xsg_main_poll_t *poll) {
-	if (likely(poll != NULL))
+void
+xsg_main_remove_poll(xsg_main_poll_t *poll)
+{
+	if (likely(poll != NULL)) {
 		poll_list = xsg_list_remove(poll_list, poll);
+	}
 }
 
 /******************************************************************************/
 
-void xsg_main_add_timeout(xsg_main_timeout_t *timeout) {
+void
+xsg_main_add_timeout(xsg_main_timeout_t *timeout)
+{
 	xsg_list_t *l;
 
-	if (unlikely(timeout == NULL))
+	if (unlikely(timeout == NULL)) {
 		return;
+	}
 
-	for (l = timeout_list; l; l = l->next)
-		if (unlikely(timeout == l->data))
+	for (l = timeout_list; l; l = l->next) {
+		if (unlikely(timeout == l->data)) {
 			return;
+		}
+	}
 
 	timeout_list = xsg_list_prepend(timeout_list, timeout);
 }
 
-void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) {
-	if (likely(timeout != NULL))
+void
+xsg_main_remove_timeout(xsg_main_timeout_t *timeout)
+{
+	if (likely(timeout != NULL)) {
 		timeout_list = xsg_list_remove(timeout_list, timeout);
+	}
 }
 
 /******************************************************************************/
 
-void xsg_main_add_signal_handler(void (*func)(int signum)) {
-	signal_handler_list = add_func(signal_handler_list, (void (*)(void)) func);
+void
+xsg_main_add_signal_handler(void (*func)(int signum))
+{
+	signal_handler_list = add_func(signal_handler_list,
+			(void (*)(void)) func);
 }
 
-void xsg_main_remove_signal_handler(void (*func)(int signum)) {
-	signal_handler_list = remove_func(signal_handler_list, (void (*)(void)) func);
-}
-
-/******************************************************************************/
-
-void xsg_main_add_signal_cleanup(void (*func)(void)) {
-	signal_cleanup_list = add_func(signal_cleanup_list, func);
-}
-
-void xsg_main_remove_signal_cleanup(void (*func)(void)) {
-	signal_cleanup_list = remove_func(signal_cleanup_list, func);
+void
+xsg_main_remove_signal_handler(void (*func)(int signum))
+{
+	signal_handler_list = remove_func(signal_handler_list,
+			(void (*)(void)) func);
 }
 
 /******************************************************************************/
 
-void xsg_main_set_time_error(void) {
+void
+xsg_main_set_time_error(void)
+{
 	time_error = TRUE;
 }
 
 /******************************************************************************/
 
-static void loop(uint64_t num) {
+static void
+loop(uint64_t num)
+{
 	struct timeval time_out;
 	struct timeval time_start;
 	struct timeval time_now;
@@ -228,11 +270,12 @@ static void loop(uint64_t num) {
 	time_out.tv_sec = interval / 1000;
 	time_out.tv_usec = (interval % 1000) * 1000;
 
-	xsg_message("Starting main loop");
+	xsg_message("starting main loop");
 
 	while (1) {
-		if (num != 0 && tick == num)
-			exit(EXIT_SUCCESS);
+		if (num != 0 && tick == num) {
+			return;
+		}
 
 		xsg_gettimeofday(&time_start, 0);
 
@@ -248,7 +291,8 @@ static void loop(uint64_t num) {
 
 			if (time_error) {
 				time_error = FALSE;
-				xsg_warning("Running all timeout functions due to time error");
+				xsg_warning("running all timeout functions due "
+						"to time error");
 				for (l = timeout_list; l; l = l->next) {
 					xsg_main_timeout_t *timeout = l->data;
 					timeout->func(timeout->arg, TRUE);
@@ -256,12 +300,12 @@ static void loop(uint64_t num) {
 			}
 
 			if (last_received_signum != 0) {
-				last_received_signum = 0; // FIXME atomic?
-				xsg_message("Running signal cleanup functions...");
-				for (fl = signal_cleanup_list; fl; fl = fl->next) {
-					void (*func)(void) = (void (*)(void)) fl->func;
-					func();
+				xsg_message("running signal handler functions...");
+				for (fl = signal_handler_list; fl; fl = fl->next) {
+					void (*func)(int) = (void (*)(int)) fl->func;
+					func(last_received_signum);
 				}
+				last_received_signum = 0;
 			}
 
 			xsg_gettimeofday(&time_now, 0);
@@ -273,18 +317,21 @@ static void loop(uint64_t num) {
 				time_diff.tv_usec = 0;
 			}
 
-			if (unlikely(xsg_timeval_sub(&time_sleep, &time_out, &time_diff)))
-				break; // timeout
+			if (unlikely(xsg_timeval_sub(&time_sleep, &time_out, &time_diff))) {
+				break; /* timeout */
+			}
 
 			for (l = timeout_list; l; l = l->next) {
 				xsg_main_timeout_t *t = l->data;
 				struct timeval timeout_sleep;
 
-				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
+				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
 					t->func(t->arg, FALSE);
+				}
 
-				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now))
+				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
 					continue;
+				}
 
 				if (timercmp(&timeout_sleep, &time_sleep, <)) {
 					time_sleep.tv_sec = timeout_sleep.tv_sec;
@@ -317,12 +364,15 @@ static void loop(uint64_t num) {
 				}
 			}
 
-			xsg_debug("Sleeping for %u.%06us", (unsigned) time_sleep.tv_sec, (unsigned) time_sleep.tv_usec);
+			xsg_debug("sleeping for %u.%06us",
+					(unsigned) time_sleep.tv_sec,
+					(unsigned) time_sleep.tv_usec);
 
-			fd_count = select(fd_max + 1, &read_fds, &write_fds, &except_fds, &time_sleep);
+			fd_count = select(fd_max + 1, &read_fds, &write_fds,
+					&except_fds, &time_sleep);
 
 			if (unlikely(fd_count == -1) && (errno == EINTR)) {
-				xsg_debug("Interrupted by signal");
+				xsg_debug("interrupted by signal");
 				continue;
 			}
 
@@ -335,24 +385,31 @@ static void loop(uint64_t num) {
 					xsg_var_flush_dirty();
 					continue;
 				} else {
-					break; // timeout
+					break; /* timeout */
 				}
 			}
 
-			xsg_debug("Interrupted by file descriptor");
+			xsg_debug("interrupted by file descriptor");
 
 			for (l = poll_list; l; l = l->next) {
 				xsg_main_poll_events_t events = 0;
 				xsg_main_poll_t *p = l->data;
 
-				if ((p->events & XSG_MAIN_POLL_READ) && (FD_ISSET(p->fd, &read_fds)))
+				if ((p->events & XSG_MAIN_POLL_READ)
+				 && (FD_ISSET(p->fd, &read_fds))) {
 					events |= XSG_MAIN_POLL_READ;
-				if ((p->events & XSG_MAIN_POLL_WRITE) && (FD_ISSET(p->fd, &write_fds)))
+				}
+				if ((p->events & XSG_MAIN_POLL_WRITE)
+				 && (FD_ISSET(p->fd, &write_fds))) {
 					events |= XSG_MAIN_POLL_WRITE;
-				if ((p->events & XSG_MAIN_POLL_EXCEPT) && (FD_ISSET(p->fd, &except_fds)))
+				}
+				if ((p->events & XSG_MAIN_POLL_EXCEPT)
+				 && (FD_ISSET(p->fd, &except_fds))) {
 					events |= XSG_MAIN_POLL_EXCEPT;
-				if (events)
+				}
+				if (events) {
 					(p->func)(p->arg, events);
+				}
 			}
 			xsg_var_flush_dirty();
 		}
@@ -360,85 +417,162 @@ static void loop(uint64_t num) {
 	}
 }
 
-static void shutdown(void) {
+/******************************************************************************/
+
+static void
+init(void)
+{
 	flist_t *fl;
-	void (*func)(void);
+
+	xsg_message("running init functions...");
+
+	for (fl = init_list; fl; fl = fl->next) {
+		void (*func)(void) = (void (*)(void)) fl->func;
+
+		func();
+	}
+}
+
+static void
+shutdown(void)
+{
 	static bool shutdown_active = FALSE;
+	flist_t *fl;
 
-	if (shutdown_active)
+	if (shutdown_active) {
 		return;
+	}
 
-	shutdown_active = TRUE;
-
-	xsg_message("Running shutdown functions");
+	xsg_message("running shutdown functions...");
 
 	for (fl = shutdown_list; fl; fl = fl->next) {
-		func = (void (*)(void)) fl->func;
+		void (*func)(void) = (void (*)(void)) fl->func;
+
 		func();
 	}
 
-	xsg_message("Terminating...");
+	xsg_message("terminating...");
 }
 
-static void signal_handler(int signum) {
-	flist_t *fl;
-
+static void
+signal_handler(int signum)
+{
 	last_received_signum = signum;
 
-	if (signum == SIGINT || signum == SIGQUIT || signum == SIGTERM || signum == SIGABRT)
-		xsg_error("Received signal %d: %s", signum, xsg_strsignal(signum));
-
-	xsg_message("Received signal %d: %s", signum, xsg_strsignal(signum));
-
-	for (fl = signal_handler_list; fl; fl = fl->next) {
-		void (*func)(int) = (void (*)(int)) fl->func;
-		func(signum);
+	switch (signum) {
+	case SIGABRT:
+		xsg_error("received signal %d: SIGABRT", SIGABRT);
+		break;
+	case SIGALRM:
+		xsg_message("received signal %d: SIGALRM", SIGALRM);
+		break;
+	case SIGCHLD:
+		xsg_message("received signal %d: SIGCHLD", SIGCHLD);
+		break;
+	case SIGCONT:
+		xsg_message("received signal %d: SIGCONT", SIGCONT);
+		break;
+	case SIGFPE:
+		xsg_message("received signal %d: SIGFPE", SIGFPE);
+		break;
+	case SIGHUP:
+		xsg_message("received signal %d: SIGHUP", SIGHUP);
+		break;
+	case SIGILL:
+		xsg_message("received signal %d: SIGILL", SIGILL);
+		break;
+	case SIGINT:
+		xsg_error("received signal %d: SIGINT", SIGINT);
+		break;
+	case SIGKILL:
+		xsg_error("received signal %d: SIGKILL", SIGKILL);
+		break;
+	case SIGPIPE:
+		xsg_warning("received signal %d: SIGPIPE", SIGPIPE);
+		break;
+	case SIGQUIT:
+		xsg_error("received signal %d: SIGQUIT", SIGQUIT);
+		break;
+	case SIGSEGV:
+		xsg_error("received signal %d: SIGSEGV", SIGSEGV);
+		break;
+	case SIGSTOP:
+		xsg_error("received signal %d: SIGSTOP", SIGSTOP);
+		break;
+	case SIGTERM:
+		xsg_error("received signal %d: SIGTERM", SIGTERM);
+		break;
+	case SIGTSTP:
+		xsg_message("received signal %d: SIGTSTP", SIGTSTP);
+		break;
+	case SIGTTIN:
+		xsg_message("received signal %d: SIGTTIN", SIGTTIN);
+		break;
+	case SIGTTOU:
+		xsg_message("received signal %d: SIGTTOU", SIGTTOU);
+		break;
+	case SIGUSR1:
+		xsg_message("received signal %d: SIGUSR1", SIGUSR1);
+		break;
+	case SIGUSR2:
+		xsg_message("received signal %d: SIGUSR2", SIGUSR2);
+		break;
+	default:
+		xsg_message("received signal %d", signum);
+		break;
 	}
 }
 
-static int ssigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
+static int
+ssigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
+{
 	int n;
 
 	n = sigaction(signum, act, oldact);
 
-	if (n == -1)
-		xsg_warning("sigaction for signal number %d failed: %s", signum, strerror(errno));
+	if (n == -1) {
+		xsg_warning("sigaction for signal number %d failed: %s",
+				signum, strerror(errno));
+	}
 
 	return n;
 }
 
-void xsg_main_loop(uint64_t num) {
-	flist_t *fl;
-	void (*func)(void);
+void
+xsg_main_loop(uint64_t num)
+{
 	struct sigaction action;
 
-	xsg_message("Installing signal handler");
+	xsg_message("installing signal handler");
 
 	action.sa_handler = signal_handler;
 	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0;
 
 	ssigaction(SIGABRT, &action, NULL);
-	ssigaction(SIGINT, &action, NULL);
-	ssigaction(SIGQUIT, &action, NULL);
-	ssigaction(SIGTERM, &action, NULL);
-
+	ssigaction(SIGALRM, &action, NULL);
 	ssigaction(SIGCHLD, &action, NULL);
+	ssigaction(SIGCONT, &action, NULL);
+	ssigaction(SIGFPE, &action, NULL);
 	ssigaction(SIGHUP, &action, NULL);
+	ssigaction(SIGILL, &action, NULL);
+	ssigaction(SIGINT, &action, NULL);
+	/* ssigaction(SIGKILL, &action, NULL); */
 	ssigaction(SIGPIPE, &action, NULL);
+	ssigaction(SIGQUIT, &action, NULL);
+	ssigaction(SIGSEGV, &action, NULL);
+	/* ssigaction(SIGSTOP, &action, NULL); */
+	ssigaction(SIGTERM, &action, NULL);
+	ssigaction(SIGTSTP, &action, NULL);
+	ssigaction(SIGTTOU, &action, NULL);
 	ssigaction(SIGUSR1, &action, NULL);
 	ssigaction(SIGUSR2, &action, NULL);
 
-	xsg_message("Registering shutdown function");
+	xsg_message("registering shutdown function");
 
 	atexit(shutdown);
 
-	xsg_message("Running init functions");
-
-	for (fl = init_list; fl; fl = fl->next) {
-		func = (void (*)(void)) fl->func;
-		func();
-	}
+	init();
 
 	loop(num);
 }

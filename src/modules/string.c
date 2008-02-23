@@ -1,7 +1,7 @@
 /* string.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 
 /******************************************************************************/
 
-static char *get_string(void *arg) {
+static char *
+get_string(void *arg)
+{
 	char *s;
 
 	s = (char *) arg;
@@ -34,25 +36,33 @@ static char *get_string(void *arg) {
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
-	uint32_t i;
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	char *s;
 
 	s = xsg_conf_read_string();
 
-	for (i = 0; i < n; i++) {
-		arg[i] = (void *) s;
-		str[i] = get_string;
-	}
+	*arg = (void *) s;
+	*str = get_string;
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	xsg_string_append_printf(string, "S %s:<string>\n", xsg_module.name);
 

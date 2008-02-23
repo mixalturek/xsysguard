@@ -76,13 +76,17 @@ static bool timestamps = FALSE;
 
 int xsg_log_level = DEFAULT_LOG_LEVEL;
 
-static void xsg_logv(const char *domain, int level, const char *format, va_list args) {
+static void
+xsg_logv(const char *domain, int level, const char *format, va_list args)
+{
 	unsigned int pid;
 	char *prefix = NULL;
 
-	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
-		if (xsg_log_level < XSG_LOG_LEVEL_ERROR)
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR)) {
+		if (xsg_log_level < XSG_LOG_LEVEL_ERROR) {
 			exit(EXIT_FAILURE);
+		}
+	}
 
 	if (timestamps) {
 		struct timeval tv;
@@ -93,74 +97,82 @@ static void xsg_logv(const char *domain, int level, const char *format, va_list 
 
 		tm = localtime(&tv.tv_sec);
 
-		if (localtime != NULL)
-			if (strftime(buf, sizeof(buf) - 1, "%H:%M:%S", tm) != 0)
-				fprintf(stderr, "%s.%06u ", buf, (unsigned) tv.tv_usec);
+		if (localtime != NULL) {
+			if (strftime(buf, sizeof(buf) - 1, "%H:%M:%S", tm) != 0) {
+				fprintf(stderr, "%s.%06u ", buf,
+						(unsigned) tv.tv_usec);
+			}
+		}
 	}
 
 	if (colored_log) {
 		switch (level) {
-			case XSG_LOG_LEVEL_ERROR:
-				prefix = COLOR_MAGENTA"[ERR]";
-				break;
-			case XSG_LOG_LEVEL_WARNING:
-				prefix = COLOR_YELLOW"[WRN]";
-				break;
-			case XSG_LOG_LEVEL_MESSAGE:
-				prefix = COLOR_CYAN"[MSG]";
-				break;
-			case XSG_LOG_LEVEL_DEBUG:
-				prefix = COLOR_BLUE"[DBG]";
-				break;
-			case XSG_LOG_LEVEL_MEM:
-				prefix = COLOR_RED"[MEM]";
-				break;
-			default:
-				prefix = "[???]";
-				break;
+		case XSG_LOG_LEVEL_ERROR:
+			prefix = COLOR_MAGENTA"[ERR]";
+			break;
+		case XSG_LOG_LEVEL_WARNING:
+			prefix = COLOR_YELLOW"[WRN]";
+			break;
+		case XSG_LOG_LEVEL_MESSAGE:
+			prefix = COLOR_CYAN"[MSG]";
+			break;
+		case XSG_LOG_LEVEL_DEBUG:
+			prefix = COLOR_BLUE"[DBG]";
+			break;
+		case XSG_LOG_LEVEL_MEM:
+			prefix = COLOR_RED"[MEM]";
+			break;
+		default:
+			prefix = "[???]";
+			break;
 		}
 	} else {
 		switch (level) {
-			case XSG_LOG_LEVEL_ERROR:
-				prefix = "[ERR]";
-				break;
-			case XSG_LOG_LEVEL_WARNING:
-				prefix = "[WRN]";
-				break;
-			case XSG_LOG_LEVEL_MESSAGE:
-				prefix = "[MSG]";
-				break;
-			case XSG_LOG_LEVEL_DEBUG:
-				prefix = "[DBG]";
-				break;
-			case XSG_LOG_LEVEL_MEM:
-				prefix = "[MEM]";
-				break;
-			default:
-				prefix = "[???]";
-				break;
+		case XSG_LOG_LEVEL_ERROR:
+			prefix = "[ERR]";
+			break;
+		case XSG_LOG_LEVEL_WARNING:
+			prefix = "[WRN]";
+			break;
+		case XSG_LOG_LEVEL_MESSAGE:
+			prefix = "[MSG]";
+			break;
+		case XSG_LOG_LEVEL_DEBUG:
+			prefix = "[DBG]";
+			break;
+		case XSG_LOG_LEVEL_MEM:
+			prefix = "[MEM]";
+			break;
+		default:
+			prefix = "[???]";
+			break;
 		}
 	}
 
 	pid = getpid();
 
-	if (domain == NULL)
+	if (domain == NULL) {
 		fprintf(stderr, "%s[%u]xsysguard: ", prefix, pid);
-	else
+	} else {
 		fprintf(stderr, "%s[%u]xsysguard/%s: ", prefix, pid, domain);
+	}
 
 	vfprintf(stderr, format, args);
 
-	if (colored_log)
+	if (colored_log) {
 		fprintf(stderr, COLOR_DEFAULT"\n");
-	else
+	} else {
 		fprintf(stderr, "\n");
+	}
 
-	if (unlikely(level == XSG_LOG_LEVEL_ERROR))
+	if (unlikely(level == XSG_LOG_LEVEL_ERROR)) {
 		exit(EXIT_FAILURE);
+	}
 }
 
-void xsg_log(const char *domain, int level, const char *format, ...) {
+void
+xsg_log(const char *domain, int level, const char *format, ...)
+{
 	va_list args;
 
 	va_start(args, format);
@@ -170,7 +182,9 @@ void xsg_log(const char *domain, int level, const char *format, ...) {
 
 /******************************************************************************/
 
-static void parse_env(const char *config_name) {
+static void
+parse_env(const char *config_name)
+{
 	char *variable;
 	char *value;
 	bool overwrite = FALSE;
@@ -179,13 +193,23 @@ static void parse_env(const char *config_name) {
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	xsg_message("%s: Setting environment variable %s=\"%s\"", config_name, variable, value);
+	xsg_message("%s: setting environment variable %s=\"%s\"",
+			config_name, variable, value);
 
-	if (xsg_setenv(variable, value, overwrite) != 0)
-		xsg_warning("%s: Cannot set environment variable %s=\"%s\": %s", config_name, variable, value, strerror(errno));
+	if (xsg_setenv(variable, value, overwrite) != 0) {
+		xsg_warning("%s: cannot set environment variable %s=\"%s\": %s",
+				config_name, variable, value, strerror(errno));
+	}
 }
 
-static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t update, xsg_var_t **var) {
+static bool
+parse_var(
+	xsg_window_t *window,
+	xsg_widget_t *widget,
+	uint64_t update,
+	xsg_var_t **var
+)
+{
 	if (!xsg_conf_find_command("+")) {
 		return FALSE;
 	} else {
@@ -194,7 +218,9 @@ static bool parse_var(xsg_window_t *window, xsg_widget_t *widget, uint64_t updat
 	}
 }
 
-static void parse_config(char *config_name, char *config_buffer) {
+static void
+parse_config(char *config_name, char *config_buffer)
+{
 	xsg_window_t *window;
 	xsg_widget_t *widget;
 	xsg_var_t *var;
@@ -205,10 +231,12 @@ static void parse_config(char *config_name, char *config_buffer) {
 	window = xsg_window_new(config_name);
 
 	while (!xsg_conf_find_end()) {
-		if (xsg_conf_find_newline())
+		if (xsg_conf_find_newline()) {
 			continue;
-		if (xsg_conf_find_commentline())
+		}
+		if (xsg_conf_find_commentline()) {
 			continue;
+		}
 		if (xsg_conf_find_command("Set")) {
 			if (xsg_conf_find_command("Name")) {
 				xsg_window_parse_name(window);
@@ -239,10 +267,13 @@ static void parse_config(char *config_name, char *config_buffer) {
 			} else if (xsg_conf_find_command("Visible")) {
 				xsg_window_parse_visible(window);
 			} else {
-				xsg_conf_error("Name, Class, Resource, Geometry, "
-						"Sticky, SkipTaskbar, SkipPager, Layer, "
-						"Decorations, OverrideRedirect, Background, XShape, "
-						"ARGBVisual or Visible expected");
+				xsg_conf_error("Name, Class, Resource, "
+						"Geometry, Sticky, "
+						"SkipTaskbar, SkipPager, "
+						"Layer, Decorations, "
+						"OverrideRedirect, Background, "
+						"XShape, ARGBVisual or "
+						"Visible expected");
 			}
 		} else if (xsg_conf_find_command("Module")) {
 			char *module_name = xsg_conf_read_string();
@@ -260,76 +291,95 @@ static void parse_config(char *config_name, char *config_buffer) {
 			xsg_widget_polygon_parse(window);
 		} else if (xsg_conf_find_command("Image")) {
 			widget = xsg_widget_image_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0)
+			while (parse_var(window, widget, update, &var) != 0) {
 				xsg_widget_image_parse_var(var);
+			}
 		} else if (xsg_conf_find_command("BarChart")) {
 			widget = xsg_widget_barchart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0)
+			while (parse_var(window, widget, update, &var) != 0) {
 				xsg_widget_barchart_parse_var(var);
+			}
 		} else if (xsg_conf_find_command("LineChart")) {
 			widget = xsg_widget_linechart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0)
+			while (parse_var(window, widget, update, &var) != 0) {
 				xsg_widget_linechart_parse_var(var);
+			}
 		} else if (xsg_conf_find_command("AreaChart")) {
 			widget = xsg_widget_areachart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0)
+			while (parse_var(window, widget, update, &var) != 0) {
 				xsg_widget_areachart_parse_var(var);
+			}
 		} else if (xsg_conf_find_command("Text")) {
 			widget = xsg_widget_text_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0)
+			while (parse_var(window, widget, update, &var) != 0) {
 				xsg_widget_text_parse_var(var);
+			}
 		} else {
-			xsg_conf_error("#, Set, Module, SetEnv, Line, Rectangle, Ellipse, Polygon, "
-					"Image, BarChart, LineChart, AreaChart or Text expected");
+			xsg_conf_error("#, Set, Module, SetEnv, Line, "
+					"Rectangle, Ellipse, Polygon, "
+					"Image, BarChart, LineChart, "
+					"AreaChart or Text expected");
 		}
 	}
 }
 
-static char *find_config_file(char *name) {
+static char *
+find_config_file(char *name)
+{
 	char *file = NULL;
 	char **pathv;
 	char **p;
 
-	if (unlikely(name == NULL))
-		xsg_error("Cannot find config file: NULL");
+	if (unlikely(name == NULL)) {
+		xsg_error("cannot find config file: NULL");
+	}
 
-	if (unlikely(strlen(name) < 1))
-		xsg_error("Cannot find config file: \"\"");
+	if (unlikely(strlen(name) < 1)) {
+		xsg_error("cannot find config file: \"\"");
+	}
 
-	if (name[0] == '/')
+	if (name[0] == '/') {
 		return xsg_strdup(name);
+	}
 
-	if (name[0] == '.' && name[1] == '/')
+	if (name[0] == '.' && name[1] == '/') {
 		return xsg_strdup(name);
+	}
 
-	if (name[0] == '.' && name[1] == '.' && name[2] == '/')
+	if (name[0] == '.' && name[1] == '.' && name[2] == '/') {
 		return xsg_strdup(name);
+	}
 
-	if (name[0] == '~' && name[1] == '/')
+	if (name[0] == '~' && name[1] == '/') {
 		return xsg_build_filename(xsg_get_home_dir(), name + 1, NULL);
+	}
 
-	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
+	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH",
+			XSYSGUARD_CONFIG_PATH);
 
-	if (unlikely(pathv == NULL))
+	if (unlikely(pathv == NULL)) {
 		xsg_error("Cannot get XSYSGUARD_CONFIG_PATH");
+	}
 
-	xsg_debug("Searching for config...");
+	xsg_debug("searching for config...");
 	for (p = pathv; *p; p++) {
 		file = xsg_build_filename(*p, name, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
 			xsg_strfreev(pathv);
-			xsg_message("%s: Found config file \"%s\"", name, file);
+			xsg_message("%s: found config file \"%s\"", name, file);
 			return file;
 		}
 		xsg_free(file);
 	}
 
 	xsg_strfreev(pathv);
-	xsg_error("Cannot find config file: \"%s\"", name);
+	xsg_error("cannot find config file: \"%s\"", name);
 	return NULL;
 }
 
-static char *get_config_file(const char *config_name, const char *filename) {
+static char *
+get_config_file(const char *config_name, const char *filename)
+{
 	struct stat stat_buf;
 	char *buffer;
 	size_t size, bytes_read;
@@ -337,26 +387,36 @@ static char *get_config_file(const char *config_name, const char *filename) {
 
 	fd = open(filename, O_RDONLY);
 
-	if (fd < 0)
-		xsg_error("Cannot read config file: %s: %s", filename, strerror(errno));
+	if (fd < 0) {
+		xsg_error("cannot read config file: %s: %s", filename,
+				strerror(errno));
+	}
 
-	if (fstat(fd, &stat_buf) < 0)
-		xsg_error("Cannot read config file: %s: fstat failed", filename);
+	if (fstat(fd, &stat_buf) < 0) {
+		xsg_error("cannot read config file: %s: fstat failed",
+				filename);
+	}
 
 	size = stat_buf.st_size;
 
-	if (size <= 0)
-		xsg_error("Cannot read config file: %s: null byte size", filename);
+	if (size <= 0) {
+		xsg_error("cannot read config file: %s: null byte size",
+				filename);
+	}
 
-	if (!S_ISREG(stat_buf.st_mode))
-		xsg_error("Cannot read config file: %s: not a regular file", filename);
+	if (!S_ISREG(stat_buf.st_mode)) {
+		xsg_error("cannot read config file: %s: not a regular file",
+				filename);
+	}
 
 	buffer = xsg_malloc(size + 1);
 
-	if (config_name != NULL)
-		xsg_message("%s: Reading config file \"%s\"", config_name, filename);
-	else
-		xsg_message("Reading config file \"%s\"", filename);
+	if (config_name != NULL) {
+		xsg_message("%s: reading config file \"%s\"", config_name,
+				filename);
+	} else {
+		xsg_message("reading config file \"%s\"", filename);
+	}
 
 	bytes_read = 0;
 	while (bytes_read < size) {
@@ -364,8 +424,10 @@ static char *get_config_file(const char *config_name, const char *filename) {
 
 		rc = read(fd, buffer + bytes_read, size - bytes_read);
 		if (rc < 0) {
-			if (errno != EINTR)
-				xsg_error("Cannot read config file: %s: %s", filename, strerror(errno));
+			if (errno != EINTR) {
+				xsg_error("Cannot read config file: %s: %s",
+						filename, strerror(errno));
+			}
 		} else if (rc == 0) {
 			break;
 		} else {
@@ -380,7 +442,9 @@ static char *get_config_file(const char *config_name, const char *filename) {
 	return buffer;
 }
 
-static void usage(bool enable_fontconfig) {
+static void
+usage(bool enable_fontconfig)
+{
 	char **pathv;
 	char **p;
 
@@ -402,73 +466,96 @@ static void usage(bool enable_fontconfig) {
 		"  -l, --log=N        Set loglevel to N: ",
 		DEFAULT_INTERVAL, DEFAULT_FONT_CACHE_SIZE, DEFAULT_IMAGE_CACHE_SIZE);
 
-	if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
+	if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL) {
 		printf("%d=ERROR", XSG_LOG_LEVEL_ERROR);
-	if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL)
+	}
+	if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL) {
 		printf(", %d=WARNING", XSG_LOG_LEVEL_WARNING);
-	if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL)
+	}
+	if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL) {
 		printf(", %d=MESSAGE", XSG_LOG_LEVEL_MESSAGE);
-	if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL)
+	}
+	if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL) {
 		printf(", %d=DEBUG", XSG_LOG_LEVEL_DEBUG);
-	if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL)
+	}
+	if (XSG_LOG_LEVEL_MEM <= XSG_MAX_LOG_LEVEL) {
 		printf(", %d=MEM", XSG_LOG_LEVEL_MEM);
+	}
 
 	printf("\n\n");
 
 	printf("XSYSGUARD_CONFIG_PATH:\n");
-	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH", XSYSGUARD_CONFIG_PATH);
-	if (pathv != NULL)
-		for (p = pathv; *p; p++)
+	pathv = xsg_get_path_from_env("XSYSGUARD_CONFIG_PATH",
+			XSYSGUARD_CONFIG_PATH);
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++) {
 			printf("  %s\n", *p);
+		}
+	}
 	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("XSYSGUARD_MODULE_PATH:\n");
-	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH", XSYSGUARD_MODULE_PATH);
-	if (pathv != NULL)
-		for (p = pathv; *p; p++)
+	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH",
+			XSYSGUARD_MODULE_PATH);
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++) {
 			printf("  %s\n", *p);
+		}
+	}
 	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("XSYSGUARD_IMAGE_PATH:\n");
-	pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH", XSYSGUARD_IMAGE_PATH);
-	if (pathv != NULL)
-		for (p = pathv; *p; p++)
+	pathv = xsg_get_path_from_env("XSYSGUARD_IMAGE_PATH",
+			XSYSGUARD_IMAGE_PATH);
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++) {
 			printf("  %s\n", *p);
+		}
+	}
 	xsg_strfreev(pathv);
 	printf("\n");
 
 	printf("XSYSGUARD_FONT_PATH:\n");
-	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH", XSYSGUARD_FONT_PATH);
-	if (pathv != NULL)
-		for (p = pathv; *p; p++)
+	pathv = xsg_get_path_from_env("XSYSGUARD_FONT_PATH",
+			XSYSGUARD_FONT_PATH);
+	if (pathv != NULL) {
+		for (p = pathv; *p; p++) {
 			printf("  %s\n", *p);
+		}
+	}
 	xsg_strfreev(pathv);
 	printf("\n");
 
-	if (!enable_fontconfig)
+	if (!enable_fontconfig) {
 		return;
+	}
 
 	pathv = xsg_fontconfig_get_path();
 	if (pathv != NULL) {
 		unsigned n = 0;
-		for (p = pathv; *p; p++)
+		for (p = pathv; *p; p++) {
 			n++;
+		}
 		xsg_strfreev(pathv);
-		printf("Found libfontconfig (%u font dirs). Print list with `xsysguard -d`.\n", n);
+		printf("Found libfontconfig (%u font dirs). Print list with "
+				"`xsysguard -d`.\n", n);
 	}
 	printf("\n");
 }
 
-static void list_font_dirs(void) {
+static void
+list_font_dirs(void)
+{
 	char **pathv;
 	char **p;
 
 	pathv = xsg_fontconfig_get_path();
 	if (pathv != NULL) {
-		for (p = pathv; *p; p++)
+		for (p = pathv; *p; p++) {
 			printf("%s\n", *p);
+		}
 		xsg_strfreev(pathv);
 	}
 }
@@ -479,7 +566,9 @@ static void list_font_dirs(void) {
  *
  ******************************************************************************/
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv)
+{
 	bool list_modules = FALSE;
 	bool list_fonts = FALSE;
 	bool list_dirs = FALSE;
@@ -512,61 +601,67 @@ int main(int argc, char **argv) {
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hH:i:n:NF:I:l:mfdct", long_options, &option_index);
+		option = getopt_long(argc, argv, "hH:i:n:NF:I:l:mfdct",
+				long_options, &option_index);
 
-		if (option == EOF)
+		if (option == EOF) {
 			break;
+		}
 
 		switch (option) {
-			case 'h':
-				print_usage = TRUE;
-				break;
-			case 'H':
-				if (optarg && !mhelp)
-					mhelp = xsg_strdup(optarg);
-				break;
-			case 'i':
-				sscanf(optarg, "%"SCNu64, &interval);
-				xsg_main_set_interval(interval);
-				break;
-			case 'n':
-				sscanf(optarg, "%"SCNu64, &num);
-				break;
-			case 'N':
-				enable_fontconfig = FALSE;
-				break;
-			case 'F':
-				if (optarg)
-					font_cache_size = atoi(optarg);
-				break;
-			case 'I':
-				if (optarg)
-					image_cache_size = atoi(optarg);
-				break;
-			case 'l':
-				if (optarg)
-					xsg_log_level = atoi(optarg);
-				break;
-			case 'c':
-				colored_log = TRUE;
-				break;
-			case 't':
-				timestamps = TRUE;
-				break;
-			case 'm':
-				list_modules = TRUE;
-				break;
-			case 'f':
-				list_fonts = TRUE;
-				break;
-			case 'd':
-				list_dirs = TRUE;
-				break;
-			case '?':
-				print_usage = TRUE;
-				break;
-			default:
-				break;
+		case 'h':
+			print_usage = TRUE;
+			break;
+		case 'H':
+			if (optarg && !mhelp) {
+				mhelp = xsg_strdup(optarg);
+			}
+			break;
+		case 'i':
+			sscanf(optarg, "%"SCNu64, &interval);
+			xsg_main_set_interval(interval);
+			break;
+		case 'n':
+			sscanf(optarg, "%"SCNu64, &num);
+			break;
+		case 'N':
+			enable_fontconfig = FALSE;
+			break;
+		case 'F':
+			if (optarg) {
+				font_cache_size = atoi(optarg);
+			}
+			break;
+		case 'I':
+			if (optarg) {
+				image_cache_size = atoi(optarg);
+			}
+			break;
+		case 'l':
+			if (optarg) {
+				xsg_log_level = atoi(optarg);
+			}
+			break;
+		case 'c':
+			colored_log = TRUE;
+			break;
+		case 't':
+			timestamps = TRUE;
+			break;
+		case 'm':
+			list_modules = TRUE;
+			break;
+		case 'f':
+			list_fonts = TRUE;
+			break;
+		case 'd':
+			list_dirs = TRUE;
+			break;
+		case '?':
+			print_usage = TRUE;
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -576,8 +671,9 @@ int main(int argc, char **argv) {
 	}
 
 	if (list_dirs) {
-		if (enable_fontconfig)
+		if (enable_fontconfig) {
 			list_font_dirs();
+		}
 		exit(EXIT_SUCCESS);
 	}
 
@@ -594,10 +690,11 @@ int main(int argc, char **argv) {
 		info = xsg_modules_info(mhelp);
 		help = xsg_modules_help(mhelp);
 
-		if (help)
+		if (help) {
 			printf("%s - %s\n\n%s\n", mhelp, info, help);
-		else
+		} else {
 			printf("%s - %s\n", mhelp, info);
+		}
 
 		exit(EXIT_SUCCESS);
 	}

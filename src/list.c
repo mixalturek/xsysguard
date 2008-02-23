@@ -32,28 +32,41 @@
 
 /******************************************************************************/
 
-xsg_list_t *xsg_list_last(xsg_list_t *list) {
-	if (list)
-		while (list->next)
+xsg_list_t *
+xsg_list_last(xsg_list_t *list)
+{
+	if (list) {
+		while (list->next) {
 			list = list->next;
-	return list;
-}
-
-xsg_list_t *xsg_list_nth(xsg_list_t *list, unsigned int n) {
-	while ((n-- > 0) && list)
-		list = list->next;
+		}
+	}
 
 	return list;
 }
 
-void *xsg_list_nth_data(xsg_list_t *list, unsigned int n) {
-	while ((n-- > 0) && list)
+xsg_list_t *
+xsg_list_nth(xsg_list_t *list, unsigned int n)
+{
+	while ((n-- > 0) && list) {
 		list = list->next;
+	}
+
+	return list;
+}
+
+void *
+xsg_list_nth_data(xsg_list_t *list, unsigned int n)
+{
+	while ((n-- > 0) && list) {
+		list = list->next;
+	}
 
 	return list ? list->data : NULL;
 }
 
-unsigned int xsg_list_length(xsg_list_t *list) {
+unsigned int
+xsg_list_length(xsg_list_t *list)
+{
 	unsigned int length;
 
 	length = 0;
@@ -65,7 +78,9 @@ unsigned int xsg_list_length(xsg_list_t *list) {
 	return length;
 }
 
-xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
+xsg_list_t *
+xsg_list_append(xsg_list_t *list, void *data)
+{
 	xsg_list_t *new_list;
 	xsg_list_t *last;
 
@@ -84,7 +99,9 @@ xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) {
 	}
 }
 
-xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
+xsg_list_t *
+xsg_list_prepend(xsg_list_t *list, void *data)
+{
 	xsg_list_t *new_list;
 
 	new_list = xsg_new(xsg_list_t, 1);
@@ -93,8 +110,9 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 
 	if (list) {
 		new_list->prev = list->prev;
-		if (list->prev)
+		if (list->prev) {
 			list->prev->next = new_list;
+		}
 		list->prev = new_list;
 	} else {
 		new_list->prev = NULL;
@@ -103,40 +121,55 @@ xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) {
 	return new_list;
 }
 
-xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position) {
+xsg_list_t *
+xsg_list_insert(xsg_list_t *list, void *data, int position)
+{
 	xsg_list_t *new_list;
 	xsg_list_t *tmp_list;
 
-	if (position < 0)
+	if (position < 0) {
 		return xsg_list_append(list, data);
-	else if (position == 0)
+	} else if (position == 0) {
 		return xsg_list_prepend(list, data);
+	}
 
 	tmp_list = xsg_list_nth(list, position);
-	if (!tmp_list)
+
+	if (!tmp_list) {
 		return xsg_list_append(list, data);
+	}
 
 	new_list = xsg_new(xsg_list_t, 1);
 	new_list->data = data;
 	new_list->prev = tmp_list->prev;
-	if (tmp_list->prev)
+
+	if (tmp_list->prev) {
 		tmp_list->prev->next = new_list;
+	}
 	new_list->next = tmp_list;
 	tmp_list->prev = new_list;
 
-	if (tmp_list == list)
+	if (tmp_list == list) {
 		return new_list;
-	else
+	} else {
 		return list;
+	}
 }
 
-xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(const void *a, const void * b)) {
+xsg_list_t *
+xsg_list_insert_sorted(
+	xsg_list_t *list,
+	void *data,
+	int (*func)(const void *a, const void * b)
+)
+{
 	xsg_list_t *tmp_list = list;
 	xsg_list_t *new_list;
 	int cmp;
 
-	if (unlikely(func == NULL))
+	if (unlikely(func == NULL)) {
 		return list;
+	}
 
 	if (!list) {
 		new_list = xsg_new(xsg_list_t, 1);
@@ -172,13 +205,16 @@ xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*func)(con
 	new_list->next = tmp_list;
 	tmp_list->prev = new_list;
 
-	if (tmp_list == list)
+	if (tmp_list == list) {
 		return new_list;
-	else
+	} else {
 		return list;
+	}
 }
 
-xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
+xsg_list_t *
+xsg_list_remove(xsg_list_t *list, const void *data)
+{
 	xsg_list_t *tmp;
 
 	tmp = list;
@@ -186,12 +222,15 @@ xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
 		if (tmp->data != data) {
 			tmp = tmp->next;
 		} else {
-			if (tmp->prev)
+			if (tmp->prev) {
 				tmp->prev->next = tmp->next;
-			if (tmp->next)
+			}
+			if (tmp->next) {
 				tmp->next->prev = tmp->prev;
-			if (list == tmp)
+			}
+			if (list == tmp) {
 				list = list->next;
+			}
 			xsg_free(tmp);
 			break;
 		}
@@ -199,7 +238,9 @@ xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) {
 	return list;
 }
 
-void xsg_list_free(xsg_list_t *list) {
+void
+xsg_list_free(xsg_list_t *list)
+{
 	xsg_list_t *next;
 
 	while (list != NULL) {
@@ -209,16 +250,19 @@ void xsg_list_free(xsg_list_t *list) {
 	}
 }
 
-xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link) {
+xsg_list_t *
+xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link)
+{
 	if (link) {
-		if (link->prev)
+		if (link->prev) {
 			link->prev->next = link->next;
-		if (link->next)
+		}
+		if (link->next) {
 			link->next->prev = link->prev;
-
-		if (link == list)
+		}
+		if (link == list) {
 			list = list->next;
-
+		}
 		xsg_free(link);
 	}
 

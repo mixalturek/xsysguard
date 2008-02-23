@@ -1,7 +1,7 @@
 /* printf.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,14 @@
 
 /******************************************************************************/
 
-xsg_printf_t *xsg_printf_new(const char *format);
+extern xsg_printf_t *
+xsg_printf_new(const char *format);
 
-void xsg_printf_add_var(xsg_printf_t *print, xsg_var_t *var);
+extern void
+xsg_printf_add_var(xsg_printf_t *print, xsg_var_t *var);
 
-char *xsg_printf(xsg_printf_t *print, xsg_var_t *var);
+extern char *
+xsg_printf(xsg_printf_t *print, xsg_var_t *var);
 
 /******************************************************************************/
 

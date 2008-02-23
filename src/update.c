@@ -33,13 +33,16 @@ typedef struct _rect_t {
 
 /******************************************************************************/
 
-xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int h) {
+xsg_list_t *
+xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int h)
+{
 	int x1_1, x2_1, y1_1, y2_1;
 	xsg_list_t *l;
 	rect_t *rect;
 
-	if (w < 1 || h < 1)
+	if (w < 1 || h < 1) {
 		return updates;
+	}
 
 	x1_1 = x;
 	x2_1 = x + w;
@@ -82,25 +85,32 @@ xsg_list_t *xsg_update_append_rect(xsg_list_t *updates, int x, int y, int w, int
 	return updates;
 }
 
-void xsg_update_get_coordinates(xsg_list_t *updates, int *x, int *y, int *w, int *h) {
+void
+xsg_update_get_coordinates(xsg_list_t *updates, int *x, int *y, int *w, int *h) {
 	rect_t *rect;
 
-	if (unlikely(updates == NULL))
+	if (unlikely(updates == NULL)) {
 		return;
+	}
 
 	rect = updates->data;
 
-	if (unlikely(rect == NULL))
+	if (unlikely(rect == NULL)) {
 		return;
+	}
 
-	if (likely(x != NULL))
+	if (likely(x != NULL)) {
 		*x = rect->xoffset;
-	if (likely(y != NULL))
+	}
+	if (likely(y != NULL)) {
 		*y = rect->yoffset;
-	if (likely(w != NULL))
+	}
+	if (likely(w != NULL)) {
 		*w = rect->width;
-	if (likely(h != NULL))
+	}
+	if (likely(h != NULL)) {
 		*h = rect->height;
+	}
 }
 
 void xsg_update_free(xsg_list_t *updates) {

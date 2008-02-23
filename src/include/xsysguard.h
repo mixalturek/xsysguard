@@ -37,7 +37,7 @@
 # define unlikely(x) (x)
 #endif
 
-#if defined(__GNUC__) && defined __GNUC_MINOR__ && (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 2)
+#if defined(__GNUC_MINOR__) && (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 2)
 # define XSG_API __attribute__ ((__externally_visible__))
 #else
 # define XSG_API
@@ -76,56 +76,88 @@ typedef struct _xsg_var_t xsg_var_t;
 /******************************************************************************/
 
 typedef struct _xsg_module_t {
-	void (*parse)(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n);
+	void (*parse)(
+		uint64_t update,
+		xsg_var_t *var,
+		double (**num)(void *),
+		char *(**str)(void *),
+		void **arg
+	);
 	const char *(*help)(void);
 	const char *info;
-	char *name; // changed by xsysguard
+	char *name; /* replaced by xsysguard */
 } xsg_module_t;
 
-extern xsg_module_t xsg_module XSG_API;
+extern XSG_API xsg_module_t xsg_module;
 
 /******************************************************************************
  * conf.c
  ******************************************************************************/
 
-bool xsg_conf_read_boolean(void) XSG_API;
-int64_t xsg_conf_read_int(void) XSG_API;
-uint64_t xsg_conf_read_uint(void) XSG_API;
-double xsg_conf_read_double(void) XSG_API;
-char *xsg_conf_read_string(void) XSG_API;
+extern XSG_API bool
+xsg_conf_read_boolean(void);
 
-bool xsg_conf_find_command(const char *command) XSG_API;
+extern XSG_API int64_t
+xsg_conf_read_int(void);
 
-void xsg_conf_error(const char *format, ...) XSG_API;
-void xsg_conf_warning(const char *format, ...) XSG_API;
+extern XSG_API uint64_t
+xsg_conf_read_uint(void);
+
+extern XSG_API double
+xsg_conf_read_double(void);
+
+extern XSG_API char *
+xsg_conf_read_string(void);
+
+extern XSG_API bool
+xsg_conf_find_command(const char *command);
+
+extern XSG_API void
+xsg_conf_error(const char *format, ...);
+
+extern XSG_API void
+xsg_conf_warning(const char *format, ...);
 
 /******************************************************************************
  * var.c
  ******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t **var, uint32_t n) XSG_API;
+extern XSG_API void
+xsg_var_dirty(xsg_var_t *var);
 
 /******************************************************************************
  * main.c
  ******************************************************************************/
 
-uint64_t xsg_main_get_interval(void) XSG_API;
-uint64_t xsg_main_get_tick(void) XSG_API;
+extern XSG_API uint64_t
+xsg_main_get_interval(void);
 
-void xsg_main_add_init_func(void (*func)(void)) XSG_API;
-void xsg_main_remove_init_func(void (*func)(void)) XSG_API;
+extern XSG_API uint64_t
+xsg_main_get_tick(void);
 
-void xsg_main_add_update_func(void (*func)(uint64_t tick)) XSG_API;
-void xsg_main_remove_update_func(void (*func)(uint64_t tick)) XSG_API;
+extern XSG_API void
+xsg_main_add_init_func(void (*func)(void));
 
-void xsg_main_add_shutdown_func(void (*func)(void)) XSG_API;
-void xsg_main_remove_shutdown_func(void (*func)(void)) XSG_API;
+extern XSG_API void
+xsg_main_remove_init_func(void (*func)(void));
 
-void xsg_main_add_signal_handler(void (*func)(int signum)) XSG_API;
-void xsg_main_remove_signal_handler(void (*func)(int signum)) XSG_API;
+extern XSG_API void
+xsg_main_add_shutdown_func(void (*func)(void));
 
-void xsg_main_add_signal_cleanup(void (*func)(void)) XSG_API;
-void xsg_main_remove_signal_cleanup(void (*func)(void)) XSG_API;
+extern XSG_API void
+xsg_main_remove_shutdown_func(void (*func)(void));
+
+extern XSG_API void
+xsg_main_add_update_func(void (*func)(uint64_t tick));
+
+extern XSG_API void
+xsg_main_remove_update_func(void (*func)(uint64_t tick));
+
+extern XSG_API void
+xsg_main_add_signal_handler(void (*func)(int signum));
+
+extern XSG_API void
+xsg_main_remove_signal_handler(void (*func)(int signum));
 
 typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,
@@ -140,17 +172,23 @@ typedef struct _xsg_main_poll_t {
 	void *arg;
 } xsg_main_poll_t;
 
-void xsg_main_add_poll(xsg_main_poll_t *poll) XSG_API;
-void xsg_main_remove_poll(xsg_main_poll_t *poll) XSG_API;
+extern XSG_API void
+xsg_main_add_poll(xsg_main_poll_t *poll);
+
+extern XSG_API void
+xsg_main_remove_poll(xsg_main_poll_t *poll);
 
 typedef struct _xsg_main_timeout_t {
-	struct timeval tv; // absolute time
+	struct timeval tv; /* absolute time */
 	void (*func)(void *arg, bool time_error);
 	void *arg;
 } xsg_main_timeout_t;
 
-void xsg_main_add_timeout(xsg_main_timeout_t *timeout) XSG_API;
-void xsg_main_remove_timeout(xsg_main_timeout_t *timeout) XSG_API;
+extern XSG_API void
+xsg_main_add_timeout(xsg_main_timeout_t *timeout);
+
+extern XSG_API void
+xsg_main_remove_timeout(xsg_main_timeout_t *timeout);
 
 /******************************************************************************
  * list.c
@@ -164,17 +202,42 @@ struct _xsg_list_t {
 	xsg_list_t *prev;
 };
 
-xsg_list_t *xsg_list_append(xsg_list_t *list, void *data) XSG_API;
-xsg_list_t *xsg_list_prepend(xsg_list_t *list, void *data) XSG_API;
-xsg_list_t *xsg_list_insert(xsg_list_t *list, void *data, int position) XSG_API;
-xsg_list_t *xsg_list_insert_sorted(xsg_list_t *list, void *data, int (*compare_func)(const void *a, const void *b)) XSG_API;
-xsg_list_t *xsg_list_remove(xsg_list_t *list, const void *data) XSG_API;
-xsg_list_t *xsg_list_last(xsg_list_t *list) XSG_API;
-unsigned int xsg_list_length(xsg_list_t *list) XSG_API;
-xsg_list_t *xsg_list_nth(xsg_list_t *list, unsigned int n) XSG_API;
-void *xsg_list_nth_data(xsg_list_t *list, unsigned int n) XSG_API;
-void xsg_list_free(xsg_list_t *list) XSG_API;
-xsg_list_t *xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link) XSG_API;
+extern XSG_API xsg_list_t *
+xsg_list_append(xsg_list_t *list, void *data);
+
+extern XSG_API xsg_list_t *
+xsg_list_prepend(xsg_list_t *list, void *data);
+
+extern XSG_API xsg_list_t *
+xsg_list_insert(xsg_list_t *list, void *data, int position);
+
+extern XSG_API xsg_list_t *
+xsg_list_insert_sorted(
+	xsg_list_t *list,
+	void *data,
+	int (*compare_func)(const void *a, const void *b)
+);
+
+extern XSG_API xsg_list_t *
+xsg_list_remove(xsg_list_t *list, const void *data);
+
+extern XSG_API xsg_list_t *
+xsg_list_last(xsg_list_t *list);
+
+extern XSG_API unsigned int
+xsg_list_length(xsg_list_t *list);
+
+extern XSG_API xsg_list_t *
+xsg_list_nth(xsg_list_t *list, unsigned int n);
+
+extern XSG_API void *
+xsg_list_nth_data(xsg_list_t *list, unsigned int n);
+
+extern XSG_API void
+xsg_list_free(xsg_list_t *list);
+
+extern XSG_API xsg_list_t *
+xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link);
 
 /******************************************************************************
  * string.c
@@ -186,54 +249,135 @@ typedef struct _xsg_string_t {
 	size_t allocated_len;
 } xsg_string_t;
 
-xsg_string_t *xsg_string_new(const char *init) XSG_API;
-xsg_string_t *xsg_string_sized_new(size_t dfl_size) XSG_API;
-xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) XSG_API;
-xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) XSG_API;
-xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) XSG_API;
-xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) XSG_API;
-xsg_string_t *xsg_string_append_c(xsg_string_t *string, char c) XSG_API;
-xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) XSG_API;
-xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len) XSG_API;
-xsg_string_t *xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c) XSG_API;
-xsg_string_t *xsg_string_erase(xsg_string_t *string, ssize_t pos, ssize_t len) XSG_API;
-xsg_string_t *xsg_string_up(xsg_string_t *string) XSG_API;
-xsg_string_t *xsg_string_down(xsg_string_t *string) XSG_API;
-void xsg_string_printf(xsg_string_t *string, const char *format, ...) XSG_API;
-void xsg_string_append_printf(xsg_string_t *string, const char *format, ...) XSG_API;
-char *xsg_string_free(xsg_string_t *string, bool free_segment) XSG_API;
+extern XSG_API xsg_string_t *
+xsg_string_new(const char *init);
+
+extern XSG_API xsg_string_t *
+xsg_string_sized_new(size_t len);
+
+extern XSG_API void
+xsg_string_assign(xsg_string_t *string, const char *val);
+
+extern XSG_API void
+xsg_string_truncate(xsg_string_t *string, size_t len);
+
+extern XSG_API void
+xsg_string_set_size(xsg_string_t *string, size_t len);
+
+extern XSG_API void
+xsg_string_append(xsg_string_t *string, const char *val);
+
+extern XSG_API void
+xsg_string_append_c(xsg_string_t *string, char c);
+
+extern XSG_API void
+xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len);
+
+extern XSG_API void
+xsg_string_insert_len(
+	xsg_string_t *string,
+	ssize_t pos,
+	const char *val,
+	ssize_t len
+);
+
+extern XSG_API void
+xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c);
+
+extern XSG_API void
+xsg_string_erase(xsg_string_t *string, ssize_t pos, ssize_t len);
+
+extern XSG_API void
+xsg_string_up(xsg_string_t *string);
+
+extern XSG_API void
+xsg_string_down(xsg_string_t *string);
+
+extern XSG_API void
+xsg_string_printf(xsg_string_t *string, const char *format, ...);
+
+extern XSG_API void
+xsg_string_append_printf(xsg_string_t *string, const char *format, ...);
+
+extern XSG_API char *
+xsg_string_free(xsg_string_t *string, bool free_segment);
 
 /******************************************************************************
  * hash.c
  ******************************************************************************/
 
-bool xsg_direct_equal(const void *a, const void *b) XSG_API;
-unsigned xsg_direct_hash(const void *v) XSG_API;
+extern XSG_API bool
+xsg_direct_equal(const void *a, const void *b);
 
-bool xsg_int_equal(const void *a, const void *b) XSG_API;
-unsigned xsg_int_hash(const void *v) XSG_API;
+extern XSG_API unsigned
+xsg_direct_hash(const void *v);
 
-bool xsg_str_equal(const void *a, const void *b) XSG_API;
-unsigned xsg_str_hash(const void *v) XSG_API;
+extern XSG_API bool
+xsg_int_equal(const void *a, const void *b);
+
+extern XSG_API unsigned
+xsg_int_hash(const void *v);
+
+extern XSG_API bool
+xsg_str_equal(const void *a, const void *b);
+
+extern XSG_API unsigned
+xsg_str_hash(const void *v);
 
 typedef struct _xsg_hash_table_t xsg_hash_table_t;
 
-xsg_hash_table_t *xsg_hash_table_new(unsigned (*hash_func)(const void *key),
-					bool (*equal_func)(const void *a, const void *b)) XSG_API;
-xsg_hash_table_t *xsg_hash_table_new_full(unsigned (*hash_func)(const void *key),
-					bool (*equal_func)(const void *a, const void *b),
-					void (*key_destroy_notify_func)(void *data),
-					void (*value_destroy_notify_func)(void *data)) XSG_API;
-xsg_hash_table_t *xsg_hash_table_ref(xsg_hash_table_t *hash_table) XSG_API;
-void xsg_hash_table_unref(xsg_hash_table_t *hash_table) XSG_API;
-void xsg_hash_table_insert(xsg_hash_table_t *hash_table, void *key, void *value) XSG_API;
-void *xsg_hash_table_lookup(xsg_hash_table_t *hash_table, const void *key) XSG_API;
-bool xsg_hash_table_lookup_extended(xsg_hash_table_t *hash_table, const void *key, void **orig_key, void **value) XSG_API;
-bool xsg_hash_table_remove(xsg_hash_table_t *hash_table, const void *key) XSG_API;
-void xsg_hash_table_remove_all(xsg_hash_table_t *hash_table) XSG_API;
-void xsg_hash_table_destroy(xsg_hash_table_t *hash_table) XSG_API;
-unsigned int xsg_hash_table_size(xsg_hash_table_t *hash_table) XSG_API;
-void xsg_hash_table_foreach(xsg_hash_table_t *hash_table, void (*func)(void *key, void *value, void *data), void *data) XSG_API;
+extern XSG_API xsg_hash_table_t *
+xsg_hash_table_new(
+	unsigned (*hash_func)(const void *key),
+	bool (*equal_func)(const void *a, const void *b)
+);
+
+extern XSG_API xsg_hash_table_t *
+xsg_hash_table_new_full(
+	unsigned (*hash_func)(const void *key),
+	bool (*equal_func)(const void *a, const void *b),
+	void (*key_destroy_notify_func)(void *data),
+	void (*value_destroy_notify_func)(void *data)
+);
+
+extern XSG_API xsg_hash_table_t *
+xsg_hash_table_ref(xsg_hash_table_t *hash_table);
+
+extern XSG_API void
+xsg_hash_table_unref(xsg_hash_table_t *hash_table);
+
+extern XSG_API void
+xsg_hash_table_insert(xsg_hash_table_t *hash_table, void *key, void *value);
+
+extern XSG_API void *
+xsg_hash_table_lookup(xsg_hash_table_t *hash_table, const void *key);
+
+extern XSG_API bool
+xsg_hash_table_lookup_extended(
+	xsg_hash_table_t *hash_table,
+	const void *key,
+	void **orig_key,
+	void **value
+);
+
+extern XSG_API bool
+xsg_hash_table_remove(xsg_hash_table_t *hash_table, const void *key);
+
+extern XSG_API void
+xsg_hash_table_remove_all(xsg_hash_table_t *hash_table);
+
+extern XSG_API void
+xsg_hash_table_destroy(xsg_hash_table_t *hash_table);
+
+extern XSG_API unsigned int
+xsg_hash_table_size(xsg_hash_table_t *hash_table);
+
+extern XSG_API void
+xsg_hash_table_foreach(
+	xsg_hash_table_t *hash_table,
+	void (*func)(void *key, void *value, void *data),
+	void *data
+);
 
 /******************************************************************************
  * buffer.c
@@ -241,44 +385,96 @@ void xsg_hash_table_foreach(xsg_hash_table_t *hash_table, void (*func)(void *key
 
 typedef struct _xsg_buffer_t xsg_buffer_t;
 
-xsg_buffer_t *xsg_buffer_new(void) XSG_API;
-void xsg_buffer_parse(xsg_buffer_t *buffer, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg) XSG_API;
-void xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len) XSG_API;
-void xsg_buffer_clear(xsg_buffer_t *buffer) XSG_API;
-void xsg_buffer_help(xsg_string_t *string, const char *module_name, const char *opt) XSG_API;
+extern XSG_API xsg_buffer_t *
+xsg_buffer_new(void);
+
+extern XSG_API void
+xsg_buffer_parse(
+	xsg_buffer_t *buffer,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+);
+
+extern XSG_API void
+xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len);
+
+extern XSG_API void
+xsg_buffer_clear(xsg_buffer_t *buffer);
+
+extern XSG_API void
+xsg_buffer_help(xsg_string_t *string, const char *module_name, const char *opt);
 
 /******************************************************************************
  * utils.c
  ******************************************************************************/
 
 /* strfuncs */
-bool xsg_str_has_suffix(const char *str, const char *suffix) XSG_API;
-char *xsg_str_without_suffix(const char *str, const char *suffix) XSG_API;
-char **xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens) XSG_API;
-void xsg_strfreev(char **str_array) XSG_API;
-int xsg_strvcmp(char **strv1, char **strv2) XSG_API;
+
+extern XSG_API bool
+xsg_str_has_suffix(const char *str, const char *suffix);
+
+extern XSG_API char *
+xsg_str_without_suffix(const char *str, const char *suffix);
+
+extern XSG_API char **
+xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens);
+
+extern XSG_API void
+xsg_strfreev(char **str_array);
+
+extern XSG_API int
+xsg_strvcmp(char **strv1, char **strv2);
 
 #define xsg_strdup(str) xsg_strdup_(str, __FILE__, __LINE__)
 #define xsg_strndup(str, n) xsg_strndup_(str, n, __FILE__, __LINE__)
 
-char *xsg_strdup_(const char *str, const char *file, int line) XSG_API;
-char *xsg_strndup_(const char *str, size_t n, const char *file, int line) XSG_API;
+extern XSG_API char *
+xsg_strdup_(const char *str, const char *file, int line);
+
+extern XSG_API char *
+xsg_strndup_(const char *str, size_t n, const char *file, int line);
 
 /* byte order */
-uint16_t xsg_uint16_be(uint16_t u) XSG_API;
-uint16_t xsg_uint16_le(uint16_t u) XSG_API;
-uint32_t xsg_uint32_be(uint32_t u) XSG_API;
-uint32_t xsg_uint32_le(uint32_t u) XSG_API;
-uint64_t xsg_uint64_be(uint64_t u) XSG_API;
-uint64_t xsg_uint64_le(uint64_t u) XSG_API;
-double xsg_double_be(double d) XSG_API;
-double xsg_double_le(double d) XSG_API;
+
+extern XSG_API uint16_t
+xsg_uint16_be(uint16_t u);
+
+extern XSG_API uint16_t
+xsg_uint16_le(uint16_t u);
+
+extern XSG_API uint32_t
+xsg_uint32_be(uint32_t u);
+
+extern XSG_API uint32_t
+xsg_uint32_le(uint32_t u);
+
+extern XSG_API uint64_t
+xsg_uint64_be(uint64_t u);
+
+extern XSG_API uint64_t
+xsg_uint64_le(uint64_t u);
+
+extern XSG_API double
+xsg_double_be(double d);
+
+extern XSG_API double
+xsg_double_le(double d);
 
 /* mem */
-void *xsg_malloc_(size_t size, const char *file, int line) XSG_API;
-void *xsg_malloc0_(size_t size, const char *file, int line) XSG_API;
-void *xsg_realloc_(void *mem, size_t size, const char *file, int line) XSG_API;
-void xsg_free_(void *mem, const char *file, int line) XSG_API;
+
+extern XSG_API void *
+xsg_malloc_(size_t size, const char *file, int line);
+
+extern XSG_API void *
+xsg_malloc0_(size_t size, const char *file, int line);
+
+extern XSG_API void *
+xsg_realloc_(void *mem, size_t size, const char *file, int line);
+
+extern XSG_API void
+xsg_free_(void *mem, const char *file, int line);
 
 #define xsg_malloc(size) xsg_malloc_(size, __FILE__, __LINE__)
 #define xsg_malloc0(size) xsg_malloc0_(size, __FILE__, __LINE__)
@@ -286,19 +482,31 @@ void xsg_free_(void *mem, const char *file, int line) XSG_API;
 #define xsg_free(mem) xsg_free_(mem, __FILE__, __LINE__)
 
 #define xsg_new(struct_type, n_structs) \
-	((struct_type *) xsg_malloc(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+	((struct_type *) xsg_malloc(((size_t) sizeof(struct_type)) \
+			* ((size_t) (n_structs))))
 #define xsg_new0(struct_type, n_structs) \
-	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+	((struct_type *) xsg_malloc0(((size_t) sizeof(struct_type)) \
+			* ((size_t) (n_structs))))
 #define xsg_renew(struct_type, mem, n_structs) \
-	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) * ((size_t) (n_structs))))
+	((struct_type *) xsg_realloc((mem), ((size_t) sizeof(struct_type)) \
+			* ((size_t) (n_structs))))
 
-int xsg_vasprintf(char **strp, const char *fmt, va_list ap) XSG_API;
-int xsg_asprintf(char **strp, const char *fmt, ...) XSG_API;
+extern XSG_API int
+xsg_vasprintf(char **strp, const char *fmt, va_list ap);
+
+extern XSG_API int
+xsg_asprintf(char **strp, const char *fmt, ...);
 
 /* misc */
-char *xsg_build_filename(const char *first_element, ...) XSG_API;
-const char *xsg_get_home_dir(void) XSG_API;
-char *xsg_dirname(const char *file_name) XSG_API;
+
+extern XSG_API char *
+xsg_build_filename(const char *first_element, ...);
+
+extern XSG_API const char *
+xsg_get_home_dir(void);
+
+extern XSG_API char *
+xsg_dirname(const char *file_name);
 
 typedef enum {
 	XSG_FILE_TEST_IS_REGULAR    = 1 << 0,
@@ -308,19 +516,26 @@ typedef enum {
 	XSG_FILE_TEST_EXISTS        = 1 << 4
 } xsg_file_test_t;
 
-bool xsg_file_test(const char *filename, xsg_file_test_t test) XSG_API;
+extern XSG_API bool
+xsg_file_test(const char *filename, xsg_file_test_t test);
 
-char **xsg_get_path_from_env(const char *env_name, const char *default_path) XSG_API;
+extern XSG_API char **
+xsg_get_path_from_env(const char *env_name, const char *default_path);
 
-int xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y) XSG_API;
-int xsg_gettimeofday(struct timeval *tv, void *tz) XSG_API;
-void xsg_gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usecs) XSG_API;
+extern XSG_API int
+xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y);
 
-char *xsg_strsignal(int signum) XSG_API;
+extern XSG_API int
+xsg_gettimeofday(struct timeval *tv, void *tz);
 
-char *xsg_getenv(const char *name) XSG_API;
-int xsg_setenv(const char *name, const char *value, int overwrite) XSG_API;
-int xsg_unsetenv(const char *name) XSG_API;
+extern XSG_API char *
+xsg_getenv(const char *name);
+
+extern XSG_API int
+xsg_setenv(const char *name, const char *value, int overwrite);
+
+extern XSG_API int
+xsg_unsetenv(const char *name);
 
 /******************************************************************************
  * compat.c
@@ -328,7 +543,8 @@ int xsg_unsetenv(const char *name) XSG_API;
 
 #ifdef SunOS
 # define isinf(x) xsg_isinf(x)
-int xsg_isinf(double x) XSG_API;
+extern XSG_API int
+xsg_isinf(double x);
 #endif /* SunOS */
 
 #ifndef timercmp
@@ -356,30 +572,43 @@ int xsg_isinf(double x) XSG_API;
 # define XSG_MAX_LOG_LEVEL XSG_LOG_LEVEL_MESSAGE
 #endif /* XSG_MAX_LOG_LEVEL */
 
-extern int xsg_log_level XSG_API;
+extern XSG_API int xsg_log_level;
 
-void xsg_log(const char *domain, int level, const char *format, ...) XSG_API;
+extern XSG_API void
+xsg_log(const char *domain, int level, const char *format, ...);
 
 #if (XSG_LOG_LEVEL_ERROR <= XSG_MAX_LOG_LEVEL)
-# define xsg_error(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_ERROR)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__); } while(0)
+# define xsg_error(...) do { \
+	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_ERROR)) \
+		xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_ERROR, __VA_ARGS__); \
+	} while(0)
 #else
 # define xsg_error(...)
 #endif
 
 #if (XSG_LOG_LEVEL_WARNING <= XSG_MAX_LOG_LEVEL)
-# define xsg_warning(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_WARNING)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__); } while (0)
+# define xsg_warning(...) do { \
+	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_WARNING)) \
+		xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_WARNING, __VA_ARGS__); \
+	} while (0)
 #else
 # define xsg_warning(...)
 #endif
 
 #if (XSG_LOG_LEVEL_MESSAGE <= XSG_MAX_LOG_LEVEL)
-# define xsg_message(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MESSAGE)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__); } while(0)
+# define xsg_message(...) do { \
+	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_MESSAGE)) \
+		xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_MESSAGE, __VA_ARGS__); \
+	} while(0)
 #else
 # define xsg_message(...)
 #endif
 
 #if (XSG_LOG_LEVEL_DEBUG <= XSG_MAX_LOG_LEVEL)
-# define xsg_debug(...) do { if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_DEBUG)) xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__); } while(0)
+# define xsg_debug(...) do { \
+	if (unlikely(xsg_log_level >= XSG_LOG_LEVEL_DEBUG)) \
+		xsg_log(XSG_LOG_DOMAIN, XSG_LOG_LEVEL_DEBUG, __VA_ARGS__); \
+	} while(0)
 #else
 # define xsg_debug(...)
 #endif

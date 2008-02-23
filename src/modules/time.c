@@ -36,7 +36,9 @@ static xsg_main_timeout_t *timeout = NULL;
 
 /******************************************************************************/
 
-static void set_timeout(struct timeval *tv) {
+static void
+set_timeout(struct timeval *tv)
+{
 	struct timeval now;
 
 	xsg_gettimeofday(&now, NULL);
@@ -45,20 +47,25 @@ static void set_timeout(struct timeval *tv) {
 	tv->tv_usec = 0;
 }
 
-static void timeout_handler(void *arg, bool time_error) {
+static void
+timeout_handler(void *arg, bool time_error)
+{
 	xsg_list_t *l;
 
 	for (l = var_list; l; l = l->next) {
 		xsg_var_t *var = l->data;
 
-		xsg_var_dirty(&var, 1);
+		xsg_var_dirty(var);
 	}
 
 	set_timeout(&timeout->tv);
 }
 
-static void init(void) {
+static void
+init(void)
+{
 	timeout = xsg_new(xsg_main_timeout_t, 1);
+
 	timeout->tv.tv_sec = 0;
 	timeout->tv.tv_usec = 0;
 	timeout->func = timeout_handler;
@@ -70,42 +77,53 @@ static void init(void) {
 
 /******************************************************************************/
 
-static struct tm *gm_time_tm() {
+static struct tm *
+gm_time_tm(void)
+{
 	time_t curtime;
 	static struct tm *tm;
 
 	curtime = time(NULL);
 	tm = gmtime(&curtime);
 
-	if (unlikely(tm == NULL))
+	if (unlikely(tm == NULL)) {
 		xsg_error("gmtime returned NULL");
+	}
 
 	return tm;
 }
 
-static struct tm *local_time_tm() {
+static struct tm *
+local_time_tm(void)
+{
 	time_t curtime;
 	static struct tm *tm;
 
 	curtime = time(NULL);
 	tm = localtime(&curtime);
 
-	if (unlikely(tm == NULL))
+	if (unlikely(tm == NULL)) {
 		xsg_error("localtime returned NULL");
+	}
 
 	return tm;
 }
 
-static struct tm *time_tm(bool local) {
-	if (local)
+static struct tm *
+time_tm(bool local)
+{
+	if (local) {
 		return local_time_tm();
-	else
+	} else {
 		return gm_time_tm();
+	}
 }
 
 /******************************************************************************/
 
-static char *get_strftime(void *arg) {
+static char *
+get_strftime(void *arg)
+{
 	strftime_args_t *args = (strftime_args_t *) arg;
 	struct tm *tm;
 
@@ -117,10 +135,11 @@ static char *get_strftime(void *arg) {
 		buf_len = args->buffer->allocated_len;
 		len = strftime(args->buffer->str, buf_len, args->format, tm);
 
-		if (likely(len != 0))
+		if (likely(len != 0)) {
 			break;
+		}
 
-		args->buffer = xsg_string_set_size(args->buffer, (buf_len + 1) * 2);
+		xsg_string_set_size(args->buffer, (buf_len + 1) * 2);
 	}
 
 	xsg_debug("get_strftime: \"%s\"", args->buffer->str);
@@ -128,34 +147,42 @@ static char *get_strftime(void *arg) {
 	return args->buffer->str;
 }
 
-static double get_sec(void *arg) {
+static double
+get_sec(void *arg)
+{
 	bool local = *((bool *) arg);
 	time_t curtime;
 	double d;
 
 	curtime = time(NULL);
 
-	if (local)
+	if (local) {
 		d = (double) mktime(localtime(&curtime));
-	else
+	} else {
 		d = (double) mktime(gmtime(&curtime));
+	}
 
 	xsg_debug("get_tv_sec: %f", d);
 
 	return d;
 }
 
-static double get_usec(void *arg) {
+static double
+get_usec(void *arg)
+{
 	struct timeval tv;
 	double d;
 
 	xsg_gettimeofday(&tv, NULL);
 	d = (double) tv.tv_usec;
 	xsg_debug("get_tv_usec: %f", d);
+
 	return d;
 }
 
-static double get_tm_sec(void *arg) {
+static double
+get_tm_sec(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -163,10 +190,13 @@ static double get_tm_sec(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_sec;
 	xsg_debug("get_tm_sec: %f", d);
+
 	return d;
 }
 
-static double get_tm_min(void *arg) {
+static double
+get_tm_min(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -174,10 +204,13 @@ static double get_tm_min(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_min;
 	xsg_debug("get_tm_min: %f", d);
+
 	return d;
 }
 
-static double get_tm_hour(void *arg) {
+static double
+get_tm_hour(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -185,10 +218,13 @@ static double get_tm_hour(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_hour;
 	xsg_debug("get_tm_hour: %f", d);
+
 	return d;
 }
 
-static double get_tm_mday(void *arg) {
+static double
+get_tm_mday(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -196,10 +232,13 @@ static double get_tm_mday(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_mday;
 	xsg_debug("get_tm_mday: %f", d);
+
 	return d;
 }
 
-static double get_tm_mon(void *arg) {
+static double
+get_tm_mon(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -207,10 +246,13 @@ static double get_tm_mon(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_mon;
 	xsg_debug("get_tm_mon: %f", d);
+
 	return d;
 }
 
-static double get_tm_year(void *arg) {
+static double
+get_tm_year(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -218,10 +260,13 @@ static double get_tm_year(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_year;
 	xsg_debug("get_tm_year: %f", d);
+
 	return d;
 }
 
-static double get_tm_wday(void *arg) {
+static double
+get_tm_wday(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -229,10 +274,13 @@ static double get_tm_wday(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_wday;
 	xsg_debug("get_tm_wday: %f", d);
+
 	return d;
 }
 
-static double get_tm_yday(void *arg) {
+static double
+get_tm_yday(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -240,10 +288,13 @@ static double get_tm_yday(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_yday;
 	xsg_debug("get_tm_yday: %f", d);
+
 	return d;
 }
 
-static double get_tm_isdst(void *arg) {
+static double
+get_tm_isdst(void *arg)
+{
 	bool local = *((bool *) arg);
 	struct tm *tm;
 	double d;
@@ -251,16 +302,22 @@ static double get_tm_isdst(void *arg) {
 	tm = time_tm(local);
 	d = (double) tm->tm_isdst;
 	xsg_debug("get_tm_isdst: %f", d);
+
 	return d;
 }
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	bool local = TRUE;
-
-	if (n > 1)
-		xsg_conf_error("Past values not supported");
 
 	if (xsg_conf_find_command("gm")) {
 		local = FALSE;
@@ -311,46 +368,67 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 		} else if (xsg_conf_find_command("tm_isdst")) {
 			*num = get_tm_isdst;
 		} else {
-			xsg_conf_error("strftime, sec, usec, tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday or tm_isdst expected");
+			xsg_conf_error("strftime, sec, usec, tm_sec, tm_min, "
+					"tm_hour, tm_mday, tm_mon, tm_year, "
+					"tm_wday, tm_yday or tm_isdst "
+					"expected");
 		}
 	}
 
-	var_list = xsg_list_append(var_list, (void *) var[0]);
+	var_list = xsg_list_append(var_list, (void *) var);
 
 	xsg_main_add_init_func(init);
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 	bool local;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	for (local = 0; local < 2; local++) {
 		char *format;
 
 		if (local) {
-			xsg_string_append_printf(string, "\nS %s:local:strftime:<format>\n\n", xsg_module.name);
+			xsg_string_append_printf(string,
+					"\nS %s:local:strftime:<format>\n\n",
+					xsg_module.name);
 			format = "N %s:local:%-20s %.0f\n";
 		} else {
-			xsg_string_append_printf(string, "S %s:gm:strftime:<format>\n\n", xsg_module.name);
+			xsg_string_append_printf(string,
+					"S %s:gm:strftime:<format>\n\n",
+					xsg_module.name);
 			format = "N %s:gm:%-23s %.0f\n";
 		}
 
-		xsg_string_append_printf(string, format, xsg_module.name, "sec", get_sec(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "usec", get_usec(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_sec", get_tm_sec(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_min", get_tm_min(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_hour", get_tm_hour(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_mday", get_tm_mday(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_mon", get_tm_mon(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_year", get_tm_year(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_wday", get_tm_wday(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_yday", get_tm_yday(&local));
-		xsg_string_append_printf(string, format, xsg_module.name, "tm_isdst", get_tm_isdst(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"sec", get_sec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"usec", get_usec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_sec", get_tm_sec(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_min", get_tm_min(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_hour", get_tm_hour(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_mday", get_tm_mday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_mon", get_tm_mon(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_year", get_tm_year(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_wday", get_tm_wday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_yday", get_tm_yday(&local));
+		xsg_string_append_printf(string, format, xsg_module.name,
+				"tm_isdst", get_tm_isdst(&local));
 	}
 
 	return string->str;

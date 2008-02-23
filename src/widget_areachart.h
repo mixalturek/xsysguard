@@ -1,7 +1,7 @@
 /* widget_areachart.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,13 @@
 
 /*****************************************************************************/
 
-xsg_widget_t *xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update);
-void xsg_widget_areachart_parse_var(xsg_var_t *var);
+extern xsg_widget_t *
+xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update);
+
+extern void
+xsg_widget_areachart_parse_var(xsg_var_t *var);
 
 /******************************************************************************/
 
-#endif // __WIDGET_AREACHART_H__
+#endif /* __WIDGET_AREACHART_H__ */
 

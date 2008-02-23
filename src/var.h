@@ -1,7 +1,7 @@
 /* var.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,22 @@
 
 /******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t **var, uint32_t n);
+extern void
+xsg_var_dirty(xsg_var_t *var);
 
-void xsg_var_flush_dirty(void);
+extern void
+xsg_var_flush_dirty(void);
 
 /******************************************************************************/
 
-xsg_var_t **xsg_var_parse_past(uint64_t update, xsg_window_t *window, xsg_widget_t *widget, uint32_t n);
-xsg_var_t *xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget);
+extern xsg_var_t *
+xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget);
 
-double xsg_var_get_num(xsg_var_t *var);
-char *xsg_var_get_str(xsg_var_t *var);
+extern double
+xsg_var_get_num(xsg_var_t *var);
+
+extern char *
+xsg_var_get_str(xsg_var_t *var);
 
 /*****************************************************************************/
 

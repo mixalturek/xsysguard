@@ -1,7 +1,7 @@
 /* angle.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <xsysguard.h>
 #include <math.h>
 
 #include "angle.h"
@@ -30,7 +31,9 @@
 
 /******************************************************************************/
 
-static void max_area(double sa, double ca, double *width, double *height) {
+static void
+max_area(double sa, double ca, double *width, double *height)
+{
 	double ow, oh;
 	unsigned w, h;
 	unsigned max;
@@ -59,7 +62,15 @@ static void max_area(double sa, double ca, double *width, double *height) {
 	}
 }
 
-xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width, unsigned height) {
+xsg_angle_t *
+xsg_angle_parse(
+	double a,
+	int xoffset,
+	int yoffset,
+	unsigned width,
+	unsigned height
+)
+{
 	xsg_angle_t *angle;
 	double arc, sa, ca, w, h;
 
@@ -124,10 +135,11 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width,
 	xoffset += (width - (int) (fabs(sa * h) + fabs(ca * w))) / 2;
 	yoffset += (height - (int) (fabs(ca * h) + fabs(sa * w))) / 2;
 
-	if (sa > 0.0)
+	if (sa > 0.0) {
 		xoffset += sa * h;
-	else
+	} else {
 		yoffset -= sa * w;
+	}
 
 	if (ca < 0.0) {
 		xoffset -= ca * w;
@@ -141,6 +153,7 @@ xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width,
 	angle->angle = a;
 	angle->angle_x = w * ca;
 	angle->angle_y = w * sa;
+
 	return angle;
 }
 

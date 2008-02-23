@@ -60,20 +60,31 @@ struct _rand_t {
 
 static rand_t *global_random = NULL;
 
-static void rand_set_seed_array(rand_t *rand, const uint32_t *seed, unsigned int seed_length) {
+/******************************************************************************/
+
+static void
+rand_set_seed_array(
+	rand_t *rand,
+	const uint32_t *seed,
+	unsigned int seed_length
+)
+{
 	int i, j, k;
 
-	if (rand == NULL)
+	if (rand == NULL) {
 		return;
+	}
 
-	if (seed_length < 1)
+	if (seed_length < 1) {
 		return;
+	}
 
 	i = 1;
 	j = 0;
 	k = (N > seed_length ? N : seed_length);
 	for (; k; k--) {
-		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1] ^ (rand->mt[i-1] >> 30)) * 1664525UL)) + seed[j] + j;
+		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1]
+			^ (rand->mt[i-1] >> 30)) * 1664525UL)) + seed[j] + j;
 		rand->mt[i] &= 0xffffffffUL;
 		i++;
 		j++;
@@ -85,7 +96,8 @@ static void rand_set_seed_array(rand_t *rand, const uint32_t *seed, unsigned int
 			j = 0;
 	}
 	for (k = N-1; k; k--) {
-		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1] ^ (rand->mt[i-1] >> 30)) * 1566083941UL)) - i;
+		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1]
+				^ (rand->mt[i-1] >> 30)) * 1566083941UL)) - i;
 		rand->mt[i] &= 0xffffffffUL;
 		i++;
 		if (i >= N) {
@@ -96,14 +108,19 @@ static void rand_set_seed_array(rand_t *rand, const uint32_t *seed, unsigned int
 	rand->mt[0] = 0x80000000UL;
 }
 
-static rand_t *rand_new_with_seed_array(const uint32_t *seed, unsigned int seed_length) {
+static rand_t *
+rand_new_with_seed_array(const uint32_t *seed, unsigned int seed_length)
+{
 	rand_t *rand = xsg_new0(rand_t, 1);
 
 	rand_set_seed_array(rand, seed, seed_length);
+
 	return rand;
 }
 
-static rand_t *rand_new() {
+static rand_t *
+rand_new(void)
+{
 	uint32_t seed[4];
 	struct timeval now;
 	static bool dev_urandom_exists = TRUE;
@@ -124,8 +141,9 @@ static rand_t *rand_new() {
 				r = fread(seed, sizeof(seed), 1, dev_urandom);
 			} while (errno == EINTR);
 
-			if (r != 1)
+			if (r != 1) {
 				dev_urandom_exists = FALSE;
+			}
 
 			fclose(dev_urandom);
 		} else {
@@ -144,23 +162,30 @@ static rand_t *rand_new() {
 	return rand_new_with_seed_array(seed, 4);
 }
 
-static uint32_t rand_int(rand_t *rand) {
+static uint32_t
+rand_int(rand_t *rand)
+{
 	uint32_t y;
 	static const uint32_t mag01[2] = { 0x0, MATRIX_A };
 
-	if (rand == NULL)
+	if (rand == NULL) {
 		return 0;
+	}
 
 	if (rand->mti >= N) {
 		int kk;
 
 		for (kk = 0; kk < N-M; kk++) {
-			y = (rand->mt[kk] & UPPER_MASK) | (rand->mt[kk+1] & LOWER_MASK);
-			rand->mt[kk] = rand->mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1];
+			y = (rand->mt[kk] & UPPER_MASK)
+				| (rand->mt[kk+1] & LOWER_MASK);
+			rand->mt[kk] = rand->mt[kk+M] ^ (y >> 1)
+				^ mag01[y & 0x1];
 		}
 		for (; kk < N-1; kk++) {
-			y = (rand->mt[kk] & UPPER_MASK) | (rand->mt[kk+1] & LOWER_MASK);
-			rand->mt[kk] = rand->mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1];
+			y = (rand->mt[kk] & UPPER_MASK)
+				| (rand->mt[kk+1] & LOWER_MASK);
+			rand->mt[kk] = rand->mt[kk+(M-N)]
+				^ (y >> 1) ^ mag01[y & 0x1];
 		}
 		y = (rand->mt[N-1] & UPPER_MASK) | (rand->mt[0] & LOWER_MASK);
 		rand->mt[N-1] = rand->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1];
@@ -175,12 +200,15 @@ static uint32_t rand_int(rand_t *rand) {
 	return y;
 }
 
-static double rand_double(rand_t *rand) {
+static double
+rand_double(rand_t *rand)
+{
 	double retval = rand_int(rand) * RAND_DOUBLE_TRANSFORM;
 	retval = (retval + rand_int(rand)) * RAND_DOUBLE_TRANSFORM;
 
-	if (retval >= 1.0)
+	if (retval >= 1.0) {
 		return rand_double(rand);
+	}
 
 	return retval;
 }
@@ -198,24 +226,31 @@ static xsg_list_t *random_list = NULL;
 
 /******************************************************************************/
 
-static void init_random(void) {
+static void
+init_random(void)
+{
 	global_random = rand_new();
 }
 
-static void update_random(uint64_t tick) {
+static void
+update_random(uint64_t tick)
+{
 	xsg_list_t *l;
 
 	for (l = random_list; l; l = l->next) {
 		random_t *random = l->data;
 
-		if (tick == 0 || tick % random->update == 0)
+		if (tick == 0 || tick % random->update == 0) {
 			random->value = rand_double(global_random);
+		}
 	}
 }
 
 /******************************************************************************/
 
-static double get_random(void *arg) {
+static double
+get_random(void *arg)
+{
 	random_t *random = arg;
 
 	xsg_debug("get_random: %f", random->value);
@@ -225,11 +260,16 @@ static double get_random(void *arg) {
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	random_t *random;
-
-	if (n > 1)
-		xsg_conf_error("Past values not supported");
 
 	random = xsg_new(random_t, 1);
 	random->update = update;
@@ -244,13 +284,16 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_init_func(init_random);
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	xsg_string_append_printf(string, "N %s\n", xsg_module.name);
 

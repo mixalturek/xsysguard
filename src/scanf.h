@@ -1,7 +1,7 @@
 /* scanf.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef __SCANF_H__
+#define __SCANF_H__
+
 #include <xsysguard.h>
 
 /******************************************************************************/
 
-char *xsg_scanf_string(const char *buffer, const char *format);
-double *xsg_scanf_number(const char *buffer, const char *format);
-uint64_t *xsg_scanf_counter(const char *buffer, const char *format);
+extern char *
+xsg_scanf_string(const char *buffer, const char *format);
+
+extern double *
+xsg_scanf_number(const char *buffer, const char *format);
+
+extern uint64_t *
+xsg_scanf_counter(const char *buffer, const char *format);
+
+/******************************************************************************/
+
+#endif /* __SCANF_H__ */
 

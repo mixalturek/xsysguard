@@ -33,23 +33,26 @@ typedef struct _feature_t {
 
 /******************************************************************************/
 
-static bool init(void) {
+static bool
+init(void)
+{
 	char *config;
 	FILE *f;
 
 	config = xsg_getenv("XSYSGUARD_SENSORS_CONFIG");
 
-	if (config == NULL)
+	if (config == NULL) {
 		config = DEFAULT_SENSORS_CONF;
+	}
 
 	if ((f = fopen(config, "r")) == NULL) {
-		xsg_warning("Cannot open configuration file: %s", config);
+		xsg_warning("cannot open configuration file: %s", config);
 		return FALSE;
 	}
 
 	if (sensors_init(f)) {
 		fclose(f);
-		xsg_warning("Cannot initialize sensors: sensors_init failed");
+		xsg_warning("cannot initialize sensors: sensors_init failed");
 		return FALSE;
 	}
 
@@ -60,7 +63,9 @@ static bool init(void) {
 
 /******************************************************************************/
 
-static double get_sensors_feature(void *arg) {
+static double
+get_sensors_feature(void *arg)
+{
 	feature_t *feature = (feature_t *) arg;
 	double value = DNAN;
 
@@ -73,18 +78,24 @@ static double get_sensors_feature(void *arg) {
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	static bool initialized = FALSE;
 	const sensors_chip_name *chip_name;
 	char *chip_name_prefix;
 	int chip_nr = 0;
 
-	if (n > 1)
-		xsg_conf_error("Past values not supported");
-
 	if (!initialized) {
-		if (!init())
-			xsg_conf_error("Cannot initialize sensors");
+		if (!init()) {
+			xsg_conf_error("cannot initialize sensors");
+		}
 		initialized = TRUE;
 	}
 
@@ -95,9 +106,12 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 		char *feature_data_name;
 		int nr1 = 0, nr2 = 0;
 
-		if (!chip_name->prefix || strcmp(chip_name->prefix, chip_name_prefix) != 0)
-			if (strcmp("*", chip_name_prefix) != 0)
+		if (!chip_name->prefix
+		 || strcmp(chip_name->prefix, chip_name_prefix) != 0) {
+			if (strcmp("*", chip_name_prefix) != 0) {
 				continue;
+			}
+		}
 
 		feature_data_name = xsg_conf_read_string();
 
@@ -106,30 +120,36 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 			feature_t *feature;
 			char *label = NULL;
 			bool found = FALSE;
-
-			//if (feature_data->mapping != SENSORS_NO_MAPPING)
-			//	continue;
-
-			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
+#if 0
+			if (feature_data->mapping != SENSORS_NO_MAPPING)
 				continue;
-
-			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0)
+#endif
+			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0) {
 				continue;
+			}
 
-			if (feature_data->name && !strcmp(feature_data->name, feature_data_name))
-				found = TRUE;
-			else if (label && !strcmp(label, feature_data_name))
-				found = TRUE;
+			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0) {
+				continue;
+			}
 
-			if (label)
+			if (feature_data->name && !strcmp(feature_data->name, feature_data_name)) {
+				found = TRUE;
+			} else if (label && !strcmp(label, feature_data_name)) {
+				found = TRUE;
+			}
+
+			if (label) {
 				free(label);
-			if (!found)
+			}
+			if (!found) {
 				continue;
+			}
 
 			feature = xsg_new(feature_t, 1);
 			feature->number = feature_data->number;
 			feature->chip_name = xsg_new(sensors_chip_name, 1);
-			memcpy((void *) feature->chip_name, (void *) chip_name, sizeof(sensors_chip_name));
+			memcpy((void *) feature->chip_name, (void *) chip_name,
+					sizeof(sensors_chip_name));
 
 			num[0] = get_sensors_feature;
 			arg[0] = (void *) feature;
@@ -140,24 +160,29 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 			return;
 		}
 
-		xsg_conf_error("Cannot find feature: %s for %s", feature_data_name, chip_name_prefix);
+		xsg_conf_error("cannot find feature: %s for %s",
+				feature_data_name, chip_name_prefix);
 	}
 
-	xsg_conf_error("Cannot find chip: %s", chip_name_prefix);
+	xsg_conf_error("cannot find chip: %s", chip_name_prefix);
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 	const sensors_chip_name *chip_name;
 	int chip_nr = 0;
 
-	if (!init())
+	if (!init()) {
 		return NULL;
+	}
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);;
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
 		const sensors_feature_data *feature_data;
@@ -166,23 +191,37 @@ static const char *help(void) {
 		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
 			double value = DNAN;
 			char *label = NULL;
-
-			//if (feature_data->mapping != SENSORS_NO_MAPPING)
-			//	continue;
-
-			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0)
+#if 0
+			if (feature_data->mapping != SENSORS_NO_MAPPING) {
 				continue;
-
-			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0)
+			}
+#endif
+			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0) {
 				continue;
+			}
 
-			if (label && feature_data->name && strcmp(label, feature_data->name))
-				xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f  %s\n", xsg_module.name, chip_name->prefix, feature_data->name, value, label);
-			else
-				xsg_string_append_printf(string, "N %s:%s:%-32s %6.2f\n", xsg_module.name, chip_name->prefix, feature_data->name, value);
+			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0) {
+				continue;
+			}
 
-			if (label)
+			if (label && feature_data->name && strcmp(label, feature_data->name)) {
+				xsg_string_append_printf(string,
+						"N %s:%s:%-32s %6.2f  %s\n",
+						xsg_module.name,
+						chip_name->prefix,
+						feature_data->name,
+						value, label);
+			} else {
+				xsg_string_append_printf(string,
+						"N %s:%s:%-32s %6.2f\n",
+						xsg_module.name,
+						chip_name->prefix,
+						feature_data->name, value);
+			}
+
+			if (label) {
 				free(label);
+			}
 		}
 	}
 

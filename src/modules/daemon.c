@@ -62,11 +62,15 @@ typedef struct _daemon_t {
 	pid_t pid;
 
 	enum {
-		RUNNING,	// daemon is running, everything is fine
-		KILL,		// daemon is running, but an error occurred, next tick: send SIGTERM
-		SEND_SIGTERM,	// daemon is running, already send SIGTERM, next tick: send SIGKILL
-		SEND_SIGKILL,	// daemon is running, already send SIGKILL, wait with waitpid()
-		NOTRUNNING	// daemon is NOT running, waitpid was ok, next tick: fork and exec
+		RUNNING,	/* daemon is running, everything is fine */
+		KILL,		/* daemon is running, but an error occurred,
+				 * next tick: send SIGTERM */
+		SEND_SIGTERM,	/* daemon is running, already send SIGTERM,
+				 * next tick: send SIGKILL */
+		SEND_SIGKILL,	/* daemon is running, already send SIGKILL,
+				 * wait with waitpid() */
+		NOTRUNNING	/* daemon is NOT running, waitpid was ok,
+				 * next tick: fork and exec */
 	} state;
 
 	xsg_main_poll_t stdin_poll;
@@ -75,14 +79,14 @@ typedef struct _daemon_t {
 
 	uint64_t last_alive_tick;
 
-	uint32_t id_buffer; // buffer for next daemon_var_id
+	uint32_t id_buffer; /* buffer for next daemon_var_id */
 	ssize_t id_buffer_fill;
 
-	uint8_t log_level_buffer; // buffer for next log_level
+	uint8_t log_level_buffer; /* buffer for next log_level */
 	bool log_level_buffer_filled;
-	xsg_string_t *log_buffer; // buffer for next log message
+	xsg_string_t *log_buffer; /* buffer for next log message */
 
-	char *write_buffer; // configuration send to daemon
+	char *write_buffer; /* configuration send to daemon */
 	size_t write_buffer_len;
 	ssize_t write_buffer_done;
 	ssize_t write_buffer_todo;
@@ -119,14 +123,18 @@ static size_t max_buf_len = MAX_BUF_LEN;
 
 /******************************************************************************/
 
-static daemon_var_t *get_daemon_var(uint32_t daemon_var_id) {
+static daemon_var_t *
+get_daemon_var(uint32_t daemon_var_id)
+{
 	if (unlikely(daemon_var_array == NULL)) {
 		daemon_var_t *daemon_var;
 
 		xsg_debug("daemon_var_array is NULL, using daemon_var_list...");
 		daemon_var = xsg_list_nth_data(daemon_var_list, daemon_var_id);
-		if (unlikely(daemon_var == NULL))
-			xsg_warning("invalid daemon_var_id: %"PRIu32, daemon_var_id);
+		if (unlikely(daemon_var == NULL)) {
+			xsg_warning("invalid daemon_var_id: %"PRIu32,
+					daemon_var_id);
+		}
 		return daemon_var;
 	}
 	if (unlikely(daemon_var_id >= daemon_var_count)) {
@@ -137,7 +145,9 @@ static daemon_var_t *get_daemon_var(uint32_t daemon_var_id) {
 	return daemon_var_array[daemon_var_id];
 }
 
-static void build_daemon_var_array(void) {
+static void
+build_daemon_var_array(void)
+{
 	xsg_list_t *l;
 	uint32_t daemon_var_id = 0;
 
@@ -151,16 +161,20 @@ static void build_daemon_var_array(void) {
 
 /******************************************************************************/
 
-static bool am_big_endian(void) {
+static bool
+am_big_endian(void)
+{
 	long one = 1;
 	return !(*((char *)(&one)));
 }
 
 /******************************************************************************/
 
-static int sclose(int fd) {
+static int
+sclose(int fd)
+{
 	if (fd < 0) {
-		xsg_warning("Trying to close fd %d", fd);
+		xsg_warning("trying to close fd %d", fd);
 		return 0;
 	} else {
 		int n;
@@ -172,7 +186,8 @@ static int sclose(int fd) {
 		if (unlikely(n == -1)) {
 			int err = errno;
 
-			xsg_debug("close for fd %d failed: %s", fd, strerror(errno));
+			xsg_debug("close for fd %d failed: %s", fd,
+					strerror(errno));
 			errno = err;
 		}
 		return n;
@@ -181,36 +196,53 @@ static int sclose(int fd) {
 
 /******************************************************************************/
 
-static void stdin_daemon(void *arg, xsg_main_poll_events_t events);
-static void stdout_daemon(void *arg, xsg_main_poll_events_t events);
-static void stderr_daemon(void *arg, xsg_main_poll_events_t events);
+static void
+stdin_daemon(void *arg, xsg_main_poll_events_t events);
+static void
+stdout_daemon(void *arg, xsg_main_poll_events_t events);
+static void
+stderr_daemon(void *arg, xsg_main_poll_events_t events);
 
 /******************************************************************************/
 
-static void kill_daemon(daemon_t *daemon) {
+static void
+kill_daemon(daemon_t *daemon)
+{
 	int n;
 
-	xsg_message("[%d]%s: Killing daemon \"%s\"", (int) daemon->pid, daemon->name, daemon->command);
+	xsg_message("[%d]%s: killing daemon \"%s\"", (int) daemon->pid,
+			daemon->name, daemon->command);
 
-	if (unlikely(daemon == NULL))
+	if (unlikely(daemon == NULL)) {
 		return;
+	}
 
-	if (daemon->state == RUNNING)
+	if (daemon->state == RUNNING) {
 		daemon->state = KILL;
-	else
+	} else {
 		return;
+	}
 
 	n = sclose(daemon->stdin_poll.fd);
-	if (unlikely(n == -1))
-		xsg_warning("[%d]%s: close(stdin) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+	if (unlikely(n == -1)) {
+		xsg_warning("[%d]%s: close(stdin) failed: %s",
+				(int) daemon->pid, daemon->name,
+				strerror(errno));
+	}
 
 	n = sclose(daemon->stdout_poll.fd);
-	if (unlikely(n == -1))
-		xsg_warning("[%d]%s: close(stdout) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+	if (unlikely(n == -1)) {
+		xsg_warning("[%d]%s: close(stdout) failed: %s",
+				(int) daemon->pid, daemon->name,
+				strerror(errno));
+	}
 
 	n = sclose(daemon->stderr_poll.fd);
-	if (unlikely(n == -1))
-		xsg_warning("[%d]%s: close(stderr) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+	if (unlikely(n == -1)) {
+		xsg_warning("[%d]%s: close(stderr) failed: %s",
+				(int) daemon->pid, daemon->name,
+				strerror(errno));
+	}
 
 	xsg_main_remove_poll(&daemon->stdin_poll);
 	xsg_main_remove_poll(&daemon->stdout_poll);
@@ -223,7 +255,9 @@ static void kill_daemon(daemon_t *daemon) {
 
 /******************************************************************************/
 
-static daemon_t *find_daemon(char *name) {
+static daemon_t *
+find_daemon(char *name)
+{
 	xsg_list_t *l;
 	daemon_t *daemon;
 	char *command;
@@ -231,8 +265,9 @@ static daemon_t *find_daemon(char *name) {
 	for (l = daemon_list; l; l = l->next) {
 		daemon = l->data;
 
-		if (strcmp(daemon->name, name) == 0)
+		if (strcmp(daemon->name, name) == 0) {
 			return daemon;
+		}
 	}
 
 	daemon = xsg_new(daemon_t, 1);
@@ -241,10 +276,11 @@ static daemon_t *find_daemon(char *name) {
 	daemon->name = xsg_strdup(name);
 
 	command = xsg_getenv(name);
-	if (command != NULL)
+	if (command != NULL) {
 		daemon->command = xsg_strdup(command);
-	else
+	} else {
 		daemon->command = name;
+	}
 
 	daemon->pid = 0;
 	daemon->state = NOTRUNNING;
@@ -282,7 +318,14 @@ static daemon_t *find_daemon(char *name) {
 
 /******************************************************************************/
 
-static void daemon_write_buffer_add_var(daemon_t *daemon, uint64_t update, type_t t, char *config, uint32_t n) {
+static void
+daemon_write_buffer_add_var(
+	daemon_t *daemon,
+	uint64_t update,
+	type_t t,
+	char *config
+)
+{
 	size_t header_len, config_len;
 	uint32_t id_be;
 	uint8_t type;
@@ -292,65 +335,81 @@ static void daemon_write_buffer_add_var(daemon_t *daemon, uint64_t update, type_
 		static char *init = "\0\nxsysguard\n";
 		uint64_t interval;
 		uint8_t log_level;
+		uint64_t timeout;
 
 		interval = xsg_uint64_be(xsg_main_get_interval());
 		log_level = xsg_log_level;
+		timeout = xsg_uint64_be(last_alive_timeout);
 
-		size_t init_len = sizeof(init) + sizeof(uint64_t) + sizeof(uint8_t);
+		size_t init_len = sizeof(init) + sizeof(uint64_t)
+				+ sizeof(uint8_t);
 
-		daemon->write_buffer = xsg_realloc(daemon->write_buffer, init_len);
+		daemon->write_buffer = xsg_realloc(daemon->write_buffer,
+				init_len);
 
-		// init
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, init, sizeof(init));
+		/* init */
+		memcpy(daemon->write_buffer + daemon->write_buffer_len,
+				init, sizeof(init));
 		daemon->write_buffer_len += sizeof(init);
 
-		// interval
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &interval, sizeof(uint64_t));
+		/* interval */
+		memcpy(daemon->write_buffer + daemon->write_buffer_len,
+				&interval, sizeof(uint64_t));
 		daemon->write_buffer_len += sizeof(uint64_t);
 
-		// log level
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &log_level, sizeof(uint8_t));
+		/* log level */
+		memcpy(daemon->write_buffer + daemon->write_buffer_len,
+				&log_level, sizeof(uint8_t));
 		daemon->write_buffer_len += sizeof(uint8_t);
+
+		/* last alive timeout */
+		memcpy(daemon->write_buffer + daemon->write_buffer_len,
+				&timeout, sizeof(uint64_t));
+		daemon->write_buffer_len += sizeof(uint64_t);
 	}
 
-	header_len = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint32_t);
+	header_len = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(uint32_t)
+			+ sizeof(uint64_t) + sizeof(uint32_t);
 	config_len = strlen(config);
 
-	daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + header_len + config_len);
+	daemon->write_buffer = xsg_realloc(daemon->write_buffer,
+			daemon->write_buffer_len + header_len + config_len);
 
-	// type
+	/* type */
 	type = t;
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, &type, sizeof(uint8_t));
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &type,
+			sizeof(uint8_t));
 	daemon->write_buffer_len += sizeof(uint8_t);
 
-	// id
+	/* id */
 	id_be = xsg_uint32_be(daemon_var_count);
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, &id_be, sizeof(uint32_t));
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &id_be,
+			sizeof(uint32_t));
 	daemon->write_buffer_len += sizeof(uint32_t);
 
-	// n
-	n = xsg_uint32_be(n);
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, &n, sizeof(uint32_t));
-	daemon->write_buffer_len += sizeof(uint32_t);
-
-	// update
+	/* update */
 	update = xsg_uint64_be(update);
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, &update, sizeof(uint64_t));
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &update,
+			sizeof(uint64_t));
 	daemon->write_buffer_len += sizeof(uint64_t);
 
-	// config_len
+	/* config_len */
 	config_len_be = xsg_uint32_be(config_len);
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, &config_len_be, sizeof(uint32_t));
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, &config_len_be,
+			sizeof(uint32_t));
 	daemon->write_buffer_len += sizeof(uint32_t);
 
-	// config
-	memcpy(daemon->write_buffer + daemon->write_buffer_len, config, config_len);
+	/* config */
+	memcpy(daemon->write_buffer + daemon->write_buffer_len, config,
+			config_len);
 	daemon->write_buffer_len += config_len;
 }
 
 /******************************************************************************/
 
-static void stdin_daemon(void *arg, xsg_main_poll_events_t events) {
+static void
+stdin_daemon(void *arg, xsg_main_poll_events_t events)
+{
 	daemon_t *daemon = (daemon_t *) arg;
 	char *buffer;
 	ssize_t n;
@@ -372,17 +431,21 @@ static void stdin_daemon(void *arg, xsg_main_poll_events_t events) {
 	n = write(daemon->stdin_poll.fd, buffer, daemon->write_buffer_todo);
 
 	if (daemon->state != RUNNING) {
-		xsg_warning("%s: write(stdin) failed: daemon is not running", daemon->name);
+		xsg_warning("%s: write(stdin) failed: daemon is not running",
+				daemon->name);
 		return;
 	}
 
 	if (unlikely(n == -1) && errno == EINTR) {
-		xsg_debug("[%d]%s: write(stdin) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_debug("[%d]%s: write(stdin) failed: %s", (int) daemon->pid,
+				daemon->name, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
-		xsg_warning("[%d]%s: write(stdin) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_warning("[%d]%s: write(stdin) failed: %s",
+				(int) daemon->pid, daemon->name,
+				strerror(errno));
 		kill_daemon(daemon);
 		return;
 	}
@@ -390,12 +453,15 @@ static void stdin_daemon(void *arg, xsg_main_poll_events_t events) {
 	daemon->write_buffer_done += n;
 	daemon->write_buffer_todo -= n;
 
-	if (daemon->write_buffer_todo < 1)
+	if (daemon->write_buffer_todo < 1) {
 		xsg_main_remove_poll(&daemon->stdin_poll);
+	}
 }
 
 
-static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
+static void
+stdout_daemon(void *arg, xsg_main_poll_events_t events)
+{
 	daemon_t *daemon = (daemon_t *) arg;
 	char buffer_array[BUFFER_SIZE];
 	char *buffer = buffer_array;
@@ -407,8 +473,9 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 		char *hex = alloca(n * 3 + 1);
 		ssize_t i;
 
-		for (i = 0; i < n; i++)
+		for (i = 0; i < n; i++) {
 			sprintf(hex + i * 3, "%02x ", buffer[i] & 0xff);
+		}
 
 		xsg_debug("%s: received: %s", daemon->name, hex);
 	}
@@ -418,18 +485,22 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 	}
 
 	if (unlikely(n == -1) && errno == EINTR) {
-		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) daemon->pid,
+				daemon->name, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
-		xsg_warning("[%d]%s: read(stdout) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_warning("[%d]%s: read(stdout) failed: %s",
+				(int) daemon->pid, daemon->name,
+				strerror(errno));
 		kill_daemon(daemon);
 		return;
 	}
 
 	if (unlikely(n == 0)) {
-		xsg_warning("[%d]%s: read(stdout) returned EOF", (int) daemon->pid, daemon->name);
+		xsg_warning("[%d]%s: read(stdout) returned EOF",
+				(int) daemon->pid, daemon->name);
 		kill_daemon(daemon);
 		return;
 	}
@@ -439,47 +510,65 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 	while (n != 0) {
 
 		while (daemon->id_buffer_fill < sizeof(uint32_t)) {
-			if (am_big_endian())
-				((char *)(&daemon->id_buffer))[daemon->id_buffer_fill] = buffer[0];
-			else
-				((char *)(&daemon->id_buffer))[sizeof(uint32_t) - 1 - daemon->id_buffer_fill] = buffer[0];
+			if (am_big_endian()) {
+				unsigned int i = daemon->id_buffer_fill;
+				((char *)(&daemon->id_buffer))[i] = buffer[0];
+			} else {
+				unsigned int i = sizeof(uint32_t) - 1
+						- daemon->id_buffer_fill;
+				((char *)(&daemon->id_buffer))[i] = buffer[0];
+			}
 
 			daemon->id_buffer_fill++;
 			buffer++;
 			n--;
-			if (unlikely(n == 0))
+
+			if (unlikely(n == 0)) {
 				return;
+			}
 		}
 
-		if (daemon->id_buffer == 0xffffffff) { // LOG MESSAGE
+		if (daemon->id_buffer == 0xffffffff) { /* LOG MESSAGE */
 			if (unlikely(!daemon->log_level_buffer_filled)) {
-				((char *)(&daemon->log_level_buffer))[0] = buffer[0];
+				((char *)(&daemon->log_level_buffer))[0]
+						= buffer[0];
 				daemon->log_level_buffer_filled = TRUE;
 				buffer++;
 				n--;
-				if (unlikely(n == 0))
+				if (unlikely(n == 0)) {
 					return;
+				}
 			}
 
 			if (daemon->log_level_buffer > 0) {
 				while (buffer[0] != '\0') {
-					if (daemon->log_buffer->len < max_buf_len)
-						daemon->log_buffer = xsg_string_append_c(daemon->log_buffer, buffer[0]);
+					if (daemon->log_buffer->len
+					  < max_buf_len) {
+						xsg_string_append_c(
+							daemon->log_buffer,
+							buffer[0]);
+					}
 					buffer++;
 					n--;
-					if (unlikely(n == 0))
+					if (unlikely(n == 0)) {
 						return;
+					}
 				}
 
-				// the '\0'
+				/* the '\0' */
 				buffer++;
 				n--;
 
-				if (xsg_log_level >= daemon->log_level_buffer)
-					xsg_log(XSG_LOG_DOMAIN, MAX(daemon->log_level_buffer, 2), "[%d]%s: Received log message: %s",
-							(int) daemon->pid, daemon->name, daemon->log_buffer->str);
+				if (xsg_log_level >= daemon->log_level_buffer) {
+					xsg_log(XSG_LOG_DOMAIN,
+						MAX(daemon->log_level_buffer,
+						2), "[%d]%s: Received log "
+						"message: %s",
+						(int) daemon->pid, daemon->name,
+						daemon->log_buffer->str);
+				}
 
-				daemon->log_buffer = xsg_string_truncate(daemon->log_buffer, 0);
+				xsg_string_truncate(daemon->log_buffer, 0);
 			}
 			daemon->log_level_buffer_filled = FALSE;
 
@@ -489,35 +578,53 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 
 			daemon_var = get_daemon_var(daemon->id_buffer);
 
-			if (unlikely(daemon_var == NULL) || unlikely(daemon_var->daemon != daemon)) {
-				xsg_warning("[%d]%s: Received invalid id: %"PRIu32, (int) daemon->pid, daemon->name, daemon->id_buffer);
+			if (unlikely(daemon_var == NULL)
+			 || unlikely(daemon_var->daemon != daemon)) {
+				xsg_warning("[%d]%s: Received invalid "
+						"id: %"PRIu32,
+						(int) daemon->pid, daemon->name,
+						daemon->id_buffer);
 				kill_daemon(daemon);
 				return;
 			}
 
 			if (daemon_var->type == NUM) {
-				while (daemon_var->new_num_fill < sizeof(double)) {
-					if (am_big_endian())
-						((char *)(&daemon_var->new_num))[daemon_var->new_num_fill] = buffer[0];
-					else
-						((char *)(&daemon_var->new_num))[sizeof(double) - 1 - daemon_var->new_num_fill] = buffer[0];
+				while (daemon_var->new_num_fill
+				     < sizeof(double)) {
+					if (am_big_endian()) {
+						unsigned int i;
+						i = daemon_var->new_num_fill;
+						((char *)(&daemon_var->new_num))[i]
+							= buffer[0];
+					} else {
+						unsigned int i;
+						i = sizeof(double) - 1
+							- daemon_var->new_num_fill;
+						((char *)(&daemon_var->new_num))[i]
+							= buffer[0];
+					}
 
 					daemon_var->new_num_fill++;
 					buffer++;
 					n--;
-					if (unlikely(n == 0))
+					if (unlikely(n == 0)) {
 						break;
+					}
 				}
 
 				if (daemon_var->new_num_fill == sizeof(double)) {
 					daemon_var->num = daemon_var->new_num;
 
-					xsg_debug("[%d]%s: Received number for id %"PRIu32": %f", (int) daemon->pid, daemon->name,
-							daemon->id_buffer, daemon_var->num);
+					xsg_debug("[%d]%s: Received number for "
+							"id %"PRIu32": %f",
+							(int) daemon->pid,
+							daemon->name,
+							daemon->id_buffer,
+							daemon_var->num);
 
 					daemon_var->new_num_fill = 0;
 
-					xsg_var_dirty(&daemon_var->var, 1);
+					xsg_var_dirty(daemon_var->var);
 
 					daemon->id_buffer_fill = 0;
 				}
@@ -525,15 +632,20 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 				xsg_string_t *tmp;
 
 				while (buffer[0] != '\0') {
-					if (daemon_var->new_str->len < max_buf_len)
-						daemon_var->new_str = xsg_string_append_c(daemon_var->new_str, buffer[0]);
+					if (daemon_var->new_str->len
+					  < max_buf_len) {
+						xsg_string_append_c(
+							daemon_var->new_str,
+							buffer[0]);
+					}
 					buffer++;
 					n--;
-					if (unlikely(n == 0))
+					if (unlikely(n == 0)) {
 						return;
+					}
 				}
 
-				// the '\0'
+				/* the '\0' */
 				buffer++;
 				n--;
 
@@ -541,12 +653,15 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 				daemon_var->new_str = daemon_var->str;
 				daemon_var->str = tmp;
 
-				xsg_debug("[%d]%s: received string for id %"PRIu32": \"%s\"", (int) daemon->pid, daemon->name,
-						daemon->id_buffer, daemon_var->str->str);
+				xsg_debug("[%d]%s: received string for "
+						"id %"PRIu32": \"%s\"",
+						(int) daemon->pid, daemon->name,
+						daemon->id_buffer,
+						daemon_var->str->str);
 
-				daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
+				xsg_string_truncate(daemon_var->new_str, 0);
 
-				xsg_var_dirty(&daemon_var->var, 1);
+				xsg_var_dirty(daemon_var->var);
 
 				daemon->id_buffer_fill = 0;
 			} else {
@@ -556,7 +671,9 @@ static void stdout_daemon(void *arg, xsg_main_poll_events_t events) {
 	}
 }
 
-static void stderr_daemon(void *arg, xsg_main_poll_events_t events) {
+static void
+stderr_daemon(void *arg, xsg_main_poll_events_t events)
+{
 	daemon_t *daemon = (daemon_t *) arg;
 	char buffer[BUFFER_SIZE];
 	ssize_t n;
@@ -564,50 +681,59 @@ static void stderr_daemon(void *arg, xsg_main_poll_events_t events) {
 	n = read(daemon->stderr_poll.fd, buffer, BUFFER_SIZE - 1);
 
 	if (unlikely(n == -1) && errno == EINTR) {
-		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid,
+				daemon->name, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
-		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid, daemon->name, strerror(errno));
+		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid,
+				daemon->name, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == 0)) {
-		xsg_debug("[%d]%s: read(stderr) returned EOF", (int) daemon->pid, daemon->name);
+		xsg_debug("[%d]%s: read(stderr) returned EOF",
+				(int) daemon->pid, daemon->name);
 		return;
 	}
 
 	buffer[n] = '\0';
 
-	xsg_warning("[%d]%s: Received message on stderr: \"%s\"", (int) daemon->pid, daemon->name, buffer);
+	xsg_warning("[%d]%s: received message on stderr: \"%s\"",
+			(int) daemon->pid, daemon->name, buffer);
 }
 
 /******************************************************************************/
 
-static void exec_daemon(daemon_t *daemon) {
-	int pipe1[2]; // daemon's stdin
-	int pipe2[2]; // daemon's stdout
-	int pipe3[2]; // daemon's stderr
+static void
+exec_daemon(daemon_t *daemon)
+{
+	int pipe1[2]; /* daemon's stdin */
+	int pipe2[2]; /* daemon's stdout */
+	int pipe3[2]; /* daemon's stderr */
 	pid_t pid;
 	xsg_list_t *l;
 
-	xsg_message("%s: Executing \"%s\"", daemon->name, daemon->command);
+	xsg_message("%s: executing \"%s\"", daemon->name, daemon->command);
 
 	if (pipe(pipe1) < 0) {
-		xsg_warning("%s: Cannot create pipe: %s", daemon->name, strerror(errno));
+		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+				strerror(errno));
 		return;
 	}
 
 	if (pipe(pipe2) < 0) {
-		xsg_warning("%s: Cannot create pipe: %s", daemon->name, strerror(errno));
+		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
 		return;
 	}
 
 	if (pipe(pipe3) < 0) {
-		xsg_warning("%s: Cannot create pipe: %s", daemon->name, strerror(errno));
+		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
 		sclose(pipe2[0]);
@@ -618,7 +744,8 @@ static void exec_daemon(daemon_t *daemon) {
 	pid = fork();
 
 	if (pid < 0) {
-		xsg_warning("%s: Cannot fork: %s", daemon->name, strerror(errno));
+		xsg_warning("%s: cannot fork: %s", daemon->name,
+				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
 		sclose(pipe2[0]);
@@ -631,18 +758,21 @@ static void exec_daemon(daemon_t *daemon) {
 		sclose(pipe2[0]);
 		sclose(pipe3[0]);
 		if (pipe1[0] != STDIN_FILENO) {
-			if (dup2(pipe1[0], STDIN_FILENO) != STDIN_FILENO)
+			if (dup2(pipe1[0], STDIN_FILENO) != STDIN_FILENO) {
 				exit(EXIT_FAILURE);
+			}
 			sclose(pipe1[0]);
 		}
 		if (pipe2[1] != STDOUT_FILENO) {
-			if (dup2(pipe2[1], STDOUT_FILENO) != STDOUT_FILENO)
+			if (dup2(pipe2[1], STDOUT_FILENO) != STDOUT_FILENO) {
 				exit(EXIT_FAILURE);
+			}
 			sclose(pipe2[1]);
 		}
 		if (pipe3[1] != STDERR_FILENO) {
-			if (dup2(pipe3[1], STDERR_FILENO) != STDERR_FILENO)
+			if (dup2(pipe3[1], STDERR_FILENO) != STDERR_FILENO) {
 				exit(EXIT_FAILURE);
+			}
 			sclose(pipe3[1]);
 		}
 		execl("/bin/sh", "sh", "-c", daemon->command, NULL);
@@ -656,7 +786,7 @@ static void exec_daemon(daemon_t *daemon) {
 	daemon->state = RUNNING;
 	daemon->pid = pid;
 
-	xsg_message("[%u]%s: Running...", daemon->pid, daemon->name);
+	xsg_message("[%u]%s: running...", daemon->pid, daemon->name);
 
 	daemon->stdin_poll.fd = pipe1[1];
 	daemon->stdout_poll.fd = pipe2[0];
@@ -670,7 +800,7 @@ static void exec_daemon(daemon_t *daemon) {
 	daemon->id_buffer_fill = 0;
 	daemon->log_level_buffer = 0;
 	daemon->log_level_buffer_filled = FALSE;
-	daemon->log_buffer = xsg_string_truncate(daemon->log_buffer, 0);
+	xsg_string_truncate(daemon->log_buffer, 0);
 	daemon->write_buffer_done = 0;
 	daemon->write_buffer_todo = daemon->write_buffer_len;
 
@@ -682,15 +812,17 @@ static void exec_daemon(daemon_t *daemon) {
 			daemon_var->new_num = DNAN;
 			daemon_var->new_num_fill = 0;
 		} else {
-			daemon_var->str = xsg_string_truncate(daemon_var->str, 0);
-			daemon_var->new_str = xsg_string_truncate(daemon_var->new_str, 0);
+			xsg_string_truncate(daemon_var->str, 0);
+			xsg_string_truncate(daemon_var->new_str, 0);
 		}
 	}
 }
 
 /******************************************************************************/
 
-static double get_num(void *arg) {
+static double
+get_num(void *arg)
+{
 	daemon_var_t *daemon_var = (daemon_var_t *) arg;
 	double num;
 
@@ -701,7 +833,9 @@ static double get_num(void *arg) {
 	return num;
 }
 
-static char *get_str(void *arg) {
+static char *
+get_str(void *arg)
+{
 	daemon_var_t *daemon_var = (daemon_var_t *) arg;
 	char *str;
 
@@ -714,19 +848,23 @@ static char *get_str(void *arg) {
 
 /******************************************************************************/
 
-static void init_daemons(void) {
+static void
+init_daemons(void)
+{
 	char *timeout, *len;
 	xsg_list_t *l;
 
 	timeout = xsg_getenv("XSYSGUARD_DAEMON_TIMEOUT");
 
-	if (timeout != NULL)
+	if (timeout != NULL) {
 		last_alive_timeout = atoll(timeout);
+	}
 
 	len = xsg_getenv("XSYSGUARD_DAEMON_MAXBUFLEN");
 
-	if (len != NULL)
+	if (len != NULL) {
 		max_buf_len = atoll(len);
+	}
 
 	build_daemon_var_array();
 
@@ -734,14 +872,18 @@ static void init_daemons(void) {
 		daemon_t *daemon = l->data;
 		uint8_t end = END;
 
-		daemon->write_buffer = xsg_realloc(daemon->write_buffer, daemon->write_buffer_len + sizeof(uint8_t));
+		daemon->write_buffer = xsg_realloc(daemon->write_buffer,
+				daemon->write_buffer_len + sizeof(uint8_t));
 
-		memcpy(daemon->write_buffer + daemon->write_buffer_len, &end, sizeof(uint8_t));
+		memcpy(daemon->write_buffer + daemon->write_buffer_len, &end,
+				sizeof(uint8_t));
 		daemon->write_buffer_len += sizeof(uint8_t);
 	}
 }
 
-static void shutdown_daemons(void) {
+static void
+shutdown_daemons(void)
+{
 	xsg_list_t *l;
 
 	for (l = daemon_list; l; l = l->next) {
@@ -750,13 +892,15 @@ static void shutdown_daemons(void) {
 		kill_daemon(daemon);
 
 		if (daemon->pid > 0) {
-			kill(daemon->pid, 15); // SIGTERM
+			kill(daemon->pid, 15); /* SIGTERM */
 			waitpid(daemon->pid, NULL, 0);
 		}
 	}
 }
 
-static void update_daemons(uint64_t tick) {
+static void
+update_daemons(uint64_t tick)
+{
 	xsg_list_t *l;
 
 	for (l = daemon_list; l; l = l->next) {
@@ -765,13 +909,16 @@ static void update_daemons(uint64_t tick) {
 		daemon->send_alive = TRUE;
 		xsg_main_add_poll(&daemon->stdin_poll);
 
-		if ((tick > daemon->last_alive_tick) && (tick - daemon->last_alive_tick) > last_alive_timeout)
-			kill_daemon(daemon); // sets state = KILL
+		if ((tick > daemon->last_alive_tick)
+		 && (tick - daemon->last_alive_tick) > last_alive_timeout) {
+			kill_daemon(daemon); /* sets state = KILL */
+		}
 
 		if (daemon->state != RUNNING && daemon->pid > 0) {
 			int status;
 
-			xsg_debug("[%d]%s: Calling waitpid...", (int) daemon->pid, daemon->name);
+			xsg_debug("[%d]%s: calling waitpid...",
+					(int) daemon->pid, daemon->name);
 
 			if (waitpid(daemon->pid, &status, WNOHANG) > 0) {
 				if (WIFEXITED(status) || WIFSIGNALED(status)) {
@@ -782,97 +929,113 @@ static void update_daemons(uint64_t tick) {
 		}
 
 		switch (daemon->state) {
-			case KILL:
-				kill(daemon->pid, 15); // SIGTERM
-				daemon->state = SEND_SIGTERM;
-				break;
-			case SEND_SIGTERM:
-				kill(daemon->pid, 9); // SIGKILL
-				daemon->state = SEND_SIGKILL;
-				break;
-			case SEND_SIGKILL:
-				xsg_warning("[%d]%s: Send SIGKILL to process, but waitpid failed", (int) daemon->pid, daemon->name);
-				break;
-			case NOTRUNNING:
-				exec_daemon(daemon);
-				break;
-			default:
-				break;
+		case KILL:
+			kill(daemon->pid, 15); /* SIGTERM */
+			daemon->state = SEND_SIGTERM;
+			break;
+		case SEND_SIGTERM:
+			kill(daemon->pid, 9); /* SIGKILL */
+			daemon->state = SEND_SIGKILL;
+			break;
+		case SEND_SIGKILL:
+			xsg_warning("[%d]%s: send SIGKILL to process, but "
+					"waitpid failed", (int) daemon->pid,
+					daemon->name);
+			break;
+		case NOTRUNNING:
+			exec_daemon(daemon);
+			break;
+		default:
+			break;
 		}
 	}
 }
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
 	char *name;
-	uint32_t i;
 	type_t type = 0;
 
 	xsg_main_add_init_func(init_daemons);
 	xsg_main_add_shutdown_func(shutdown_daemons);
 	xsg_main_add_update_func(update_daemons);
 
-	daemon_var = xsg_new(daemon_var_t, n);
+	daemon_var = xsg_new(daemon_var_t, 1);
 
-	if (!xsg_conf_find_command("exec"))
+	if (!xsg_conf_find_command("exec")) {
 		xsg_conf_error("exec expected");
+	}
 
 	name = xsg_conf_read_string();
 	daemon = find_daemon(name);
 	xsg_free(name);
 
-	if (xsg_conf_find_command("n"))
+	if (xsg_conf_find_command("n")) {
 		type = NUM;
-	else if (xsg_conf_find_command("num"))
+	} else if (xsg_conf_find_command("num")) {
 		type = NUM;
-	else if (xsg_conf_find_command("number"))
+	} else if (xsg_conf_find_command("number")) {
 		type = NUM;
-	else if (xsg_conf_find_command("s"))
+	} else if (xsg_conf_find_command("s")) {
 		type = STR;
-	else if (xsg_conf_find_command("str"))
+	} else if (xsg_conf_find_command("str")) {
 		type = STR;
-	else if (xsg_conf_find_command("string"))
+	} else if (xsg_conf_find_command("string")) {
 		type = STR;
-	else
+	} else {
 		xsg_conf_error("n, num, number, s, str or string expected");
-
-	for (i = 0; i < n; i++) {
-		daemon_var[i].daemon = daemon;
-		daemon_var[i].var = var[i];
-		daemon_var[i].type = type;
-
-		if (type == NUM) {
-			daemon_var[i].num = DNAN;
-			daemon_var[i].new_num = DNAN;
-			num[i] = get_num;
-		} else {
-			daemon_var->str = xsg_string_new(NULL);
-			daemon_var->new_str = xsg_string_new(NULL);
-			str[i] = get_str;
-		}
-		arg[i] = daemon_var + i;
 	}
 
-	daemon_write_buffer_add_var(daemon, update, type, xsg_conf_read_string(), n);
+	daemon_var->daemon = daemon;
+	daemon_var->var = var;
+	daemon_var->type = type;
+
+	if (type == NUM) {
+		daemon_var->num = DNAN;
+		daemon_var->new_num = DNAN;
+		*num = get_num;
+	} else {
+		daemon_var->str = xsg_string_new(NULL);
+		daemon_var->new_str = xsg_string_new(NULL);
+		*str = get_str;
+	}
+
+	*arg = daemon_var;
+
+	daemon_write_buffer_add_var(daemon, update, type,
+			xsg_conf_read_string());
 
 	daemon->var_list = xsg_list_append(daemon->var_list, daemon_var);
 	daemon_var_list = xsg_list_append(daemon_var_list, daemon_var);
 	daemon_var_count++;
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
-	xsg_string_append_printf(string, "N %s:exec:<name>:num:<variable>\n", xsg_module.name);
-	xsg_string_append_printf(string, "S %s:exec:<name>:str:<variable>\n", xsg_module.name);
+	xsg_string_append_printf(string, "N %s:exec:<name>:num:<variable>\n",
+			xsg_module.name);
+	xsg_string_append_printf(string, "S %s:exec:<name>:str:<variable>\n",
+			xsg_module.name);
 
 	return string->str;
 }

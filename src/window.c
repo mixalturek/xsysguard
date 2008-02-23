@@ -104,9 +104,12 @@ static xsg_main_poll_t poll = { 0 };
  *
  ******************************************************************************/
 
-static void copy_from_parent_timeout(void *arg, bool time_error);
+static void
+copy_from_parent_timeout(void *arg, bool time_error);
 
-xsg_window_t *xsg_window_new(char *config_name) {
+xsg_window_t *
+xsg_window_new(char *config_name)
+{
 	xsg_window_t *window;
 
 	window = xsg_new(xsg_window_t, 1);
@@ -178,11 +181,15 @@ xsg_window_t *xsg_window_new(char *config_name) {
 
 /******************************************************************************/
 
-void xsg_window_add_widget(xsg_window_t *window, xsg_widget_t *widget) {
+void
+xsg_window_add_widget(xsg_window_t *window, xsg_widget_t *widget)
+{
 	window->widget_list = xsg_list_append(window->widget_list, widget);
 }
 
-char *xsg_window_get_config_name(xsg_window_t *window) {
+char *
+xsg_window_get_config_name(xsg_window_t *window)
+{
 	return window->config;
 }
 
@@ -192,66 +199,89 @@ char *xsg_window_get_config_name(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-void xsg_window_parse_name(xsg_window_t *window) {
+void
+xsg_window_parse_name(xsg_window_t *window)
+{
 	window->name = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_class(xsg_window_t *window) {
+void
+xsg_window_parse_class(xsg_window_t *window)
+{
 	window->class = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_resource(xsg_window_t *window) {
+void
+xsg_window_parse_resource(xsg_window_t *window)
+{
 	window->resource = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_geometry(xsg_window_t *window) {
+void
+xsg_window_parse_geometry(xsg_window_t *window)
+{
 	window->geometry = xsg_conf_read_string();
 	xsg_conf_read_newline();
-	window->flags = XParseGeometry(window->geometry, &window->xoffset, &window->yoffset,
-			&window->width, &window->height);
+	window->flags = XParseGeometry(window->geometry, &window->xoffset,
+			&window->yoffset, &window->width, &window->height);
 }
 
-void xsg_window_parse_sticky(xsg_window_t *window) {
+void
+xsg_window_parse_sticky(xsg_window_t *window)
+{
 	window->sticky = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_skip_taskbar(xsg_window_t *window) {
+void
+xsg_window_parse_skip_taskbar(xsg_window_t *window)
+{
 	window->skip_taskbar = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_skip_pager(xsg_window_t *window) {
+void
+xsg_window_parse_skip_pager(xsg_window_t *window)
+{
 	window->skip_pager = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_layer(xsg_window_t *window) {
-	if (xsg_conf_find_command("Above"))
+void
+xsg_window_parse_layer(xsg_window_t *window)
+{
+	if (xsg_conf_find_command("Above")) {
 		window->layer = 1;
-	else if (xsg_conf_find_command("Normal"))
+	} else if (xsg_conf_find_command("Normal")) {
 		window->layer = 0;
-	else if (xsg_conf_find_command("Below"))
+	} else if (xsg_conf_find_command("Below")) {
 		window->layer = -1;
-	else
+	} else {
 		xsg_conf_error("Above, Normal or Below expected");
+	}
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_decorations(xsg_window_t *window) {
+void
+xsg_window_parse_decorations(xsg_window_t *window)
+{
 	window->decorations = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_override_redirect(xsg_window_t * window) {
+void
+xsg_window_parse_override_redirect(xsg_window_t * window)
+{
 	window->override_redirect = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_background(xsg_window_t * window) {
+void
+xsg_window_parse_background(xsg_window_t * window)
+{
 	if (xsg_conf_find_command("CopyFromParent")) {
 		window->copy_from_parent = TRUE;
 		window->background_image_update = xsg_conf_read_uint();
@@ -259,28 +289,37 @@ void xsg_window_parse_background(xsg_window_t * window) {
 		window->copy_from_root = TRUE;
 		window->background_image_update = xsg_conf_read_uint();
 	} else if (xsg_conf_find_command("Color")) {
-		window->background_color = xsg_imlib_uint2color(xsg_conf_read_color());
+		window->background_color = xsg_imlib_uint2color(
+				xsg_conf_read_color());
 	} else {
-		xsg_conf_error("CopyFromParent, CopyFromRoot or Color expected");
+		xsg_conf_error("CopyFromParent, CopyFromRoot or Color "
+				"expected");
 	}
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_xshape(xsg_window_t *window) {
+void
+xsg_window_parse_xshape(xsg_window_t *window)
+{
 	uint64_t val = xsg_conf_read_uint();
 
 	window->xshape = MIN(val, 255);
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_argb_visual(xsg_window_t *window) {
+void
+xsg_window_parse_argb_visual(xsg_window_t *window)
+{
 	window->argb_visual = xsg_conf_read_boolean();
 	xsg_conf_read_newline();
 }
 
-void xsg_window_parse_visible(xsg_window_t *window) {
+void
+xsg_window_parse_visible(xsg_window_t *window)
+{
 	window->visible_update = xsg_conf_read_uint();
-	window->visible_var = xsg_var_parse(window->visible_update, window, NULL);
+	window->visible_var = xsg_var_parse(window->visible_update, window,
+			NULL);
 }
 
 /******************************************************************************
@@ -289,7 +328,9 @@ void xsg_window_parse_visible(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static void set_xatom(xsg_window_t *window, const char *type, const char *property) {
+static void
+set_xatom(xsg_window_t *window, const char *type, const char *property)
+{
 	XEvent xev;
 	Atom type_atom;
 	Atom property_atom;
@@ -308,7 +349,8 @@ static void set_xatom(xsg_window_t *window, const char *type, const char *proper
 	xev.xclient.data.l[1] = property_atom;
 	xev.xclient.data.l[2] = 0;
 
-	XSendEvent(display, XRootWindow(display, screen), FALSE, SubstructureNotifyMask, &xev);
+	XSendEvent(display, XRootWindow(display, screen), FALSE,
+			SubstructureNotifyMask, &xev);
 }
 
 /******************************************************************************
@@ -317,7 +359,9 @@ static void set_xatom(xsg_window_t *window, const char *type, const char *proper
  *
  ******************************************************************************/
 
-static void grab_background(xsg_window_t *window, Window src_window) {
+static void
+grab_background(xsg_window_t *window, Window src_window)
+{
 	Imlib_Image background;
 	int status;
 	int x, y;
@@ -325,26 +369,30 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 	Window src;
 	XSetWindowAttributes attrs;
 
-	if (unlikely(src_window == None))
+	if (unlikely(src_window == None)) {
 		return;
+	}
 
-	status = XTranslateCoordinates(display, window->window, src_window, 0, 0, &x, &y, &src);
+	status = XTranslateCoordinates(display, window->window, src_window,
+			0, 0, &x, &y, &src);
 
-	if (unlikely(!status))
+	if (unlikely(!status)) {
 		return;
+	}
 
 	attrs.background_pixmap = ParentRelative;
 	attrs.backing_store = Always;
 	attrs.override_redirect = True;
 	attrs.event_mask = ExposureMask;
 
-	src = XCreateWindow(display, src_window, x, y, window->width, window->height, 0,
-			window->depth, CopyFromParent, window->visual,
-			CWBackPixmap | CWBackingStore | CWOverrideRedirect | CWEventMask,
-			&attrs);
+	src = XCreateWindow(display, src_window, x, y, window->width,
+			window->height, 0, window->depth, CopyFromParent,
+			window->visual,	CWBackPixmap | CWBackingStore
+			| CWOverrideRedirect | CWEventMask, &attrs);
 
-	if (unlikely(!src))
+	if (unlikely(!src)) {
 		return;
+	}
 
 	imlib_context_set_drawable(src);
 	imlib_context_set_visual(window->visual);
@@ -358,7 +406,8 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 		XWindowEvent(display, src, ExposureMask, &event);
 	} while (event.type != Expose);
 
-	background = imlib_create_image_from_drawable(0, 0, 0, window->width, window->height, 0);
+	background = imlib_create_image_from_drawable(0, 0, 0, window->width,
+			window->height, 0);
 
 	XUngrabServer(display);
 	XDestroyWindow(display, src);
@@ -369,11 +418,14 @@ static void grab_background(xsg_window_t *window, Window src_window) {
 			imlib_free_image();
 		}
 		window->background_image = background;
-		xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
+		xsg_window_update_append_rect(window, 0, 0, window->width,
+				window->height);
 	}
 }
 
-static bool check_root_background(xsg_window_t *window) {
+static bool
+check_root_background(xsg_window_t *window)
+{
 	static Pixmap old_pixmap = None;
 	static Atom id = None;
 	Pixmap pixmap = None;
@@ -388,29 +440,33 @@ static bool check_root_background(xsg_window_t *window) {
 
 	root = RootWindow(display, screen);
 
-	status = XTranslateCoordinates(display, window->window, root, 0, 0, &x, &y, &src);
+	status = XTranslateCoordinates(display, window->window, root, 0, 0,
+			&x, &y, &src);
 
 	if (status != None) {
-		if ((x != window->copy_from_root_xoffset) || (y != window->copy_from_root_yoffset)) {
+		if ((x != window->copy_from_root_xoffset)
+		 || (y != window->copy_from_root_yoffset)) {
 			window->copy_from_root_xoffset = x;
 			window->copy_from_root_yoffset = y;
 			return TRUE;
 		}
 	}
 
-	if (id == None)
+	if (id == None) {
 		id = XInternAtom(display, "_XROOTMAP_ID", True);
+	}
 
-	if (id == None)
+	if (id == None) {
 		return FALSE;
+	}
 
-	status = XGetWindowProperty(display, root, id, 0, 1, False, XA_PIXMAP, &act_type, &act_format,
-			&nitems, &bytes_after, &prop);
+	status = XGetWindowProperty(display, root, id, 0, 1, False, XA_PIXMAP,
+			&act_type, &act_format, &nitems, &bytes_after, &prop);
 
 	if (status == Success && prop != NULL) {
 		pixmap = *((Pixmap *)prop);
 		XFree(prop);
-		if(old_pixmap != pixmap) {
+		if (old_pixmap != pixmap) {
 			old_pixmap = pixmap;
 			return TRUE;
 		}
@@ -419,37 +475,48 @@ static bool check_root_background(xsg_window_t *window) {
 	return FALSE;
 }
 
-static void grab_root_background(xsg_window_t *window) {
+static void
+grab_root_background(xsg_window_t *window)
+{
 	Window root = RootWindow(display, screen);
 
-	xsg_message("%s: Grabbing root window: 0x%lx", window->config, (unsigned long) root);
+	xsg_message("%s: Grabbing root window: 0x%lx", window->config,
+			(unsigned long) root);
 
 	grab_background(window, root);
 }
 
-static void grab_parent_background(xsg_window_t *window) {
+static void
+grab_parent_background(xsg_window_t *window)
+{
 	Status status;
 	unsigned int nchildren;
 	Window *children = NULL;
 	Window root;
 	Window parent = None;
 
-	status = XQueryTree(display, window->window, &root, &parent, &children, &nchildren);
+	status = XQueryTree(display, window->window, &root, &parent, &children,
+			&nchildren);
 
-	if (children != NULL)
+	if (children != NULL) {
 		XFree(children);
+	}
 
 	if (parent == None) {
-		xsg_warning("%s: Cannot determine parent window", window->config);
+		xsg_warning("%s: cannot determine parent window",
+				window->config);
 		return;
 	}
 
-	xsg_message("%s: Grabbing parent window: 0x%lx", window->config, (unsigned long) parent);
+	xsg_message("%s: grabbing parent window: 0x%lx", window->config,
+			(unsigned long) parent);
 
 	grab_background(window, parent);
 }
 
-static void copy_from_parent_timeout(void *arg, bool time_error) {
+static void
+copy_from_parent_timeout(void *arg, bool time_error)
+{
 	xsg_window_t *window = arg;
 	grab_parent_background(window);
 	xsg_main_remove_timeout(&window->copy_from_parent_timeout);
@@ -461,14 +528,17 @@ static void copy_from_parent_timeout(void *arg, bool time_error) {
  *
  ******************************************************************************/
 
-static void render(xsg_window_t *window) {
+static void
+render(xsg_window_t *window)
+{
 	Imlib_Image buffer;
 	xsg_list_t *update;
 
-	if (!window->visible)
+	if (!window->visible) {
 		return;
+	}
 
-	xsg_debug("%s: Render...", window->config);
+	xsg_debug("%s: render...", window->config);
 
 	imlib_context_set_visual(window->visual);
 	imlib_context_set_colormap(window->colormap);
@@ -484,13 +554,21 @@ static void render(xsg_window_t *window) {
 		if (window->xexpose_updates) {
 			Imlib_Updates xexpose_update;
 
-			window->xexpose_updates = imlib_updates_merge_for_rendering(window->xexpose_updates, window->width, window->height);
+			window->xexpose_updates
+				= imlib_updates_merge_for_rendering(
+						window->xexpose_updates,
+						window->width, window->height);
 
-			for (xexpose_update = window->xexpose_updates; xexpose_update; xexpose_update = imlib_updates_get_next(xexpose_update)) {
+			for (xexpose_update = window->xexpose_updates;
+			     xexpose_update;
+			     xexpose_update = imlib_updates_get_next(
+						xexpose_update)) {
 				int x, y, w, h;
 
-				imlib_updates_get_coordinates(xexpose_update, &x, &y, &w, &h);
-				window->updates = xsg_update_append_rect(window->updates, x, y, w, h);
+				imlib_updates_get_coordinates(xexpose_update,
+						&x, &y, &w, &h);
+				window->updates = xsg_update_append_rect(
+						window->updates, x, y, w, h);
 			}
 
 			imlib_updates_free(window->xexpose_updates);
@@ -498,8 +576,9 @@ static void render(xsg_window_t *window) {
 		}
 	}
 
-	if (window->updates == NULL)
+	if (window->updates == NULL) {
 		return;
+	}
 
 	for (update = window->updates; update; update = update->next) {
 		int up_x = 0, up_y = 0, up_w = 0, up_h = 0;
@@ -507,32 +586,41 @@ static void render(xsg_window_t *window) {
 
 		xsg_update_get_coordinates(update, &up_x, &up_y, &up_w, &up_h);
 
-		xsg_debug("%s: Render x=%d, y=%d, width=%d, height=%d", window->config, up_x, up_y, up_w, up_h);
+		xsg_debug("%s: render x=%d, y=%d, width=%d, height=%d",
+				window->config, up_x, up_y, up_w, up_h);
 
 		if (window->background_image) {
 			imlib_context_set_image(window->background_image);
-			buffer = imlib_create_cropped_image(up_x, up_y, up_w, up_h);
+			buffer = imlib_create_cropped_image(up_x, up_y,
+					up_w, up_h);
 			imlib_context_set_image(buffer);
 			imlib_image_set_has_alpha(1);
 		} else {
 			buffer = imlib_create_image(up_w, up_h);
 			imlib_context_set_image(buffer);
 			imlib_image_set_has_alpha(1);
-			imlib_image_clear_color(window->background_color.red, window->background_color.green,
-					window->background_color.blue, window->background_color.alpha);
+			imlib_image_clear_color(window->background_color.red,
+					window->background_color.green,
+					window->background_color.blue,
+					window->background_color.alpha);
 		}
 
-		for (l = window->widget_list; l; l = l->next)
-			xsg_widgets_render(l->data, buffer, up_x, up_y, up_w, up_h);
+		for (l = window->widget_list; l; l = l->next) {
+			xsg_widgets_render(l->data, buffer, up_x, up_y,
+					up_w, up_h);
+		}
 
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(0);
 
-		if (window->argb_visual)
-			xsg_xrender_render(window->window, window->visual, window->mask, window->xshape,
-					imlib_image_get_data_for_reading_only(), up_x, up_y, up_w, up_h);
-		else
+		if (window->argb_visual) {
+			xsg_xrender_render(window->window, window->visual,
+					window->mask, window->xshape,
+					imlib_image_get_data_for_reading_only(),
+					up_x, up_y, up_w, up_h);
+		} else {
 			imlib_render_image_on_drawable(up_x, up_y);
+		}
 
 		imlib_context_set_image(buffer);
 		imlib_context_set_blend(1);
@@ -544,12 +632,17 @@ static void render(xsg_window_t *window) {
 
 	if (window->xshape > 0) {
 		if (window->argb_visual) {
-			XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+			XShapeCombineMask(display, window->window,
+					ShapeBounding, 0, 0, window->mask,
+					ShapeSet);
 		} else {
-			XSetWindowBackgroundPixmap(display, window->window, window->pixmap);
-			XShapeCombineMask(display, window->window, ShapeBounding, 0, 0, window->mask, ShapeSet);
+			XSetWindowBackgroundPixmap(display, window->window,
+					window->pixmap);
+			XShapeCombineMask(display, window->window,
+					ShapeBounding, 0, 0, window->mask,
+					ShapeSet);
 			XClearWindow(display, window->window);
-			//XSync(display, False);
+			/* XSync(display, False); */
 		}
 	}
 }
@@ -560,7 +653,28 @@ static void render(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static void handle_xevent(void) {
+static void
+gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec)
+{
+	if (unlikely(tv == NULL)) {
+		return;
+	}
+
+	xsg_gettimeofday(tv, NULL);
+
+	tv->tv_sec += tv_sec;
+	tv->tv_sec += tv_usec / 1000000;
+	tv->tv_usec += tv_usec % 1000000;
+
+	if (tv->tv_usec >= 1000000) {
+		++tv->tv_sec;
+		tv->tv_usec -= 1000000;
+	}
+}
+
+static void
+handle_xevent(void)
+{
 	xsg_list_t *l;
 	XEvent event;
 
@@ -569,57 +683,76 @@ static void handle_xevent(void) {
 		xsg_window_t *window = l->data;
 
 		switch (event.type) {
-			case Expose:
-				if (window->window == event.xexpose.window) {
-					window->xexpose_updates = imlib_update_append_rect(window->xexpose_updates,
-							event.xexpose.x, event.xexpose.y,
-							event.xexpose.width, event.xexpose.height);
-					xsg_debug("%s: Received Expose event: x=%d, y=%d, w=%d, h=%d",
-							window->config,
-							event.xexpose.x, event.xexpose.y,
-							event.xexpose.width, event.xexpose.height);
+		case Expose:
+			if (window->window == event.xexpose.window) {
+				window->xexpose_updates
+					= imlib_update_append_rect(
+						window->xexpose_updates,
+						event.xexpose.x,
+						event.xexpose.y,
+						event.xexpose.width,
+						event.xexpose.height);
+				xsg_debug("%s: received Expose event: x=%d, "
+						"y=%d, w=%d, h=%d",
+						window->config,
+						event.xexpose.x,
+						event.xexpose.y,
+						event.xexpose.width,
+						event.xexpose.height);
+			}
+			break;
+		case ReparentNotify:
+			if (window->window == event.xreparent.window) {
+				xsg_message("%s: received ReparentNotify "
+						"event. new parent is: 0x%lx",
+						window->config,
+						(unsigned long)
+						event.xreparent.parent);
+				if (window->copy_from_parent) {
+					gettimeofday_and_add(
+						&window->copy_from_parent_timeout.tv,
+						0, 100 * 1000);
+					xsg_main_add_timeout(
+						&window->copy_from_parent_timeout);
 				}
-				break;
-			case ReparentNotify:
-				if (window->window == event.xreparent.window) {
-					xsg_message("%s: Received ReparentNotify event. New parent is: 0x%lx",
-							window->config, (unsigned long) event.xreparent.parent);
-					if (window->copy_from_parent) {
-						xsg_gettimeofday_and_add(&window->copy_from_parent_timeout.tv, 0, 100 * 1000);
-						xsg_main_add_timeout(&window->copy_from_parent_timeout);
-					}
-				}
-				break;
-			default:
-				xsg_debug("Received XEvent: %d", event.type);
-				break;
+			}
+			break;
+		default:
+			xsg_debug("received XEvent: %d", event.type);
+			break;
 		}
 	}
 }
 
-static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
+static void
+handle_xevents(void *arg, xsg_main_poll_events_t events)
+{
 	xsg_list_t *l;
 
 	while (XPending(display)) {
-		while (XPending(display))
+		while (XPending(display)) {
 			handle_xevent();
+		}
 
 		for (l = window_list; l; l = l->next) {
 			xsg_window_t *window = l->data;
 
 			if (window->argb_visual) {
-				if (window->xexpose_updates != 0)
+				if (window->xexpose_updates != 0) {
 					render(window);
+				}
 			} else if (window->xshape > 0) {
 				if (window->xexpose_updates != 0) {
 					XClearWindow(display, window->window);
 					XSync(display, False);
-					imlib_updates_free(window->xexpose_updates);
+					imlib_updates_free(
+						window->xexpose_updates);
 					window->xexpose_updates = 0;
 				}
 			} else {
-				if (window->xexpose_updates != 0)
+				if (window->xexpose_updates != 0) {
 					render(window);
+				}
 			}
 		}
 	}
@@ -631,7 +764,9 @@ static void handle_xevents(void *arg, xsg_main_poll_events_t events) {
  *
  ******************************************************************************/
 
-void xsg_window_render(void) {
+void
+xsg_window_render(void)
+{
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
@@ -649,15 +784,19 @@ void xsg_window_render(void) {
  *
  ******************************************************************************/
 
-static void update_visible(xsg_window_t *window) {
+static void
+update_visible(xsg_window_t *window)
+{
 	bool visible;
 
 	visible = window->visible;
 
-	if (window->visible_update != 0)
-		window->visible = (xsg_var_get_num(window->visible_var) == 0.0) ? FALSE : TRUE;
-	else
+	if (window->visible_update != 0) {
+		window->visible = (xsg_var_get_num(window->visible_var) == 0.0)
+			? FALSE : TRUE;
+	} else {
 		window->visible = TRUE;
+	}
 
 	if (window->visible != visible) {
 		if (window->visible) {
@@ -665,21 +804,31 @@ static void update_visible(xsg_window_t *window) {
 
 			XMapWindow(display, window->window);
 
-			if (window->sticky)
-				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_STICKY");
+			if (window->sticky) {
+				set_xatom(window, "_NET_WM_STATE",
+						"_NET_WM_STATE_STICKY");
+			}
 
-			if (window->skip_taskbar)
-				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_SKIP_TASKBAR");
+			if (window->skip_taskbar) {
+				set_xatom(window, "_NET_WM_STATE",
+						"_NET_WM_STATE_SKIP_TASKBAR");
+			}
 
-			if (window->skip_pager)
-				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_SKIP_PAGER");
+			if (window->skip_pager) {
+				set_xatom(window, "_NET_WM_STATE",
+						"_NET_WM_STATE_SKIP_PAGER");
+			}
 
-			if (window->layer > 0)
-				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_ABOVE");
-			else if (window->layer < 0)
-				set_xatom(window, "_NET_WM_STATE", "_NET_WM_STATE_BELOW");
+			if (window->layer > 0) {
+				set_xatom(window, "_NET_WM_STATE",
+						"_NET_WM_STATE_ABOVE");
+			} else if (window->layer < 0) {
+				set_xatom(window, "_NET_WM_STATE",
+						"_NET_WM_STATE_BELOW");
+			}
 
-			xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
+			xsg_window_update_append_rect(window, 0, 0,
+					window->width, window->height);
 		} else {
 			xsg_debug("%s: XUnmapWindow", window->config);
 
@@ -694,22 +843,33 @@ static void update_visible(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-void xsg_window_update(uint64_t tick) {
+void
+xsg_window_update(uint64_t tick)
+{
 	xsg_list_t *l;
 
 	for (l = window_list; l; l = l->next) {
 		xsg_window_t *window = l->data;
 
-		if (window->copy_from_root)
-			if (check_root_background(window) || ((window->background_image_update != 0) && (tick % window->background_image_update) == 0))
+		if (window->copy_from_root) {
+			if (check_root_background(window)
+			 || ((window->background_image_update != 0)
+			  && (tick % window->background_image_update) == 0)) {
 				grab_root_background(window);
+			}
+		}
 
-		if (window->copy_from_parent)
-			if ((window->background_image_update != 0) && (tick % window->background_image_update) == 0)
+		if (window->copy_from_parent) {
+			if ((window->background_image_update != 0)
+			 && (tick % window->background_image_update) == 0) {
 				grab_parent_background(window);
+			}
+		}
 
-		if ((window->visible_update != 0) && (tick % window->visible_update) == 0)
+		if ((window->visible_update != 0)
+		 && (tick % window->visible_update) == 0) {
 			update_visible(window);
+		}
 	}
 
 	xsg_window_render();
@@ -722,8 +882,17 @@ void xsg_window_update(uint64_t tick) {
  *
  ******************************************************************************/
 
-void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffset, int width, int height) {
-	window->updates = xsg_update_append_rect(window->updates, xoffset, yoffset, width, height);
+void
+xsg_window_update_append_rect(
+	xsg_window_t *window,
+	int xoffset,
+	int yoffset,
+	int width,
+	int height
+)
+{
+	window->updates = xsg_update_append_rect(window->updates, xoffset,
+			yoffset, width, height);
 }
 
 /******************************************************************************
@@ -732,7 +901,13 @@ void xsg_window_update_append_rect(xsg_window_t *window, int xoffset, int yoffse
  *
  ******************************************************************************/
 
-void xsg_window_update_var(xsg_window_t *window, xsg_widget_t *widget, xsg_var_t *var) {
+void
+xsg_window_update_var(
+	xsg_window_t *window,
+	xsg_widget_t *widget,
+	xsg_var_t *var
+)
+{
 	if (widget == NULL) {
 		update_visible(window);
 		xsg_window_render();
@@ -755,7 +930,9 @@ typedef struct {
 	unsigned long status;
 } MotifWmHints;
 
-void hide_decorations(xsg_window_t *window) {
+static void
+hide_decorations(xsg_window_t *window)
+{
 	Atom hints_atom;
 	Atom type;
 	int format;
@@ -767,22 +944,27 @@ void hide_decorations(xsg_window_t *window) {
 
 	hints_atom = XInternAtom(display, "_MOTIF_WM_HINTS", FALSE);
 
-	XGetWindowProperty(display, window->window, hints_atom, 0, sizeof(MotifWmHints)/sizeof(long), False, AnyPropertyType,
-			&type, &format, &nitems, &bytes_after, (unsigned char **) hints_pointer);
+	XGetWindowProperty(display, window->window, hints_atom, 0,
+			sizeof(MotifWmHints)/sizeof(long), False,
+			AnyPropertyType, &type, &format, &nitems,
+			&bytes_after, (unsigned char **) hints_pointer);
 
-	if (type == None)
+	if (type == None) {
 		hints = &new_hints;
+	}
 
 	hints->flags |= (1L << 1);
 	hints->decorations = 0;
 
-	xsg_message("%s: Hiding window decorations", window->config);
+	xsg_message("%s: hiding window decorations", window->config);
 
 	XChangeProperty(display, window->window, hints_atom, hints_atom, 32,
-			PropModeReplace, (unsigned char *) hints, sizeof(MotifWmHints)/sizeof(long));
+			PropModeReplace, (unsigned char *) hints,
+			sizeof(MotifWmHints)/sizeof(long));
 
-	if (hints != &new_hints)
+	if (hints != &new_hints) {
 		XFree(hints);
+	}
 }
 
 /******************************************************************************
@@ -791,12 +973,15 @@ void hide_decorations(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static void set_size_hints(xsg_window_t *window) {
+static void
+set_size_hints(xsg_window_t *window)
+{
 	XSizeHints *size_hints;
 
 	size_hints = XAllocSizeHints();
 
-	size_hints->flags = PMinSize | PMaxSize | PSize | USPosition | PWinGravity;
+	size_hints->flags = PMinSize | PMaxSize | PSize | USPosition
+			| PWinGravity;
 
 	size_hints->min_width = window->width;
 	size_hints->max_width = window->width;
@@ -808,7 +993,7 @@ static void set_size_hints(xsg_window_t *window) {
 	size_hints->y = window->yoffset;
 	size_hints->win_gravity = window->gravity;
 
-	xsg_debug("%s: Setting size hints", window->config);
+	xsg_debug("%s: setting size hints", window->config);
 
 	XSetWMNormalHints(display, window->window, size_hints);
 
@@ -821,7 +1006,9 @@ static void set_size_hints(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static void set_class_hints(xsg_window_t *window) {
+static void
+set_class_hints(xsg_window_t *window)
+{
 	XClassHint *class_hint;
 
 	class_hint = XAllocClassHint();
@@ -829,7 +1016,7 @@ static void set_class_hints(xsg_window_t *window) {
 	class_hint->res_name = window->resource;
 	class_hint->res_class = window->class;
 
-	xsg_debug("%s: Setting class hints", window->config);
+	xsg_debug("%s: setting class hints", window->config);
 
 	XSetClassHint(display, window->window, class_hint);
 
@@ -842,12 +1029,16 @@ static void set_class_hints(xsg_window_t *window) {
  *
  ******************************************************************************/
 
-static int io_error_handler(Display *display) {
+static int
+io_error_handler(Display *display)
+{
 	xsg_error("X connection broken");
 	return 0;
 }
 
-static int error_handler(Display *display, XErrorEvent *event) {
+static int
+error_handler(Display *display, XErrorEvent *event)
+{
 	char buf[1024];
 
 	XGetErrorText(display, event->error_code, buf, sizeof(buf));
@@ -861,30 +1052,26 @@ static int error_handler(Display *display, XErrorEvent *event) {
  *
  ******************************************************************************/
 
-static bool need_render_all = FALSE;
-
-static void signal_handler(int signum) {
-	if (signum == SIGHUP)
-		need_render_all = TRUE;
-}
-
-static void signal_cleanup(void) {
+static void
+signal_handler(int signum)
+{
 	xsg_list_t *l;
 
-	if (need_render_all) {
-		need_render_all = FALSE;
-
+	if (signum == SIGHUP) {
 		xsg_message("Rendering all windows");
 
 		for (l = window_list; l; l = l->next) {
 			xsg_window_t *window = l->data;
 
-			if (window->copy_from_root)
+			if (window->copy_from_root) {
 				grab_root_background(window);
-			if (window->copy_from_parent)
+			}
+			if (window->copy_from_parent) {
 				grab_parent_background(window);
+			}
 
-			xsg_window_update_append_rect(window, 0, 0, window->width, window->height);
+			xsg_window_update_append_rect(window, 0, 0,
+					window->width, window->height);
 		}
 	}
 
@@ -897,20 +1084,25 @@ static void signal_cleanup(void) {
  *
  ******************************************************************************/
 
-void xsg_window_init() {
+void
+xsg_window_init(void)
+{
 	xsg_list_t *l;
 
 	XSetIOErrorHandler(io_error_handler);
 	XSetErrorHandler(error_handler);
 
-	if (display == NULL)
+	if (display == NULL) {
 		display = XOpenDisplay(NULL);
+	}
 
-	if (unlikely(display == NULL))
+	if (unlikely(display == NULL)) {
 		xsg_error("Cannot open display");
+	}
 
-	if (screen == 0)
+	if (screen == 0) {
 		screen = XDefaultScreen(display);
+	}
 
 	imlib_context_set_blend(1);
 	imlib_context_set_dither(0);
@@ -924,13 +1116,16 @@ void xsg_window_init() {
 		unsigned long valuemask;
 
 		if (window->flags & XNegative) {
-			window->xoffset += DisplayWidth(display, screen) - window->width;
+			window->xoffset += DisplayWidth(display, screen)
+				- window->width;
 			window->gravity = NorthEastGravity;
 		}
 
 		if (window->flags & YNegative) {
-			window->yoffset += DisplayHeight(display, screen) - window->height;
-			window->gravity = (window->gravity == NorthEastGravity ? SouthEastGravity : SouthWestGravity);
+			window->yoffset += DisplayHeight(display, screen)
+				- window->height;
+			window->gravity = window->gravity == NorthEastGravity
+					? SouthEastGravity : SouthWestGravity;
 		}
 
 		if (window->argb_visual) {
@@ -938,52 +1133,69 @@ void xsg_window_init() {
 			window->visual = xsg_xrender_find_visual(screen);
 			window->depth = 32;
 		} else {
-			window->visual = imlib_get_best_visual(display, screen, &window->depth);
+			window->visual = imlib_get_best_visual(display, screen,
+					&window->depth);
 		}
 
 		if (window->xshape) {
 			int event_base, error_base;
 
-			if (!XShapeQueryExtension(display, &event_base, &error_base))
-				xsg_error("%s: No xshape extension found", window->config);
+			if (!XShapeQueryExtension(display, &event_base,
+						&error_base)) {
+				xsg_error("%s: No xshape extension found",
+						window->config);
+			}
 		}
 
-		window->colormap = XCreateColormap(display, RootWindow(display, screen), window->visual, AllocNone);
+		window->colormap = XCreateColormap(display,
+				RootWindow(display, screen), window->visual,
+				AllocNone);
 
 		attrs.event_mask = ExposureMask | StructureNotifyMask;
 		attrs.background_pixel = 0;
 		attrs.border_pixel = 0;
 		attrs.colormap = window->colormap;
-		valuemask = CWEventMask | CWBackPixel | CWBorderPixel | CWColormap;
+		valuemask = CWEventMask | CWBackPixel | CWBorderPixel
+			| CWColormap;
 
 		if (window->override_redirect) {
 			attrs.override_redirect = 1;
 			valuemask |= CWOverrideRedirect;
 		}
 
-		window->window = XCreateWindow(display, XRootWindow(display, screen),
-			window->xoffset, window->yoffset, window->width, window->height, 0,
-			window->depth, InputOutput, window->visual, valuemask, &attrs);
+		window->window = XCreateWindow(display,
+				XRootWindow(display, screen),
+				window->xoffset, window->yoffset,
+				window->width, window->height, 0,
+				window->depth, InputOutput, window->visual,
+				valuemask, &attrs);
 
 		set_size_hints(window);
 		set_class_hints(window);
 
 		XStoreName(display, window->window, window->name);
 
-		if (window->argb_visual)
+		if (window->argb_visual) {
 			xsg_xrender_redirect(window->window);
-
-		if (!window->decorations)
-			hide_decorations(window);
-
-
-		if (window->xshape > 0) {
-			window->mask = XCreatePixmap(display, window->window, window->width, window->height, 1);
-			if (!window->argb_visual)
-				window->pixmap = XCreatePixmap(display, window->window, window->width, window->height, window->depth);
 		}
 
-		window->updates = xsg_update_append_rect(window->updates, 0, 0, window->width, window->height);
+		if (!window->decorations) {
+			hide_decorations(window);
+		}
+
+		if (window->xshape > 0) {
+			window->mask = XCreatePixmap(display, window->window,
+					window->width, window->height, 1);
+			if (!window->argb_visual) {
+				window->pixmap = XCreatePixmap(display,
+						window->window,
+						window->width, window->height,
+						window->depth);
+			}
+		}
+
+		window->updates = xsg_update_append_rect(window->updates, 0, 0,
+				window->width, window->height);
 	}
 
 	poll.fd = ConnectionNumber(display);
@@ -1008,7 +1220,6 @@ void xsg_window_init() {
 		update_visible(window);
 	}
 
-	xsg_main_add_signal_cleanup(signal_cleanup);
 	xsg_main_add_signal_handler(signal_handler);
 }
 
@@ -1018,26 +1229,32 @@ void xsg_window_init() {
  *
  ******************************************************************************/
 
-bool xsg_window_color_lookup(char *name, uint32_t *color) {
+bool
+xsg_window_color_lookup(char *name, uint32_t *color)
+{
 	Colormap cm;
 	XColor c;
 
 	XSetIOErrorHandler(io_error_handler);
 	XSetErrorHandler(error_handler);
 
-	if (display == NULL)
+	if (display == NULL) {
 		display = XOpenDisplay(NULL);
+	}
 
-	if (unlikely(display == NULL))
-		xsg_error("Cannot open display");
+	if (unlikely(display == NULL)) {
+		xsg_error("cannot open display");
+	}
 
-	if (screen == 0)
+	if (screen == 0) {
 		screen = XDefaultScreen(display);
+	}
 
 	cm = DefaultColormap(display, screen);
 
-	if (XParseColor(display, cm, name, &c) == 0)
+	if (XParseColor(display, cm, name, &c) == 0) {
 		return FALSE;
+	}
 
 	A_VAL(color) = 0xff;
 	R_VAL(color) = c.red >> 8;

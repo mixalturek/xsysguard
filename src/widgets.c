@@ -1,7 +1,7 @@
 /* widgets.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,13 +60,16 @@ xsg_widget_t *xsg_widgets_new(xsg_window_t *window) {
 
 /******************************************************************************/
 
-xsg_widget_t *xsg_widgets_last() {
+xsg_widget_t *
+xsg_widgets_last(void)
+{
 	xsg_list_t *l;
 
 	l = xsg_list_last(widget_list);
 
-	if (unlikely(l == NULL))
+	if (unlikely(l == NULL)) {
 		xsg_error("No widgets available");
+	}
 
 	return l->data;
 }
@@ -77,7 +80,9 @@ xsg_widget_t *xsg_widgets_last() {
  *
  ******************************************************************************/
 
-static bool widget_rect(xsg_widget_t *widget, int x, int y, unsigned int w, unsigned int h) {
+static bool
+widget_rect(xsg_widget_t *widget, int x, int y, unsigned int w, unsigned int h)
+{
 	int x1_1, x2_1, y1_1, y2_1, x1_2, x2_2, y1_2, y2_2;
 	bool x_overlap, y_overlap;
 
@@ -97,11 +102,21 @@ static bool widget_rect(xsg_widget_t *widget, int x, int y, unsigned int w, unsi
 	return x_overlap && y_overlap;
 }
 
-void xsg_widgets_render(xsg_widget_t *w, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h) {
+void
+xsg_widgets_render(
+	xsg_widget_t *w,
+	Imlib_Image buffer,
+	int up_x,
+	int up_y,
+	int up_w,
+	int up_h
+)
+{
 	xsg_widget_t *widget = w;
 
-	if (widget->visible && widget_rect(widget, up_x, up_y, up_w, up_h))
+	if (widget->visible && widget_rect(widget, up_x, up_y, up_w, up_h)) {
 		(widget->render_func)(widget, buffer, up_x, up_y);
+	}
 }
 
 /******************************************************************************
@@ -110,36 +125,49 @@ void xsg_widgets_render(xsg_widget_t *w, Imlib_Image buffer, int up_x, int up_y,
  *
  ******************************************************************************/
 
-void xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var) {
+void
+xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var)
+{
 	if (widget->visible_var == var) {
 		bool visible = widget->visible;
 
-		if (widget->visible_update != 0)
-			widget->visible = (xsg_var_get_num(var) == 0.0) ? FALSE : TRUE;
-		else
+		if (widget->visible_update != 0) {
+			widget->visible = (xsg_var_get_num(var) == 0.0)
+				? FALSE : TRUE;
+		} else {
 			widget->visible = TRUE;
-		if (widget->visible != visible)
-			xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset,
+		}
+		if (widget->visible != visible) {
+			xsg_window_update_append_rect(widget->window,
+					widget->xoffset, widget->yoffset,
 					widget->width, widget->height);
+		}
 	} else {
 		(widget->update_func)(widget, var);
 	}
 }
 
-void xsg_widgets_update(uint64_t tick) {
+void
+xsg_widgets_update(uint64_t tick)
+{
 	xsg_list_t *l;
 
 	for (l = widget_list; l; l = l->next) {
 		xsg_widget_t *widget = l->data;
 
-		if ((widget->visible_update != 0) && (tick % widget->visible_update) == 0) {
+		if ((widget->visible_update != 0)
+		 && (tick % widget->visible_update) == 0) {
 			bool visible = widget->visible;
 
-			widget->visible = (xsg_var_get_num(widget->visible_var) == 0.0) ? FALSE : TRUE;
+			widget->visible = (xsg_var_get_num(widget->visible_var)
+					== 0.0) ? FALSE : TRUE;
 
-			if (visible != widget->visible)
-				xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset,
+			if (visible != widget->visible) {
+				xsg_window_update_append_rect(widget->window,
+						widget->xoffset,
+						widget->yoffset,
 						widget->width, widget->height);
+			}
 		}
 
 		if ((widget->update != 0) && (tick % widget->update) == 0) {
@@ -147,8 +175,9 @@ void xsg_widgets_update(uint64_t tick) {
 			(widget->update_func)(widget, NULL);
 		}
 
-		if (tick == 0)
+		if (tick == 0) {
 			(widget->update_func)(widget, NULL);
+		}
 	}
 }
 

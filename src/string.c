@@ -1,7 +1,7 @@
 /* string.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,27 +38,36 @@
 
 /******************************************************************************/
 
-static size_t nearest_power(size_t base, size_t num) {
+static size_t
+nearest_power(size_t base, size_t num)
+{
 	if (num > MY_MAXSIZE / 2) {
 		return MY_MAXSIZE;
 	} else {
 		size_t n = base;
 
-		while (n < num)
+		while (n < num) {
 			n <<= 1;
+		}
 
 		return n;
 	}
 }
 
-static void xsg_string_maybe_expand(xsg_string_t *string, size_t len) {
+static void
+xsg_string_maybe_expand(xsg_string_t *string, size_t len)
+{
 	if (string->len + len >= string->allocated_len) {
 		string->allocated_len = nearest_power(1, string->len + len + 1);
 		string->str = xsg_realloc(string->str, string->allocated_len);
 	}
 }
 
-xsg_string_t *xsg_string_new(const char *init) {
+/******************************************************************************/
+
+xsg_string_t *
+xsg_string_new(const char *init)
+{
 	xsg_string_t *string;
 
 	if (init == NULL || *init == '\0') {
@@ -73,90 +82,123 @@ xsg_string_t *xsg_string_new(const char *init) {
 	return string;
 }
 
-xsg_string_t *xsg_string_sized_new(size_t dfl_size) {
-	xsg_string_t *string = xsg_new0(xsg_string_t, 1);
+xsg_string_t *
+xsg_string_sized_new(size_t len)
+{
+	xsg_string_t *string = xsg_new(xsg_string_t, 1);
 
 	string->allocated_len = 0;
 	string->len = 0;
 	string->str = NULL;
 
-	xsg_string_maybe_expand(string, MAX(dfl_size, 2));
+	xsg_string_maybe_expand(string, MAX(len, 2));
 	string->str[0] = 0;
 
 	return string;
 }
 
-xsg_string_t *xsg_string_assign(xsg_string_t *string, const char *rval) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(rval == NULL))
-		return string;
+/******************************************************************************/
 
-	if (likely(string->str != rval)) {
-		xsg_string_truncate(string, 0);
-		xsg_string_append(string, rval);
+void
+xsg_string_assign(xsg_string_t *string, const char *val)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+	if (unlikely(val == NULL)) {
+		return;
 	}
 
-	return string;
+	if (likely(string->str != val)) {
+		xsg_string_truncate(string, 0);
+		xsg_string_append(string, val);
+	}
 }
 
-xsg_string_t *xsg_string_truncate(xsg_string_t *string, size_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
+void
+xsg_string_truncate(xsg_string_t *string, size_t len)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
 
 	string->len = MIN(len, string->len);
 	string->str[string->len] = 0;
-
-	return string;
 }
 
-xsg_string_t *xsg_string_set_size(xsg_string_t *string, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
+void
+xsg_string_set_size(xsg_string_t *string, size_t len)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
 
-	if (len >= string->allocated_len)
+	if (len >= string->allocated_len) {
 		xsg_string_maybe_expand(string, len - string->len);
+	}
 
 	string->len = len;
 	string->str[len] = 0;
-
-	return string;
 }
 
-xsg_string_t *xsg_string_append(xsg_string_t *string, const char *val) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
+void
+xsg_string_append(xsg_string_t *string, const char *val)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+	if (unlikely(val == NULL)) {
+		return;
+	}
 
-	return xsg_string_insert_len(string, -1, val, -1);
+	xsg_string_insert_len(string, -1, val, -1);
 }
 
-xsg_string_t *xsg_string_append_c(xsg_string_t *string, char c) {
-	if (unlikely(string == NULL))
-		return NULL;
-	return xsg_string_insert_c(string, -1, c);
+void
+xsg_string_append_c(xsg_string_t *string, char c)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+
+	xsg_string_insert_c(string, -1, c);
 }
 
-xsg_string_t *xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
-	return xsg_string_insert_len(string, -1, val, len);
+void
+xsg_string_append_len(xsg_string_t *string, const char *val, ssize_t len)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+	if (unlikely(val == NULL)) {
+		return;
+	}
+
+	xsg_string_insert_len(string, -1, val, len);
 }
 
-xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const char *val, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(val == NULL))
-		return string;
-	if (len < 0)
+void
+xsg_string_insert_len(
+	xsg_string_t *string,
+	ssize_t pos,
+	const char *val,
+	ssize_t len
+)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+	if (unlikely(val == NULL)) {
+		return;
+	}
+	if (len < 0) {
 		len = strlen(val);
-	if (pos < 0)
+	}
+	if (pos < 0) {
 		pos = string->len;
-	else if (pos > string->len)
-		return string;
+	} else if (pos > string->len) {
+		return;
+	}
 
 	if (val >= string->str && val <= string->str + string->len) {
 		size_t offset = val - string->str;
@@ -165,112 +207,142 @@ xsg_string_t *xsg_string_insert_len(xsg_string_t *string, ssize_t pos, const cha
 		xsg_string_maybe_expand(string, len);
 		val = string->str + offset;
 
-		if (pos < string->len)
-			  memmove(string->str + pos + len, string->str + pos, string->len - pos);
+		if (pos < string->len) {
+			  memmove(string->str + pos + len, string->str + pos,
+					  string->len - pos);
+		}
 
 		if (offset < pos) {
 			precount = MIN(len, pos - offset);
 			memcpy(string->str + pos, val, precount);
 		}
 
-		if (len > precount)
-			memcpy(string->str + pos + precount, val + precount + len, len - precount);
+		if (len > precount) {
+			memcpy(string->str + pos + precount,
+					val + precount + len, len - precount);
+		}
 	} else {
 		xsg_string_maybe_expand(string, len);
 
-		if (pos < string->len)
-			memmove(string->str + pos + len, string->str + pos, string->len - pos);
+		if (pos < string->len) {
+			memmove(string->str + pos + len, string->str + pos,
+					string->len - pos);
+		}
 
-		if (len == 1)
+		if (len == 1) {
 			string->str[pos] = *val;
-		else
+		} else {
 			memcpy(string->str + pos, val, len);
+		}
 	}
 
 	string->len += len;
-
 	string->str[string->len] = 0;
-
-	return string;
 }
 
-xsg_string_t *xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c) {
-	if (unlikely(string == NULL))
-		return NULL;
+void
+xsg_string_insert_c(xsg_string_t *string, ssize_t pos, char c)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
 	xsg_string_maybe_expand(string, 1);
 	if (pos < 0) {
 		pos = string->len;
-	} else {
-		if (unlikely(pos > string->len))
-			return string;
+	} else if (unlikely(pos > string->len)) {
+			return;
 	}
-	if (pos < string->len)
-		memmove(string->str + pos + 1, string->str + pos, string->len - pos);
+	if (pos < string->len) {
+		memmove(string->str + pos + 1, string->str + pos,
+				string->len - pos);
+	}
 	string->str[pos] = c;
 	string->len += 1;
 	string->str[string->len] = 0;
-	return string;
 }
 
-xsg_string_t *xsg_string_erase(xsg_string_t *string, ssize_t pos, ssize_t len) {
-	if (unlikely(string == NULL))
-		return NULL;
-	if (unlikely(pos < 0))
-		return string;
-	if (unlikely(pos > string->len))
-		return string;
+void
+xsg_string_erase(xsg_string_t *string, ssize_t pos, ssize_t len)
+{
+	if (unlikely(string == NULL)) {
+		return;
+	}
+	if (unlikely(pos < 0)) {
+		return;
+	}
+	if (unlikely(pos > string->len)) {
+		return;
+	}
 	if (len < 0) {
 		len = string->len - pos;
 	} else {
-		if (unlikely(pos + len > string->len))
-			return string;
-		if (pos + len < string->len)
-			memmove(string->str + pos, string->str + pos + len, string->len - (pos + len));
+		if (unlikely(pos + len > string->len)) {
+			return;
+		}
+		if (pos + len < string->len) {
+			memmove(string->str + pos, string->str + pos + len,
+					string->len - (pos + len));
+		}
 	}
 	string->len -= len;
 	string->str[string->len] = 0;
-	return string;
 }
 
-xsg_string_t *xsg_string_up(xsg_string_t *string) {
+/******************************************************************************/
+
+void
+xsg_string_up(xsg_string_t *string)
+{
 	unsigned char *s;
 	long n;
 
-	if (unlikely(string == NULL))
-		return NULL;
+	if (unlikely(string == NULL)) {
+		return;
+	}
 
 	n = string->len;
 	s = (unsigned char *) string->str;
 
 	while (n) {
-		if (islower(*s))
+		if (islower(*s)) {
 			*s = toupper(*s);
+		}
 		s++;
 		n--;
 	}
-	return string;
 }
 
-xsg_string_t *xsg_string_down(xsg_string_t *string) {
+void
+xsg_string_down(xsg_string_t *string)
+{
 	unsigned char *s;
 	long n;
 
-	if (unlikely(string == NULL))
-		return NULL;
+	if (unlikely(string == NULL)) {
+		return;
+	}
 
 	n = string->len;
 	s = (unsigned char *) string->str;
 
 	while (n) {
-		if (isupper(*s))
+		if (isupper(*s)) {
 			*s = tolower(*s);
+		}
 		s++;
 		n--;
 	}
-	return string;
 }
 
-static void xsg_string_append_printf_internal(xsg_string_t *string, const char *fmt, va_list args) {
+/******************************************************************************/
+
+static void
+xsg_string_append_printf_internal(
+	xsg_string_t *string,
+	const char *fmt,
+	va_list args
+)
+{
 	char *buffer;
 	int length;
 
@@ -279,7 +351,11 @@ static void xsg_string_append_printf_internal(xsg_string_t *string, const char *
 	xsg_free(buffer);
 }
 
-void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
+/******************************************************************************/
+
+void
+xsg_string_printf(xsg_string_t *string, const char *format, ...)
+{
 	va_list args;
 
 	xsg_string_truncate(string, 0);
@@ -289,7 +365,9 @@ void xsg_string_printf(xsg_string_t *string, const char *format, ...) {
 	va_end(args);
 }
 
-void xsg_string_append_printf(xsg_string_t *string, const char *format, ...) {
+void
+xsg_string_append_printf(xsg_string_t *string, const char *format, ...)
+{
 	va_list args;
 
 	va_start(args, format);
@@ -297,11 +375,16 @@ void xsg_string_append_printf(xsg_string_t *string, const char *format, ...) {
 	va_end(args);
 }
 
-char *xsg_string_free(xsg_string_t *string, bool free_segment) {
+/******************************************************************************/
+
+char *
+xsg_string_free(xsg_string_t *string, bool free_segment)
+{
 	char *segment;
 
-	if (unlikely(string == NULL))
+	if (unlikely(string == NULL)) {
 		return NULL;
+	}
 
 	if (free_segment) {
 		xsg_free(string->str);

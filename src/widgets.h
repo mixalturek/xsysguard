@@ -1,7 +1,7 @@
 /* widgets.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,15 +28,27 @@
 
 /******************************************************************************/
 
-void xsg_widgets_update(uint64_t tick);
+extern void
+xsg_widgets_update(uint64_t tick);
 
-void xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var);
+extern void
+xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var);
 
-xsg_widget_t *xsg_widgets_new(xsg_window_t *window);
+extern xsg_widget_t *
+xsg_widgets_new(xsg_window_t *window);
 
-xsg_widget_t *xsg_widgets_last(void);
+extern xsg_widget_t *
+xsg_widgets_last(void);
 
-void xsg_widgets_render(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y, int up_w, int up_h);
+extern void
+xsg_widgets_render(
+	xsg_widget_t *widget,
+	Imlib_Image buffer,
+	int up_x,
+	int up_y,
+	int up_w,
+	int up_h
+);
 
 /******************************************************************************/
 

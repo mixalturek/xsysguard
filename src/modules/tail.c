@@ -42,7 +42,9 @@ static xsg_list_t *tail_list = NULL;
 
 /******************************************************************************/
 
-static xsg_buffer_t *find_buffer(const char *filename) {
+static xsg_buffer_t *
+find_buffer(const char *filename)
+{
 	xsg_list_t *l;
 	tail_t *t;
 	int fd;
@@ -50,11 +52,13 @@ static xsg_buffer_t *find_buffer(const char *filename) {
 	for (l = tail_list; l; l = l->next) {
 		t = l->data;
 
-		if (strcmp(t->filename, filename) == 0)
+		if (strcmp(t->filename, filename) == 0) {
 			return t->buffer;
+		}
 	}
 
 	t = xsg_new(tail_t, 1);
+
 	t->filename = xsg_strdup(filename);
 	t->buffer = xsg_buffer_new();
 
@@ -82,7 +86,9 @@ static xsg_buffer_t *find_buffer(const char *filename) {
 
 /******************************************************************************/
 
-static void update_buffer(tail_t *t) {
+static void
+update_buffer(tail_t *t)
+{
 	struct stat stats;
 	char buf[4096];
 	int fd;
@@ -90,42 +96,46 @@ static void update_buffer(tail_t *t) {
 	fd = open(t->filename, O_RDONLY | O_NONBLOCK);
 
 	if (fd < 0) {
-		xsg_warning("Cannot open file: \"%s\": %s", t->filename, strerror(errno));
+		xsg_warning("cannot open file: \"%s\": %s", t->filename,
+				strerror(errno));
 		xsg_buffer_clear(t->buffer);
 		return;
 	}
 
 	if (fstat(fd, &stats) != 0) {
-		xsg_warning("Cannot stat file: \"%s\": %s", t->filename, strerror(errno));
+		xsg_warning("cannot stat file: \"%s\": %s", t->filename,
+				strerror(errno));
 		xsg_buffer_clear(t->buffer);
 		close(fd);
 		return;
 	}
 
 	if (!S_ISREG(stats.st_mode)) {
-		xsg_warning("Not a regualr file: \"%s\"", t->filename);
+		xsg_warning("not a regualr file: \"%s\"", t->filename);
 		xsg_buffer_clear(t->buffer);
 		close(fd);
 		return;
 	}
 
 	if (t->dev != stats.st_dev) {
-		xsg_message("ID of device containing file changed: \"%s\"", t->filename);
+		xsg_message("id of device containing file changed: \"%s\"",
+				t->filename);
 		xsg_buffer_clear(t->buffer);
 		t->dev = stats.st_dev;
 		t->ino = stats.st_ino;
 		t->size = 0;
 	} else if (t->ino != stats.st_ino) {
-		xsg_message("Inode number changed: \"%s\"", t->filename);
+		xsg_message("inode number changed: \"%s\"", t->filename);
 		xsg_buffer_clear(t->buffer);
 		t->ino = stats.st_ino;
 		t->size = 0;
 	} else if (t->mtime != stats.st_mtime && t->size == stats.st_size) {
-		xsg_message("Time of last modification changed, but total size not: \"%s\"", t->filename);
+		xsg_message("time of last modification changed, but total size "
+				"not: \"%s\"", t->filename);
 		xsg_buffer_clear(t->buffer);
 		t->size = 0;
 	} else if (t->mtime != stats.st_mtime && t->size > stats.st_size) {
-		xsg_message("File truncated: \"%s\"", t->filename);
+		xsg_message("file truncated: \"%s\"", t->filename);
 		xsg_buffer_clear(t->buffer);
 		t->size = 0;
 	}
@@ -138,7 +148,8 @@ static void update_buffer(tail_t *t) {
 	}
 
 	if (lseek(fd, t->size, SEEK_SET) < 0) {
-		xsg_warning("Cannot seek file: \"%s\": %s", t->filename, strerror(errno));
+		xsg_warning("cannot seek file: \"%s\": %s", t->filename,
+				strerror(errno));
 		close(fd);
 		return;
 	}
@@ -149,14 +160,15 @@ static void update_buffer(tail_t *t) {
 		if (n < 0 && errno == EINTR) {
 			continue;
 		} else if (n < 0) {
-			xsg_warning("Cannot read from file \"%s\": %s", t->filename, strerror(errno));
+			xsg_warning("cannot read from file \"%s\": %s",
+					t->filename, strerror(errno));
 			break;
 		} else if (n > 0) {
 			xsg_buffer_add(t->buffer, buf, n);
 			t->size += n;
 			continue;
 		} else {
-			// EOF
+			/* EOF */
 			break;
 		}
 	}
@@ -164,21 +176,29 @@ static void update_buffer(tail_t *t) {
 	close(fd);
 }
 
-static void update_tails(uint64_t tick) {
+static void
+update_tails(uint64_t tick)
+{
 	xsg_list_t *l;
 
-	for (l = tail_list; l; l = l->next)
+	for (l = tail_list; l; l = l->next) {
 		update_buffer((tail_t *) l->data);
+	}
 }
 
 /******************************************************************************/
 
-void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	char *filename;
 	xsg_buffer_t *buffer;
-
-	if (n > 1)
-		xsg_conf_error("Past values not supported");
 
 	filename = xsg_conf_read_string();
 
@@ -191,13 +211,16 @@ void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**st
 	xsg_main_add_update_func(update_tails);
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	xsg_buffer_help(string, xsg_module.name, "<filename>");
 

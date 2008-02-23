@@ -1,7 +1,7 @@
 /* writebuffer.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,8 @@ static buffer_t *send_buffer = buffer_array + 1;
 
 /******************************************************************************/
 
-static void buffer_writer(void *arg, xsg_main_poll_events_t events);
+static void
+buffer_writer(void *arg, xsg_main_poll_events_t events);
 
 static xsg_main_poll_t poll = {
 	STDOUT_FILENO,		/* fd */
@@ -63,7 +64,9 @@ static xsg_main_poll_t poll = {
 
 /******************************************************************************/
 
-static void buffer_writer(void *arg, xsg_main_poll_events_t events) {
+static void
+buffer_writer(void *arg, xsg_main_poll_events_t events)
+{
 	char *buffer;
 	ssize_t n;
 
@@ -71,11 +74,13 @@ static void buffer_writer(void *arg, xsg_main_poll_events_t events) {
 
 	n = write(STDOUT_FILENO, buffer, write_buffer->todo);
 
-	if (unlikely(n == -1) && errno == EINTR)
+	if (unlikely(n == -1) && errno == EINTR) {
 		return;
+	}
 
-	if (unlikely(n == -1))
+	if (unlikely(n == -1)) {
 		exit(EXIT_FAILURE);
+	}
 
 	write_buffer->done += n;
 	write_buffer->todo -= n;
@@ -88,13 +93,17 @@ static void buffer_writer(void *arg, xsg_main_poll_events_t events) {
 
 /******************************************************************************/
 
-bool xsg_writebuffer_ready(void) {
+bool
+xsg_writebuffer_ready(void)
+{
 	return (write_buffer->todo == 0);
 }
 
 /******************************************************************************/
 
-void xsg_writebuffer_flush(void) {
+void
+xsg_writebuffer_flush(void)
+{
 	buffer_t *tmp;
 
 	tmp = write_buffer;
@@ -111,7 +120,9 @@ void xsg_writebuffer_flush(void) {
 
 /******************************************************************************/
 
-static void buffer_writer_timeout(void) {
+static void
+buffer_writer_timeout(void)
+{
 	while (!xsg_writebuffer_ready()) {
 		char *buffer;
 		ssize_t ret, n;
@@ -128,23 +139,29 @@ static void buffer_writer_timeout(void) {
 			ret = select(STDOUT_FILENO + 1, NULL, &fds, NULL, &tv);
 		} while (ret == -1 && errno == EINTR);
 
-		if (unlikely(ret == -1) || unlikely(ret == 0)) /* error || timeout */
+		if (unlikely(ret == -1) || unlikely(ret == 0)) {
+			/* error || timeout */
 			return;
+		}
 
 		buffer = write_buffer->buf + write_buffer->done;
 
 		n = write(STDOUT_FILENO, buffer, write_buffer->todo);
 
-		if (unlikely(n == -1))
+		if (unlikely(n == -1)) {
 			return;
+		}
 
 		write_buffer->done += n;
 		write_buffer->todo -= n;
 	}
 }
 
-void xsg_writebuffer_forced_flush(void) {
+void
+xsg_writebuffer_forced_flush(void)
+{
 	buffer_writer_timeout();
+
 	if (xsg_writebuffer_ready()) {
 		xsg_writebuffer_flush();
 		buffer_writer_timeout();
@@ -153,18 +170,23 @@ void xsg_writebuffer_forced_flush(void) {
 
 /******************************************************************************/
 
-static size_t nearest_power(size_t base, size_t num) {
+static size_t
+nearest_power(size_t base, size_t num)
+{
 	if (num > ((size_t)-1) / 2) {
 		return ((size_t)-1);
 	} else {
 		size_t n = base;
-		while (n < num)
+		while (n < num) {
 			n <<= 1;
+		}
 		return n;
 	}
 }
 
-static void buffer_maybe_expand(buffer_t *buffer, size_t len) {
+static void
+buffer_maybe_expand(buffer_t *buffer, size_t len)
+{
 	if (buffer->len + len >= buffer->allocated_len) {
 		buffer->allocated_len = nearest_power(1, buffer->len + len);
 		buffer->buf = xsg_realloc(buffer->buf, buffer->allocated_len);
@@ -173,7 +195,9 @@ static void buffer_maybe_expand(buffer_t *buffer, size_t len) {
 
 /******************************************************************************/
 
-void xsg_writebuffer_queue_num(uint32_t id, double num) {
+void
+xsg_writebuffer_queue_num(uint32_t id, double num)
+{
 
 	buffer_maybe_expand(send_buffer, sizeof(uint32_t) + sizeof(double));
 
@@ -186,7 +210,9 @@ void xsg_writebuffer_queue_num(uint32_t id, double num) {
 	send_buffer->len += sizeof(double);
 }
 
-void xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str) {
+void
+xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str)
+{
 	size_t len = str->len;
 
 	buffer_maybe_expand(send_buffer, sizeof(uint32_t) + len + 1);
@@ -201,28 +227,36 @@ void xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str) {
 
 /******************************************************************************/
 
-void xsg_writebuffer_queue_alive(void) {
+void
+xsg_writebuffer_queue_alive(void)
+{
 	uint8_t alive[] = { 0xff, 0xff, 0xff, 0xff, 0x00 };
 
 	buffer_maybe_expand(send_buffer, sizeof(uint32_t) + sizeof(uint8_t));
 
-	memcpy(send_buffer->buf + send_buffer->len, alive, sizeof(uint32_t) + sizeof(uint8_t));
+	memcpy(send_buffer->buf + send_buffer->len, alive,
+			sizeof(uint32_t) + sizeof(uint8_t));
 	send_buffer->len += sizeof(uint32_t) + sizeof(uint8_t);
 }
 
-void xsg_writebuffer_queue_log(uint8_t level, const char *message, size_t len) {
-	static bool already_running = FALSE; // we call xsg_realloc which may call us
+void
+xsg_writebuffer_queue_log(uint8_t level, const char *message, size_t len)
+{
+	static bool already_running = FALSE;
 	uint32_t id = 0xffffffff;
 
-	if (unlikely(already_running))
+	if (unlikely(already_running)) {
 		return;
+	}
 
-	if (unlikely(send_buffer->len > MAX_LOG_BUFFER_LEN))
+	if (unlikely(send_buffer->len > MAX_LOG_BUFFER_LEN)) {
 		return;
+	}
 
 	already_running = TRUE;
 
-	buffer_maybe_expand(send_buffer, sizeof(uint32_t) + sizeof(uint8_t) + len + 1);
+	buffer_maybe_expand(send_buffer, sizeof(uint32_t) + sizeof(uint8_t)
+			+ len + 1);
 
 	memcpy(send_buffer->buf + send_buffer->len, &id, sizeof(uint32_t));
 	send_buffer->len += sizeof(uint32_t);

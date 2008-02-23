@@ -1,7 +1,7 @@
 /* conf.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,20 +25,41 @@
 
 /******************************************************************************/
 
-void xsg_conf_set_buffer(char *name, char *buffer);
+extern void
+xsg_conf_set_buffer(char *name, char *buffer);
 
-void xsg_conf_set_color_lookup(bool (*func)(char *name, uint32_t *color));
+extern void
+xsg_conf_set_color_lookup(bool (*func)(char *name, uint32_t *color));
 
-bool xsg_conf_find_commentline(void);
-bool xsg_conf_find_newline(void);
-bool xsg_conf_find_comma(void);
-bool xsg_conf_find_end(void);
+/******************************************************************************/
 
-bool xsg_conf_find_number(double *number_return);
-bool xsg_conf_find_string(char **string_return);
+extern bool
+xsg_conf_find_commentline(void);
 
-void xsg_conf_read_newline(void);
-uint32_t xsg_conf_read_color(void);
+extern bool
+xsg_conf_find_newline(void);
+
+extern bool
+xsg_conf_find_comma(void);
+
+extern bool
+xsg_conf_find_end(void);
+
+/******************************************************************************/
+
+extern bool
+xsg_conf_find_number(double *number_return);
+
+extern bool
+xsg_conf_find_string(char **string_return);
+
+/******************************************************************************/
+
+extern void
+xsg_conf_read_newline(void);
+
+extern uint32_t
+xsg_conf_read_color(void);
 
 /******************************************************************************/
 

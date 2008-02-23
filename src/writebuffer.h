@@ -1,7 +1,7 @@
 /* writebuffer.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,28 @@
 
 /******************************************************************************/
 
-bool xsg_writebuffer_ready(void);
-void xsg_writebuffer_flush(void);
+extern bool
+xsg_writebuffer_ready(void);
 
-void xsg_writebuffer_forced_flush(void);
+extern void
+xsg_writebuffer_flush(void);
+
+extern void
+xsg_writebuffer_forced_flush(void);
 
 /******************************************************************************/
 
-void xsg_writebuffer_queue_num(uint32_t id, double num);
-void xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str);
+extern void
+xsg_writebuffer_queue_num(uint32_t id, double num);
 
-void xsg_writebuffer_queue_alive(void);
+extern void
+xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str);
 
-void xsg_writebuffer_queue_log(uint8_t level, const char *message, size_t len);
+extern void
+xsg_writebuffer_queue_alive(void);
+
+extern void
+xsg_writebuffer_queue_log(uint8_t level, const char *message, size_t len);
 
 /*****************************************************************************/
 

@@ -1,7 +1,7 @@
 /* printf.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,14 +61,17 @@ static xsg_list_t *printf_list = NULL;
 
 /******************************************************************************/
 
-xsg_printf_t *xsg_printf_new(const char *format) {
+xsg_printf_t *
+xsg_printf_new(const char *format)
+{
 	xsg_printf_t *p;
 	xsg_string_t *buf;
 	const char *f;
 	int type = 0;
 
-	if (unlikely(format == NULL))
+	if (unlikely(format == NULL)) {
 		xsg_error("printf_new: format is null");
+	}
 
 	p = xsg_new(xsg_printf_t, 1);
 
@@ -83,16 +86,17 @@ xsg_printf_t *xsg_printf_new(const char *format) {
 
 	while (*f != '\0') {
 		if (f[0] != '%') {
-			buf = xsg_string_append_len(buf, f, 1);
+			xsg_string_append_len(buf, f, 1);
 			f++;
 		} else if (f[0] == '%' && f[1] == '%') {
-			buf = xsg_string_append_len(buf, f, 2);
+			xsg_string_append_len(buf, f, 2);
 			f += 2;
 		} else {
-			// found % -> flush buf
+			/* found % -> flush buf */
 			if (p->begin == NULL) {
 				p->begin = xsg_strdup(buf->str);
-				xsg_debug("printf_new: begin: \"%s\"", buf->str);
+				xsg_debug("printf_new: begin: \"%s\"",
+						buf->str);
 			} else {
 				var_t *var = xsg_new(var_t, 1);
 				var->var = NULL;
@@ -102,104 +106,128 @@ xsg_printf_t *xsg_printf_new(const char *format) {
 				var->format = xsg_strdup(buf->str);
 
 				p->var_list = xsg_list_append(p->var_list, var);
-				xsg_debug("printf_new: format: \"%s\"", buf->str);
+				xsg_debug("printf_new: format: \"%s\"",
+						buf->str);
 			}
-			buf = xsg_string_truncate(buf, 0);
-			// The character %
-			buf = xsg_string_append_len(buf, f, 1);
+			xsg_string_truncate(buf, 0);
+			/* The character % */
+			xsg_string_append_len(buf, f, 1);
 			f++;
-			// The flag character
-			while (*f == '#' || *f == '0' || *f == '-' || *f == ' ' || *f == '+') {
-				buf = xsg_string_append_len(buf, f, 1);
+			/* The flag character */
+			while (*f == '#'
+			    || *f == '0'
+			    || *f == '-'
+			    || *f == ' '
+			    || *f == '+') {
+				xsg_string_append_len(buf, f, 1);
 				f++;
 			}
-			if (*f == '\0')
-				xsg_error("printf_new: cannot parse format: conversion specifier expected after flag character");
-			// The field width
+			if (*f == '\0') {
+				xsg_error("printf_new: cannot parse format: "
+						"conversion specifier expected "
+						"after flag character");
+			}
+			/* The field width */
 			if (isdigit(*f) || *f == '*') {
-				buf = xsg_string_append_len(buf, f, 1);
+				xsg_string_append_len(buf, f, 1);
 				f++;
 				while (isdigit(*f)) {
-					buf = xsg_string_append_len(buf, f, 1);
+					xsg_string_append_len(buf, f, 1);
 					f++;
 				}
 			}
-			if (*f == '\0')
-				xsg_error("printf_new: cannot parse format: conversion specifier expected after field width");
-			// The precision
+			if (*f == '\0') {
+				xsg_error("printf_new: cannot parse format: "
+						"conversion specifier expected "
+						"after field width");
+			}
+			/* The precision */
 			if (*f == '.') {
-				buf = xsg_string_append_len(buf, f, 1);
+				xsg_string_append_len(buf, f, 1);
 				f++;
 				while (isdigit(*f)) {
-					buf = xsg_string_append_len(buf, f, 1);
+					xsg_string_append_len(buf, f, 1);
 					f++;
 				}
 			}
-			if (*f == '\0')
-				xsg_error("printf_new: cannot parse format: conversion specifier expected after precision");
-			// The length modifier
-			if (f[0] == 'h' && f[1] == 'h')
+			if (*f == '\0') {
+				xsg_error("printf_new: cannot parse format: "
+						"conversion specifier expected "
+						"after precision");
+			}
+			/* The length modifier */
+			if (f[0] == 'h' && f[1] == 'h') {
 				f += 2;
-			else if (f[0] == 'l' && f[1] == 'l')
+			} else if (f[0] == 'l' && f[1] == 'l') {
 				f += 2;
-			else if (*f == 'h' || *f == 'l' || *f == 'L' || *f == 'q' || *f == 'j' || *f == 'z' || *f == 't')
+			} else if (*f == 'h'
+				|| *f == 'l'
+				|| *f == 'L'
+				|| *f == 'q'
+				|| *f == 'j'
+				|| *f == 'z'
+				|| *f == 't') {
 				f++;
-			// The conversion specifier
+			}
+			/* The conversion specifier */
 			switch (*f) {
-				case 'd':
-					type = VAR_INT;
-					buf = xsg_string_append(buf, PRId64);
-					break;
-				case 'i':
-					type = VAR_INT;
-					buf = xsg_string_append(buf, PRIi64);
-					break;
-				case 'o':
-					type = VAR_UINT;
-					buf = xsg_string_append(buf, PRIo64);
-					break;
-				case 'u':
-					type = VAR_UINT;
-					buf = xsg_string_append(buf, PRIu64);
-					break;
-				case 'x':
-					type = VAR_UINT;
-					buf = xsg_string_append(buf, PRIx64);
-					break;
-				case 'X':
-					type = VAR_UINT;
-					buf = xsg_string_append(buf, PRIX64);
-					break;
-				case 'e':
-				case 'E':
-				case 'f':
-				case 'F':
-				case 'g':
-				case 'G':
-				case 'a':
-				case 'A':
-					type = VAR_DOUBLE;
-					buf = xsg_string_append_len(buf, f, 1);
-					break;
-				case 'c':
-					type = VAR_CHAR;
-					buf = xsg_string_append_len(buf, f, 1);
-					break;
-				case 's':
-					type = VAR_STRING;
-					buf = xsg_string_append_len(buf, f, 1);
-					break;
-				case 'p':
-					type = VAR_POINTER;
-					buf = xsg_string_append_len(buf, f, 1);
-					break;
-				default:
-					xsg_error("printf_new: cannot parse format: conversion specifier expected: d,i,o,u,x,X,e,E,f,F,g,G,a,A,c,s,p");
+			case 'd':
+				type = VAR_INT;
+				xsg_string_append(buf, PRId64);
+				break;
+			case 'i':
+				type = VAR_INT;
+				xsg_string_append(buf, PRIi64);
+				break;
+			case 'o':
+				type = VAR_UINT;
+				xsg_string_append(buf, PRIo64);
+				break;
+			case 'u':
+				type = VAR_UINT;
+				xsg_string_append(buf, PRIu64);
+				break;
+			case 'x':
+				type = VAR_UINT;
+				xsg_string_append(buf, PRIx64);
+				break;
+			case 'X':
+				type = VAR_UINT;
+				xsg_string_append(buf, PRIX64);
+				break;
+			case 'e':
+			case 'E':
+			case 'f':
+			case 'F':
+			case 'g':
+			case 'G':
+			case 'a':
+			case 'A':
+				type = VAR_DOUBLE;
+				xsg_string_append_len(buf, f, 1);
+				break;
+			case 'c':
+				type = VAR_CHAR;
+				xsg_string_append_len(buf, f, 1);
+				break;
+			case 's':
+				type = VAR_STRING;
+				xsg_string_append_len(buf, f, 1);
+				break;
+			case 'p':
+				type = VAR_POINTER;
+				xsg_string_append_len(buf, f, 1);
+				break;
+			default:
+				xsg_error("printf_new: cannot parse format: "
+						"conversion specifier "
+						"expected: d,i,o,u,x,X,e,E,"
+						"f,F,g,G,a,A,c,s,p");
 			}
 			f++;
 		}
 	}
-	// flush buf
+	/* flush buf */
 	if (p->begin == NULL) {
 		p->begin = xsg_strdup(buf->str);
 		xsg_debug("printf_new: begin: \"%s\"", buf->str);
@@ -224,11 +252,14 @@ xsg_printf_t *xsg_printf_new(const char *format) {
 	return p;
 }
 
-void xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v) {
+void
+xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v)
+{
 	var_t *var;
 
-	if (p->next_var == NULL)
+	if (p->next_var == NULL) {
 		xsg_conf_error("no more variables expected");
+	}
 
 	var = p->next_var->data;
 
@@ -237,56 +268,71 @@ void xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v) {
 	p->next_var = p->next_var->next;
 }
 
-char *xsg_printf(xsg_printf_t *p, xsg_var_t *v) {
+char *
+xsg_printf(xsg_printf_t *p, xsg_var_t *v)
+{
 	xsg_list_t *l;
 
-	p->buffer = xsg_string_assign(p->buffer, p->begin);
+	xsg_string_assign(p->buffer, p->begin);
 
 	for (l = p->var_list; l; l = l->next) {
 		var_t *var = l->data;
 
 		if (var->type == VAR_INT) {
-			// d, i
+			/* d, i */
 			if ((v == NULL) || (v == var->var)) {
 				var->num = xsg_var_get_num(var->var);
-				if (isnan(var->num) || isinf(var->num))
+				if (isnan(var->num) || isinf(var->num)) {
 					var->num = 0.0;
+				}
 			}
-			xsg_string_append_printf(p->buffer, var->format, (int64_t) var->num);
+			xsg_string_append_printf(p->buffer, var->format,
+					(int64_t) var->num);
 		} else if (var->type == VAR_UINT) {
-			// o, u, x, X
+			/* o, u, x, X */
 			if ((v == NULL) || (v == var->var)) {
 				var->num = xsg_var_get_num(var->var);
-				if (isnan(var->num) || isinf(var->num))
+				if (isnan(var->num) || isinf(var->num)) {
 					var->num = 0.0;
+				}
 			}
-			xsg_string_append_printf(p->buffer, var->format, (uint64_t) var->num);
+			xsg_string_append_printf(p->buffer, var->format,
+					(uint64_t) var->num);
 		} else if (var->type == VAR_DOUBLE) {
-			// e, E, f, F, g, G, a, A
-			if ((v == NULL) || (v == var->var))
+			/* e, E, f, F, g, G, a, A */
+			if ((v == NULL) || (v == var->var)) {
 				var->num = xsg_var_get_num(var->var);
-			xsg_string_append_printf(p->buffer, var->format, var->num);
+			}
+			xsg_string_append_printf(p->buffer, var->format,
+					var->num);
 		} else if (var->type == VAR_CHAR) {
-			// c
+			/* c */
 			if ((v == NULL) || (v == var->var)) {
 				var->num = xsg_var_get_num(var->var);
-				if (isnan(var->num) || isinf(var->num))
+				if (isnan(var->num) || isinf(var->num)) {
 					var->num = (double) ' ';
+				}
 			}
-			xsg_string_append_printf(p->buffer, var->format, (int) var->num);
+			xsg_string_append_printf(p->buffer, var->format,
+					(int) var->num);
 		} else if (var->type == VAR_STRING) {
-			// s
-			if ((v == NULL) || (v == var->var))
-				var->str = xsg_string_assign(var->str, xsg_var_get_str(var->var));
-			xsg_string_append_printf(p->buffer, var->format, var->str->str);
+			/* s */
+			if ((v == NULL) || (v == var->var)) {
+				xsg_string_assign(var->str,
+						xsg_var_get_str(var->var));
+			}
+			xsg_string_append_printf(p->buffer, var->format,
+					var->str->str);
 		} else if (var->type == VAR_POINTER) {
-			// p
+			/* p */
 			if ((v == NULL) || (v == var->var)) {
 				var->num = xsg_var_get_num(var->var);
-				if (isnan(var->num) || isinf(var->num))
+				if (isnan(var->num) || isinf(var->num)) {
 					var->num = 0.0;
+				}
 			}
-			xsg_string_append_printf(p->buffer, var->format, (unsigned) var->num);
+			xsg_string_append_printf(p->buffer, var->format,
+					(unsigned) var->num);
 		} else {
 			xsg_error("printf: unknown var type");
 		}
@@ -296,5 +342,4 @@ char *xsg_printf(xsg_printf_t *p, xsg_var_t *v) {
 
 	return p->buffer->str;
 }
-
 

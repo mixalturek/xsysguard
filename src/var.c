@@ -1,7 +1,7 @@
 /* var.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,30 +44,33 @@ static bool dirty = FALSE;
 
 /******************************************************************************/
 
-void xsg_var_dirty(xsg_var_t **var, uint32_t n) {
-	uint32_t i;
-
-	if (unlikely(var == NULL))
+void
+xsg_var_dirty(xsg_var_t *var)
+{
+	if (unlikely(var == NULL)) {
 		return;
+	}
 
-	for (i = 0; i < n; i++)
-		if (likely(var[i] != NULL))
-			var[i]->dirty = TRUE;
+	var->dirty = TRUE;
 
 	dirty = TRUE;
 }
 
-void xsg_var_flush_dirty(void) {
+void
+xsg_var_flush_dirty(void)
+{
 	if (dirty) {
 		xsg_list_t *l;
 
 		for (l = var_list; l; l = l->next) {
 			xsg_var_t *var = l->data;
 
-			if (unlikely(var->dirty)) {
-				xsg_window_update_var(var->window, var->widget, var);
-				var->dirty = FALSE;
+			if (!var->dirty) {
+				continue;
 			}
+
+			xsg_window_update_var(var->window, var->widget, var);
+			var->dirty = FALSE;
 		}
 		xsg_window_render();
 		dirty = FALSE;
@@ -76,49 +79,19 @@ void xsg_var_flush_dirty(void) {
 
 /******************************************************************************/
 
-xsg_var_t **xsg_var_parse_past(uint64_t update, xsg_window_t *window, xsg_widget_t *widget, uint32_t n) {
-	xsg_rpn_t **rpn;
-	xsg_var_t **var;
-	xsg_var_t *mem;
-	uint32_t i;
-
-	rpn = alloca(sizeof(xsg_rpn_t **) * n);
-
-	var = xsg_new(xsg_var_t *, n);
-	mem = xsg_new(xsg_var_t, n);
-
-	for (i = 0; i < n; i++)
-		var[i] = mem + i;
-
-	for (i = 0; i < n; i++) {
-		var[i]->window = window;
-		var[i]->widget = widget;
-		var[i]->dirty = FALSE;
-	}
-
-	xsg_rpn_parse(update, var, rpn, n);
-
-	for (i = 0; i < n; i++) {
-		var[i]->rpn = rpn[i];
-
-		var_list = xsg_list_append(var_list, var[i]);
-	}
-
-	return var;
-}
-
-xsg_var_t *xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget) {
+xsg_var_t *
+xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget)
+{
 	xsg_var_t *var;
 	xsg_rpn_t *rpn;
 
 	var = xsg_new(xsg_var_t, 1);
 
+	xsg_rpn_parse(update, var, &rpn);
+
 	var->window = window;
 	var->widget = widget;
 	var->dirty = FALSE;
-
-	xsg_rpn_parse(update, &var, &rpn, 1);
-
 	var->rpn = rpn;
 
 	var_list = xsg_list_append(var_list, var);
@@ -126,11 +99,15 @@ xsg_var_t *xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *wi
 	return var;
 }
 
-double xsg_var_get_num(xsg_var_t *var) {
+double
+xsg_var_get_num(xsg_var_t *var)
+{
 	return xsg_rpn_get_num(var->rpn);
 }
 
-char *xsg_var_get_str(xsg_var_t *var) {
+char *
+xsg_var_get_str(xsg_var_t *var)
+{
 	return xsg_rpn_get_str(var->rpn);
 }
 

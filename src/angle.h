@@ -1,7 +1,7 @@
 /* angle.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,14 @@ typedef struct _xsg_angle_t {
 
 /******************************************************************************/
 
-xsg_angle_t *xsg_angle_parse(double a, int xoffset, int yoffset, unsigned width, unsigned height);
+extern xsg_angle_t *
+xsg_angle_parse(
+	double a,
+	int xoffset,
+	int yoffset,
+	unsigned width,
+	unsigned height
+);
 
 /******************************************************************************/
 

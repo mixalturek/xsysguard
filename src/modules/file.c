@@ -1,7 +1,7 @@
 /* file.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,9 @@ static xsg_list_t *file_list = NULL;
 
 /******************************************************************************/
 
-static xsg_buffer_t *find_buffer(const char *filename, uint64_t update) {
+static xsg_buffer_t *
+find_buffer(const char *filename, uint64_t update)
+{
 	xsg_list_t *l;
 	file_t *f;
 
@@ -47,8 +49,9 @@ static xsg_buffer_t *find_buffer(const char *filename, uint64_t update) {
 		f = l->data;
 
 		if (strcmp(f->filename, filename) == 0 && update == f->update) {
-			if ((update % f->update) == 0)
+			if ((update % f->update) == 0) {
 				return f->buffer;
+			}
 			if ((f->update % update) == 0) {
 				f->update = update;
 				return f->buffer;
@@ -57,6 +60,7 @@ static xsg_buffer_t *find_buffer(const char *filename, uint64_t update) {
 	}
 
 	f = xsg_new(file_t, 1);
+
 	f->filename = xsg_strdup(filename);
 	f->update = update;
 	f->buffer = xsg_buffer_new();
@@ -68,7 +72,9 @@ static xsg_buffer_t *find_buffer(const char *filename, uint64_t update) {
 
 /******************************************************************************/
 
-static void update_file(file_t *f) {
+static void
+update_file(file_t *f)
+{
 	int fd;
 	int e;
 #if 0
@@ -80,7 +86,8 @@ static void update_file(file_t *f) {
 	fd = open(f->filename, O_RDONLY | O_NONBLOCK);
 
 	if (fd == -1) {
-		xsg_warning("Cannot open file %s: %s", f->filename, strerror(errno));
+		xsg_warning("cannot open file %s: %s", f->filename,
+				strerror(errno));
 		return;
 	}
 
@@ -90,19 +97,23 @@ static void update_file(file_t *f) {
 
 		n = read(fd, buf, sizeof(buf));
 
-		if (n == 0)
+		if (n == 0) {
 			break;
+		}
 
-		if (n == -1 && errno == EINTR)
+		if (n == -1 && errno == EINTR) {
 			continue;
+		}
 
 		if (n == -1 && errno == EAGAIN) {
-			xsg_message("Cannot read from file %s: %s", f->filename, strerror(errno));
+			xsg_message("cannot read from file %s: %s", f->filename,
+					strerror(errno));
 			break;
 		}
 
 		if (n == -1) {
-			xsg_warning("Cannot read from file %s: %s", f->filename, strerror(errno));
+			xsg_warning("cannot read from file %s: %s", f->filename,
+					strerror(errno));
 			break;
 		}
 
@@ -116,25 +127,33 @@ static void update_file(file_t *f) {
 	xsg_buffer_clear(f->buffer);
 }
 
-static void update_files(uint64_t update) {
+static void
+update_files(uint64_t update)
+{
 	xsg_list_t *l;
 
 	for (l = file_list; l; l = l->next) {
 		file_t *f = l->data;
 
-		if (update % f->update == 0)
+		if (update % f->update == 0) {
 			update_file(f);
+		}
 	}
 }
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	char *filename;
 	xsg_buffer_t *buffer;
-
-	if (n > 1)
-		xsg_conf_error("Past values not supported");
 
 	filename = xsg_conf_read_string();
 
@@ -147,13 +166,16 @@ static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char
 	xsg_main_add_update_func(update_files);
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	xsg_buffer_help(string, xsg_module.name, "<filename>");
 

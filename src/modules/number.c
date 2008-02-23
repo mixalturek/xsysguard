@@ -1,7 +1,7 @@
 /* number.c
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005-2007 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 
 /******************************************************************************/
 
-static double get_number(void *arg) {
+static double
+get_number(void *arg)
+{
 	double d;
 
 	d = * (double *) arg;
@@ -34,26 +36,34 @@ static double get_number(void *arg) {
 
 /******************************************************************************/
 
-static void parse(uint64_t update, xsg_var_t **var, double (**num)(void *), char *(**str)(void *), void **arg, uint32_t n) {
-	uint32_t i;
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
 	double *d;
 
 	d = xsg_new(double, 1);
 	*d = xsg_conf_read_double();
 
-	for (i = 0; i < n; i++) {
-		arg[i] = (void *) d;
-		num[i] = get_number;
-	}
+	*arg = (void *) d;
+	*num = get_number;
 }
 
-static const char *help(void) {
+static const char *
+help(void)
+{
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL)
+	if (string == NULL) {
 		string = xsg_string_new(NULL);
-	else
-		string = xsg_string_truncate(string, 0);
+	} else {
+		xsg_string_truncate(string, 0);
+	}
 
 	xsg_string_append_printf(string, "N %s:<number>\n", xsg_module.name);
 

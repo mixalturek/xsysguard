@@ -1,7 +1,7 @@
 /* widget_line.h
  *
  * This file is part of xsysguard <http://xsysguard.sf.net>
- * Copyright (C) 2005 Sascha Wessel <sawe@users.sf.net>
+ * Copyright (C) 2005-2008 Sascha Wessel <sawe@users.sf.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@
 
 /*****************************************************************************/
 
-void xsg_widget_line_parse(xsg_window_t *window);
+extern void
+xsg_widget_line_parse(xsg_window_t *window);
 
 /******************************************************************************/
 
-#endif // __WIDGET_LINE_H__
+#endif /* __WIDGET_LINE_H__ */
 
