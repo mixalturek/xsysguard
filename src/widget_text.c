@@ -74,8 +74,10 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	int line_advance, space_advance;
 	char **linev;
 
-	xsg_debug("%s: render Text",
-			xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Text: x=%d, y=%d, w=%u, h=%u",
+			xsg_window_get_config_name(widget->window),
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
 
 	text = widget->data;
 
