@@ -763,52 +763,6 @@ xsg_get_path_from_env(const char *env_name, const char *default_path)
 /******************************************************************************/
 
 int
-xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y)
-{
-
-	x->tv_sec += x->tv_usec / 1000000;
-	x->tv_usec %= 1000000;
-
-	y->tv_sec += y->tv_usec / 1000000;
-	y->tv_usec %= 1000000;
-
-	if (x->tv_sec < y->tv_sec) {
-		int usec = y->tv_usec - x->tv_usec;
-		result->tv_sec = y->tv_sec - x->tv_sec;
-		if (usec < 0) {
-			--result->tv_sec;
-			result->tv_usec = usec + 1000000;
-		} else {
-			result->tv_usec = usec;
-		}
-		return 1;
-	} else if (x->tv_sec > y->tv_sec) {
-		int usec = x->tv_usec - y->tv_usec;
-		result->tv_sec = x->tv_sec - y->tv_sec;
-		if (usec < 0) {
-			--result->tv_sec;
-			result->tv_usec = usec + 1000000;
-		} else {
-			result->tv_usec = usec;
-		}
-		return 0;
-	} else { /* x->tv_sec == y->tv_sec */
-		result->tv_sec = 0;
-		if (x->tv_usec < y->tv_usec) {
-			result->tv_usec = y->tv_usec - x->tv_usec;;
-			return 1;
-		} else if (x->tv_usec > y->tv_usec) {
-			result->tv_usec = x->tv_usec - y->tv_usec;
-			return 0;
-		} else { /* x->tv_usec == y->tv_usec */
-			result->tv_usec = 0;
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int
 xsg_gettimeofday(struct timeval *tv, void *tz)
 {
 	static struct timeval last = { 0, 0 };
@@ -820,10 +774,10 @@ xsg_gettimeofday(struct timeval *tv, void *tz)
 		xsg_error("gettimeofday failed");
 	}
 
-	if (unlikely(timercmp(tv, &last, <))) {
+	if (unlikely(xsg_timercmp(tv, &last, <))) {
 		struct timeval diff;
 
-		xsg_timeval_sub(&diff, &last, tv);
+		xsg_timersub(&last, tv, &diff);
 		xsg_warning("time moved backwards: %u sec and %u usec",
 				(unsigned) diff.tv_sec,
 				(unsigned) diff.tv_usec);
