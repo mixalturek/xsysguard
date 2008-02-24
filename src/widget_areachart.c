@@ -67,9 +67,10 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 	areachart = widget->data;
 
-	xsg_debug("%s: render AreaChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: render AreaChart: x=%d, y=%d, w=%u, h=%u",
 			xsg_window_get_config_name(widget->window),
-			widget->xoffset, widget->yoffset, widget->width, widget->height);
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
 
 	if ((areachart->angle == NULL) || (areachart->angle->angle == 0.0)) {
 		int xoffset, yoffset;
