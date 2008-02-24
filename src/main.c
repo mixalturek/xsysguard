@@ -369,7 +369,13 @@ loop(uint64_t num)
 			FD_ZERO(&except_fds);
 
 			for (l = poll_list; l; l = l->next) {
-				xsg_main_poll_t *p = l->data;;
+				xsg_main_poll_t *p = l->data;
+
+				if (unlikely(p->fd < 0)) {
+					xsg_warning("invalid poll fd: %d",
+							p->fd);
+					continue;
+				}
 
 				if (p->events & XSG_MAIN_POLL_READ) {
 					FD_SET(p->fd, &read_fds);
@@ -415,6 +421,12 @@ loop(uint64_t num)
 				for (l = poll_list; l; l = l->next) {
 					xsg_main_poll_events_t events = 0;
 					xsg_main_poll_t *p = l->data;
+
+					if (unlikely(p->fd < 0)) {
+						xsg_warning("invalid poll fd: %d",
+								p->fd);
+						continue;
+					}
 
 					if ((p->events & XSG_MAIN_POLL_READ)
 					 && (FD_ISSET(p->fd, &read_fds))) {
@@ -583,7 +595,7 @@ xsg_main_loop(uint64_t num)
 	/* ssigaction(SIGKILL, &action, NULL); */
 	ssigaction(SIGPIPE, &action, NULL);
 	ssigaction(SIGQUIT, &action, NULL);
-	ssigaction(SIGSEGV, &action, NULL);
+	/* ssigaction(SIGSEGV, &action, NULL); */
 	/* ssigaction(SIGSTOP, &action, NULL); */
 	ssigaction(SIGTERM, &action, NULL);
 	ssigaction(SIGTSTP, &action, NULL);
