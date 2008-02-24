@@ -253,31 +253,51 @@ xsg_main_set_time_error(void)
 /******************************************************************************/
 
 static void
+get_next_update_time(struct timeval *tv)
+{
+	uint64_t msec, msec1, msec2, sec, usec;
+	struct timeval now;
+
+	if (interval == 0) {
+		xsg_gettimeofday(tv, NULL);
+		return;
+	}
+
+	xsg_gettimeofday(&now, NULL);
+
+	msec1 = (uint64_t) now.tv_sec * 1000;
+	msec2 = (uint64_t) now.tv_usec / 1000;
+	msec = msec1 + msec2;
+
+	msec = msec % interval;
+	msec = interval - msec;
+
+	sec = msec / 1000;
+	usec = (msec % 1000) * 1000;
+
+	tv->tv_sec = now.tv_sec + sec;
+	tv->tv_usec = now.tv_usec + usec;
+
+	if (tv->tv_usec > 1000000) {
+		tv->tv_sec += 1;
+		tv->tv_usec -= 1000000;
+	}
+}
+
+static void
 loop(uint64_t num)
 {
-	struct timeval time_out;
-	struct timeval time_start;
-	struct timeval time_now;
-	struct timeval time_diff;
-	struct timeval time_sleep;
-	fd_set read_fds;
-	fd_set write_fds;
-	fd_set except_fds;
-	int fd_count, fd_max;
-	xsg_list_t *l;
-	flist_t *fl;
-
-	time_out.tv_sec = interval / 1000;
-	time_out.tv_usec = (interval % 1000) * 1000;
-
 	xsg_message("starting main loop");
 
 	while (1) {
+		struct timeval time_next_update;
+		flist_t *fl;
+
 		if (num != 0 && tick == num) {
 			return;
 		}
 
-		xsg_gettimeofday(&time_start, 0);
+		get_next_update_time(&time_next_update);
 
 		xsg_debug("tick %"PRIu64, tick);
 
@@ -287,19 +307,27 @@ loop(uint64_t num)
 		}
 
 		while (1) {
-			xsg_main_timeout_t *timeout = NULL;
+			struct timeval time_sleep;
+			struct timeval time_next;
+			struct timeval time_now;
+			fd_set read_fds;
+			fd_set write_fds;
+			fd_set except_fds;
+			int fd_count, fd_max;
+			xsg_list_t *l;
+			bool time_next_is_update;
 
-			if (time_error) {
-				time_error = FALSE;
+			if (unlikely(time_error)) {
 				xsg_warning("running all timeout functions due "
 						"to time error");
 				for (l = timeout_list; l; l = l->next) {
-					xsg_main_timeout_t *timeout = l->data;
-					timeout->func(timeout->arg, TRUE);
+					xsg_main_timeout_t *t = l->data;
+					t->func(t->arg, TRUE);
 				}
+				time_error = FALSE;
 			}
 
-			if (last_received_signum != 0) {
+			if (unlikely(last_received_signum != 0)) {
 				xsg_message("running signal handler functions...");
 				for (fl = signal_handler_list; fl; fl = fl->next) {
 					void (*func)(int) = (void (*)(int)) fl->func;
@@ -310,33 +338,26 @@ loop(uint64_t num)
 
 			xsg_gettimeofday(&time_now, 0);
 
-			if (unlikely(xsg_timeval_sub(&time_diff, &time_now, &time_start))) {
-				time_start.tv_sec = time_now.tv_sec;
-				time_start.tv_usec = time_now.tv_usec;
-				time_diff.tv_sec = 0;
-				time_diff.tv_usec = 0;
-			}
+			time_next.tv_sec = time_next_update.tv_sec;
+			time_next.tv_usec = time_next_update.tv_usec;
 
-			if (unlikely(xsg_timeval_sub(&time_sleep, &time_out, &time_diff))) {
-				break; /* timeout */
-			}
+			time_next_is_update = TRUE;
 
 			for (l = timeout_list; l; l = l->next) {
 				xsg_main_timeout_t *t = l->data;
-				struct timeval timeout_sleep;
 
-				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
+				if (xsg_timercmp(&t->tv, &time_now, <)) {
 					t->func(t->arg, FALSE);
 				}
 
-				if (xsg_timeval_sub(&timeout_sleep, &t->tv, &time_now)) {
+				if (xsg_timercmp(&t->tv, &time_now, <)) {
 					continue;
 				}
 
-				if (timercmp(&timeout_sleep, &time_sleep, <)) {
-					time_sleep.tv_sec = timeout_sleep.tv_sec;
-					time_sleep.tv_usec = timeout_sleep.tv_usec;
-					timeout = t;
+				if (xsg_timercmp(&t->tv, &time_next, <)) {
+					time_next.tv_sec = t->tv.tv_sec;
+					time_next.tv_usec = t->tv.tv_usec;
+					time_next_is_update = FALSE;
 				}
 			}
 
@@ -364,6 +385,14 @@ loop(uint64_t num)
 				}
 			}
 
+			xsg_gettimeofday(&time_now, 0);
+
+			if (xsg_timercmp(&time_next, &time_now, <)) {
+				xsg_timerclear(&time_sleep);
+			} else {
+				xsg_timersub(&time_next, &time_now, &time_sleep);
+			}
+
 			xsg_debug("sleeping for %u.%06us",
 					(unsigned) time_sleep.tv_sec,
 					(unsigned) time_sleep.tv_usec);
@@ -376,42 +405,36 @@ loop(uint64_t num)
 				continue;
 			}
 
-			if (unlikely(fd_count == -1))
+			if (unlikely(fd_count == -1)) {
 				xsg_error("select: %s", strerror(errno));
-
-			if (fd_count == 0) {
-				if (timeout != NULL) {
-					timeout->func(timeout->arg, FALSE);
-					xsg_var_flush_dirty();
-					continue;
-				} else {
-					break; /* timeout */
-				}
 			}
 
-			xsg_debug("interrupted by file descriptor");
+			if (fd_count != 0) {
+				xsg_debug("interrupted by file descriptor");
 
-			for (l = poll_list; l; l = l->next) {
-				xsg_main_poll_events_t events = 0;
-				xsg_main_poll_t *p = l->data;
+				for (l = poll_list; l; l = l->next) {
+					xsg_main_poll_events_t events = 0;
+					xsg_main_poll_t *p = l->data;
 
-				if ((p->events & XSG_MAIN_POLL_READ)
-				 && (FD_ISSET(p->fd, &read_fds))) {
-					events |= XSG_MAIN_POLL_READ;
+					if ((p->events & XSG_MAIN_POLL_READ)
+					 && (FD_ISSET(p->fd, &read_fds))) {
+						events |= XSG_MAIN_POLL_READ;
+					}
+					if ((p->events & XSG_MAIN_POLL_WRITE)
+					 && (FD_ISSET(p->fd, &write_fds))) {
+						events |= XSG_MAIN_POLL_WRITE;
+					}
+					if ((p->events & XSG_MAIN_POLL_EXCEPT)
+					 && (FD_ISSET(p->fd, &except_fds))) {
+						events |= XSG_MAIN_POLL_EXCEPT;
+					}
+					if (events) {
+						(p->func)(p->arg, events);
+					}
 				}
-				if ((p->events & XSG_MAIN_POLL_WRITE)
-				 && (FD_ISSET(p->fd, &write_fds))) {
-					events |= XSG_MAIN_POLL_WRITE;
-				}
-				if ((p->events & XSG_MAIN_POLL_EXCEPT)
-				 && (FD_ISSET(p->fd, &except_fds))) {
-					events |= XSG_MAIN_POLL_EXCEPT;
-				}
-				if (events) {
-					(p->func)(p->arg, events);
-				}
+			} else if (time_next_is_update) {
+				break; /* next tick */
 			}
-			xsg_var_flush_dirty();
 		}
 		tick++;
 	}
