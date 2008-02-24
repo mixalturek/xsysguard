@@ -48,16 +48,21 @@ render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	unsigned int width, height;
 	double angle;
 
-	xsg_debug("%s: render Rectangle", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Rectangle",
+			xsg_window_get_config_name(widget->window));
 
 	rectangle = (rectangle_t *) widget->data;
 
-	if (rectangle->angle == NULL)
+	if (rectangle->angle == NULL) {
 		angle = 0.0;
-	else
+	} else {
 		angle = rectangle->angle->angle;
+	}
 
-	if ((angle == 0.0) || (angle == 90.0) || (angle == 180.0) || (angle == 270.0)) {
+	if ((angle == 0.0)
+	 || (angle == 90.0)
+	 || (angle == 180.0)
+	 || (angle == 270.0)) {
 		xoffset = widget->xoffset - up_x;
 		yoffset = widget->yoffset - up_y;
 		width = widget->width;
@@ -68,15 +73,22 @@ render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		if (rectangle->range) {
 			double range_angle = rectangle->range_angle + angle;
 			imlib_context_set_color_range(rectangle->range);
-			imlib_image_fill_color_range_rectangle(xoffset, yoffset, width, height, range_angle);
+			imlib_image_fill_color_range_rectangle(xoffset, yoffset,
+					width, height, range_angle);
 		} else if (rectangle->filled) {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
-					rectangle->color.blue, rectangle->color.alpha);
-			imlib_image_fill_rectangle(xoffset, yoffset, width, height);
+			imlib_context_set_color(rectangle->color.red,
+					rectangle->color.green,
+					rectangle->color.blue,
+					rectangle->color.alpha);
+			imlib_image_fill_rectangle(xoffset, yoffset,
+					width, height);
 		} else {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
-					rectangle->color.blue, rectangle->color.alpha);
-			imlib_image_draw_rectangle(xoffset, yoffset, width, height);
+			imlib_context_set_color(rectangle->color.red,
+					rectangle->color.green,
+					rectangle->color.blue,
+					rectangle->color.alpha);
+			imlib_image_draw_rectangle(xoffset, yoffset,
+					width, height);
 		}
 	} else {
 		Imlib_Image tmp;
@@ -95,23 +107,33 @@ render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		if (rectangle->range) {
 			double range_angle = rectangle->range_angle;
 			imlib_context_set_color_range(rectangle->range);
-			imlib_image_fill_color_range_rectangle(xoffset, yoffset, width, height, range_angle);
+			imlib_image_fill_color_range_rectangle(xoffset, yoffset,
+					width, height, range_angle);
 		} else if (rectangle->filled) {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
-					rectangle->color.blue, rectangle->color.alpha);
-			imlib_image_fill_rectangle(xoffset, yoffset, width, height);
+			imlib_context_set_color(rectangle->color.red,
+					rectangle->color.green,
+					rectangle->color.blue,
+					rectangle->color.alpha);
+			imlib_image_fill_rectangle(xoffset, yoffset,
+					width, height);
 		} else {
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
-					rectangle->color.blue, rectangle->color.alpha);
-			imlib_image_draw_rectangle(xoffset, yoffset, width, height);
+			imlib_context_set_color(rectangle->color.red,
+					rectangle->color.green,
+					rectangle->color.blue,
+					rectangle->color.alpha);
+			imlib_image_draw_rectangle(xoffset, yoffset,
+					width, height);
 		}
 
 		imlib_context_set_image(buffer);
 
 		imlib_blend_image_onto_image_at_angle(tmp, 1, 0, 0,
-				rectangle->angle->width, rectangle->angle->height,
-				rectangle->angle->xoffset - up_x, rectangle->angle->yoffset - up_y,
-				rectangle->angle->angle_x, rectangle->angle->angle_y);
+				rectangle->angle->width,
+				rectangle->angle->height,
+				rectangle->angle->xoffset - up_x,
+				rectangle->angle->yoffset - up_y,
+				rectangle->angle->angle_x,
+				rectangle->angle->angle_y);
 
 		imlib_context_set_image(tmp);
 		imlib_free_image();
@@ -159,7 +181,8 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("ColorRange")) {
 			unsigned int count, i;
 
@@ -170,8 +193,10 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 
 			rectangle->range = imlib_create_color_range();
 			imlib_context_set_color_range(rectangle->range);
-			imlib_context_set_color(rectangle->color.red, rectangle->color.green,
-					rectangle->color.blue, rectangle->color.alpha);
+			imlib_context_set_color(rectangle->color.red,
+					rectangle->color.green,
+					rectangle->color.blue,
+					rectangle->color.alpha);
 			imlib_add_color_to_color_range(0);
 			rectangle->range_angle = xsg_conf_read_double();
 			count = xsg_conf_read_uint();
@@ -179,7 +204,8 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_imlib_uint2color(xsg_conf_read_color());
+				color = xsg_imlib_uint2color(
+						xsg_conf_read_color());
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);
@@ -189,12 +215,16 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 		} else if (xsg_conf_find_command("Filled")) {
 			rectangle->filled = TRUE;
 		} else {
-			xsg_conf_error("Visible, Angle, ColorRange or Filled expected");
+			xsg_conf_error("Visible, Angle, ColorRange or "
+					"Filled expected");
 		}
 	}
 
-	if (angle != 0.0)
-		rectangle->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	if (angle != 0.0) {
+		rectangle->angle = xsg_angle_parse(angle,
+				widget->xoffset, widget->yoffset,
+				widget->width, widget->height);
+	}
 }
 
 
