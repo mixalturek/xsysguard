@@ -273,7 +273,7 @@ xsg_modules_help(const char *name)
 	for (l = modules_list; l; l = l->next) {
 		module_t *m = l->data;
 
-		if (!strcmp(m->name, name)) {
+		if (strcmp(m->name, name)) {
 			continue;
 		}
 
@@ -300,7 +300,7 @@ xsg_modules_info(const char *name)
 	for (l = modules_list; l; l = l->next) {
 		module_t *m = l->data;
 
-		if (!strcmp(m->name, name)) {
+		if (strcmp(m->name, name)) {
 			continue;
 		}
 
