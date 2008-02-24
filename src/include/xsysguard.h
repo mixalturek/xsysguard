@@ -523,9 +523,6 @@ extern XSG_API char **
 xsg_get_path_from_env(const char *env_name, const char *default_path);
 
 extern XSG_API int
-xsg_timeval_sub(struct timeval *result, struct timeval *x, struct timeval *y);
-
-extern XSG_API int
 xsg_gettimeofday(struct timeval *tv, void *tz);
 
 extern XSG_API char *
@@ -537,6 +534,35 @@ xsg_setenv(const char *name, const char *value, int overwrite);
 extern XSG_API int
 xsg_unsetenv(const char *name);
 
+#define xsg_timerisset(tvp) ((tvp)->tv_sec || (tvp)->tv_usec)
+
+#define xsg_timerclear(tvp) ((tvp)->tv_sec = (tvp)->tv_usec = 0)
+
+#define xsg_timercmp(a, b, CMP)						\
+	(((a)->tv_sec == (b)->tv_sec) ?					\
+	 ((a)->tv_usec CMP (b)->tv_usec) :				\
+	 ((a)->tv_sec CMP (b)->tv_sec))
+
+#define xsg_timeradd(a, b, result)					\
+	do {								\
+		(result)->tv_sec = (a)->tv_sec + (b)->tv_sec;		\
+		(result)->tv_usec = (a)->tv_usec + (b)->tv_usec;	\
+		if ((result)->tv_usec >= 1000000) {			\
+			++(result)->tv_sec;				\
+			(result)->tv_usec -= 1000000;			\
+		}							\
+	} while (0)
+
+#define xsg_timersub(a, b, result)					\
+	do {								\
+		(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;		\
+		(result)->tv_usec = (a)->tv_usec - (b)->tv_usec;	\
+		if ((result)->tv_usec < 0) {				\
+			--(result)->tv_sec;				\
+			(result)->tv_usec += 1000000;			\
+		}							\
+	} while (0)
+
 /******************************************************************************
  * compat.c
  ******************************************************************************/
@@ -546,13 +572,6 @@ xsg_unsetenv(const char *name);
 extern XSG_API int
 xsg_isinf(double x);
 #endif /* SunOS */
-
-#ifndef timercmp
-# define timercmp(a, b, CMP) \
-	(((a)->tv_sec == (b)->tv_sec) ? \
-	 ((a)->tv_usec CMP (b)->tv_usec) : \
-	 ((a)->tv_sec CMP (b)->tv_sec))
-#endif
 
 /******************************************************************************
  * logging
