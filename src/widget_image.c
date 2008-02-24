@@ -35,7 +35,7 @@
 typedef struct {
 	xsg_printf_t *print;
 	xsg_angle_t *angle;
-	char *filename;
+	xsg_string_t *filename;
 } image_t;
 
 /******************************************************************************/
@@ -52,14 +52,14 @@ render_image(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			"widht=%u, height=%u, filename=%s",
 			xsg_window_get_config_name(widget->window),
 			widget->xoffset, widget->yoffset,
-			widget->width, widget->height, image->filename);
+			widget->width, widget->height, image->filename->str);
 
-	img = xsg_imlib_load_image(image->filename);
+	img = xsg_imlib_load_image(image->filename->str);
 
 	if (unlikely(img == NULL)) {
 		xsg_warning("%s: render Image: cannot load image \"%s\"",
 				xsg_window_get_config_name(widget->window),
-				image->filename);
+				image->filename->str);
 		return;
 	}
 
@@ -90,18 +90,20 @@ update_image(xsg_widget_t *widget, xsg_var_t *var)
 
 	image = widget->data;
 
-	filename = image->filename;
+	filename = xsg_printf(image->print, var);
 
-	image->filename = xsg_printf(image->print, var);
+	if (!filename) {
+		return;
+	}
 
-	if (filename != NULL && strcmp(filename, image->filename) != 0) {
-		xsg_window_update_append_rect(widget->window, widget->xoffset,
+	if (!strcmp(filename, image->filename->str)) {
+		return;
+	}
+
+	xsg_string_assign(image->filename, filename);
+
+	xsg_window_update_append_rect(widget->window, widget->xoffset,
 				widget->yoffset, widget->width, widget->height);
-	}
-
-	if (filename != NULL) {
-		xsg_free(filename);
-	}
 }
 
 static void
@@ -133,7 +135,7 @@ xsg_widget_image_parse(xsg_window_t *window, uint64_t *update)
 
 	image->print = xsg_printf_new(xsg_conf_read_string());
 	image->angle = NULL;
-	image->filename = xsg_conf_read_string();
+	image->filename = xsg_string_new(NULL);
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
