@@ -48,8 +48,10 @@ render_rectangle(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	unsigned int width, height;
 	double angle;
 
-	xsg_debug("%s: render Rectangle",
-			xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Rectangle: x=%d, y=%d, w=%u, h=%u",
+			xsg_window_get_config_name(widget->window),
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
 
 	rectangle = (rectangle_t *) widget->data;
 
