@@ -51,24 +51,28 @@ render_polygon(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	ImlibPolygon poly;
 	unsigned int i;
 
-	xsg_debug("%s: render Polygon", xsg_window_get_config_name(widget->window));
+	xsg_debug("%s: render Polygon",
+			xsg_window_get_config_name(widget->window));
 
 	polygon = (polygon_t *) widget->data;
 
 	poly = imlib_polygon_new();
 
-	for (i = 0; i < polygon->point_count; i++)
-		imlib_polygon_add_point(poly, polygon->points[i].x - up_x, polygon->points[i].y - up_y);
+	for (i = 0; i < polygon->point_count; i++) {
+		imlib_polygon_add_point(poly, polygon->points[i].x - up_x,
+				polygon->points[i].y - up_y);
+	}
 
 	imlib_context_set_image(buffer);
 
 	imlib_context_set_color(polygon->color.red, polygon->color.green,
 			polygon->color.blue, polygon->color.alpha);
 
-	if (polygon->filled)
+	if (polygon->filled) {
 		imlib_image_fill_polygon(poly);
-	else
+	} else {
 		imlib_image_draw_polygon(poly, polygon->closed);
+	}
 
 	imlib_polygon_free(poly);
 }
@@ -109,7 +113,8 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 	for (i = 0; i < polygon->point_count; i++) {
 		polygon->points[i].x = xsg_conf_read_int();
 		polygon->points[i].y = xsg_conf_read_int();
-		imlib_polygon_add_point(poly, polygon->points[i].x, polygon->points[i].y);
+		imlib_polygon_add_point(poly, polygon->points[i].x,
+				polygon->points[i].y);
 	}
 
 	imlib_polygon_get_bounds(poly, &x1, &y1, &x2, &y2);
@@ -127,7 +132,8 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Filled")) {
 			polygon->filled = TRUE;
 		} else if (xsg_conf_find_command("Closed")) {
@@ -137,5 +143,4 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 		}
 	}
 }
-
 
