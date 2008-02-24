@@ -279,7 +279,7 @@ loop(uint64_t num)
 
 		xsg_gettimeofday(&time_start, 0);
 
-		xsg_debug("Tick %"PRIu64, tick);
+		xsg_debug("tick %"PRIu64, tick);
 
 		for (fl = update_list; fl; fl = fl->next) {
 			void (*func)(uint64_t) = (void (*)(uint64_t)) fl->func;
