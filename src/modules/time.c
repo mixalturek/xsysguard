@@ -31,52 +31,6 @@ typedef struct _strftime_args_t {
 
 /******************************************************************************/
 
-static xsg_list_t *var_list = NULL;
-static xsg_main_timeout_t *timeout = NULL;
-
-/******************************************************************************/
-
-static void
-set_timeout(struct timeval *tv)
-{
-	struct timeval now;
-
-	xsg_gettimeofday(&now, NULL);
-
-	tv->tv_sec = (now.tv_sec / 60 + 1) * 60;
-	tv->tv_usec = 0;
-}
-
-static void
-timeout_handler(void *arg, bool time_error)
-{
-	xsg_list_t *l;
-
-	for (l = var_list; l; l = l->next) {
-		xsg_var_t *var = l->data;
-
-		xsg_var_dirty(var);
-	}
-
-	set_timeout(&timeout->tv);
-}
-
-static void
-init(void)
-{
-	timeout = xsg_new(xsg_main_timeout_t, 1);
-
-	timeout->tv.tv_sec = 0;
-	timeout->tv.tv_usec = 0;
-	timeout->func = timeout_handler;
-	timeout->arg = NULL;
-
-	set_timeout(&timeout->tv);
-	xsg_main_add_timeout(timeout);
-}
-
-/******************************************************************************/
-
 static struct tm *
 gm_time_tm(void)
 {
@@ -374,10 +328,6 @@ parse(
 					"expected");
 		}
 	}
-
-	var_list = xsg_list_append(var_list, (void *) var);
-
-	xsg_main_add_init_func(init);
 }
 
 static const char *
