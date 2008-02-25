@@ -156,7 +156,7 @@ xsg_vasprintf(char **strp, const char *fmt, va_list ap)
 
 	*strp = xsg_new(char, len);
 
-	len = vsprintf(*strp, fmt, ap2);
+	len = vsnprintf(*strp, len, fmt, ap2);
 
 	va_end(ap2);
 
