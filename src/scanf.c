@@ -116,7 +116,7 @@ scan_s_len(const char *nptr, char **endptr, unsigned long maxlen)
 {
 	unsigned long len = 0;
 
-	while (isspace(nptr)) {
+	while (isspace(*nptr)) {
 		nptr++;
 	}
 
