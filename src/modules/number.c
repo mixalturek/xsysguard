@@ -37,7 +37,7 @@ get_number(void *arg)
 /******************************************************************************/
 
 static void
-parse(
+parse_number(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -55,7 +55,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_number(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -65,12 +65,12 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_string_append_printf(string, "N %s:<number>\n", xsg_module.name);
+	xsg_string_append_printf(string, "N %s:<number>\n", XSG_MODULE_NAME);
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "get a fixed number"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_number, help_number, "get a fixed number");
 
