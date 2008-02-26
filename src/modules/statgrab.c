@@ -89,7 +89,7 @@ static sg_process_count *process_count = NULL;
  ******************************************************************************/
 
 static void
-libstatgrab_error()
+libstatgrab_error(void)
 {
 	sg_error error;
 	const char *error_str;
@@ -2790,13 +2790,13 @@ get_process_stats_orderedby_time(void)
 /******************************************************************************/
 
 typedef struct {
-	sg_process_stats *(*list_func)();
+	sg_process_stats *(*list_func)(void);
 	bool ascending;
 	uint32_t number;
 } process_stats_data_t;
 
 typedef struct {
-	sg_process_stats *(*list_func)();
+	sg_process_stats *(*list_func)(void);
 	bool ascending;
 	uint32_t number;
 	char *running;
@@ -3301,7 +3301,7 @@ parse_process_stats(
 	void **arg
 )
 {
-	sg_process_stats *(*list_func)() = NULL;
+	sg_process_stats *(*list_func)(void) = NULL;
 	bool ascending = TRUE;
 	uint32_t number = 0;
 	bool state_command = FALSE;
