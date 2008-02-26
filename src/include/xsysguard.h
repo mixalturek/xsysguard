@@ -90,6 +90,15 @@ typedef struct _xsg_module_t {
 
 extern XSG_API xsg_module_t xsg_module;
 
+#ifndef XSG_MODULE
+# define XSG_MODULE(parse, help, info) \
+	xsg_module_t xsg_module = { parse, help, info }
+#endif
+
+#ifndef XSG_MODULE_NAME
+# define XSG_MODULE_NAME xsg_module.name
+#endif
+
 /******************************************************************************
  * conf.c
  ******************************************************************************/
@@ -584,7 +593,7 @@ xsg_isinf(double x);
 #define XSG_LOG_LEVEL_MEM	5
 
 #ifndef XSG_LOG_DOMAIN
-# define XSG_LOG_DOMAIN xsg_module.name
+# define XSG_LOG_DOMAIN XSG_MODULE_NAME
 #endif /* XSG_LOG_DOMAIN */
 
 #ifndef XSG_MAX_LOG_LEVEL
