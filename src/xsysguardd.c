@@ -290,8 +290,10 @@ read_config(FILE *stream, bool log_level_overwrite)
 static void
 usage(void)
 {
+#ifdef XSYSGUARD_MODULE_PATH
 	char **pathv;
 	char **p;
+#endif
 
 	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
 		"Usage: xsysguardd [ARGUMENTS...]\n\n"
@@ -322,6 +324,7 @@ usage(void)
 
 	printf("\n\n");
 
+#ifdef XSYSGUARD_MODULE_PATH
 	printf("XSYSGUARD_MODULE_PATH:\n");
 	pathv = xsg_get_path_from_env("XSYSGUARD_MODULE_PATH",
 			XSYSGUARD_MODULE_PATH);
@@ -332,6 +335,7 @@ usage(void)
 	}
 	xsg_strfreev(pathv);
 	printf("\n");
+#endif
 }
 
 /******************************************************************************
