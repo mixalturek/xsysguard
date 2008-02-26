@@ -387,6 +387,22 @@ am_big_endian(void)
 	return !(*((char *)(&one)));
 }
 
+static bool
+am_big_endian_float(void)
+{
+	union {
+		double d;
+		struct {
+			uint32_t u0;
+			uint32_t u1;
+		} u;
+	} one;
+
+	one.d = 1.0;
+
+	return (one.u.u1 == 0);
+}
+
 static uint16_t
 swap_16(uint16_t u)
 {
@@ -478,7 +494,7 @@ xsg_uint64_le(uint64_t u)
 double
 xsg_double_be(double d)
 {
-	if (am_big_endian()) {
+	if (am_big_endian_float()) {
 		return d;
 	} else {
 		union {
@@ -494,7 +510,7 @@ xsg_double_be(double d)
 double
 xsg_double_le(double d)
 {
-	if (am_big_endian()) {
+	if (am_big_endian_float()) {
 		union {
 			double d;
 			uint64_t u;
