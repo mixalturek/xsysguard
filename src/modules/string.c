@@ -37,7 +37,7 @@ get_string(void *arg)
 /******************************************************************************/
 
 static void
-parse(
+parse_string(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -54,7 +54,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_string(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -64,12 +64,12 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_string_append_printf(string, "S %s:<string>\n", xsg_module.name);
+	xsg_string_append_printf(string, "S %s:<string>\n", XSG_MODULE_NAME);
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "get a fixed string"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_string, help_string, "get a fixed string");
 
