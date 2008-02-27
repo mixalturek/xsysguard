@@ -313,7 +313,7 @@ find_daemon(char *name)
 
 	daemon->var_list = NULL;
 
-	return daemon;;
+	return daemon;
 }
 
 /******************************************************************************/
