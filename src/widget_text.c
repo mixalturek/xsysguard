@@ -83,7 +83,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 	/* count lines */
 	line_count = 0;
-	for (linev = text->lines; *linev != NULL; linev++) {
+	for (linev = text->lines; linev != NULL && *linev != NULL; linev++) {
 		line_count++;
 	}
 
