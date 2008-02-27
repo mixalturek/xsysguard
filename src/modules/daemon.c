@@ -954,7 +954,7 @@ update_daemons(uint64_t tick)
 /******************************************************************************/
 
 static void
-parse(
+parse_daemon(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -1022,7 +1022,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_daemon(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -1033,14 +1033,14 @@ help(void)
 	}
 
 	xsg_string_append_printf(string, "N %s:exec:<name>:num:<variable>\n",
-			xsg_module.name);
+			XSG_MODULE_NAME);
 	xsg_string_append_printf(string, "S %s:exec:<name>:str:<variable>\n",
-			xsg_module.name);
+			XSG_MODULE_NAME);
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "execute xsysguardd processes"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_daemon, help_daemon, "execute xsysguardd processes");
 
