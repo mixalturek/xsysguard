@@ -72,12 +72,14 @@ get_name(void *arg)
 	static char name[IFNAMSIZ + 1];
 
 	if (iw_get_ext(skfd, arg, SIOCGIWNAME, &wrq) < 0) {
+		xsg_debug("get_name: UNKNOWN");
 		return "";
 	}
 
 	strncpy(name, wrq.u.name, IFNAMSIZ);
 	name[IFNAMSIZ] = '\0';
 
+	xsg_debug("get_name: \"%s\"", name);
 	return name;
 }
 
@@ -85,9 +87,11 @@ static double
 get_nwid(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWNWID, &wrq) < 0) {
+		xsg_debug("get_nwid: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_nwid: %f", (double) wrq.u.nwid.value);
 	return (double) wrq.u.nwid.value;
 }
 
@@ -97,6 +101,7 @@ get_freq_number(void *arg)
 	double freq;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWFREQ, &wrq) < 0) {
+		xsg_debug("get_freq_number: UNKNOWN");
 		return DNAN;
 	}
 
@@ -108,6 +113,7 @@ get_freq_number(void *arg)
 		}
 	}
 
+	xsg_debug("get_freq_number: %f", freq);
 	return freq;
 }
 
@@ -119,11 +125,13 @@ get_freq_string(void *arg)
 	freq = get_freq_number(arg);
 
 	if (isnan(freq)) {
+		xsg_debug("get_freq_string: UNKNOWN");
 		return "";
 	}
 
 	iw_print_freq_value(buffer, sizeof(buffer), freq);
 
+	xsg_debug("get_freq_string: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -133,6 +141,7 @@ get_channel(void *arg)
 	double freq;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWFREQ, &wrq) < 0) {
+		xsg_debug("get_channel: UNKNOWN");
 		return DNAN;
 	}
 
@@ -144,6 +153,7 @@ get_channel(void *arg)
 		}
 	}
 
+	xsg_debug("get_channel: %f", freq);
 	return freq;
 }
 
@@ -158,6 +168,7 @@ get_key(void *arg)
 	wrq.u.data.flags = 0;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWENCODE, &wrq) < 0) {
+		xsg_debug("get_key: UNKNOWN");
 		return "";
 	}
 
@@ -165,11 +176,13 @@ get_key(void *arg)
 	key_flags = wrq.u.data.flags;
 
 	if ((key_flags & IW_ENCODE_DISABLED) || (key_size == 0)) {
+		xsg_debug("get_key: \"off\"");
 		return "off";
 	}
 
 	iw_print_key(buffer, sizeof(buffer), key, key_size, key_flags);
 
+	xsg_debug("get_key: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -184,6 +197,7 @@ get_keyid(void *arg)
 	wrq.u.data.flags = 0;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWENCODE, &wrq) < 0) {
+		xsg_debug("get_keyid: UNKNOWN");
 		return DNAN;
 	}
 
@@ -191,9 +205,11 @@ get_keyid(void *arg)
 	key_flags = wrq.u.data.flags;
 
 	if ((key_flags & IW_ENCODE_DISABLED) || (key_size == 0)) {
+		xsg_debug("get_keyid: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_keyid: %f", (double) (key_flags & IW_ENCODE_INDEX));
 	return (double) (key_flags & IW_ENCODE_INDEX);
 }
 
@@ -208,14 +224,17 @@ get_essid(void *arg)
 	wrq.u.essid.flags = 0;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWESSID, &wrq) < 0) {
+		xsg_debug("get_essid: UNKNOWN");
 		return "";
 	}
 
 	essid_on = wrq.u.data.flags;
 
 	if (essid_on) {
+		xsg_debug("get_essid: \"%s\"", essid);
 		return essid;
 	} else {
+		xsg_debug("get_essid: off/any");
 		return "off/any";
 	}
 }
@@ -224,12 +243,15 @@ static double
 get_mode_number(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWMODE, &wrq) < 0) {
+		xsg_debug("get_mode_number: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.mode < IW_NUM_OPER_MODE) {
+		xsg_debug("get_mode_number: %f", (double) wrq.u.mode);
 		return (double) wrq.u.mode;
 	} else {
+		xsg_debug("get_mode_number: %f", (double) IW_NUM_OPER_MODE);
 		return (double) IW_NUM_OPER_MODE;
 	}
 }
@@ -238,6 +260,7 @@ static char *
 get_mode_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWMODE, &wrq) < 0) {
+		xsg_debug("get_mode_string: UNKNOWN");
 		return "";
 	}
 
@@ -251,6 +274,7 @@ get_mode_string(void *arg)
 
 	buffer[sizeof(buffer) - 1] = '\0';
 
+	xsg_debug("get_mode_string: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -258,9 +282,11 @@ static double
 get_sens(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWSENS, &wrq) < 0) {
+		xsg_debug("get_sens: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_sens: %f", (double) wrq.u.sens.value);
 	return (double) wrq.u.sens.value;
 }
 
@@ -274,13 +300,16 @@ get_nickname(void *arg)
 	wrq.u.essid.flags = 0;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWNICKN, &wrq) < 0) {
+		xsg_debug("get_nickname: UNKNOWN");
 		return "";
 	}
 
 	if (wrq.u.essid.length <= 1) {
+		xsg_debug("get_nickname: UNKNOWN");
 		return "";
 	}
 
+	xsg_debug("get_nickname: \"%s\"", nickname);
 	return nickname;
 }
 
@@ -288,11 +317,13 @@ static char *
 get_ap(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWAP, &wrq) < 0) {
+		xsg_debug("get_ap: UNKNOWN");
 		return "";
 	}
 
 	iw_sawap_ntop(&(wrq.u.ap_addr), buffer);
 
+	xsg_debug("get_ap: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -300,9 +331,11 @@ static double
 get_bitrate_number(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRATE, &wrq) < 0) {
+		xsg_debug("get_bitrate_number: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_bitrate_number: %f", (double) wrq.u.bitrate.value);
 	return (double) wrq.u.bitrate.value;
 }
 
@@ -310,11 +343,13 @@ static char *
 get_bitrate_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRATE, &wrq) < 0) {
+		xsg_debug("get_bitrate_string: UNKNOWN");
 		return "";
 	}
 
 	iw_print_bitrate(buffer, sizeof(buffer), wrq.u.bitrate.value);
 
+	xsg_debug("get_bitrate_string: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -322,13 +357,16 @@ static double
 get_rts_number(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRTS, &wrq) < 0) {
+		xsg_debug("get_rts_number: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.rts.disabled) {
+		xsg_debug("get_rts_number: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_rts_number: %f", (double) wrq.u.rts.value);
 	return (double) wrq.u.rts.value;
 }
 
@@ -336,15 +374,18 @@ static char *
 get_rts_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRTS, &wrq) < 0) {
+		xsg_debug("get_rts_string: UNKNOWN");
 		return "";
 	}
 
 	if (wrq.u.rts.disabled) {
+		xsg_debug("get_rts_string: \"off\"");
 		return "off";
 	}
 
 	snprintf(buffer, sizeof(buffer), "%d B", wrq.u.rts.value);
 
+	xsg_debug("get_rts_string: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -352,13 +393,16 @@ static double
 get_frag_number(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWFRAG, &wrq) < 0) {
+		xsg_debug("get_frag_number: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.frag.disabled) {
+		xsg_debug("get_frag_number: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_frag_number: %f", (double) wrq.u.frag.value);
 	return (double) wrq.u.frag.value;
 }
 
@@ -366,15 +410,18 @@ static char *
 get_frag_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWFRAG, &wrq) < 0) {
+		xsg_debug("get_frag_string: UNKNOWN");
 		return "";
 	}
 
 	if (wrq.u.frag.disabled) {
+		xsg_debug("get_frag_string: \"off\"");
 		return "off";
 	}
 
 	snprintf(buffer, sizeof(buffer), "%d B", wrq.u.frag.value);
 
+	xsg_debug("get_frag_string: \"%s\"", buffer);
 	return buffer;
 }
 
@@ -385,10 +432,12 @@ get_power_management(void *arg)
 	wrq.u.power.flags = 0;
 
 	if (iw_get_ext(skfd, arg, SIOCGIWPOWER, &wrq) < 0) {
+		xsg_debug("get_power_management: UNKNOWN");
 		return "";
 	}
 
 	if (wrq.u.power.disabled) {
+		xsg_debug("get_power_management: \"off\"");
 		return "off";
 	}
 
@@ -413,8 +462,10 @@ get_power_management(void *arg)
 	}
 
 	if (string->str[0] == ' ') {
+		xsg_debug("get_power_management: \"%s\"", string->str + 1);
 		return string->str + 1;
 	} else {
+		xsg_debug("get_power_management: \"%s\"", string->str);
 		return string->str;
 	}
 }
@@ -423,58 +474,72 @@ static double
 get_txpower_dbm(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
+		xsg_debug("get_txpower_dbm: UNKNOWN");
 		return DNAN;
 	}
 
 	if (range.we_version_compiled <= 9) {
+		xsg_debug("get_txpower_dbm: UNKNOWN");
 		return DNAN;
 	}
 
 	if (iw_get_ext(skfd, arg, SIOCGIWTXPOW, &wrq) < 0) {
+		xsg_debug("get_txpower_dbm: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.txpower.disabled) {
+		xsg_debug("get_txpower_dbm: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.txpower.flags & IW_TXPOW_RELATIVE) {
+		xsg_debug("get_txpower_dbm: UNKNOWN");
 		return DNAN;
 	}
 
 	if (wrq.u.txpower.flags & IW_TXPOW_MWATT) {
+		xsg_debug("get_txpower_dbm: %f", (double) iw_mwatt2dbm(wrq.u.txpower.value));
 		return (double) iw_mwatt2dbm(wrq.u.txpower.value);
 	}
 
+	xsg_debug("get_txpower_dbm: %f", (double) wrq.u.txpower.value);
 	return (double) wrq.u.txpower.value;
 }
 
 static double
 get_txpower_mw(void *arg)
 {
-	return dbm2mw(get_txpower_dbm(arg));
+	double mw = dbm2mw(get_txpower_dbm(arg));
+	xsg_debug("get_txpower_mw: %f", mw);
+	return mw;
 }
 
 static char *
 get_retry(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
+		xsg_debug("get_retry: UNKNOWN");
 		return "";
 	}
 
 	if (range.we_version_compiled <= 10) {
+		xsg_debug("get_retry: UNKNOWN");
 		return "";
 	}
 
 	if (iw_get_ext(skfd, arg, SIOCGIWRETRY, &wrq) < 0) {
+		xsg_debug("get_retry: UNKNOWN");
 		return "";
 	}
 
 	if (wrq.u.retry.disabled) {
+		xsg_debug("get_retry: \"off\"");
 		return "off";
 	}
 
 	if (wrq.u.retry.flags == IW_RETRY_ON) {
+		xsg_debug("get_retry: \"on\"");
 		return "on";
 	}
 
@@ -484,12 +549,15 @@ get_retry(void *arg)
 				range.we_version_compiled);
 
 		if (buffer[0] == ' ') {
+			xsg_debug("get_retry: \"%s\"", buffer + 1);
 			return buffer + 1;
 		} else {
+			xsg_debug("get_retry: \"%s\"", buffer);
 			return buffer;
 		}
 	}
 
+	xsg_debug("get_retry: UNKNOWN");
 	return "";
 }
 
@@ -503,9 +571,11 @@ get_stats_quality_quality(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_quality_quality: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_quality_quality: %f", (double) stats.qual.qual);
 	return (double) stats.qual.qual;
 }
 
@@ -519,6 +589,7 @@ get_stats_quality_signal(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_quality_signal: UNKNOWN");
 		return DNAN;
 	}
 
@@ -527,6 +598,8 @@ get_stats_quality_signal(void *arg)
 	  || (stats.qual.updated & (IW_QUAL_DBM | IW_QUAL_RCPI)))) {
 		if (stats.qual.updated & IW_QUAL_RCPI) {
 			if (!(stats.qual.updated & IW_QUAL_LEVEL_INVALID)) {
+				xsg_debug("get_stats_quality_signal: %f",
+					(stats.qual.level / 2.0) - 110.0);
 				return (stats.qual.level / 2.0) - 110.0;
 			}
 		} else if ((stats.qual.updated & IW_QUAL_DBM)
@@ -538,11 +611,14 @@ get_stats_quality_signal(void *arg)
 					dblevel -= 0x100;
 				}
 
+				xsg_debug("get_stats_quality_signal: %f",
+						(double) dblevel);
 				return (double) dblevel;
 			}
 		}
 	}
 
+	xsg_debug("get_stats_quality_signal: UNKNOWN");
 	return DNAN;
 }
 
@@ -556,6 +632,7 @@ get_stats_quality_noise(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_quality_noise: UNKNOWN");
 		return DNAN;
 	}
 
@@ -564,6 +641,8 @@ get_stats_quality_noise(void *arg)
 	  || (stats.qual.updated & (IW_QUAL_DBM | IW_QUAL_RCPI)))) {
 		if (stats.qual.updated & IW_QUAL_RCPI) {
 			if (!(stats.qual.updated & IW_QUAL_NOISE_INVALID)) {
+				xsg_debug("get_stats_quality_noise: %f",
+					(stats.qual.noise / 2.0) - 110.0);
 				return (stats.qual.noise / 2.0) - 110.0;
 			}
 		} else if ((stats.qual.updated & IW_QUAL_DBM)
@@ -575,11 +654,14 @@ get_stats_quality_noise(void *arg)
 					dbnoise -= 0x100;
 				}
 
+				xsg_debug("get_stats_quality_noise: %f",
+						(double) dbnoise);
 				return (double) dbnoise;
 			}
 		}
 	}
 
+	xsg_debug("get_stats_quality_noise: UNKNOWN");
 	return DNAN;
 }
 
@@ -609,9 +691,12 @@ get_stats_discarded_code(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_discarded_code: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_discarded_code: %f",
+			(double) stats.discard.code);
 	return (double) stats.discard.code;
 }
 
@@ -625,9 +710,12 @@ get_stats_discarded_fragment(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_discarded_fragment: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_discarded_fragment: %f",
+			(double) stats.discard.fragment);
 	return (double) stats.discard.fragment;
 }
 
@@ -641,13 +729,17 @@ get_stats_discarded_retries(void *arg)
 	}
 
 	if (range.we_version_compiled <= 11) {
+		xsg_debug("get_stats_discarded_retries: UNKNOWN");
 		return DNAN;
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_discarded_retries: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_discarded_retries: %f",
+			(double) stats.discard.retries);
 	return (double) stats.discard.retries;
 }
 
@@ -661,9 +753,12 @@ get_stats_discarded_misc(void *arg)
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_discarded_misc: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_discarded_misc: %f",
+			(double) stats.discard.misc);
 	return (double) stats.discard.misc;
 }
 
@@ -677,13 +772,17 @@ get_stats_missed_beacon(void *arg)
 	}
 
 	if (range.we_version_compiled <= 11) {
+		xsg_debug("get_stats_missed_beacon: UNKNOWN");
 		return DNAN;
 	}
 
 	if (iw_get_stats(skfd, arg, &stats, &range, has_range) < 0) {
+		xsg_debug("get_stats_missed_beacon: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_stats_missed_beacon: %f",
+			(double) stats.miss.beacon);
 	return (double) stats.miss.beacon;
 }
 
@@ -691,9 +790,12 @@ static double
 get_range_sensitivity(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
+		xsg_debug("get_range_sensitivity: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_range_sensitivity: %f",
+			(double) range.sensitivity);
 	return (double) range.sensitivity;
 }
 
@@ -701,9 +803,12 @@ static double
 get_range_max_quality_quality(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
+		xsg_debug("get_range_max_quality_quality: UNKNOWN");
 		return DNAN;
 	}
 
+	xsg_debug("get_range_max_quality_quality: %f",
+			(double) range.max_qual.qual);
 	return (double) range.max_qual.qual;
 }
 
