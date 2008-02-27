@@ -764,13 +764,8 @@ parse_iw(
 		} else if (xsg_conf_find_command("nwid")) {
 			*num = get_nwid;
 		} else if (xsg_conf_find_command("freq")) {
-			if (xsg_conf_find_command("num")) {
-				*num = get_freq_number;
-			} else if (xsg_conf_find_command("str")) {
-				*str = get_freq_string;
-			} else {
-				xsg_conf_error("num or str expected");
-			}
+			*num = get_freq_number;
+			*str = get_freq_string;
 		} else if (xsg_conf_find_command("channel")) {
 			*num = get_channel;
 		} else if (xsg_conf_find_command("key")) {
@@ -925,10 +920,10 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "config:nwid",
 				get_nwid(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "config:freq:num",
+				XSG_MODULE_NAME, ifname, "config:freq",
 				get_freq_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				XSG_MODULE_NAME, ifname, "config:freq:str",
+				XSG_MODULE_NAME, ifname, "config:freq",
 				get_freq_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
 				XSG_MODULE_NAME, ifname, "config:channel",
