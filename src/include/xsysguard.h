@@ -87,7 +87,7 @@ typedef struct _xsg_module_t {
 	);
 	const char *(*help)(void);
 	const char *info;
-	char *name; /* replaced by xsysguard */
+	const char *name; /* replaced by xsysguard */
 } xsg_module_t;
 
 extern XSG_API xsg_module_t xsg_module;
