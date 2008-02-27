@@ -279,7 +279,7 @@ find_daemon(char *name)
 	if (command != NULL) {
 		daemon->command = xsg_strdup(command);
 	} else {
-		daemon->command = name;
+		daemon->command = daemon->name;
 	}
 
 	daemon->pid = 0;
