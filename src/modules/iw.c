@@ -780,13 +780,8 @@ parse_iw(
 		} else if (xsg_conf_find_command("essid")) {
 			*str = get_essid;
 		} else if (xsg_conf_find_command("mode")) {
-			if (xsg_conf_find_command("num")) {
-				*num = get_mode_number;
-			} else if (xsg_conf_find_command("str")) {
-				*str = get_mode_string;
-			} else {
-				xsg_conf_error("num or str expected");
-			}
+			*num = get_mode_number;
+			*str = get_mode_string;
 		} else {
 			xsg_conf_error("name, nwid, freq, channel, key, keyid, "
 					"essid or mode expected");
@@ -948,10 +943,10 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "config:essid",
 				get_essid(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "config:mode:num",
+				XSG_MODULE_NAME, ifname, "config:mode",
 				get_mode_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				XSG_MODULE_NAME, ifname, "config:mode:str",
+				XSG_MODULE_NAME, ifname, "config:mode",
 				get_mode_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
 				XSG_MODULE_NAME, ifname, "info:sensitivity",
