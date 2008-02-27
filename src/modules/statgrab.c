@@ -3213,10 +3213,10 @@ static double
 get_process_stats_state_number(void *arg)
 {
 	sg_process_stats *sg_list, *sg;
-	process_stats_data_t *data;
+	process_stats_state_data_t *data;
 	uint32_t index;
 
-	data = (process_stats_data_t *) arg;
+	data = (process_stats_state_data_t *) arg;
 
 	if (data->number >= process_entries) {
 		xsg_debug("get_process_stats_state_number: process_stats for "
@@ -3300,7 +3300,6 @@ parse_process_stats(
 	sg_process_stats *(*list_func)(void) = NULL;
 	bool ascending = TRUE;
 	uint32_t number = 0;
-	bool state_command = FALSE;
 
 	if (xsg_conf_find_command("process_name")) {
 		*str = get_process_stats_process_name;
@@ -3331,7 +3330,8 @@ parse_process_stats(
 	} else if (xsg_conf_find_command("nice")) {
 		*num = get_process_stats_nice;
 	} else if (xsg_conf_find_command("state")) {
-		state_command = TRUE;
+		*num = get_process_stats_state_number;
+		*str = get_process_stats_state_string;
 	} else {
 		xsg_conf_error("process_name, proctitle, pid, parent, pgid, "
 				"uid, euid, gid, egid, proc_size, "
@@ -3369,16 +3369,6 @@ parse_process_stats(
 	}
 
 	number = xsg_conf_read_uint();
-
-	if (state_command) {
-		if (xsg_conf_find_command("num")) {
-			*num = get_process_stats_state_number;
-		} else if (xsg_conf_find_command("str")) {
-			*str = get_process_stats_state_string;
-		} else {
-			xsg_conf_error("num or str expected");
-		}
-	}
 
 	if (*str == get_process_stats_state_string) {
 		process_stats_state_data_t *data;
@@ -3956,13 +3946,10 @@ help_statgrab(void)
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "nice",
 			"<ordered_by>", "{ascending|descending}", "<number>");
-	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			XSG_MODULE_NAME, "process_stats", "state",
-			"<ordered_by>", "{ascending|descending}", "<number>:num");
-	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
+	xsg_string_append_printf(string, "X %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "state",
 			"<ordered_by>", "{ascending|descending}",
-			"<number>:str:<running>:<sleeping>:<stopped>:<zombie>:<unknown>");
+			"<number>:<running>:<sleeping>:<stopped>:<zombie>:<unknown>");
 	xsg_string_append_c(string, '\n');
 
 	get_process_count(0);
