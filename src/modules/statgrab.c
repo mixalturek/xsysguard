@@ -2409,13 +2409,22 @@ get_network_iface_stats_speed(void *arg)
 	}
 }
 
+typedef struct {
+	char *interface_name;
+	char *full;
+	char *half;
+	char *unknown;
+} network_iface_stats_duplex_data_t;
+
 static double
 get_network_iface_stats_duplex_number(void *arg)
 {
 	sg_network_iface_stats *ret;
+	network_iface_stats_duplex_data_t *data;
 	char *interface_name;
 
-	interface_name = (char *) arg;
+	data = (network_iface_stats_duplex_data_t *) arg;
+	interface_name = data->interface_name;
 
 	if ((ret = get_network_iface_stats_for_interface_name(interface_name))) {
 		xsg_debug("get_network_iface_stats_duplex_number: %f",
@@ -2428,13 +2437,6 @@ get_network_iface_stats_duplex_number(void *arg)
 		return DNAN;
 	}
 }
-
-typedef struct {
-	char *interface_name;
-	char *full;
-	char *half;
-	char *unknown;
-} network_iface_stats_duplex_data_t;
 
 static char *
 get_network_iface_stats_duplex_string(void *arg)
@@ -2489,23 +2491,17 @@ parse_network_iface_stats(
 		*num = get_network_iface_stats_speed;
 		*arg = (void *) interface_name;
 	} else if (xsg_conf_find_command("duplex")) {
-		if (xsg_conf_find_command("num")) {
-			*num = get_network_iface_stats_duplex_number;
-			*arg = (void *) interface_name;
-		} else if (xsg_conf_find_command("str")) {
-			network_iface_stats_duplex_data_t *data;
+		network_iface_stats_duplex_data_t *data;
 
-			data = xsg_new(network_iface_stats_duplex_data_t, 1);
-			data->interface_name = interface_name;
-			data->full = xsg_conf_read_string();
-			data->half = xsg_conf_read_string();
-			data->unknown = xsg_conf_read_string();
+		data = xsg_new(network_iface_stats_duplex_data_t, 1);
+		data->interface_name = interface_name;
+		data->full = xsg_conf_read_string();
+		data->half = xsg_conf_read_string();
+		data->unknown = xsg_conf_read_string();
 
-			*str = get_network_iface_stats_duplex_string;
-			*arg = (void *) data;
-		} else {
-			xsg_conf_error("num or str expected");
-		}
+		*num = get_network_iface_stats_duplex_number;
+		*str = get_network_iface_stats_duplex_string;
+		*arg = (void *) data;
 	} else {
 		xsg_conf_error("speed or duplex expected");
 	}
@@ -3901,9 +3897,9 @@ help(void)
 
 		help3n0(string, "network_iface_stats", s, "speed",
 				get_network_iface_stats_speed(s));
-		help3n0(string, "network_iface_stats", s, "duplex:num",
-				get_network_iface_stats_duplex_number(s));
-		help3s(string, "network_iface_stats", s, "duplex:str:FULL:HALF:UNKNOWN",
+		help3n0(string, "network_iface_stats", s, "duplex",
+				get_network_iface_stats_duplex_number(&data));
+		help3s(string, "network_iface_stats", s, "duplex:FULL:HALF:UNKNOWN",
 				get_network_iface_stats_duplex_string(&data));
 		xsg_string_append_c(string, '\n');
 	}
