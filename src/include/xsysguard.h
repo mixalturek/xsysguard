@@ -37,10 +37,12 @@
 # define unlikely(x) (x)
 #endif
 
-#if defined(__GNUC_MINOR__) && (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 2)
-# define XSG_API __attribute__ ((__externally_visible__))
-#else
-# define XSG_API
+#ifndef XSG_API
+# if defined(__GNUC_MINOR__) && (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 2)
+#  define XSG_API __attribute__ ((__externally_visible__))
+# else
+#  define XSG_API
+# endif
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ < 3)
