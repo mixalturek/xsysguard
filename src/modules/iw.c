@@ -38,7 +38,7 @@ static xsg_list_t *device_list = NULL;
 /******************************************************************************/
 
 static int
-handler(int skfd, char *ifname, char *args[], int count)
+handle_iw(int skfd, char *ifname, char *args[], int count)
 {
 	/* if no wireless name: no wireless extensions */
 	if (iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) >= 0) {
@@ -50,9 +50,9 @@ handler(int skfd, char *ifname, char *args[], int count)
 }
 
 static void
-get_device_list(void){
+get_iw_device_list(void){
 	if (device_list == NULL) {
-		iw_enum_devices(skfd, handler, NULL, 0);
+		iw_enum_devices(skfd, handle_iw, NULL, 0);
 	}
 }
 
@@ -722,7 +722,7 @@ get_range_max_quality_quality(void *arg)
 /******************************************************************************/
 
 static void
-init(void)
+init_iw(void)
 {
 	if (skfd < 0) {
 		skfd = iw_sockets_open();
@@ -733,7 +733,7 @@ init(void)
 }
 
 static void
-shut_down(void)
+shutdown_iw(void)
 {
 	iw_sockets_close(skfd);
 }
@@ -741,7 +741,7 @@ shut_down(void)
 /******************************************************************************/
 
 static void
-parse(
+parse_iw(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -756,8 +756,8 @@ parse(
 	if (strcmp(ifname, "*") == 0) {
 		xsg_free(ifname);
 
-		init();
-		get_device_list();
+		init_iw();
+		get_iw_device_list();
 
 		if (device_list == NULL) {
 			xsg_conf_warning("no devices with wireless "
@@ -916,19 +916,19 @@ parse(
 		xsg_conf_error("config, info, stats or range expected");
 	}
 
-	xsg_main_add_init_func(init);
-	xsg_main_add_shutdown_func(shut_down);
+	xsg_main_add_init_func(init_iw);
+	xsg_main_add_shutdown_func(shutdown_iw);
 }
 
 static const char *
-help(void)
+help_iw(void)
 {
 	static xsg_string_t *string = NULL;
 	xsg_string_t *dev_list = xsg_string_new(NULL);
 	xsg_list_t *l;
 	int i = 0;
 
-	init();
+	init_iw();
 
 	if (skfd < 0) {
 		return NULL;
@@ -940,7 +940,7 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	get_device_list();
+	get_iw_device_list();
 
 	for (l = device_list; l; l = l->next) {
 		char name[128];
@@ -963,119 +963,119 @@ help(void)
 		char *ifname = (char *) l->data;
 
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "config:name",
+				XSG_MODULE_NAME, ifname, "config:name",
 				get_name(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "config:nwid",
+				XSG_MODULE_NAME, ifname, "config:nwid",
 				get_nwid(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "config:freq:num",
+				XSG_MODULE_NAME, ifname, "config:freq:num",
 				get_freq_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "config:freq:str",
+				XSG_MODULE_NAME, ifname, "config:freq:str",
 				get_freq_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "config:channel",
+				XSG_MODULE_NAME, ifname, "config:channel",
 				get_channel(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "config:key",
+				XSG_MODULE_NAME, ifname, "config:key",
 				get_key(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "config:keyid",
+				XSG_MODULE_NAME, ifname, "config:keyid",
 				get_keyid(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "config:essid",
+				XSG_MODULE_NAME, ifname, "config:essid",
 				get_essid(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "config:mode:num",
+				XSG_MODULE_NAME, ifname, "config:mode:num",
 				get_mode_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "config:mode:str",
+				XSG_MODULE_NAME, ifname, "config:mode:str",
 				get_mode_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "info:sensitivity",
+				XSG_MODULE_NAME, ifname, "info:sensitivity",
 				get_sens(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:nickname",
+				XSG_MODULE_NAME, ifname, "info:nickname",
 				get_nickname(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:access_point",
+				XSG_MODULE_NAME, ifname, "info:access_point",
 				get_ap(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "info:bitrate:num",
+				XSG_MODULE_NAME, ifname, "info:bitrate:num",
 				get_bitrate_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:bitrate:str",
+				XSG_MODULE_NAME, ifname, "info:bitrate:str",
 				get_bitrate_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "info:rts:num",
+				XSG_MODULE_NAME, ifname, "info:rts:num",
 				get_rts_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:rts:str",
+				XSG_MODULE_NAME, ifname, "info:rts:str",
 				get_rts_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "info:fragment:num",
+				XSG_MODULE_NAME, ifname, "info:fragment:num",
 				get_frag_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:fragment:str",
+				XSG_MODULE_NAME, ifname, "info:fragment:str",
 				get_frag_string(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:power_management",
+				XSG_MODULE_NAME, ifname, "info:power_management",
 				get_power_management(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "info:txpower:dbm",
+				XSG_MODULE_NAME, ifname, "info:txpower:dbm",
 				get_txpower_dbm(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.2f\n",
-				xsg_module.name, ifname, "info:txpower:mw",
+				XSG_MODULE_NAME, ifname, "info:txpower:mw",
 				get_txpower_mw(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				xsg_module.name, ifname, "info:retry",
+				XSG_MODULE_NAME, ifname, "info:retry",
 				get_retry(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:quality:quality",
+				XSG_MODULE_NAME, ifname, "stats:quality:quality",
 				get_stats_quality_quality(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:quality:signal:dbm",
+				XSG_MODULE_NAME, ifname, "stats:quality:signal:dbm",
 				get_stats_quality_signal_dbm(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n",
-				xsg_module.name, ifname, "stats:quality:signal:mw",
+				XSG_MODULE_NAME, ifname, "stats:quality:signal:mw",
 				get_stats_quality_signal_mw(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:quality:noise:dbm",
+				XSG_MODULE_NAME, ifname, "stats:quality:noise:dbm",
 				get_stats_quality_noise_dbm(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n",
-				xsg_module.name, ifname, "stats:quality:noise:mw",
+				XSG_MODULE_NAME, ifname, "stats:quality:noise:mw",
 				get_stats_quality_noise_mw(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:discarded:nwid",
+				XSG_MODULE_NAME, ifname, "stats:discarded:nwid",
 				get_stats_discarded_nwid(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:discarded:code",
+				XSG_MODULE_NAME, ifname, "stats:discarded:code",
 				get_stats_discarded_code(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:discarded:fragment",
+				XSG_MODULE_NAME, ifname, "stats:discarded:fragment",
 				get_stats_discarded_fragment(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:discarded:retries",
+				XSG_MODULE_NAME, ifname, "stats:discarded:retries",
 				get_stats_discarded_retries(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:discarded:misc",
+				XSG_MODULE_NAME, ifname, "stats:discarded:misc",
 				get_stats_discarded_misc(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "stats:missed:beacon",
+				XSG_MODULE_NAME, ifname, "stats:missed:beacon",
 				get_stats_missed_beacon(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "range:sensitivity",
+				XSG_MODULE_NAME, ifname, "range:sensitivity",
 				get_range_sensitivity(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				xsg_module.name, ifname, "range:max_quality:quality",
+				XSG_MODULE_NAME, ifname, "range:max_quality:quality",
 				get_range_max_quality_quality(ifname));
 	}
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "libiw (wireless extension library)"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_iw, help_iw, "libiw (wireless extension library)");
 
