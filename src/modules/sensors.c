@@ -36,8 +36,13 @@ typedef struct _feature_t {
 static bool
 init_sensors(void)
 {
+	static bool initialized = FALSE;
 	char *config;
 	FILE *f;
+
+	if (initialized) {
+		return TRUE;
+	}
 
 	config = xsg_getenv("XSYSGUARD_SENSORS_CONFIG");
 
@@ -57,6 +62,8 @@ init_sensors(void)
 	}
 
 	fclose(f);
+
+	initialized = TRUE;
 
 	return TRUE;
 }
@@ -87,16 +94,12 @@ parse_sensors(
 	void **arg
 )
 {
-	static bool initialized = FALSE;
 	const sensors_chip_name *chip_name;
 	char *chip_name_prefix;
 	int chip_nr = 0;
 
-	if (!initialized) {
-		if (!init_sensors()) {
-			xsg_conf_error("cannot initialize sensors");
-		}
-		initialized = TRUE;
+	if (!init_sensors()) {
+		xsg_conf_error("cannot initialize sensors");
 	}
 
 	chip_name_prefix = xsg_conf_read_string();
