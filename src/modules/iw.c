@@ -510,7 +510,7 @@ get_stats_quality_quality(void *arg)
 }
 
 static double
-get_stats_quality_signal_dbm(void *arg)
+get_stats_quality_signal(void *arg)
 {
 	int has_range = 1;
 
@@ -547,13 +547,7 @@ get_stats_quality_signal_dbm(void *arg)
 }
 
 static double
-get_stats_quality_signal_mw(void *arg)
-{
-	return dbm2mw(get_stats_quality_signal_dbm(arg));
-}
-
-static double
-get_stats_quality_noise_dbm(void *arg)
+get_stats_quality_noise(void *arg)
 {
 	int has_range = 1;
 
@@ -587,12 +581,6 @@ get_stats_quality_noise_dbm(void *arg)
 	}
 
 	return DNAN;
-}
-
-static double
-get_stats_quality_noise_mw(void *arg)
-{
-	return dbm2mw(get_stats_quality_noise_dbm(arg));
 }
 
 static double
@@ -857,21 +845,9 @@ parse_iw(
 			if (xsg_conf_find_command("quality")) {
 				*num = get_stats_quality_quality;
 			} else if (xsg_conf_find_command("signal")) {
-				if (xsg_conf_find_command("dbm")) {
-					*num = get_stats_quality_signal_dbm;
-				} else if (xsg_conf_find_command("mw")) {
-					*num = get_stats_quality_signal_mw;
-				} else {
-					xsg_conf_error("dbm or mw expected");
-				}
+				*num = get_stats_quality_signal;
 			} else if (xsg_conf_find_command("noise")) {
-				if (xsg_conf_find_command("dbm")) {
-					*num = get_stats_quality_noise_dbm;
-				} else if (xsg_conf_find_command("mw")) {
-					*num = get_stats_quality_noise_mw;
-				} else {
-					xsg_conf_error("dbm or mw expected");
-				}
+				*num = get_stats_quality_noise;
 			} else {
 				xsg_conf_error("quality, signal or noise "
 						"expected");
@@ -1035,17 +1011,11 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "stats:quality:quality",
 				get_stats_quality_quality(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "stats:quality:signal:dbm",
-				get_stats_quality_signal_dbm(ifname));
-		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n",
-				XSG_MODULE_NAME, ifname, "stats:quality:signal:mw",
-				get_stats_quality_signal_mw(ifname));
+				XSG_MODULE_NAME, ifname, "stats:quality:signal",
+				get_stats_quality_signal(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "stats:quality:noise:dbm",
-				get_stats_quality_noise_dbm(ifname));
-		xsg_string_append_printf(string, "N %s:%s:%-36s%.6f\n",
-				XSG_MODULE_NAME, ifname, "stats:quality:noise:mw",
-				get_stats_quality_noise_mw(ifname));
+				XSG_MODULE_NAME, ifname, "stats:quality:noise",
+				get_stats_quality_noise(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
 				XSG_MODULE_NAME, ifname, "stats:discarded:nwid",
 				get_stats_discarded_nwid(ifname));
