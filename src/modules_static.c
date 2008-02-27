@@ -33,26 +33,70 @@
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
-#define XSG_MODULE(parse, help, info) static const char *info_number = info
-#define XSG_MODULE_NAME "number"
-#include "modules/number.c"
+#define XSG_MODULE(parse, help, info) static const char info_daemon[] = info
+#define XSG_MODULE_NAME "daemon"
+#include "modules/daemon.c"
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
-#define XSG_MODULE(parse, help, info) static const char *info_string = info
-#define XSG_MODULE_NAME "string"
-#include "modules/string.c"
-#undef XSG_MODULE_NAME
-#undef XSG_MODULE
-
-#define XSG_MODULE(parse, help, info) static const char *info_file = info
+#define XSG_MODULE(parse, help, info) static const char info_file[] = info
 #define XSG_MODULE_NAME "file"
 #include "modules/file.c"
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
+#define XSG_MODULE(parse, help, info) static const char info_number[] = info
+#define XSG_MODULE_NAME "number"
+#include "modules/number.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
+#define XSG_MODULE(parse, help, info) static const char info_random[] = info
+#define XSG_MODULE_NAME "random"
+#include "modules/random.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
+#define XSG_MODULE(parse, help, info) static const char info_string[] = info
+#define XSG_MODULE_NAME "string"
+#include "modules/string.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
+#define XSG_MODULE(parse, help, info) static const char info_tail[] = info
+#define XSG_MODULE_NAME "tail"
+#include "modules/tail.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
+#define XSG_MODULE(parse, help, info) static const char info_tick[] = info
+#define XSG_MODULE_NAME "tick"
+#include "modules/tick.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
+#define XSG_MODULE(parse, help, info) static const char info_time[] = info
+#define XSG_MODULE_NAME "time"
+#include "modules/time.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
 #undef XSG_LOG_DOMAIN
 #define XSG_LOG_DOMAIN NULL
+
+/******************************************************************************/
+
+xsg_module_t xsg_modules_array[] = {
+	{ parse_daemon, help_daemon, info_daemon, "daemon" },
+	{ parse_file, help_file, info_file, "file" },
+	{ parse_number, help_number, info_number, "number" },
+	{ parse_random, help_random, info_random, "random" },
+	{ parse_string, help_string, info_string, "string" },
+	{ parse_tail, help_tail, info_tail, "tail" },
+	{ parse_tick, help_tick, info_tick, "tick" },
+	{ parse_time, help_time, info_time, "time" },
+	{ NULL }
+};
 
 /******************************************************************************/
 
@@ -70,45 +114,47 @@ xsg_modules_parse(
 	void **arg
 )
 {
+	xsg_module_t *m;
+
 	num[0] = NULL;
 	str[0] = NULL;
 	arg[0] = NULL;
 
-	if (xsg_conf_find_command("number")) {
-		parse_number(update, var, num, str, arg);
-	} else if (xsg_conf_find_command("string")) {
-		parse_string(update, var, num, str, arg);
-	} else if (xsg_conf_find_command("file")) {
-		parse_file(update, var, num, str, arg);
-	} else {
-		return FALSE;
+	for (m = xsg_modules_array; m->parse; m++) {
+		if (xsg_conf_find_command(m->name)) {
+			m->parse(update, var, num, str, arg);
+
+			if ((num[0] == NULL) && (str[0] == NULL)) {
+				xsg_conf_error("module must set *str != NULL "
+						"or *num != NULL");
+			}
+
+			return TRUE;
+		}
 	}
 
-	if ((num[0] == NULL) && (str[0] == NULL)) {
-		xsg_conf_error("module must set *str != NULL or "
-				"*num != NULL");
-	}
-
-	return TRUE;
+	return FALSE;
 }
 
 void
-xsg_modules_list()
+xsg_modules_list(void)
 {
-	printf("%-12s %s\n", "file", info_file);
-	printf("%-12s %s\n", "number", info_number);
-	printf("%-12s %s\n", "string", info_string);
+	xsg_module_t *m;
+
+	for (m = xsg_modules_array; m->parse; m++) {
+		printf("%-12s %s\n", m->name, m->info);
+	}
 }
 
 const char *
 xsg_modules_help(const char *name)
 {
-	if (!strcmp(name, "number")) {
-		return help_number();
-	} else if (!strcmp(name, "string")) {
-		return help_string();
-	} else if (!strcmp(name, "file")) {
-		return help_file();
+	xsg_module_t *m;
+
+	for (m = xsg_modules_array; m->parse; m++) {
+		if (!strcmp(name, m->name)) {
+			return m->help();
+		}
 	}
 
 	xsg_error("cannot find module: %s", name);
@@ -119,12 +165,12 @@ xsg_modules_help(const char *name)
 const char *
 xsg_modules_info(const char *name)
 {
-	if (!strcmp(name, "number")) {
-		return info_number;
-	} else if (!strcmp(name, "string")) {
-		return info_string;
-	} else if (!strcmp(name, "file")) {
-		return info_file;
+	xsg_module_t *m;
+
+	for (m = xsg_modules_array; m->parse; m++) {
+		if (!strcmp(name, m->name)) {
+			return m->info;
+		}
 	}
 
 	xsg_error("cannot find module: %s", name);
