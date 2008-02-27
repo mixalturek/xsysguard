@@ -40,7 +40,7 @@ static xsg_list_t *file_list = NULL;
 /******************************************************************************/
 
 static xsg_buffer_t *
-find_buffer(const char *filename, uint64_t update)
+find_file_buffer(const char *filename, uint64_t update)
 {
 	xsg_list_t *l;
 	file_t *f;
@@ -144,7 +144,7 @@ update_files(uint64_t update)
 /******************************************************************************/
 
 static void
-parse(
+parse_file(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -157,7 +157,7 @@ parse(
 
 	filename = xsg_conf_read_string();
 
-	buffer = find_buffer(filename, update);
+	buffer = find_file_buffer(filename, update);
 
 	xsg_free(filename);
 
@@ -167,7 +167,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_file(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -177,12 +177,12 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_buffer_help(string, xsg_module.name, "<filename>");
+	xsg_buffer_help(string, XSG_MODULE_NAME, "<filename>");
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "read regular files"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_file, help_file, "read regular files");
 
