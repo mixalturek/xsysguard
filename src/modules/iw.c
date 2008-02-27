@@ -807,13 +807,8 @@ parse_iw(
 				xsg_conf_error("num or str expected");
 			}
 		} else if (xsg_conf_find_command("rts")) {
-			if (xsg_conf_find_command("num")) {
-				*num = get_rts_number;
-			} else if (xsg_conf_find_command("str")) {
-				*str = get_rts_string;
-			} else {
-				xsg_conf_error("num or str expected");
-			}
+			*num = get_rts_number;
+			*str = get_rts_string;
 		} else if (xsg_conf_find_command("fragment")) {
 				*num = get_frag_number;
 				*str = get_frag_string;
@@ -979,10 +974,10 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "info:bitrate:str",
 				get_bitrate_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "info:rts:num",
+				XSG_MODULE_NAME, ifname, "info:rts",
 				get_rts_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				XSG_MODULE_NAME, ifname, "info:rts:str",
+				XSG_MODULE_NAME, ifname, "info:rts",
 				get_rts_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
 				XSG_MODULE_NAME, ifname, "info:fragment",
