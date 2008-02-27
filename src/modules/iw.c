@@ -810,8 +810,8 @@ parse_iw(
 			*num = get_rts_number;
 			*str = get_rts_string;
 		} else if (xsg_conf_find_command("fragment")) {
-				*num = get_frag_number;
-				*str = get_frag_string;
+			*num = get_frag_number;
+			*str = get_frag_string;
 		} else if (xsg_conf_find_command("power_management")) {
 			*str = get_power_management;
 		} else if (xsg_conf_find_command("txpower")) {
