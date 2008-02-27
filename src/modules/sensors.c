@@ -34,7 +34,7 @@ typedef struct _feature_t {
 /******************************************************************************/
 
 static bool
-init(void)
+init_sensors(void)
 {
 	char *config;
 	FILE *f;
@@ -79,7 +79,7 @@ get_sensors_feature(void *arg)
 /******************************************************************************/
 
 static void
-parse(
+parse_sensors(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -93,7 +93,7 @@ parse(
 	int chip_nr = 0;
 
 	if (!initialized) {
-		if (!init()) {
+		if (!init_sensors()) {
 			xsg_conf_error("cannot initialize sensors");
 		}
 		initialized = TRUE;
@@ -168,13 +168,13 @@ parse(
 }
 
 static const char *
-help(void)
+help_sensors(void)
 {
 	static xsg_string_t *string = NULL;
 	const sensors_chip_name *chip_name;
 	int chip_nr = 0;
 
-	if (!init()) {
+	if (!init_sensors()) {
 		return NULL;
 	}
 
@@ -207,14 +207,14 @@ help(void)
 			if (label && feature_data->name && strcmp(label, feature_data->name)) {
 				xsg_string_append_printf(string,
 						"N %s:%s:%-32s %6.2f  %s\n",
-						xsg_module.name,
+						XSG_MODULE_NAME,
 						chip_name->prefix,
 						feature_data->name,
 						value, label);
 			} else {
 				xsg_string_append_printf(string,
 						"N %s:%s:%-32s %6.2f\n",
-						xsg_module.name,
+						XSG_MODULE_NAME,
 						chip_name->prefix,
 						feature_data->name, value);
 			}
@@ -228,7 +228,7 @@ help(void)
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "libsensors (lm-sensors - Linux hardware monitoring)"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_sensors, help_sensors, "libsensors (lm-sensors - Linux hardware monitoring)");
 
