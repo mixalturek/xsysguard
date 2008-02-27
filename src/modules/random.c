@@ -261,7 +261,7 @@ get_random(void *arg)
 /******************************************************************************/
 
 static void
-parse(
+parse_random(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -285,7 +285,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_random(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -295,12 +295,12 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_string_append_printf(string, "N %s\n", xsg_module.name);
+	xsg_string_append_printf(string, "N %s\n", XSG_MODULE_NAME);
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "random number generator"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_random, help_random, "random number generator");
 
