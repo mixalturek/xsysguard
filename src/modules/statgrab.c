@@ -3533,7 +3533,7 @@ shutdown_stats(void)
 /******************************************************************************/
 
 static void
-parse(
+parse_statgrab(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -3631,7 +3631,7 @@ static void
 help2n0(xsg_string_t *string, char *s1, char *s2, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s ",
-			xsg_module.name, s1, s2);
+			XSG_MODULE_NAME, s1, s2);
 	help_align(string);
 	xsg_string_append_printf(string, "%.0f\n", num);
 }
@@ -3640,7 +3640,7 @@ static void
 help3n0(xsg_string_t *string, char *s1, char *s2, char *s3, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s:%s ",
-			xsg_module.name, s1, s2, s3);
+			XSG_MODULE_NAME, s1, s2, s3);
 	help_align(string);
 	xsg_string_append_printf(string, "%.0f\n", num);
 }
@@ -3649,7 +3649,7 @@ static void
 help2n2(xsg_string_t *string, char *s1, char *s2, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s ",
-			xsg_module.name, s1, s2);
+			XSG_MODULE_NAME, s1, s2);
 	help_align(string);
 	xsg_string_append_printf(string, "%.2f\n", num);
 }
@@ -3658,7 +3658,7 @@ static void
 help2s(xsg_string_t *string, char *s1, char *s2, char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s ",
-			xsg_module.name, s1, s2);
+			XSG_MODULE_NAME, s1, s2);
 	help_align(string);
 	xsg_string_append_printf(string, "%s\n", str);
 }
@@ -3667,13 +3667,13 @@ static void
 help3s(xsg_string_t *string, char *s1, char *s2, char *s3, char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s:%s ",
-			xsg_module.name, s1, s2, s3);
+			XSG_MODULE_NAME, s1, s2, s3);
 	help_align(string);
 	xsg_string_append_printf(string, "%s\n", str);
 }
 
 static const char *
-help(void)
+help_statgrab(void)
 {
 	static xsg_string_t *string = NULL;
 	xsg_string_t *tmp = xsg_string_new(NULL);;
@@ -3915,52 +3915,52 @@ help(void)
 	xsg_string_append_c(string, '\n');
 
 	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "process_name",
+			XSG_MODULE_NAME, "process_stats", "process_name",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "proctitle",
+			XSG_MODULE_NAME, "process_stats", "proctitle",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "pid",
+			XSG_MODULE_NAME, "process_stats", "pid",
 			"<ordered_by>", "{ascending|descending} ", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "parent",
+			XSG_MODULE_NAME, "process_stats", "parent",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "pgid",
+			XSG_MODULE_NAME, "process_stats", "pgid",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "uid",
+			XSG_MODULE_NAME, "process_stats", "uid",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "euid",
+			XSG_MODULE_NAME, "process_stats", "euid",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "gid",
+			XSG_MODULE_NAME, "process_stats", "gid",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "egid",
+			XSG_MODULE_NAME, "process_stats", "egid",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "proc_size",
+			XSG_MODULE_NAME, "process_stats", "proc_size",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "proc_resident",
+			XSG_MODULE_NAME, "process_stats", "proc_resident",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "time_spent",
+			XSG_MODULE_NAME, "process_stats", "time_spent",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "cpu_percent",
+			XSG_MODULE_NAME, "process_stats", "cpu_percent",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "nice",
+			XSG_MODULE_NAME, "process_stats", "nice",
 			"<ordered_by>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "state",
+			XSG_MODULE_NAME, "process_stats", "state",
 			"<ordered_by>", "{ascending|descending}", "<number>:num");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
-			xsg_module.name, "process_stats", "state",
+			XSG_MODULE_NAME, "process_stats", "state",
 			"<ordered_by>", "{ascending|descending}",
 			"<number>:str:<running>:<sleeping>:<stopped>:<zombie>:<unknown>");
 	xsg_string_append_c(string, '\n');
@@ -3980,7 +3980,7 @@ help(void)
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "libstatgrab (get system statistics)"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_statgrab, help_statgrab, "libstatgrab (get system statistics)");
 
