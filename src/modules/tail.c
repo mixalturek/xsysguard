@@ -43,7 +43,7 @@ static xsg_list_t *tail_list = NULL;
 /******************************************************************************/
 
 static xsg_buffer_t *
-find_buffer(const char *filename)
+find_tail_buffer(const char *filename)
 {
 	xsg_list_t *l;
 	tail_t *t;
@@ -87,7 +87,7 @@ find_buffer(const char *filename)
 /******************************************************************************/
 
 static void
-update_buffer(tail_t *t)
+update_tail(tail_t *t)
 {
 	struct stat stats;
 	char buf[4096];
@@ -182,14 +182,14 @@ update_tails(uint64_t tick)
 	xsg_list_t *l;
 
 	for (l = tail_list; l; l = l->next) {
-		update_buffer((tail_t *) l->data);
+		update_tail((tail_t *) l->data);
 	}
 }
 
 /******************************************************************************/
 
 static void
-parse(
+parse_tail(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
@@ -202,7 +202,7 @@ parse(
 
 	filename = xsg_conf_read_string();
 
-	buffer = find_buffer(filename);
+	buffer = find_tail_buffer(filename);
 
 	xsg_free(filename);
 
@@ -212,7 +212,7 @@ parse(
 }
 
 static const char *
-help(void)
+help_tail(void)
 {
 	static xsg_string_t *string = NULL;
 
@@ -222,12 +222,12 @@ help(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_buffer_help(string, xsg_module.name, "<filename>");
+	xsg_buffer_help(string, XSG_MODULE_NAME, "<filename>");
 
 	return string->str;
 }
 
-xsg_module_t xsg_module = {
-	parse, help, "tail files in follow mode (`tail -F`)"
-};
+/******************************************************************************/
+
+XSG_MODULE(parse_tail, help_tail, "tail files in follow mode (`tail -F`)");
 
