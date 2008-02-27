@@ -62,7 +62,7 @@ xsg_malloc_(size_t size, const char *file, int line)
 			return mem;
 		}
 
-		xsg_error("Failed to allocate %zu bytes: %s.%d",
+		xsg_error("failed to allocate %zu bytes: %s.%d",
 				size, file, line);
 	}
 	return NULL;
@@ -86,7 +86,7 @@ xsg_malloc0_(size_t size, const char *file, int line)
 			return mem;
 		}
 
-		xsg_error("Failed to allocate %zu bytes: %s.%d",
+		xsg_error("failed to allocate %zu bytes: %s.%d",
 				size, file, line);
 	}
 	return NULL;
@@ -115,7 +115,7 @@ xsg_realloc_(void *mem, size_t size, const char *file, int line)
 			return mem;
 		}
 
-		xsg_error("Failed to allocate %zu bytes: %s.%d",
+		xsg_error("failed to allocate %zu bytes: %s.%d",
 				size, file, line);
 	}
 	if (mem) {
