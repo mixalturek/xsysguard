@@ -297,7 +297,7 @@ get_ap(void *arg)
 }
 
 static double
-	get_bitrate_number(void *arg)
+get_bitrate_number(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRATE, &wrq) < 0) {
 		return DNAN;
@@ -799,13 +799,8 @@ parse_iw(
 		} else if (xsg_conf_find_command("access_point")) {
 			*str = get_ap;
 		} else if (xsg_conf_find_command("bitrate")) {
-			if (xsg_conf_find_command("num")) {
-				*num = get_bitrate_number;
-			} else if (xsg_conf_find_command("str")) {
-				*str = get_bitrate_string;
-			} else {
-				xsg_conf_error("num or str expected");
-			}
+			*num = get_bitrate_number;
+			*str = get_bitrate_string;
 		} else if (xsg_conf_find_command("rts")) {
 			*num = get_rts_number;
 			*str = get_rts_string;
@@ -968,10 +963,10 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "info:access_point",
 				get_ap(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "info:bitrate:num",
+				XSG_MODULE_NAME, ifname, "info:bitrate",
 				get_bitrate_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				XSG_MODULE_NAME, ifname, "info:bitrate:str",
+				XSG_MODULE_NAME, ifname, "info:bitrate",
 				get_bitrate_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
 				XSG_MODULE_NAME, ifname, "info:rts",
