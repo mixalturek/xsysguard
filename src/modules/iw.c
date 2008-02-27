@@ -815,13 +815,8 @@ parse_iw(
 				xsg_conf_error("num or str expected");
 			}
 		} else if (xsg_conf_find_command("fragment")) {
-			if (xsg_conf_find_command("num")) {
 				*num = get_frag_number;
-			} else if (xsg_conf_find_command("str")) {
-				*str = get_freq_string;
-			} else {
-				xsg_conf_error("num or str expected");
-			}
+				*str = get_frag_string;
 		} else if (xsg_conf_find_command("power_management")) {
 			*str = get_power_management;
 		} else if (xsg_conf_find_command("txpower")) {
@@ -990,10 +985,10 @@ help_iw(void)
 				XSG_MODULE_NAME, ifname, "info:rts:str",
 				get_rts_string(ifname));
 		xsg_string_append_printf(string, "N %s:%s:%-36s%.0f\n",
-				XSG_MODULE_NAME, ifname, "info:fragment:num",
+				XSG_MODULE_NAME, ifname, "info:fragment",
 				get_frag_number(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
-				XSG_MODULE_NAME, ifname, "info:fragment:str",
+				XSG_MODULE_NAME, ifname, "info:fragment",
 				get_frag_string(ifname));
 		xsg_string_append_printf(string, "S %s:%s:%-36s%s\n",
 				XSG_MODULE_NAME, ifname, "info:power_management",
