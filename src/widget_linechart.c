@@ -61,9 +61,10 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 	linechart = widget->data;
 
-	xsg_debug("%s: render LineChart: xoffset=%d, yoffset=%d, width=%u, height=%u",
+	xsg_debug("%s: render LineChart: x=%d, y=%d, w=%u, h=%u",
 			xsg_window_get_config_name(widget->window),
-			widget->xoffset, widget->yoffset, widget->width, widget->height);
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
 
 	if ((linechart->angle == NULL) || (linechart->angle->angle == 0.0)) {
 		int xoffset, yoffset;
