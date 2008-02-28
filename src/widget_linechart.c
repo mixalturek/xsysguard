@@ -100,7 +100,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int value_index;
 				double value;
 
-				value_index = (linechart->value_index - xoffset + widget->width)
+				value_index = (xoffset + linechart->value_index + 1)
 						% widget->width;
 				value = linechart_var->values[value_index];
 
@@ -166,8 +166,8 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int value_index;
 				double value;
 
-				value_index = ((linechart->value_index - yoffset + widget->height)
-						% widget->height);
+				value_index = (yoffset + linechart->value_index + 1)
+						% widget->height;
 				value = linechart_var->values[value_index];
 
 				if (isnan(value)) {
@@ -232,8 +232,8 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int value_index;
 				double value;
 
-				value_index = ((xoffset + linechart->value_index + 1)
-						% widget->width);
+				value_index = (linechart->value_index - xoffset + widget->width)
+						% widget->width;
 				value = linechart_var->values[value_index];
 
 				if (isnan(value)) {
@@ -298,8 +298,8 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int value_index;
 				double value;
 
-				value_index = ((yoffset + linechart->value_index + 1)
-						% widget->height);
+				value_index = (linechart->value_index - yoffset + widget->height)
+						% widget->height;
 				value = linechart_var->values[value_index];
 
 				if (isnan(value)) {
