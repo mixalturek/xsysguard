@@ -122,8 +122,8 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 				unsigned int i;
 
-				value_index = ((areachart->value_index - xoffset + widget->width)
-						% widget->width);
+				value_index = (xoffset + areachart->value_index + 1)
+						% widget->width;
 				value = areachart_var->values[value_index];
 
 				if (value > 0.0) {
@@ -246,8 +246,8 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 				unsigned int i;
 
-				value_index = ((areachart->value_index - yoffset + widget->height)
-						% widget->height);
+				value_index = (yoffset + areachart->value_index + 1)
+						% widget->height;
 				value = areachart_var->values[value_index];
 
 				if (value > 0.0) {
@@ -369,8 +369,8 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 				unsigned int i;
 
-				value_index = ((xoffset + areachart->value_index + 1)
-						% widget->width);
+				value_index = (areachart->value_index - xoffset + widget->width)
+						% widget->width;
 				value = areachart_var->values[value_index];
 
 				if (value > 0.0) {
@@ -492,8 +492,8 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 				unsigned int i;
 
-				value_index = ((yoffset + areachart->value_index + 1)
-						% widget->height);
+				value_index = (areachart->value_index - yoffset + widget->height)
+						% widget->height;
 				value = areachart_var->values[value_index];
 
 				if (value > 0.0) {
@@ -621,8 +621,8 @@ render_areachart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 				unsigned int i;
 
-				value_index = ((areachart->value_index - xoffset + chart_width)
-						% chart_width);
+				value_index = (xoffset + areachart->value_index + 1)
+						% chart_width;
 				value = areachart_var->values[value_index];
 
 				if (value > 0.0) {
