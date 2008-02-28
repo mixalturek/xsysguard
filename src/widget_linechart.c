@@ -419,21 +419,25 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 
 	linechart = (linechart_t *) widget->data;
 
-	if ((var == NULL) || (linechart->min_var == var)) {
-		double value = linechart->min;
+	if (linechart->min_var) {
+		if ((var == NULL) || (linechart->min_var == var)) {
+			double value = linechart->min;
 
-		linechart->min = xsg_var_get_num(linechart->min_var);
-		if (value != linechart->min) {
-			dirty = TRUE;
+			linechart->min = xsg_var_get_num(linechart->min_var);
+			if (value != linechart->min) {
+				dirty = TRUE;
+			}
 		}
 	}
 
-	if ((var == NULL) || (linechart->max_var == var)) {
-		double value = linechart->max;
+	if (linechart->max_var) {
+		if ((var == NULL) || (linechart->max_var == var)) {
+			double value = linechart->max;
 
-		linechart->max = xsg_var_get_num(linechart->max_var);
-		if (value != linechart->max) {
-			dirty = TRUE;
+			linechart->max = xsg_var_get_num(linechart->max_var);
+			if (value != linechart->max) {
+				dirty = TRUE;
+			}
 		}
 	}
 
