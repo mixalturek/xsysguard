@@ -27,11 +27,8 @@
 
 /*****************************************************************************/
 
-extern xsg_widget_t *
-xsg_widget_image_parse(xsg_window_t *window, uint64_t *update);
-
 extern void
-xsg_widget_image_parse_var(xsg_var_t *var);
+xsg_widget_image_parse(xsg_window_t *window);
 
 /******************************************************************************/
 

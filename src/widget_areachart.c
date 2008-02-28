@@ -802,75 +802,13 @@ scroll_areachart(xsg_widget_t *widget)
 
 /******************************************************************************/
 
-xsg_widget_t *
-xsg_widget_areachart_parse(xsg_window_t *window, uint64_t *update)
+static void
+parse_var(xsg_widget_t *widget, xsg_var_t *var)
 {
-	xsg_widget_t *widget;
-	areachart_t *areachart;
-	double angle = 0.0;
-
-	widget = xsg_widgets_new(window);
-
-	areachart = xsg_new(areachart_t, 1);
-
-	widget->update = xsg_conf_read_uint();
-	widget->xoffset = xsg_conf_read_int();
-	widget->yoffset = xsg_conf_read_int();
-	widget->width = xsg_conf_read_uint();
-	widget->height = xsg_conf_read_uint();
-	widget->render_func = render_areachart;
-	widget->update_func = update_areachart;
-	widget->scroll_func = scroll_areachart;
-	widget->data = (void *) areachart;
-
-	*update = widget->update;
-
-	areachart->angle = NULL;
-	areachart->min = 0.0;
-	areachart->max = 0.0;
-	areachart->const_min = FALSE;
-	areachart->const_max = FALSE;
-	areachart->background = NULL;
-	areachart->var_list = NULL;
-	areachart->value_index = 0;
-
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Visible")) {
-			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
-		} else if (xsg_conf_find_command("Angle")) {
-			angle = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Min")) {
-			areachart->min = xsg_conf_read_double();
-			areachart->const_min = TRUE;
-		} else if (xsg_conf_find_command("Max")) {
-			areachart->max = xsg_conf_read_double();
-			areachart->const_max = TRUE;
-		} else if (xsg_conf_find_command("Background")) {
-			if (areachart->background != NULL)
-				xsg_free(areachart->background);
-			areachart->background = xsg_conf_read_string();
-		} else {
-			xsg_conf_error("Visible, Angle, Min, Max or Background expected");
-		}
-	}
-
-	if (angle != 0.0) {
-		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
-	}
-
-	return widget;
-}
-
-void
-xsg_widget_areachart_parse_var(xsg_var_t *var)
-{
-	xsg_widget_t *widget;
 	areachart_t *areachart;
 	areachart_var_t *areachart_var;
 	unsigned int width, i;
 
-	widget = xsg_widgets_last();
 	areachart = widget->data;
 	areachart_var = xsg_new(areachart_var_t, 1);
 	areachart->var_list = xsg_list_append(areachart->var_list, areachart_var);
@@ -939,4 +877,63 @@ xsg_widget_areachart_parse_var(xsg_var_t *var)
 	}
 }
 
+void
+xsg_widget_areachart_parse(xsg_window_t *window)
+{
+	xsg_widget_t *widget;
+	areachart_t *areachart;
+	double angle = 0.0;
+
+	widget = xsg_widgets_new(window);
+
+	areachart = xsg_new(areachart_t, 1);
+
+	widget->update = xsg_conf_read_uint();
+	widget->xoffset = xsg_conf_read_int();
+	widget->yoffset = xsg_conf_read_int();
+	widget->width = xsg_conf_read_uint();
+	widget->height = xsg_conf_read_uint();
+	widget->render_func = render_areachart;
+	widget->update_func = update_areachart;
+	widget->scroll_func = scroll_areachart;
+	widget->data = (void *) areachart;
+
+	areachart->angle = NULL;
+	areachart->min = 0.0;
+	areachart->max = 0.0;
+	areachart->const_min = FALSE;
+	areachart->const_max = FALSE;
+	areachart->background = NULL;
+	areachart->var_list = NULL;
+	areachart->value_index = 0;
+
+	while (!xsg_conf_find_newline()) {
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var = xsg_var_parse(widget->visible_update, window, widget);
+		} else if (xsg_conf_find_command("Angle")) {
+			angle = xsg_conf_read_double();
+		} else if (xsg_conf_find_command("Min")) {
+			areachart->min = xsg_conf_read_double();
+			areachart->const_min = TRUE;
+		} else if (xsg_conf_find_command("Max")) {
+			areachart->max = xsg_conf_read_double();
+			areachart->const_max = TRUE;
+		} else if (xsg_conf_find_command("Background")) {
+			if (areachart->background != NULL)
+				xsg_free(areachart->background);
+			areachart->background = xsg_conf_read_string();
+		} else {
+			xsg_conf_error("Visible, Angle, Min, Max or Background expected");
+		}
+	}
+
+	if (angle != 0.0) {
+		areachart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
+	}
+
+	while (xsg_conf_find_command("+")) {
+		parse_var(widget, xsg_var_parse(widget->update, window, widget));
+	}
+}
 

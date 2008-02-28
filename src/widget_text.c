@@ -637,8 +637,21 @@ scroll_text(xsg_widget_t *widget)
 	return;
 }
 
-xsg_widget_t *
-xsg_widget_text_parse(xsg_window_t *window, uint64_t *update)
+/******************************************************************************/
+
+static void
+parse_var(xsg_widget_t *widget, xsg_var_t *var)
+{
+	text_t *text;
+
+	text = widget->data;
+
+	xsg_printf_add_var(text->print, var);
+	xsg_conf_read_newline();
+}
+
+void
+xsg_widget_text_parse(xsg_window_t *window)
 {
 	xsg_widget_t *widget;
 	text_t *text;
@@ -657,8 +670,6 @@ xsg_widget_text_parse(xsg_window_t *window, uint64_t *update)
 	widget->update_func = update_text;
 	widget->scroll_func = scroll_text;
 	widget->data = (void *) text;
-
-	*update = widget->update;
 
 	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
 	text->font = NULL;
@@ -722,19 +733,8 @@ xsg_widget_text_parse(xsg_window_t *window, uint64_t *update)
 				widget->yoffset, widget->width, widget->height);
 	}
 
-	return widget;
-}
-
-void
-xsg_widget_text_parse_var(xsg_var_t *var)
-{
-	xsg_widget_t *widget;
-	text_t *text;
-
-	widget = xsg_widgets_last();
-	text = widget->data;
-
-	xsg_printf_add_var(text->print, var);
-	xsg_conf_read_newline();
+	while (xsg_conf_find_command("+")) {
+		parse_var(widget, xsg_var_parse(widget->update, window, widget));
+	}
 }
 

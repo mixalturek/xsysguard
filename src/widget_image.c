@@ -112,8 +112,21 @@ scroll_image(xsg_widget_t *widget)
 	return;
 }
 
-xsg_widget_t *
-xsg_widget_image_parse(xsg_window_t *window, uint64_t *update)
+/******************************************************************************/
+
+static void
+parse_var(xsg_widget_t *widget, xsg_var_t *var)
+{
+	image_t *image;
+
+	image = widget->data;
+
+	xsg_printf_add_var(image->print, var);
+	xsg_conf_read_newline();
+}
+
+void
+xsg_widget_image_parse(xsg_window_t *window)
 {
 	xsg_widget_t *widget;
 	image_t *image;
@@ -154,19 +167,8 @@ xsg_widget_image_parse(xsg_window_t *window, uint64_t *update)
 				widget->yoffset, widget->width, widget->height);
 	}
 
-	return widget;
-}
-
-void
-xsg_widget_image_parse_var(xsg_var_t *var)
-{
-	xsg_widget_t *widget;
-	image_t *image;
-
-	widget = xsg_widgets_last();
-	image = widget->data;
-
-	xsg_printf_add_var(image->print, var);
-	xsg_conf_read_newline();
+	while (xsg_conf_find_command("+")) {
+		parse_var(widget, xsg_var_parse(widget->update, window, widget));
+	}
 }
 

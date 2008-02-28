@@ -748,72 +748,11 @@ scroll_barchart(xsg_widget_t *widget)
 	return;
 }
 
-xsg_widget_t *
-xsg_widget_barchart_parse(xsg_window_t *window, uint64_t *update)
+/******************************************************************************/
+
+static void
+parse_var(xsg_widget_t *widget, xsg_var_t *var)
 {
-	xsg_widget_t *widget;
-	barchart_t *barchart;
-	double angle = 0.0;
-
-	widget = xsg_widgets_new(window);
-
-	barchart = xsg_new(barchart_t, 1);
-
-	widget->update = xsg_conf_read_uint();
-	widget->xoffset = xsg_conf_read_int();
-	widget->yoffset = xsg_conf_read_int();
-	widget->width = xsg_conf_read_uint();
-	widget->height = xsg_conf_read_uint();
-	widget->render_func = render_barchart;
-	widget->update_func = update_barchart;
-	widget->scroll_func = scroll_barchart;
-	widget->data = (void *) barchart;
-
-	*update = widget->update;
-
-	barchart->angle = NULL;
-	barchart->min = 0.0;
-	barchart->max = 0.0;
-	barchart->const_min = FALSE;
-	barchart->const_max = FALSE;
-	barchart->mask = NULL;
-	barchart->var_list = NULL;
-
-	while (!xsg_conf_find_newline()) {
-		if (xsg_conf_find_command("Visible")) {
-			widget->visible_update = xsg_conf_read_uint();
-			widget->visible_var = xsg_var_parse(
-					widget->visible_update, window, widget);
-		} else if (xsg_conf_find_command("Angle")) {
-			angle = xsg_conf_read_double();
-		} else if (xsg_conf_find_command("Min")) {
-			barchart->min = xsg_conf_read_double();
-			barchart->const_min = TRUE;
-		} else if (xsg_conf_find_command("Max")) {
-			barchart->max = xsg_conf_read_double();
-			barchart->const_max = TRUE;
-		} else if (xsg_conf_find_command("Mask")) {
-			if (barchart->mask != NULL)
-				xsg_free(barchart->mask);
-			barchart->mask = xsg_conf_read_string();
-		} else {
-			xsg_conf_error("Visible, Angle, Min, Max or Mask "
-					"expected");
-		}
-	}
-
-	if (angle != 0.0) {
-		barchart->angle = xsg_angle_parse(angle, widget->xoffset,
-				widget->yoffset, widget->width, widget->height);
-	}
-
-	return widget;
-}
-
-void
-xsg_widget_barchart_parse_var(xsg_var_t *var)
-{
-	xsg_widget_t *widget;
 	barchart_t *barchart;
 	barchart_var_t *barchart_var;
 
@@ -862,9 +801,69 @@ xsg_widget_barchart_parse_var(xsg_var_t *var)
 		}
 	}
 
-	widget = xsg_widgets_last();
 	barchart = widget->data;
 	barchart->var_list = xsg_list_append(barchart->var_list, barchart_var);
 }
 
+void
+xsg_widget_barchart_parse(xsg_window_t *window)
+{
+	xsg_widget_t *widget;
+	barchart_t *barchart;
+	double angle = 0.0;
+
+	widget = xsg_widgets_new(window);
+
+	barchart = xsg_new(barchart_t, 1);
+
+	widget->update = xsg_conf_read_uint();
+	widget->xoffset = xsg_conf_read_int();
+	widget->yoffset = xsg_conf_read_int();
+	widget->width = xsg_conf_read_uint();
+	widget->height = xsg_conf_read_uint();
+	widget->render_func = render_barchart;
+	widget->update_func = update_barchart;
+	widget->scroll_func = scroll_barchart;
+	widget->data = (void *) barchart;
+
+	barchart->angle = NULL;
+	barchart->min = 0.0;
+	barchart->max = 0.0;
+	barchart->const_min = FALSE;
+	barchart->const_max = FALSE;
+	barchart->mask = NULL;
+	barchart->var_list = NULL;
+
+	while (!xsg_conf_find_newline()) {
+		if (xsg_conf_find_command("Visible")) {
+			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_var = xsg_var_parse(
+					widget->visible_update, window, widget);
+		} else if (xsg_conf_find_command("Angle")) {
+			angle = xsg_conf_read_double();
+		} else if (xsg_conf_find_command("Min")) {
+			barchart->min = xsg_conf_read_double();
+			barchart->const_min = TRUE;
+		} else if (xsg_conf_find_command("Max")) {
+			barchart->max = xsg_conf_read_double();
+			barchart->const_max = TRUE;
+		} else if (xsg_conf_find_command("Mask")) {
+			if (barchart->mask != NULL)
+				xsg_free(barchart->mask);
+			barchart->mask = xsg_conf_read_string();
+		} else {
+			xsg_conf_error("Visible, Angle, Min, Max or Mask "
+					"expected");
+		}
+	}
+
+	if (angle != 0.0) {
+		barchart->angle = xsg_angle_parse(angle, widget->xoffset,
+				widget->yoffset, widget->width, widget->height);
+	}
+
+	while (xsg_conf_find_command("+")) {
+		parse_var(widget, xsg_var_parse(widget->update, window, widget));
+	}
+}
 

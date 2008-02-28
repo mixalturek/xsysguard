@@ -202,29 +202,10 @@ parse_env(const char *config_name)
 	}
 }
 
-static bool
-parse_var(
-	xsg_window_t *window,
-	xsg_widget_t *widget,
-	uint64_t update,
-	xsg_var_t **var
-)
-{
-	if (!xsg_conf_find_command("+")) {
-		return FALSE;
-	} else {
-		*var = xsg_var_parse(update, window, widget);
-		return TRUE;
-	}
-}
-
 static void
 parse_config(char *config_name, char *config_buffer)
 {
 	xsg_window_t *window;
-	xsg_widget_t *widget;
-	xsg_var_t *var;
-	uint64_t update;
 
 	xsg_conf_set_buffer(config_name, config_buffer);
 
@@ -275,7 +256,7 @@ parse_config(char *config_name, char *config_buffer)
 						"XShape, ARGBVisual or "
 						"Visible expected");
 			}
-		} else if (xsg_conf_find_command("Module")) {
+		} else if (xsg_conf_find_command("ModuleEnv")) {
 			char *module_name = xsg_conf_read_string();
 			xsg_modules_help(module_name);
 			xsg_free(module_name);
@@ -290,30 +271,15 @@ parse_config(char *config_name, char *config_buffer)
 		} else if (xsg_conf_find_command("Polygon")) {
 			xsg_widget_polygon_parse(window);
 		} else if (xsg_conf_find_command("Image")) {
-			widget = xsg_widget_image_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0) {
-				xsg_widget_image_parse_var(var);
-			}
+			xsg_widget_image_parse(window);
 		} else if (xsg_conf_find_command("BarChart")) {
-			widget = xsg_widget_barchart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0) {
-				xsg_widget_barchart_parse_var(var);
-			}
+			xsg_widget_barchart_parse(window);
 		} else if (xsg_conf_find_command("LineChart")) {
-			widget = xsg_widget_linechart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0) {
-				xsg_widget_linechart_parse_var(var);
-			}
+			xsg_widget_linechart_parse(window);
 		} else if (xsg_conf_find_command("AreaChart")) {
-			widget = xsg_widget_areachart_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0) {
-				xsg_widget_areachart_parse_var(var);
-			}
+			xsg_widget_areachart_parse(window);
 		} else if (xsg_conf_find_command("Text")) {
-			widget = xsg_widget_text_parse(window, &update);
-			while (parse_var(window, widget, update, &var) != 0) {
-				xsg_widget_text_parse_var(var);
-			}
+			xsg_widget_text_parse(window);
 		} else {
 			xsg_conf_error("#, Set, Module, SetEnv, Line, "
 					"Rectangle, Ellipse, Polygon, "

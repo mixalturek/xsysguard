@@ -428,8 +428,38 @@ scroll_linechart(xsg_widget_t *widget)
 	xsg_window_update_append_rect(widget->window, widget->xoffset, widget->yoffset, widget->width, widget->height);
 }
 
-xsg_widget_t *
-xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
+/******************************************************************************/
+
+static void
+parse_var(xsg_widget_t *widget, xsg_var_t *var)
+{
+	linechart_t *linechart;
+	linechart_var_t * linechart_var;
+	unsigned int width, i;
+
+	linechart = widget->data;
+	linechart_var = xsg_new(linechart_var_t, 1);
+	linechart->var_list = xsg_list_append(linechart->var_list, linechart_var);
+
+	if (linechart->angle) {
+		width = linechart->angle->width;
+	} else {
+		width = widget->width;
+	}
+
+	linechart_var->var = var;
+	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	linechart_var->values = xsg_new(double, width);
+
+	for (i = 0; i < width; i++) {
+		linechart_var->values[i] = DNAN;
+	}
+
+	xsg_conf_read_newline();
+}
+
+void
+xsg_widget_linechart_parse(xsg_window_t *window)
 {
 	xsg_widget_t *widget;
 	linechart_t *linechart;
@@ -448,8 +478,6 @@ xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
 	widget->update_func = update_linechart;
 	widget->scroll_func = scroll_linechart;
 	widget->data = (void *) linechart;
-
-	*update = widget->update;
 
 	linechart->angle = NULL;
 	linechart->min = 0.0;
@@ -484,36 +512,8 @@ xsg_widget_linechart_parse(xsg_window_t *window, uint64_t *update)
 	if (angle != 0.0)
 		linechart->angle = xsg_angle_parse(angle, widget->xoffset, widget->yoffset, widget->width, widget->height);
 
-	return widget;
-}
-
-void
-xsg_widget_linechart_parse_var(xsg_var_t *var)
-{
-	xsg_widget_t *widget;
-	linechart_t *linechart;
-	linechart_var_t * linechart_var;
-	unsigned int width, i;
-
-	widget = xsg_widgets_last();
-	linechart = widget->data;
-	linechart_var = xsg_new(linechart_var_t, 1);
-	linechart->var_list = xsg_list_append(linechart->var_list, linechart_var);
-
-	if (linechart->angle) {
-		width = linechart->angle->width;
-	} else {
-		width = widget->width;
+	while (xsg_conf_find_command("+")) {
+		parse_var(widget, xsg_var_parse(widget->update, window, widget));
 	}
-
-	linechart_var->var = var;
-	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
-	linechart_var->values = xsg_new(double, width);
-
-	for (i = 0; i < width; i++) {
-		linechart_var->values[i] = DNAN;
-	}
-
-	xsg_conf_read_newline();
 }
 
