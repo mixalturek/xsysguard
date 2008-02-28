@@ -1007,7 +1007,7 @@ help_iw(void)
 				(char *) device_list->data);
 	}
 
-	xsg_string_append(string, "\n\n");
+	xsg_string_append(string, "\n");
 
 	for (l = device_list; l; l = l->next) {
 		char *ifname = (char *) l->data;
