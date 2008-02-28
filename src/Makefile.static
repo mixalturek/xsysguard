@@ -60,7 +60,7 @@ ALL += xsysguardd-sparc-linux
 ALL += xsysguardd-s390-linux
 ALL += xsysguardd-s390x-linux
 ALL += xsysguardd-mipsel-linux
-#ALL += xsysguardd-parisc-linux
+ALL += xsysguardd-hppa-linux
 ALL += xsysguardd-x86_64-linux
 ALL += xsysguardd-ia64-linux
 
@@ -127,6 +127,14 @@ xsysguardd-sparc-linux: $(SRC)
 		-mcpu=supersparc -m32
 	sparc-linux-strip -R .comment -R .note $@
 
+xsysguardd-sparc64-linux: $(SRC)
+	$(MAKE) -C dietlibc all sparc64
+	sparc64-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
+		dietlibc/bin-sparc64/start.o dietlibc/bin-sparc64/dietlibc.a \
+		-lgcc dietlibc/bin-sparc64/dietlibc.a \
+		-m64 -mcpu=v9
+	sparc64-linux-strip -R .comment -R .note $@
+
 xsysguardd-s390-linux: $(SRC)
 	$(MAKE) -C dietlibc all s390
 	s390-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
@@ -147,7 +155,14 @@ xsysguardd-mipsel-linux: $(SRC)
 		dietlibc/bin-mipsel/start.o dietlibc/bin-mipsel/dietlibc.a \
 		-lgcc dietlibc/bin-mipsel/dietlibc.a \
 		-EL -G 0 -fstrict-aliasing -fno-pic -mno-abicalls
-	mips-linux-strip -R .comment -R .note $@
+	mipsel-linux-strip -R .comment -R .note $@
+
+xsysguardd-hppa-linux: $(SRC)
+	$(MAKE) -C dietlibc all hppa
+	hppa-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
+		dietlibc/bin-hppa/start.o dietlibc/bin-hppa/dietlibc.a \
+		-lgcc dietlibc/bin-hppa/dietlibc.a
+	hppa-linux-strip -R .comment -R .note $@
 
 xsysguardd-x86_64-linux: $(SRC)
 	$(MAKE) -C dietlibc all x86_64
