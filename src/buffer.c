@@ -527,11 +527,15 @@ xsg_buffer_add(xsg_buffer_t *buffer, const char *string, size_t len)
 
 	for (i = 0; i < len; i++) {
 		xsg_string_append_c(buffer->read_string, string[i]);
-		xsg_string_append_c(buffer->readline_string, string[i]);
-		if (buffer->readline_string != NULL && string[i] == '\n') {
-			process_readline(buffer);
-			xsg_string_truncate(buffer->readline_string, 0);
-			buffer->line_number++;
+		if (buffer->readline_string != NULL) {
+			if (likely(string[i] != '\n')) {
+				xsg_string_append_c(buffer->readline_string,
+						string[i]);
+			} else {
+				process_readline(buffer);
+				xsg_string_truncate(buffer->readline_string, 0);
+				buffer->line_number++;
+			}
 		}
 	}
 }
