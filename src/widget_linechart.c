@@ -481,8 +481,10 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 			linechart_var = l->data;
 
 			for (i = 0; i < count; i++) {
-				linechart->max = MAX(linechart->max,
+				if (!isnan(linechart_var->values[i])) {
+					linechart->max = MAX(linechart->max,
 						linechart_var->values[i]);
+				}
 			}
 		}
 	} else if (linechart->max_var) {
@@ -492,8 +494,10 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 			linechart_var = l->data;
 
 			for (i = 0; i < count; i++) {
-				linechart->min = MIN(linechart->min,
+				if (!isnan(linechart_var->values[i])) {
+					linechart->min = MIN(linechart->min,
 						linechart_var->values[i]);
+				}
 			}
 		}
 	} else {
@@ -504,10 +508,12 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 			linechart_var = l->data;
 
 			for (i = 0; i < count; i++) {
-				linechart->min = MIN(linechart->min,
+				if (!isnan(linechart_var->values[i])) {
+					linechart->min = MIN(linechart->min,
 						linechart_var->values[i]);
-				linechart->max = MAX(linechart->max,
+					linechart->max = MAX(linechart->max,
 						linechart_var->values[i]);
+				}
 			}
 		}
 	}
