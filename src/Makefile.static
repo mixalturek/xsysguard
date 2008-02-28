@@ -51,7 +51,7 @@ SRC += writebuffer.c writebuffer.h
 
 ALL := xsysguardd-i386-linux
 ALL += xsysguardd-mips-linux
-#ALL += xsysguardd-alpha-linux
+ALL += xsysguardd-alpha-linux
 ALL += xsysguardd-ppc-linux
 ALL += xsysguardd-ppc64-linux
 ALL += xsysguardd-arm-linux
@@ -85,7 +85,15 @@ xsysguardd-mips-linux: $(SRC)
 		-Ldietlibc/bin-mips dietlibc/bin-mips/start.o \
 		-lgcc dietlibc/bin-mips/dietlibc.a \
 		-meb -G 0 -fstrict-aliasing -fno-pic -mno-abicalls
-	mipsel-linux-strip -R .comment -R .note $@
+	mips-linux-strip -R .comment -R .note $@
+
+xsysguardd-alpha-linux: $(SRC)
+	$(MAKE) -C dietlibc all alpha
+	alpha-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
+		-Ldietlibc/bin-alpha dietlibc/bin-alpha/start.o \
+		-lgcc dietlibc/bin-alpha/dietlibc.a \
+		-fstrict-aliasing
+	alpha-linux-strip -R .comment -R .note $@
 
 xsysguardd-ppc-linux: $(SRC)
 	$(MAKE) -C dietlibc all ppc
