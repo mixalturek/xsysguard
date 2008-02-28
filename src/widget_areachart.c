@@ -50,8 +50,8 @@ typedef struct {
 	xsg_angle_t *angle;
 	double min;
 	double max;
-	bool const_min;
-	bool const_max;
+	xsg_var_t *min_var;
+	xsg_var_t *max_var;
 	char *background;
 	xsg_list_t *var_list;
 	unsigned int value_index;
@@ -711,25 +711,52 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 	areachart_var_t *areachart_var;
 	xsg_list_t *l;
 	unsigned int i, count;
-
-	/* TODO: dirty flag + smaller update rect */
-	xsg_window_update_append_rect(widget->window,
-			widget->xoffset, widget->yoffset,
-			widget->width, widget->height);
+	bool dirty = FALSE;
 
 	areachart = (areachart_t *) widget->data;
+
+	if ((var == NULL) || (areachart->min_var == var)) {
+		double value = areachart->min;
+
+		areachart->min = xsg_var_get_num(areachart->min_var);
+		if (value != areachart->min) {
+			dirty = TRUE;
+		}
+	}
+
+	if ((var == NULL) || (areachart->max_var == var)) {
+		double value = areachart->max;
+
+		areachart->max = xsg_var_get_num(areachart->max_var);
+		if (value != areachart->max) {
+			dirty = TRUE;
+		}
+	}
 
 	i = areachart->value_index;
 	for (l = areachart->var_list; l; l = l->next) {
 		areachart_var = l->data;
 
-		if ((var == 0) || (areachart_var->var == var)) {
+		if ((var == NULL) || (areachart_var->var == var)) {
+			double value = areachart_var->values[i];
+
 			areachart_var->values[i] = xsg_var_get_num(
 					areachart_var->var);
+			if (value != areachart_var->values[i]) {
+				dirty = TRUE;
+			}
 		}
 	}
 
-	if (areachart->const_min && areachart->const_max) {
+	if (!dirty) {
+		return;
+	}
+
+	xsg_window_update_append_rect(widget->window,
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
+
+	if (areachart->min_var && areachart->max_var) {
 		return;
 	}
 
@@ -739,44 +766,7 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 		count = widget->width;
 	}
 
-	if (!areachart->const_min && !areachart->const_max) {
-		areachart->min = DBL_MAX;
-		areachart->max = DBL_MIN;
-
-		for (i = 0; i < count; i++) {
-			double pos = 0.0;
-			double neg = 0.0;
-
-			for (l = areachart->var_list; l; l = l->next) {
-				areachart_var = l->data;
-
-				if (areachart_var->values[i] > 0.0) {
-					if (areachart_var->add_prev) {
-						pos += areachart_var->values[i];
-					} else {
-						pos = areachart_var->values[i];
-					}
-					areachart->min = MIN(areachart->min, pos);
-					areachart->max = MAX(areachart->max, pos);
-				} else if (areachart_var->values[i] < 0.0) {
-					if (areachart_var->add_prev) {
-						neg += areachart_var->values[i];
-					} else {
-						neg = areachart_var->values[i];
-					}
-					areachart->min = MIN(areachart->min, neg);
-					areachart->max = MAX(areachart->max, neg);
-				} else {
-					if (!areachart_var->add_prev) {
-						pos = 0.0;
-						neg = 0.0;
-					}
-					areachart->min = MIN(areachart->min, 0.0);
-					areachart->max = MAX(areachart->max, 0.0);
-				}
-			}
-		}
-	} else if (areachart->const_min) {
+	if (areachart->min_var) {
 		areachart->max = DBL_MIN;
 
 		for (i = 0;  i < count; i++) {
@@ -809,7 +799,7 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 				}
 			}
 		}
-	} else if (areachart->const_max) {
+	} else if (areachart->max_var) {
 		areachart->min = DBL_MAX;
 
 		for (i = 0; i < count; i++) {
@@ -839,6 +829,43 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 						neg = 0.0;
 					}
 					areachart->min = MIN(areachart->min, 0.0);
+				}
+			}
+		}
+	} else {
+		areachart->min = DBL_MAX;
+		areachart->max = DBL_MIN;
+
+		for (i = 0; i < count; i++) {
+			double pos = 0.0;
+			double neg = 0.0;
+
+			for (l = areachart->var_list; l; l = l->next) {
+				areachart_var = l->data;
+
+				if (areachart_var->values[i] > 0.0) {
+					if (areachart_var->add_prev) {
+						pos += areachart_var->values[i];
+					} else {
+						pos = areachart_var->values[i];
+					}
+					areachart->min = MIN(areachart->min, pos);
+					areachart->max = MAX(areachart->max, pos);
+				} else if (areachart_var->values[i] < 0.0) {
+					if (areachart_var->add_prev) {
+						neg += areachart_var->values[i];
+					} else {
+						neg = areachart_var->values[i];
+					}
+					areachart->min = MIN(areachart->min, neg);
+					areachart->max = MAX(areachart->max, neg);
+				} else {
+					if (!areachart_var->add_prev) {
+						pos = 0.0;
+						neg = 0.0;
+					}
+					areachart->min = MIN(areachart->min, 0.0);
+					areachart->max = MAX(areachart->max, 0.0);
 				}
 			}
 		}
@@ -974,8 +1001,8 @@ xsg_widget_areachart_parse(xsg_window_t *window)
 	areachart->angle = NULL;
 	areachart->min = 0.0;
 	areachart->max = 0.0;
-	areachart->const_min = FALSE;
-	areachart->const_max = FALSE;
+	areachart->min_var = NULL;
+	areachart->max_var = NULL;
 	areachart->background = NULL;
 	areachart->var_list = NULL;
 	areachart->value_index = 0;
@@ -988,11 +1015,11 @@ xsg_widget_areachart_parse(xsg_window_t *window)
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
-			areachart->min = xsg_conf_read_double();
-			areachart->const_min = TRUE;
+			areachart->min_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Max")) {
-			areachart->max = xsg_conf_read_double();
-			areachart->const_max = TRUE;
+			areachart->max_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Background")) {
 			if (areachart->background != NULL) {
 				xsg_free(areachart->background);
