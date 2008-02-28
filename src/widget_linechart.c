@@ -44,8 +44,8 @@ typedef struct {
 	xsg_angle_t *angle;
 	double min;
 	double max;
-	bool const_min;
-	bool const_max;
+	xsg_var_t *min_var;
+	xsg_var_t *max_var;
 	char *background;
 	xsg_list_t *var_list;
 	unsigned int value_index;
@@ -415,25 +415,52 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 	linechart_var_t *linechart_var;
 	xsg_list_t *l;
 	unsigned int i, count;
-
-	/* TODO: dirty flag + smalller update rect */
-	xsg_window_update_append_rect(widget->window,
-			widget->xoffset, widget->yoffset,
-			widget->width, widget->height);
+	bool dirty = FALSE;
 
 	linechart = (linechart_t *) widget->data;
+
+	if ((var == NULL) || (linechart->min_var == var)) {
+		double value = linechart->min;
+
+		linechart->min = xsg_var_get_num(linechart->min_var);
+		if (value != linechart->min) {
+			dirty = TRUE;
+		}
+	}
+
+	if ((var == NULL) || (linechart->max_var == var)) {
+		double value = linechart->max;
+
+		linechart->max = xsg_var_get_num(linechart->max_var);
+		if (value != linechart->max) {
+			dirty = TRUE;
+		}
+	}
 
 	i = linechart->value_index;
 	for (l = linechart->var_list; l; l = l->next) {
 		linechart_var = l->data;
 
 		if ((var == NULL) || (linechart_var->var == var)) {
+			double value = linechart_var->values[i];
+
 			linechart_var->values[i] = xsg_var_get_num(
 					linechart_var->var);
+			if (value != linechart_var->values[i]) {
+				dirty = TRUE;
+			}
 		}
 	}
 
-	if (linechart->const_min && linechart->const_max) {
+	if (!dirty) {
+		return;
+	}
+
+	xsg_window_update_append_rect(widget->window,
+			widget->xoffset, widget->yoffset,
+			widget->width, widget->height);
+
+	if (linechart->min_var && linechart->max_var) {
 		return;
 	}
 
@@ -443,21 +470,7 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 		count = widget->width;
 	}
 
-	if (!linechart->const_min && !linechart->const_max) {
-		linechart->min = DBL_MAX;
-		linechart->max = DBL_MIN;
-
-		for (l = linechart->var_list; l; l = l->next) {
-			linechart_var = l->data;
-
-			for (i = 0; i < count; i++) {
-				linechart->min = MIN(linechart->min,
-						linechart_var->values[i]);
-				linechart->max = MAX(linechart->max,
-						linechart_var->values[i]);
-			}
-		}
-	} else if (linechart->const_min) {
+	if (linechart->min_var) {
 		linechart->max = DBL_MIN;
 
 		for (l = linechart->var_list; l; l = l->next) {
@@ -468,7 +481,7 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 						linechart_var->values[i]);
 			}
 		}
-	} else if (linechart->const_max) {
+	} else if (linechart->max_var) {
 		linechart->min = DBL_MAX;
 
 		for (l = linechart->var_list; l; l = l->next) {
@@ -476,6 +489,20 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 
 			for (i = 0; i < count; i++) {
 				linechart->min = MIN(linechart->min,
+						linechart_var->values[i]);
+			}
+		}
+	} else {
+		linechart->min = DBL_MAX;
+		linechart->max = DBL_MIN;
+
+		for (l = linechart->var_list; l; l = l->next) {
+			linechart_var = l->data;
+
+			for (i = 0; i < count; i++) {
+				linechart->min = MIN(linechart->min,
+						linechart_var->values[i]);
+				linechart->max = MAX(linechart->max,
 						linechart_var->values[i]);
 			}
 		}
@@ -557,8 +584,8 @@ xsg_widget_linechart_parse(xsg_window_t *window)
 	linechart->angle = NULL;
 	linechart->min = 0.0;
 	linechart->max = 0.0;
-	linechart->const_min = FALSE;
-	linechart->const_max = FALSE;
+	linechart->min_var = NULL;
+	linechart->max_var = NULL;
 	linechart->background = NULL;
 	linechart->var_list = NULL;
 	linechart->value_index = 0;
@@ -571,11 +598,11 @@ xsg_widget_linechart_parse(xsg_window_t *window)
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
-			linechart->min = xsg_conf_read_double();
-			linechart->const_min = TRUE;
+			linechart->min_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Max")) {
-			linechart->max = xsg_conf_read_double();
-			linechart->const_max = TRUE;
+			linechart->max_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Background")) {
 			if (linechart->background != NULL) {
 				xsg_free(linechart->background);
