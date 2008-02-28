@@ -47,8 +47,8 @@ typedef struct {
 	xsg_angle_t *angle;
 	double min;
 	double max;
-	bool const_min;
-	bool const_max;
+	xsg_var_t *min_var;
+	xsg_var_t *max_var;
 	Imlib_Image mask;
 	xsg_list_t *var_list;
 } barchart_t;
@@ -598,7 +598,24 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 
 	barchart = (barchart_t *) widget->data;
 
-	if (barchart->const_min && barchart->const_max) {
+	if (barchart->min_var && barchart->max_var) {
+		if ((var == NULL) || (barchart->min_var == var)) {
+			double value = barchart->min;
+
+			barchart->min = xsg_var_get_num(barchart->min_var);
+			if (value != barchart->min) {
+				dirty = TRUE;
+			}
+		}
+		if ((var == NULL) || (barchart->max_var == var)) {
+			double value = barchart->max;
+
+			barchart->max = xsg_var_get_num(barchart->max_var);
+			if (value != barchart->max) {
+				dirty = TRUE;
+			}
+		}
+
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
 
@@ -612,9 +629,18 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 				}
 			}
 		}
-	} else if (barchart->const_min) {
+	} else if (barchart->min_var) {
 		double pos = 0.0;
 		double neg = 0.0;
+
+		if ((var == NULL) || (barchart->min_var == var)) {
+			double value = barchart->min;
+
+			barchart->min = xsg_var_get_num(barchart->min_var);
+			if (value != barchart->min) {
+				dirty = TRUE;
+			}
+		}
 
 		barchart->max = DBL_MIN;
 
@@ -632,16 +658,18 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 			}
 
 			if (barchart_var->value > 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					pos += barchart_var->value;
-				else
+				} else {
 					pos = barchart_var->value;
+				}
 				barchart->max = MAX(barchart->max, pos);
 			} else if (barchart_var->value < 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					neg += barchart_var->value;
-				else
+				} else {
 					neg = barchart_var->value;
+				}
 				barchart->max = MAX(barchart->max, neg);
 			} else {
 				if (!barchart_var->add_prev) {
@@ -651,9 +679,18 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 				barchart->max = MAX(barchart->max, 0.0);
 			}
 		}
-	} else if (barchart->const_max) {
+	} else if (barchart->max_var) {
 		double pos = 0.0;
 		double neg = 0.0;
+
+		if ((var == NULL) || (barchart->max_var == var)) {
+			double value = barchart->max;
+
+			barchart->max = xsg_var_get_num(barchart->max_var);
+			if (value != barchart->max) {
+				dirty = TRUE;
+			}
+		}
 
 		barchart->min = DBL_MAX;
 
@@ -671,16 +708,18 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 			}
 
 			if (barchart_var->value > 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					pos += barchart_var->value;
-				else
+				} else {
 					pos = barchart_var->value;
+				}
 				barchart->min = MIN(barchart->min, pos);
 			} else if (barchart_var->value < 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					neg += barchart_var->value;
-				else
+				} else {
 					neg = barchart_var->value;
+				}
 				barchart->min = MIN(barchart->min, neg);
 			} else {
 				if (!barchart_var->add_prev) {
@@ -711,17 +750,19 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 			}
 
 			if (barchart_var->value > 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					pos += barchart_var->value;
-				else
+				} else {
 					pos = barchart_var->value;
+				}
 				barchart->min = MIN(barchart->min, pos);
 				barchart->max = MAX(barchart->max, pos);
 			} else if (barchart_var->value < 0.0) {
-				if (barchart_var->add_prev)
+				if (barchart_var->add_prev) {
 					neg += barchart_var->value;
-				else
+				} else {
 					neg = barchart_var->value;
+				}
 				barchart->min = MIN(barchart->min, neg);
 				barchart->max = MAX(barchart->max, neg);
 			} else {
@@ -829,8 +870,8 @@ xsg_widget_barchart_parse(xsg_window_t *window)
 	barchart->angle = NULL;
 	barchart->min = 0.0;
 	barchart->max = 0.0;
-	barchart->const_min = FALSE;
-	barchart->const_max = FALSE;
+	barchart->min_var = NULL;
+	barchart->max_var = NULL;
 	barchart->mask = NULL;
 	barchart->var_list = NULL;
 
@@ -842,14 +883,15 @@ xsg_widget_barchart_parse(xsg_window_t *window)
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
 		} else if (xsg_conf_find_command("Min")) {
-			barchart->min = xsg_conf_read_double();
-			barchart->const_min = TRUE;
+			barchart->min_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Max")) {
-			barchart->max = xsg_conf_read_double();
-			barchart->const_max = TRUE;
+			barchart->max_var = xsg_var_parse(widget->update,
+					window, widget);
 		} else if (xsg_conf_find_command("Mask")) {
-			if (barchart->mask != NULL)
+			if (barchart->mask != NULL) {
 				xsg_free(barchart->mask);
+			}
 			barchart->mask = xsg_conf_read_string();
 		} else {
 			xsg_conf_error("Visible, Angle, Min, Max or Mask "
