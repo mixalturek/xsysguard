@@ -715,21 +715,25 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 
 	areachart = (areachart_t *) widget->data;
 
-	if ((var == NULL) || (areachart->min_var == var)) {
-		double value = areachart->min;
+	if (areachart->min_var) {
+		if ((var == NULL) || (areachart->min_var == var)) {
+			double value = areachart->min;
 
-		areachart->min = xsg_var_get_num(areachart->min_var);
-		if (value != areachart->min) {
-			dirty = TRUE;
+			areachart->min = xsg_var_get_num(areachart->min_var);
+			if (value != areachart->min) {
+				dirty = TRUE;
+			}
 		}
 	}
 
-	if ((var == NULL) || (areachart->max_var == var)) {
-		double value = areachart->max;
+	if (areachart->max_var) {
+		if ((var == NULL) || (areachart->max_var == var)) {
+			double value = areachart->max;
 
-		areachart->max = xsg_var_get_num(areachart->max_var);
-		if (value != areachart->max) {
-			dirty = TRUE;
+			areachart->max = xsg_var_get_num(areachart->max_var);
+			if (value != areachart->max) {
+				dirty = TRUE;
+			}
 		}
 	}
 
