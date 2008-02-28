@@ -1732,6 +1732,15 @@ parse_fs_stats(
 {
 	*arg = (void *) xsg_conf_read_string();
 
+	if (!strcmp(*arg, "*")) {
+		get_fs_stats(0);
+
+		if (fs_entries > 0) {
+			xsg_free(*arg);
+			*arg = xsg_strdup(fs_stats_by_device_name[0].device_name);
+		}
+	}
+
 	if (xsg_conf_find_command("device_name")) {
 		*str = get_fs_stats_device_name;
 	} else if (xsg_conf_find_command("fs_type")) {
@@ -1840,6 +1849,15 @@ parse_disk_io_stats(
 )
 {
 	*arg = (void *) xsg_conf_read_string();
+
+	if (!strcmp(*arg, "*")) {
+		get_disk_io_stats(0);
+
+		if (disk_io_entries > 0) {
+			xsg_free(*arg);
+			*arg = xsg_strdup(disk_io_stats[0].disk_name);
+		}
+	}
 
 	if (xsg_conf_find_command("read_bytes")) {
 		*num = get_disk_io_stats_read_bytes;
@@ -1950,9 +1968,21 @@ parse_disk_io_stats_diff(
 )
 {
 	disk_io_stats_diff_arg_t *a;
+	char *disk_name;
+
+	disk_name = xsg_conf_read_string();
+
+	if (!strcmp(disk_name, "*")) {
+		get_disk_io_stats(0);
+
+		if (disk_io_entries > 0) {
+			xsg_free(disk_name);
+			disk_name = xsg_strdup(disk_io_stats[0].disk_name);
+		}
+	}
 
 	a = xsg_new(disk_io_stats_diff_arg_t, 1);
-	a->disk_name = xsg_conf_read_string();
+	a->disk_name = disk_name;
 	a->d = find_disk_io_stats_diff(update);
 
 	*arg = (void *) a;
@@ -2127,6 +2157,15 @@ parse_network_io_stats(
 )
 {
 	*arg = (void *) xsg_conf_read_string();
+
+	if (!strcmp(*arg, "*")) {
+		get_network_io_stats(0);
+
+		if (network_io_entries > 0) {
+			xsg_free(*arg);
+			*arg = xsg_strdup(network_io_stats[0].interface_name);
+		}
+	}
 
 	if (xsg_conf_find_command("tx")) {
 		*num = get_network_io_stats_tx;
@@ -2345,9 +2384,21 @@ parse_network_io_stats_diff(
 )
 {
 	network_io_stats_diff_arg_t *a;
+	char *interface_name;
+
+	interface_name = xsg_conf_read_string();
+
+	if (!strcmp(interface_name, "*")) {
+		get_network_io_stats(0);
+
+		if (network_io_entries > 0) {
+			xsg_free(interface_name);
+			interface_name = xsg_strdup(network_io_stats[0].interface_name);
+		}
+	}
 
 	a = xsg_new(network_io_stats_diff_arg_t, 1);
-	a->interface_name = xsg_conf_read_string();
+	a->interface_name = interface_name;
 	a->d = find_network_io_stats_diff(update);
 
 	*arg = (void *) a;
@@ -2487,6 +2538,15 @@ parse_network_iface_stats(
 	char *interface_name;
 
 	interface_name = xsg_conf_read_string();
+
+	if (!strcmp(interface_name, "*")) {
+		get_network_iface_stats(0);
+
+		if (network_iface_entries > 0) {
+			xsg_free(interface_name);
+			interface_name = xsg_strdup(network_iface_stats[0].interface_name);
+		}
+	}
 
 	if (xsg_conf_find_command("speed")) {
 		*num = get_network_iface_stats_speed;
