@@ -22,6 +22,7 @@
 #include <statgrab.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /******************************************************************************/
 
@@ -3666,7 +3667,6 @@ static const char *
 help_statgrab(void)
 {
 	static xsg_string_t *string = NULL;
-	xsg_string_t *tmp = xsg_string_new(NULL);;
 	int i;
 
 	init_stats();
@@ -3680,45 +3680,49 @@ help_statgrab(void)
 	get_fs_stats(0);
 
 	for (i = 0; i < fs_entries; i++) {
-		xsg_string_append_printf(tmp, "%s ",
+		char name[128];
+
+		snprintf(name, sizeof(name), "STATGRAB_DEVICE%d", i);
+		xsg_setenv(name, fs_stats_by_device_name[i].device_name, TRUE);
+
+		xsg_string_append_printf(string, "%s:          %s\n", name,
 				fs_stats_by_device_name[i].device_name);
 	}
-	xsg_string_append_printf(string, "XSG_STATGRAB_DEVICE_NAMES:      %s\n",
-			tmp->str);
-	xsg_setenv("XSG_STATGRAB_FS_DEVICES", tmp->str, TRUE);
 
-	xsg_string_truncate(tmp, 0);
 	for (i = 0; i < fs_entries; i++) {
-		xsg_string_append_printf(tmp, "%s ",
+		char name[128];
+
+		snprintf(name, sizeof(name), "STATGRAB_MNTPOINT%d", i);
+		xsg_setenv(name, fs_stats_by_mnt_point[i].mnt_point, TRUE);
+
+		xsg_string_append_printf(string, "%s:        %s\n", name,
 				fs_stats_by_mnt_point[i].mnt_point);
 	}
-	xsg_string_append_printf(string, "XSG_STATGRAB_MNT_POINTS:        %s\n",
-			tmp->str);
-	xsg_setenv("XSG_STATGRAB_FS_MNT_POINTS", tmp->str, TRUE);
 
 	get_disk_io_stats(0);
 
-	xsg_string_truncate(tmp, 0);
 	for (i = 0; i < disk_io_entries; i++) {
-		xsg_string_append_printf(tmp, "%s ",
+		char name[128];
+
+		snprintf(name, sizeof(name), "STATGRAB_DISK%d", i);
+		xsg_setenv(name, disk_io_stats[i].disk_name, TRUE);
+
+		xsg_string_append_printf(string, "%s:            %s\n", name,
 				disk_io_stats[i].disk_name);
 	}
-	xsg_string_append_printf(string, "XSG_STATGRAB_DISK_NAMES:        %s\n",
-			tmp->str);
-	xsg_setenv("XSG_STATGRAB_DISK_NAMES", tmp->str, TRUE);
 
 	get_network_iface_stats(0);
 
-	xsg_string_truncate(tmp, 0);
 	for (i = 0; i < network_iface_entries; i++) {
-		xsg_string_append_printf(tmp, "%s ",
+		char name[128];
+
+		snprintf(name, sizeof(name), "STATGRAB_INTERFACE%d", i);
+		xsg_setenv(name, network_iface_stats[i].interface_name, TRUE);
+
+		xsg_string_append_printf(string, "%s:       %s\n", name,
 				network_iface_stats[i].interface_name);
 	}
-	xsg_string_append_printf(string, "XSG_STATGRAB_INTERFACE_NAMES:   %s\n",
-			tmp->str);
-	xsg_setenv("XSG_STATGRAB_INTERFACE_NAMES", tmp->str, TRUE);
 
-	xsg_string_free(tmp, TRUE);
 	xsg_string_append_c(string, '\n');
 
 	get_host_info(0);
