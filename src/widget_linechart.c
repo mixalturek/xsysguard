@@ -368,7 +368,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				double value;
 
 				value_index = (xoffset + linechart->value_index + 1)
-						% widget->width;
+						% chart_width;
 				value = linechart_var->values[value_index];
 
 				if (isnan(value)) {
