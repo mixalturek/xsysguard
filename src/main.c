@@ -268,7 +268,7 @@ get_next_update_time(struct timeval *tv)
 	/* normalize now */
 	now.tv_usec += 1000 - now.tv_usec % 1000;
 
-	if (now.tv_usec > 1000000) {
+	if (now.tv_usec >= 1000000) {
 		now.tv_sec += 1;
 		now.tv_usec -= 1000000;
 	}
@@ -286,7 +286,7 @@ get_next_update_time(struct timeval *tv)
 	tv->tv_sec = now.tv_sec + sec;
 	tv->tv_usec = now.tv_usec + usec;
 
-	if (tv->tv_usec > 1000000) {
+	if (tv->tv_usec >= 1000000) {
 		tv->tv_sec += 1;
 		tv->tv_usec -= 1000000;
 	}
@@ -410,7 +410,7 @@ loop(uint64_t num)
 			/* just to be sure... */
 			time_sleep.tv_usec += 1000;
 
-			if (time_sleep.tv_usec > 1000000) {
+			if (time_sleep.tv_usec >= 1000000) {
 				time_sleep.tv_sec += 1;
 				time_sleep.tv_usec -= 1000000;
 			}
