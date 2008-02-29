@@ -265,6 +265,14 @@ get_next_update_time(struct timeval *tv)
 
 	xsg_gettimeofday(&now, NULL);
 
+	/* normalize now */
+	now.tv_usec += 1000 - now.tv_usec % 1000;
+
+	if (now.tv_usec > 1000000) {
+		now.tv_sec += 1;
+		now.tv_usec -= 1000000;
+	}
+
 	msec1 = (uint64_t) now.tv_sec * 1000;
 	msec2 = (uint64_t) now.tv_usec / 1000;
 	msec = msec1 + msec2;
@@ -290,7 +298,7 @@ loop(uint64_t num)
 	xsg_message("starting main loop");
 
 	while (1) {
-		struct timeval time_next_update;
+		struct timeval time_next_update = { 0, 0 };
 		flist_t *fl;
 
 		if (num != 0 && tick == num) {
