@@ -697,11 +697,10 @@ gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec)
 }
 
 static void
-handle_move_event(xsg_window_t *window, XEvent *event)
+handle_move_event(XEvent *event)
 {
 	static int x, y, press_x, press_y;
-	static bool mouse_down = FALSE;
-	int release_x, release_y;
+	static Window win = None;
 	int move_x, move_y;
 	int win_x, win_y;
 	XWindowAttributes win_attr;
@@ -710,34 +709,29 @@ handle_move_event(xsg_window_t *window, XEvent *event)
 
 	switch (event->type) {
 	case ButtonPress:
-		XGetWindowAttributes(display, window->window, &win_attr);
-		XTranslateCoordinates(display, window->window,
+		win = event->xbutton.window;
+
+		XGetWindowAttributes(display, win, &win_attr);
+		XTranslateCoordinates(display, win,
 				RootWindow(display, screen),
 				win_attr.x, win_attr.y, &x, &y, &child);
 		XQueryPointer(display, RootWindow(display, screen),
 				&root, &child, &press_x, &press_y,
 				&win_x, &win_y, &mask);
-		mouse_down = TRUE;
 		break;
 	case ButtonRelease:
-		XQueryPointer(display, RootWindow(display, screen),
-				&root, &child,
-				&release_x, &release_y,
-				&win_x, &win_y, &mask);
-		XMoveWindow(display, window->window,
-				x + (release_x - press_x),
-				y + (release_y - press_y));
-		mouse_down = FALSE;
+		win = None;
 		break;
 	case MotionNotify:
-		if (!mouse_down) {
+		if (win != event->xmotion.window) {
 			break;
 		}
+		xsg_debug("Moving window...");
 		XQueryPointer(display, RootWindow(display, screen),
 				&root, &child,
 				&move_x, &move_y,
 				&win_x, &win_y, &mask);
-		XMoveWindow(display, window->window,
+		XMoveWindow(display, win,
 				x + (move_x - press_x),
 				y + (move_y - press_y));
 		break;
@@ -792,27 +786,37 @@ handle_xevent(void)
 			}
 			break;
 		case ButtonPress:
-			xsg_debug("received XEvent: ButtonPress");
+			if (window->window != event.xbutton.window) {
+				break;
+			}
+			xsg_debug("received XEvent: ButtonPress %u",
+					(unsigned) event.xbutton.button);
 			if (event.xbutton.button == window->button_exit) {
 				xsg_error("pressed mouse button %u: exiting...",
 						window->button_exit);
 			}
 			if (event.xbutton.button == window->button_move) {
-				handle_move_event(window, &event);
+				handle_move_event(&event);
 			}
 			break;
 		case ButtonRelease:
-			xsg_debug("received XEvent: ButtonRelease");
+			if (window->window != event.xbutton.window) {
+				break;
+			}
+			xsg_debug("received XEvent: ButtonRelease %u",
+					(unsigned) event.xbutton.button);
 			if (event.xbutton.button == window->button_move) {
-				handle_move_event(window, &event);
+				handle_move_event(&event);
 			}
 			break;
 		case MotionNotify:
+			if (window->window != event.xmotion.window) {
+				break;
+			}
 			xsg_debug("received XEvent: MotionNotify");
-			handle_move_event(window, &event);
+			handle_move_event(&event);
 			break;
 		default:
-			xsg_debug("received XEvent: %d", event.type);
 			break;
 		}
 	}
