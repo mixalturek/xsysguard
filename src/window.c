@@ -87,6 +87,9 @@ struct _xsg_window_t {
 	uint64_t visible_update;
 	xsg_var_t *visible_var;
 
+	unsigned int button_exit;
+	unsigned int button_move;
+
 	xsg_list_t *widget_list;
 };
 
@@ -171,6 +174,9 @@ xsg_window_new(char *config_name)
 	window->visible = FALSE;
 	window->visible_update = 0;
 	window->visible_var = NULL;
+
+	window->button_exit = 0;
+	window->button_move = 0;
 
 	window->widget_list = NULL;
 
@@ -320,6 +326,24 @@ xsg_window_parse_visible(xsg_window_t *window)
 	window->visible_update = xsg_conf_read_uint();
 	window->visible_var = xsg_var_parse(window->visible_update, window,
 			NULL);
+	xsg_conf_read_newline();
+}
+
+void
+xsg_window_parse_mouse(xsg_window_t *window)
+{
+	unsigned int button;
+
+	button = xsg_conf_read_uint();
+
+	if (xsg_conf_find_command("Exit")) {
+		window->button_exit = button;
+	} else if (xsg_conf_find_command("Move")) {
+		window->button_move = button;
+	} else {
+		xsg_conf_error("Exit or Move expected");
+	}
+	xsg_conf_read_newline();
 }
 
 /******************************************************************************
@@ -673,6 +697,56 @@ gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec)
 }
 
 static void
+handle_move_event(xsg_window_t *window, XEvent *event)
+{
+	static int x, y, press_x, press_y;
+	static bool mouse_down = FALSE;
+	int release_x, release_y;
+	int move_x, move_y;
+	int win_x, win_y;
+	XWindowAttributes win_attr;
+	Window root, child;
+	unsigned int mask;
+
+	switch (event->type) {
+	case ButtonPress:
+		XGetWindowAttributes(display, window->window, &win_attr);
+		XTranslateCoordinates(display, window->window,
+				RootWindow(display, screen),
+				win_attr.x, win_attr.y, &x, &y, &child);
+		XQueryPointer(display, RootWindow(display, screen),
+				&root, &child, &press_x, &press_y,
+				&win_x, &win_y, &mask);
+		mouse_down = TRUE;
+		break;
+	case ButtonRelease:
+		XQueryPointer(display, RootWindow(display, screen),
+				&root, &child,
+				&release_x, &release_y,
+				&win_x, &win_y, &mask);
+		XMoveWindow(display, window->window,
+				x + (release_x - press_x),
+				y + (release_y - press_y));
+		mouse_down = FALSE;
+		break;
+	case MotionNotify:
+		if (!mouse_down) {
+			break;
+		}
+		XQueryPointer(display, RootWindow(display, screen),
+				&root, &child,
+				&move_x, &move_y,
+				&win_x, &win_y, &mask);
+		XMoveWindow(display, window->window,
+				x + (move_x - press_x),
+				y + (move_y - press_y));
+		break;
+	default:
+		break;
+	}
+}
+
+static void
 handle_xevent(void)
 {
 	xsg_list_t *l;
@@ -716,6 +790,26 @@ handle_xevent(void)
 						&window->copy_from_parent_timeout);
 				}
 			}
+			break;
+		case ButtonPress:
+			xsg_debug("received XEvent: ButtonPress");
+			if (event.xbutton.button == window->button_exit) {
+				xsg_error("pressed mouse button %u: exiting...",
+						window->button_exit);
+			}
+			if (event.xbutton.button == window->button_move) {
+				handle_move_event(window, &event);
+			}
+			break;
+		case ButtonRelease:
+			xsg_debug("received XEvent: ButtonRelease");
+			if (event.xbutton.button == window->button_move) {
+				handle_move_event(window, &event);
+			}
+			break;
+		case MotionNotify:
+			xsg_debug("received XEvent: MotionNotify");
+			handle_move_event(window, &event);
 			break;
 		default:
 			xsg_debug("received XEvent: %d", event.type);
@@ -1151,7 +1245,8 @@ xsg_window_init(void)
 				RootWindow(display, screen), window->visual,
 				AllocNone);
 
-		attrs.event_mask = ExposureMask | StructureNotifyMask;
+		attrs.event_mask = ExposureMask | StructureNotifyMask
+			| ButtonPressMask | ButtonReleaseMask | ButtonMotionMask;
 		attrs.background_pixel = 0;
 		attrs.border_pixel = 0;
 		attrs.colormap = window->colormap;

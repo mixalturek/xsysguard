@@ -247,6 +247,8 @@ parse_config(char *config_name, char *config_buffer)
 				xsg_window_parse_argb_visual(window);
 			} else if (xsg_conf_find_command("Visible")) {
 				xsg_window_parse_visible(window);
+			} else if (xsg_conf_find_command("Mouse")) {
+				xsg_window_parse_mouse(window);
 			} else {
 				xsg_conf_error("Name, Class, Resource, "
 						"Geometry, Sticky, "

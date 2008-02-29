@@ -95,6 +95,9 @@ xsg_window_parse_argb_visual(xsg_window_t *window);
 extern void
 xsg_window_parse_visible(xsg_window_t *window);
 
+extern void
+xsg_window_parse_mouse(xsg_window_t *window);
+
 /*****************************************************************************/
 
 extern void
