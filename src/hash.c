@@ -71,7 +71,7 @@ xsg_direct_equal(const void *v1, const void *v2)
 unsigned
 xsg_direct_hash(const void *v)
 {
-	return (unsigned) v;
+	return (unsigned) (unsigned long) v;
 }
 
 /******************************************************************************/
