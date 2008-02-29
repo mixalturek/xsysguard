@@ -407,6 +407,14 @@ loop(uint64_t num)
 				xsg_timersub(&time_next, &time_now, &time_sleep);
 			}
 
+			/* just to be sure... */
+			time_sleep.tv_usec += 1000;
+
+			if (time_sleep.tv_usec > 1000000) {
+				time_sleep.tv_sec += 1;
+				time_sleep.tv_usec -= 1000000;
+			}
+
 			xsg_debug("sleeping for %u.%06us",
 					(unsigned) time_sleep.tv_sec,
 					(unsigned) time_sleep.tv_usec);
