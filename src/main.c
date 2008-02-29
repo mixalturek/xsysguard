@@ -407,8 +407,8 @@ loop(uint64_t num)
 				xsg_timersub(&time_next, &time_now, &time_sleep);
 			}
 
-			/* just to be sure... */
-			time_sleep.tv_usec += 1000;
+			/* just to be sure... 100 Hz */
+			time_sleep.tv_usec += 10000;
 
 			if (time_sleep.tv_usec >= 1000000) {
 				time_sleep.tv_sec += 1;
