@@ -78,7 +78,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					0, widget->update);
 		}
 
-		pixel_mult = ((double) widget->height)
+		pixel_mult = ((double) widget->height - 0.5)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -144,7 +144,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					1, widget->update);
 		}
 
-		pixel_mult = ((double) widget->width)
+		pixel_mult = ((double) widget->width - 0.5)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -210,7 +210,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					2, widget->update);
 		}
 
-		pixel_mult = ((double) widget->height)
+		pixel_mult = ((double) widget->height - 0.5)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -276,7 +276,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					3, widget->update);
 		}
 
-		pixel_mult = ((double) widget->width)
+		pixel_mult = ((double) widget->width - 0.5)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -350,7 +350,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					0, widget->update);
 		}
 
-		pixel_mult = ((double) chart_height)
+		pixel_mult = ((double) chart_height - 0.5)
 			/ (linechart->max - linechart->min);
 
 		for (l = linechart->var_list; l; l = l->next) {
