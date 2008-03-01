@@ -278,6 +278,10 @@ xsg_printf(xsg_printf_t *p, xsg_var_t *v)
 	for (l = p->var_list; l; l = l->next) {
 		var_t *var = l->data;
 
+		if (var->var == NULL) {
+			break;
+		}
+
 		if (var->type == VAR_INT) {
 			/* d, i */
 			if ((v == NULL) || (v == var->var)) {
