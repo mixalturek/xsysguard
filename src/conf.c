@@ -322,6 +322,7 @@ xsg_conf_find_commentline(void)
 		}
 		if (ptr[0] == '\n') {
 			ptr++;
+			line++;
 		}
 		return TRUE;
 	} else {
