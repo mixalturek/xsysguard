@@ -248,7 +248,9 @@ xsg_imlib_blend_background(
 	bg_width = imlib_image_get_width();
 	bg_height = imlib_image_get_height();
 
-	imlib_context_set_image(image);
+	if (image) {
+		imlib_context_set_image(image);
+	}
 
 	imlib_context_set_cliprect(xoffset, yoffset, width, height);
 
@@ -291,7 +293,10 @@ xsg_imlib_blend_background(
 	imlib_context_set_image(bg_img);
 	imlib_free_image();
 
+	if (image) {
 	imlib_context_set_image(image);
+	}
+
 	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
 }
 
