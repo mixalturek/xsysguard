@@ -614,8 +614,8 @@ xsg_main_loop(uint64_t num)
 	/* ssigaction(SIGSEGV, &action, NULL); */
 	/* ssigaction(SIGSTOP, &action, NULL); */
 	ssigaction(SIGTERM, &action, NULL);
-	ssigaction(SIGTSTP, &action, NULL);
-	ssigaction(SIGTTOU, &action, NULL);
+	/* ssigaction(SIGTSTP, &action, NULL); */
+	/* ssigaction(SIGTTOU, &action, NULL); */
 	ssigaction(SIGUSR1, &action, NULL);
 	ssigaction(SIGUSR2, &action, NULL);
 
