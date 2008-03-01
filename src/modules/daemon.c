@@ -342,7 +342,7 @@ daemon_write_buffer_add_var(
 		timeout = xsg_uint64_be(last_alive_timeout);
 
 		size_t init_len = sizeof(init) + sizeof(uint64_t)
-				+ sizeof(uint8_t);
+				+ sizeof(uint8_t) + sizeof(uint64_t);
 
 		daemon->write_buffer = xsg_realloc(daemon->write_buffer,
 				init_len);
