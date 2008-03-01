@@ -78,7 +78,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					0, widget->update);
 		}
 
-		pixel_mult = ((double) widget->height - 0.5)
+		pixel_mult = ((double) widget->height - 1.0)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -114,7 +114,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					continue;
 				}
 
-				yoffset = (int) (pixel_mult *
+				yoffset = lround(pixel_mult *
 						(linechart->max - value));
 
 				imlib_polygon_add_point(poly,
@@ -144,7 +144,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					1, widget->update);
 		}
 
-		pixel_mult = ((double) widget->width - 0.5)
+		pixel_mult = ((double) widget->width - 1.0)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -180,8 +180,8 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					continue;
 				}
 
-				xoffset = widget->width - (int) (pixel_mult
-						* (linechart->max - value));
+				xoffset = widget->width - lround(pixel_mult
+						* (linechart->max - value)) - 1;
 
 				imlib_polygon_add_point(poly,
 						widget->xoffset - up_x + xoffset,
@@ -210,7 +210,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					2, widget->update);
 		}
 
-		pixel_mult = ((double) widget->height - 0.5)
+		pixel_mult = ((double) widget->height - 1.0)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -246,8 +246,8 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					continue;
 				}
 
-				yoffset = widget->height - (int) (pixel_mult
-						* (linechart->max - value));
+				yoffset = widget->height - lround(pixel_mult
+						* (linechart->max - value)) - 1;
 
 				imlib_polygon_add_point(poly,
 						widget->xoffset - up_x + xoffset,
@@ -276,7 +276,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					3, widget->update);
 		}
 
-		pixel_mult = ((double) widget->width - 0.5)
+		pixel_mult = ((double) widget->width - 1.0)
 			/ (linechart->max - linechart->min);
 
 		imlib_context_set_image(buffer);
@@ -312,7 +312,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					continue;
 				}
 
-				xoffset = (int) (pixel_mult
+				xoffset = lround(pixel_mult
 						* (linechart->max - value));
 
 				imlib_polygon_add_point(poly,
@@ -350,7 +350,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					0, widget->update);
 		}
 
-		pixel_mult = ((double) chart_height - 0.5)
+		pixel_mult = ((double) chart_height - 1.0)
 			/ (linechart->max - linechart->min);
 
 		for (l = linechart->var_list; l; l = l->next) {
@@ -381,7 +381,7 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					continue;
 				}
 
-				yoffset = (int) (pixel_mult
+				yoffset = lround(pixel_mult
 						* (linechart->max - value));
 
 				imlib_polygon_add_point(poly, xoffset, yoffset);
