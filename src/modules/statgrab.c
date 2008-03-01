@@ -1394,10 +1394,16 @@ get_fs_stats_device_name(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_device_name: \"%s\"", ret->device_name);
 		return ret->device_name;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_device_name: \"%s\"", ret->device_name);
 		return ret->device_name;
 	} else {
@@ -1415,10 +1421,16 @@ get_fs_stats_fs_type(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_fs_type: \"%s\"", ret->fs_type);
 		return ret->fs_type;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_fs_type: \"%s\"", ret->fs_type);
 		return ret->fs_type;
 	} else {
@@ -1436,10 +1448,16 @@ get_fs_stats_mnt_point(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_mnt_point: \"%s\"", ret->mnt_point);
 		return ret->mnt_point;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_mnt_point: \"%s\"", ret->mnt_point);
 		return ret->mnt_point;
 	} else {
@@ -1457,10 +1475,16 @@ get_fs_stats_size(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_size: %f", (double) ret->size);
 		return (double) ret->size;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_size: %f", (double) ret->size);
 		return (double) ret->size;
 	} else {
@@ -1478,10 +1502,16 @@ get_fs_stats_used(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used: %f", (double) ret->used);
 		return (double) ret->used;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used: %f", (double) ret->used);
 		return (double) ret->used;
 	} else {
@@ -1499,10 +1529,16 @@ get_fs_stats_avail(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail: %f", (double) ret->avail);
 		return (double) ret->avail;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail: %f", (double) ret->avail);
 		return (double) ret->avail;
 	} else {
@@ -1520,11 +1556,17 @@ get_fs_stats_total_inodes(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_total_inodes: %f",
 				(double) ret->total_inodes);
 		return (double) ret->total_inodes;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_total_inodes: %f",
 				(double) ret->total_inodes);
 		return (double) ret->total_inodes;
@@ -1543,11 +1585,17 @@ get_fs_stats_used_inodes(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used_inodes: %f",
 				(double) ret->used_inodes);
 		return (double) ret->used_inodes;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used_inodes: %f",
 				(double) ret->used_inodes);
 		return (double) ret->used_inodes;
@@ -1566,11 +1614,17 @@ get_fs_stats_free_inodes(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_free_inodes: %f",
 				(double) ret->free_inodes);
 		return (double) ret->free_inodes;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_free_inodes: %f",
 				(double) ret->free_inodes);
 		return (double) ret->free_inodes;
@@ -1589,11 +1643,17 @@ get_fs_stats_avail_inodes(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail_inodes: %f",
 				(double) ret->avail_inodes);
 		return (double) ret->avail_inodes;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail_inodes: %f",
 				(double) ret->avail_inodes);
 		return (double) ret->avail_inodes;
@@ -1612,10 +1672,16 @@ get_fs_stats_io_size(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_io_size: %f", (double) ret->io_size);
 		return (double) ret->io_size;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_io_size: %f", (double) ret->io_size);
 		return (double) ret->io_size;
 	} else {
@@ -1633,11 +1699,17 @@ get_fs_stats_block_size(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_block_size: %f",
 				(double) ret->block_size);
 		return (double) ret->block_size;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_block_size: %f",
 				(double) ret->block_size);
 		return (double) ret->block_size;
@@ -1656,11 +1728,17 @@ get_fs_stats_total_blocks(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_total_blocks: %f",
 				(double) ret->total_blocks);
 		return (double) ret->total_blocks;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_total_blocks: %f",
 				(double) ret->total_blocks);
 		return (double) ret->total_blocks;
@@ -1679,11 +1757,17 @@ get_fs_stats_free_blocks(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_free_blocks: %f",
 				(double) ret->free_blocks);
 		return (double) ret->free_blocks;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_free_blocks: %f",
 				(double) ret->free_blocks);
 		return (double) ret->free_blocks;
@@ -1702,11 +1786,17 @@ get_fs_stats_used_blocks(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used_blocks: %f",
 				(double) ret->used_blocks);
 		return (double) ret->used_blocks;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_used_blocks: %f",
 				(double) ret->used_blocks);
 		return (double) ret->used_blocks;
@@ -1725,11 +1815,17 @@ get_fs_stats_avail_blocks(void *arg)
 
 	data = (char *) arg;
 
-	if ((ret = get_fs_stats_for_device_name(data))) {
+	ret = get_fs_stats_for_device_name(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail_blocks: %f",
 				(double) ret->avail_blocks);
 		return (double) ret->avail_blocks;
-	} else if ((ret = get_fs_stats_for_mnt_point(data))) {
+	}
+
+	ret = get_fs_stats_for_mnt_point(data);
+
+	if (ret) {
 		xsg_debug("get_fs_stats_avail_blocks: %f",
 				(double) ret->avail_blocks);
 		return (double) ret->avail_blocks;
@@ -1828,7 +1924,9 @@ get_disk_io_stats_read_bytes(void *arg)
 
 	disk_name = (char *) arg;
 
-	if ((ret = get_disk_io_stats_for_disk_name(disk_name))) {
+	ret = get_disk_io_stats_for_disk_name(disk_name);
+
+	if (ret) {
 		xsg_debug("get_disk_io_stats_read_bytes: %f",
 				(double) ret->read_bytes);
 		return (double) ret->read_bytes;
@@ -1847,7 +1945,9 @@ get_disk_io_stats_write_bytes(void *arg)
 
 	disk_name = (char *) arg;
 
-	if ((ret = get_disk_io_stats_for_disk_name(disk_name))) {
+	ret = get_disk_io_stats_for_disk_name(disk_name);
+
+	if (ret) {
 		xsg_debug("get_disk_io_stats_write_bytes: %f",
 				(double) ret->write_bytes);
 		return (double) ret->write_bytes;
@@ -1921,7 +2021,9 @@ get_disk_io_stats_diff_read_bytes(void *arg)
 
 	a = (disk_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_disk_io_stats_diff_for_disk_name(a))) {
+	ret = get_disk_io_stats_diff_for_disk_name(a);
+
+	if (ret) {
 		xsg_debug("get_disk_io_stats_diff_read_bytes: %f",
 				(double) ret->read_bytes);
 		return (double) ret->read_bytes;
@@ -1941,7 +2043,9 @@ get_disk_io_stats_diff_write_bytes(void *arg)
 
 	a = (disk_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_disk_io_stats_diff_for_disk_name(a))) {
+	ret = get_disk_io_stats_diff_for_disk_name(a);
+
+	if (ret) {
 		xsg_debug("get_disk_io_stats_diff_write_bytes: %f",
 				(double) ret->write_bytes);
 		return (double) ret->write_bytes;
@@ -2043,7 +2147,9 @@ get_network_io_stats_tx(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_tx: %f", (double) ret->tx);
 		return (double) ret->tx;
 	} else {
@@ -2061,7 +2167,9 @@ get_network_io_stats_rx(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_rx: %f", (double) ret->rx);
 		return (double) ret->rx;
 	} else {
@@ -2079,7 +2187,9 @@ get_network_io_stats_ipackets(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_ipackets: %f",
 				(double) ret->ipackets);
 		return (double) ret->ipackets;
@@ -2098,7 +2208,9 @@ get_network_io_stats_opackets(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_opackets: %f",
 				(double) ret->opackets);
 		return (double) ret->opackets;
@@ -2117,7 +2229,9 @@ get_network_io_stats_ierrors(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_ierrors: %f",
 				(double) ret->ierrors);
 		return (double) ret->ierrors;
@@ -2136,7 +2250,9 @@ get_network_io_stats_oerrors(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_oerrors: %f",
 				(double) ret->oerrors);
 		return (double) ret->oerrors;
@@ -2155,7 +2271,9 @@ get_network_io_stats_collisions(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_io_stats_for_interface_name(interface_name))) {
+	ret = get_network_io_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_collisions: %f",
 				(double) ret->collisions);
 		return (double) ret->collisions;
@@ -2261,7 +2379,9 @@ get_network_io_stats_diff_rx(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_rx: %f", (double) ret->rx);
 		return (double) ret->rx;
 	} else {
@@ -2279,7 +2399,9 @@ get_network_io_stats_diff_ipackets(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_ipackets: %f",
 				(double) ret->ipackets);
 		return (double) ret->ipackets;
@@ -2299,7 +2421,9 @@ get_network_io_stats_diff_opackets(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_opackets: %f",
 				(double) ret->opackets);
 		return (double) ret->opackets;
@@ -2319,7 +2443,9 @@ get_network_io_stats_diff_ierrors(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_ierrors: %f",
 				(double) ret->ierrors);
 		return (double) ret->ierrors;
@@ -2339,7 +2465,9 @@ get_network_io_stats_diff_oerrors(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_oerrors: %f",
 				(double) ret->oerrors);
 		return (double) ret->oerrors;
@@ -2359,7 +2487,9 @@ get_network_io_stats_diff_collisions(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_collisions: %f",
 				(double) ret->collisions);
 		return (double) ret->collisions;
@@ -2472,7 +2602,9 @@ get_network_iface_stats_speed(void *arg)
 
 	interface_name = (char *) arg;
 
-	if ((ret = get_network_iface_stats_for_interface_name(interface_name))) {
+	ret = get_network_iface_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_iface_stats_speed: %f",
 				(double) ret->speed);
 		return (double) ret->speed;
@@ -2500,7 +2632,9 @@ get_network_iface_stats_duplex_number(void *arg)
 	data = (network_iface_stats_duplex_data_t *) arg;
 	interface_name = data->interface_name;
 
-	if ((ret = get_network_iface_stats_for_interface_name(interface_name))) {
+	ret = get_network_iface_stats_for_interface_name(interface_name);
+
+	if (ret) {
 		xsg_debug("get_network_iface_stats_duplex_number: %f",
 				(double) ret->duplex);
 		return (double) ret->duplex;
@@ -2522,7 +2656,9 @@ get_network_iface_stats_duplex_string(void *arg)
 	data = (network_iface_stats_duplex_data_t *) arg;
 	interface_name = data->interface_name;
 
-	if (!(ret = get_network_iface_stats_for_interface_name(interface_name))) {
+	ret = get_network_iface_stats_for_interface_name(interface_name);
+
+	if (!ret) {
 		xsg_debug("get_network_iface_stats_duplex_string: "
 				"network_iface_stats for \"%s\" not found",
 				interface_name);
