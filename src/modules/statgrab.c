@@ -285,6 +285,7 @@ get_disk_io_stats_diff(uint64_t tick)
 		int old_entries = d->entries;
 		int i, j;
 
+		d->entries = entries;
 		d->diff = xsg_new(sg_disk_io_stats, entries);
 
 		for (i = 0; i < entries; i++) {
@@ -363,6 +364,7 @@ get_network_io_stats_diff(uint64_t tick)
 		int old_entries = d->entries;
 		int i, j;
 
+		d->entries = entries;
 		d->diff = xsg_new(sg_network_io_stats, entries);
 
 		for (i = 0; i < entries; i++) {
@@ -2221,7 +2223,9 @@ get_network_io_stats_diff_tx(void *arg)
 
 	a = (network_io_stats_diff_arg_t *) arg;
 
-	if ((ret = get_network_io_stats_diff_for_interface_name(a))) {
+	ret = get_network_io_stats_diff_for_interface_name(a);
+
+	if (ret) {
 		xsg_debug("get_network_io_stats_diff_tx: %f", (double) ret->tx);
 		return (double) ret->tx;
 	} else {
