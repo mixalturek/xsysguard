@@ -294,7 +294,7 @@ xsg_imlib_blend_background(
 	imlib_free_image();
 
 	if (image) {
-	imlib_context_set_image(image);
+		imlib_context_set_image(image);
 	}
 
 	imlib_context_set_cliprect(clip_x, clip_y, clip_w, clip_h);
