@@ -283,7 +283,7 @@ parse_config(char *config_name, char *config_buffer)
 		} else if (xsg_conf_find_command("Text")) {
 			xsg_widget_text_parse(window);
 		} else {
-			xsg_conf_error("#, Set, Module, SetEnv, Line, "
+			xsg_conf_error("#, Set, SetEnv, ModuleEnv, Line, "
 					"Rectangle, Ellipse, Polygon, "
 					"Image, BarChart, LineChart, "
 					"AreaChart or Text expected");
