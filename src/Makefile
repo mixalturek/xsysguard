@@ -40,7 +40,7 @@ $(error cannot read VERSION file)
 endif
 SVNVERSION := $(shell test -d ../.svn && svnversion -nc .. | sed -e 's/^[^:]*://;s/[A-Za-z]//')
 ifdef SVNVERSION
-VERSION := $(VERSION).r$(SVNVERSION)
+VERSION := $(VERSION).svn$(SVNVERSION)
 endif
 
 DATA_DIR    := $(datadir)/xsysguard
