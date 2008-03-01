@@ -49,10 +49,18 @@ xsg_conf_set_buffer(char *name, char *buffer)
 static char *
 error_line(void)
 {
-	char *p, *line_begin, *line_end, *buffer;
+	char *nptr, *p, *line_begin, *line_end, *buffer;
 	size_t line_len, n;
 
-	p = ptr;
+	nptr = ptr;
+
+	if (nptr[0] == '\0' || nptr[0] == '\n') {
+		if (nptr > buf) {
+			nptr--;
+		}
+	}
+
+	p = nptr;
 
 	while (p[0] != '\0' && p[0] != '\n') {
 		p++;
@@ -62,7 +70,7 @@ error_line(void)
 
 	p--;
 
-	if (p < ptr) {
+	if (p < nptr) {
 		return xsg_strdup("\n^");
 	}
 
@@ -80,11 +88,11 @@ error_line(void)
 
 	line_len = line_end - line_begin;
 
-	if (ptr < p) {
+	if (nptr < p) {
 		return xsg_strdup("\n^");
 	}
 
-	n = ptr - p;
+	n = nptr - p;
 
 	buffer = xsg_new(char, line_len + 1 + n + 1 + 1);
 
