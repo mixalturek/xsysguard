@@ -1,0 +1,12 @@
+Set Background Color #0000
+Set Geometry 160x110
+Set Decorations Off
+Set XShape 1
+Set Mouse 1 Move
+Set Mouse 3 Exit
+
+Rectangle 0 100 160 10 blue Filled
+
+AreaChart 1 0 0 160 100 Min 0 Max 1
++ random orange Top 3 red red red
+
