@@ -771,7 +771,7 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 	}
 
 	if (areachart->min_var) {
-		areachart->max = DBL_MIN;
+		areachart->max = - DBL_MAX;
 
 		for (i = 0;  i < count; i++) {
 			double pos = 0.0;
@@ -838,7 +838,7 @@ update_areachart(xsg_widget_t *widget, xsg_var_t *var)
 		}
 	} else {
 		areachart->min = DBL_MAX;
-		areachart->max = DBL_MIN;
+		areachart->max = - DBL_MAX;
 
 		for (i = 0; i < count; i++) {
 			double pos = 0.0;

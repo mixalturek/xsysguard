@@ -475,7 +475,7 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 	}
 
 	if (linechart->min_var) {
-		linechart->max = DBL_MIN;
+		linechart->max = - DBL_MAX;
 
 		for (l = linechart->var_list; l; l = l->next) {
 			linechart_var = l->data;
@@ -502,7 +502,7 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 		}
 	} else {
 		linechart->min = DBL_MAX;
-		linechart->max = DBL_MIN;
+		linechart->max = - DBL_MAX;
 
 		for (l = linechart->var_list; l; l = l->next) {
 			linechart_var = l->data;

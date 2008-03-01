@@ -642,7 +642,7 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 			}
 		}
 
-		barchart->max = DBL_MIN;
+		barchart->max = - DBL_MAX;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
@@ -734,7 +734,7 @@ update_barchart(xsg_widget_t *widget, xsg_var_t *var)
 		double neg = 0.0;
 
 		barchart->min = DBL_MAX;
-		barchart->max = DBL_MIN;
+		barchart->max = - DBL_MAX;
 
 		for (l = barchart->var_list; l; l = l->next) {
 			barchart_var = l->data;
