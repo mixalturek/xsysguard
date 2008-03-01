@@ -235,7 +235,6 @@ xsg_imlib_blend_background(
 	bg_img = xsg_imlib_load_image(bg);
 
 	if (unlikely(bg_img == NULL)) {
-		xsg_warning("cannot load image \"%s\"", bg);
 		return;
 	}
 
