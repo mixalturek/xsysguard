@@ -1,0 +1,33 @@
+Set Background Color grey
+Set Geometry 360x240
+
+################################################################################
+
+LineChart 1 10 10 100 100 Min 0 Max 1 Background test/linechart_background.png
++ random blue
+
+################################################################################
+
+LineChart 3 130 10 100 100 Min 0 Max 1 Angle 90 Background test/linechart_background.png
++ random blue
+
+################################################################################
+
+LineChart 1 250 10 100 100 Min 0 Max 1 Angle 100 Background test/linechart_background.png
++ random blue
+
+################################################################################
+
+LineChart 1 10 130 100 100 Min 0 Max 1 Angle 180 Background test/linechart_background.png
++ random blue
+
+################################################################################
+
+LineChart 3 130 130 100 100 Min 0 Max 1 Angle 270 Background test/linechart_background.png
++ random blue
+
+################################################################################
+
+LineChart 1 250 130 100 100 Min 0 Max 1 Angle 30 Background test/linechart_background.png
++ random blue
+
