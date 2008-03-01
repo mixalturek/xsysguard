@@ -508,70 +508,89 @@ shutdown(void)
 static void
 signal_handler(int signum)
 {
-	last_received_signum = signum;
+	char *signame;
+
+	/* NOTE: strsignal is not part of any standard */
 
 	switch (signum) {
 	case SIGABRT:
-		xsg_error("received signal %d: SIGABRT", SIGABRT);
+		signame = "SIGABRT";
 		break;
 	case SIGALRM:
-		xsg_message("received signal %d: SIGALRM", SIGALRM);
+		signame = "SIGALRM";
 		break;
 	case SIGCHLD:
-		xsg_message("received signal %d: SIGCHLD", SIGCHLD);
+		signame = "SIGCHLD";
 		break;
 	case SIGCONT:
-		xsg_message("received signal %d: SIGCONT", SIGCONT);
+		signame = "SIGCONT";
 		break;
 	case SIGFPE:
-		xsg_message("received signal %d: SIGFPE", SIGFPE);
+		signame = "SIGFPE";
 		break;
 	case SIGHUP:
-		xsg_message("received signal %d: SIGHUP", SIGHUP);
+		signame = "SIGHUP";
 		break;
 	case SIGILL:
-		xsg_message("received signal %d: SIGILL", SIGILL);
+		signame = "SIGILL";
 		break;
 	case SIGINT:
-		xsg_error("received signal %d: SIGINT", SIGINT);
+		signame = "SIGINT";
 		break;
 	case SIGKILL:
-		xsg_error("received signal %d: SIGKILL", SIGKILL);
+		signame = "SIGKILL";
 		break;
 	case SIGPIPE:
-		xsg_warning("received signal %d: SIGPIPE", SIGPIPE);
+		signame = "SIGPIPE";
 		break;
 	case SIGQUIT:
-		xsg_error("received signal %d: SIGQUIT", SIGQUIT);
+		signame = "SIGQUIT";
 		break;
 	case SIGSEGV:
-		xsg_error("received signal %d: SIGSEGV", SIGSEGV);
+		signame = "SIGSEGV";
 		break;
 	case SIGSTOP:
-		xsg_error("received signal %d: SIGSTOP", SIGSTOP);
+		signame = "SIGSTOP";
 		break;
 	case SIGTERM:
-		xsg_error("received signal %d: SIGTERM", SIGTERM);
+		signame = "SIGTERM";
 		break;
 	case SIGTSTP:
-		xsg_message("received signal %d: SIGTSTP", SIGTSTP);
+		signame = "SIGTSTP";
 		break;
 	case SIGTTIN:
-		xsg_message("received signal %d: SIGTTIN", SIGTTIN);
+		signame = "SIGTTIN";
 		break;
 	case SIGTTOU:
-		xsg_message("received signal %d: SIGTTOU", SIGTTOU);
+		signame = "SIGTTOU";
 		break;
 	case SIGUSR1:
-		xsg_message("received signal %d: SIGUSR1", SIGUSR1);
+		signame = "SIGUSR1";
 		break;
 	case SIGUSR2:
-		xsg_message("received signal %d: SIGUSR2", SIGUSR2);
+		signame = "SIGUSR2";
 		break;
 	default:
-		xsg_message("received signal %d", signum);
+		signame = "";
 		break;
 	}
+
+	switch (signum) {
+	case SIGABRT:
+	case SIGINT:
+	case SIGKILL:
+	case SIGQUIT:
+	case SIGSEGV:
+	case SIGSTOP:
+	case SIGTERM:
+		xsg_error("received signal %d: %s", signum, signame);
+		break;
+	default:
+		xsg_message("received signal %d: %s", signum, signame);
+		break;
+	}
+
+	last_received_signum = signum;
 }
 
 static int
