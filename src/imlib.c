@@ -257,16 +257,16 @@ xsg_imlib_blend_background(
 
 	switch (orientation) {
 	case 0:
-		xoffset += (tick / update) % bg_width;
-		break;
-	case 1:
-		yoffset += (tick / update) % bg_height;
-		break;
-	case 2:
 		xoffset -= (tick / update) % bg_width;
 		break;
-	case 3:
+	case 1:
 		yoffset -= (tick / update) % bg_height;
+		break;
+	case 2:
+		xoffset += (tick / update) % bg_width;
+		break;
+	case 3:
+		yoffset += (tick / update) % bg_height;
 		break;
 	default:
 		xsg_error("unknown orientation");
