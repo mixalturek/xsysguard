@@ -1,0 +1,57 @@
+Set Background Color grey
+Set Geometry 360x240
+
+################################################################################
+
+Rectangle 10 10 100 100 white Filled
+
+LineChart 1 10 10 100 100 Min -100 Max 100
++ 100 red
++ -100 blue
++ random,200,MUL,100,SUB green
+
+################################################################################
+
+Rectangle 130 10 100 100 white Filled Angle 90
+
+LineChart 1 130 10 100 100 Min -10 Max 10 Angle 90
++ 10 red
++ -10 blue
++ random,20,MUL,10,SUB green
+
+################################################################################
+
+Rectangle 250 10 100 100 white Filled Angle 100
+
+LineChart 1 250 10 100 100 Min -100 Max 100 Angle 100
++ 100 red
++ -100 blue
++ random,200,MUL,100,SUB green
+
+################################################################################
+
+Rectangle 10 130 100 100 white Filled Angle 180
+
+LineChart 1 10 130 100 100 Min 0 Max 100 Angle 180
++ 100 red
++ 0 blue
++ random,100,MUL green
+
+################################################################################
+
+Rectangle 130 130 100 100 white Filled Angle 270
+
+LineChart 1 130 130 100 100 Min 100 Max 200 Angle 270
++ 100 blue
++ 200 red
++ random,100,MUL,100,ADD green
+
+################################################################################
+
+Rectangle 250 130 100 100 white Filled Angle 30
+
+LineChart 1 250 130 100 100 Angle 30
++ -200 blue
++ -100 red
++ random,100,MUL,200,SUB green
+
