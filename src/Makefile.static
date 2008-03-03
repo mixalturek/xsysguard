@@ -34,11 +34,10 @@ DEF += -D XSG_LOG_DOMAIN=NULL
 DEF += -D XSYSGUARD_VERSION=\"$(VERSION)\"
 DEF += -D XSG_API=
 
-FLAGS := -nostdlib -static -combine -fwhole-program
-FLAGS += -Iinclude -DLinux -g0 -Os -fomit-frame-pointer
-FLAGS += -isystem dietlibc/include -D__dietlibc__ $(DEF)
+CFLAGS := -static -g0 -Iinclude -Wall -DLinux $(DEF)
+CFLAGS += -Os -combine -fwhole-program -fomit-frame-pointer
 
-SRC := xsysguardd.c libm.c
+SRC := xsysguardd.c
 SRC += include/xsysguard.h types.h
 SRC += main.c main.h 
 SRC += conf.c conf.h
@@ -49,137 +48,37 @@ SRC += modules_static.c modules.h
 SRC += vard.c vard.h
 SRC += writebuffer.c writebuffer.h
 
-ALL := xsysguardd-i386-linux
-ALL += xsysguardd-mips-linux
-ALL += xsysguardd-alpha-linux
-ALL += xsysguardd-ppc-linux
-ALL += xsysguardd-ppc64-linux
-ALL += xsysguardd-arm-linux
-ALL += xsysguardd-sparc-linux
-#ALL += xsysguardd-sparc64-linux
-ALL += xsysguardd-s390-linux
-ALL += xsysguardd-s390x-linux
-ALL += xsysguardd-mipsel-linux
-ALL += xsysguardd-hppa-linux
-ALL += xsysguardd-x86_64-linux
-ALL += xsysguardd-ia64-linux
+################################################################################
+
+GCC   := linux-uclibc-gcc $(CFLAGS)
+STRIP := linux-uclibc-strip -R .comment -R .note
 
 ################################################################################
 
-all: dietlibc $(ALL)
-
-dietlibc:
-	cvs -d :pserver:cvs@cvs.fefe.de:/cvs -z9 co dietlibc
-
-xsysguardd-i386-linux: $(SRC)
-	$(MAKE) -C dietlibc all i386
-	i386-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		-Ldietlibc/bin-i386 dietlibc/bin-i386/start.o \
-		-lgcc dietlibc/bin-i386/dietlibc.a \
-		-m32
-	i386-linux-strip -R .comment -R .note $@
-
-xsysguardd-mips-linux: $(SRC)
-	$(MAKE) -C dietlibc all mips
-	mips-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		-Ldietlibc/bin-mips dietlibc/bin-mips/start.o \
-		-lgcc dietlibc/bin-mips/dietlibc.a \
-		-meb -G 0 -fstrict-aliasing -fno-pic -mno-abicalls
-	mips-linux-strip -R .comment -R .note $@
-
-xsysguardd-alpha-linux: $(SRC)
-	$(MAKE) -C dietlibc all alpha
-	alpha-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		-Ldietlibc/bin-alpha dietlibc/bin-alpha/start.o \
-		-lgcc dietlibc/bin-alpha/dietlibc.a \
-		-fstrict-aliasing
-	alpha-linux-strip -R .comment -R .note $@
-
-xsysguardd-ppc-linux: $(SRC)
-	$(MAKE) -C dietlibc all ppc
-	ppc-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		-Ldietlibc/bin-ppc dietlibc/bin-ppc/start.o \
-		-lgcc dietlibc/bin-ppc/dietlibc.a \
-		-mpowerpc-gpopt -mpowerpc-gfxopt
-	ppc-linux-strip -R .comment -R .note $@
-
-xsysguardd-ppc64-linux: $(SRC)
-	$(MAKE) -C dietlibc all ppc64
-	ppc64-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		-Ldietlibc/bin-ppc64 dietlibc/bin-ppc64/start.o \
-		-lgcc dietlibc/bin-ppc64/dietlibc.a \
-		-mpowerpc64
-	ppc64-linux-strip -R .comment -R .note $@
-
-xsysguardd-arm-linux: $(SRC)
-	$(MAKE) -C dietlibc all arm
-	arm-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-arm/start.o dietlibc/bin-arm/dietlibc.a \
-		-lgcc dietlibc/bin-arm/dietlibc.a \
-		-fstrict-aliasing -mhard-float
-	arm-linux-strip -R .comment -R .note $@
-
-xsysguardd-sparc-linux: $(SRC)
-	$(MAKE) -C dietlibc all sparc
-	sparc-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-sparc/start.o dietlibc/bin-sparc/dietlibc.a \
-		-lgcc dietlibc/bin-sparc/dietlibc.a \
-		-mcpu=supersparc -m32
-	sparc-linux-strip -R .comment -R .note $@
-
-xsysguardd-sparc64-linux: $(SRC)
-	$(MAKE) -C dietlibc all sparc64
-	sparc64-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-sparc64/start.o dietlibc/bin-sparc64/dietlibc.a \
-		-lgcc dietlibc/bin-sparc64/dietlibc.a \
-		-m64 -mcpu=v9
-	sparc64-linux-strip -R .comment -R .note $@
-
-xsysguardd-s390-linux: $(SRC)
-	$(MAKE) -C dietlibc all s390
-	s390-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-s390/start.o dietlibc/bin-s390/dietlibc.a \
-		-lgcc dietlibc/bin-s390/dietlibc.a
-	s390-linux-strip -R .comment -R .note $@
-
-xsysguardd-s390x-linux: $(SRC)
-	$(MAKE) -C dietlibc all s390x
-	s390x-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-s390x/start.o dietlibc/bin-s390x/dietlibc.a \
-		-lgcc dietlibc/bin-s390x/dietlibc.a
-	s390x-linux-strip -R .comment -R .note $@
-
-xsysguardd-mipsel-linux: $(SRC)
-	$(MAKE) -C dietlibc all mipsel
-	mipsel-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-mipsel/start.o dietlibc/bin-mipsel/dietlibc.a \
-		-lgcc dietlibc/bin-mipsel/dietlibc.a \
-		-EL -G 0 -fstrict-aliasing -fno-pic -mno-abicalls
-	mipsel-linux-strip -R .comment -R .note $@
-
-xsysguardd-hppa-linux: $(SRC)
-	$(MAKE) -C dietlibc all hppa
-	hppa-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-hppa/start.o dietlibc/bin-hppa/dietlibc.a \
-		-lgcc dietlibc/bin-hppa/dietlibc.a
-	hppa-linux-strip -R .comment -R .note $@
-
-xsysguardd-x86_64-linux: $(SRC)
-	$(MAKE) -C dietlibc all x86_64
-	x86_64-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-x86_64/start.o dietlibc/bin-x86_64/dietlibc.a \
-		-lgcc dietlibc/bin-x86_64/dietlibc.a \
-		-fstrict-aliasing -momit-leaf-frame-pointer
-	x86_64-linux-strip -R .comment -R .note $@
-
-xsysguardd-ia64-linux: $(SRC)
-	$(MAKE) -C dietlibc all ia64
-	ia64-linux-gcc -o $@ $(FLAGS) $(filter %.c,$^) \
-		dietlibc/bin-ia64/start.o dietlibc/bin-ia64/dietlibc.a \
-		-lgcc dietlibc/bin-ia64/dietlibc.a
-	ia64-linux-strip -R .comment -R .note $@
+ARCH := i386
+ARCH += ia64
+ARCH += x86_64
+ARCH += arm
+ARCH += armeb
+ARCH += mips
+ARCH += mipsel
+ARCH += powerpc
 
 ################################################################################
+
+ALL := $(patsubst %,xsysguardd-%-linux,$(ARCH))
+ALL += $(patsubst %,xsysguardd-%-linux-upx,$(ARCH))
+
+################################################################################
+
+all: $(ALL)
+
+xsysguardd-%-linux: $(SRC)
+	$(patsubst xsysguardd-%-linux,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
+	$(patsubst xsysguardd-%-linux,%,$@)-$(STRIP) $@
+
+xsysguardd-%-linux-upx: xsysguardd-%-linux
+	upx --best -o $@ $^ || exit 0
 
 clean:
 	$(RM) $(ALL)
