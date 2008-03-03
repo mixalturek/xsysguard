@@ -319,6 +319,14 @@ op_sqrt(void)
 }
 
 static void
+op_pow(void)
+{
+	num_stack[stack_index - 1] = pow(num_stack[stack_index - 1],
+			num_stack[stack_index]);
+	stack_index -= 1;
+}
+
+static void
 op_atan(void)
 {
 	num_stack[stack_index] = atan(num_stack[stack_index]);
@@ -678,6 +686,10 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("N", "SQRT");
 			op->op = op_sqrt;
 			PUSH("N");
+		} else if (xsg_conf_find_command("POW")) {
+			POP("NN", "POW");
+			op->op = op_pow;
+			PUSH("N");
 		} else if (xsg_conf_find_command("ATAN")) {
 			POP("N", "ATAN");
 			op->op = op_atan;
@@ -802,7 +814,7 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"ISINF, IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, "
 						"ADD, SUB, MUL, DIV, MOD, "
-						"SIN, COS, LOG, EXP, SQRT, "
+						"SIN, COS, LOG, EXP, SQRT, POW, "
 						"ATAN, ATAN2, FLOOR, CEIL, "
 						"DEG2RAD, RAD2DEG, ABS, DUP, "
 						"POP, EXC, STRLEN, STRCMP, "
