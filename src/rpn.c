@@ -253,6 +253,18 @@ op_neginf(void)
 }
 
 static void
+op_inc(void)
+{
+	num_stack[stack_index] = num_stack[stack_index] + 1.0;
+}
+
+static void
+op_dec(void)
+{
+	num_stack[stack_index] = num_stack[stack_index] - 1.0;
+}
+
+static void
 op_add(void)
 {
 	num_stack[stack_index - 1] += num_stack[stack_index];
@@ -646,6 +658,14 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		} else if (xsg_conf_find_command("NEGINF")) {
 			op->op = op_neginf;
 			PUSH("N");
+		} else if (xsg_conf_find_command("INC")) {
+			POP("N", "INC");
+			op->op = op_inc;
+			PUSH("N");
+		} else if (xsg_conf_find_command("DEC")) {
+			POP("N", "DEC");
+			op->op = op_dec;
+			PUSH("N");
 		} else if (xsg_conf_find_command("ADD")) {
 			POP("NN", "ADD");
 			op->op = op_add;
@@ -813,8 +833,9 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"LT, LE, GT, GE, EQ, NE, UN, "
 						"ISINF, IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, "
-						"ADD, SUB, MUL, DIV, MOD, "
-						"SIN, COS, LOG, EXP, SQRT, POW, "
+						"INC, DEC, ADD, SUB, "
+						"MUL, DIV, MOD, SIN, COS, "
+						"LOG, EXP, SQRT, POW, "
 						"ATAN, ATAN2, FLOOR, CEIL, "
 						"DEG2RAD, RAD2DEG, ABS, DUP, "
 						"POP, EXC, STRLEN, STRCMP, "
