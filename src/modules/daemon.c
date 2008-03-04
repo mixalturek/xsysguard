@@ -973,10 +973,6 @@ parse_daemon(
 
 	daemon_var = xsg_new(daemon_var_t, 1);
 
-	if (!xsg_conf_find_command("exec")) {
-		xsg_conf_error("exec expected");
-	}
-
 	name = xsg_conf_read_string();
 	daemon = find_daemon(name);
 	xsg_free(name);
