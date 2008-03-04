@@ -39,6 +39,12 @@
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
+#define XSG_MODULE(parse, help, info) static const char info_env[] = info
+#define XSG_MODULE_NAME "env"
+#include "modules/env.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
 #define XSG_MODULE(parse, help, info) static const char info_exec[] = info
 #define XSG_MODULE_NAME "exec"
 #include "modules/exec.c"
@@ -94,6 +100,7 @@
 
 xsg_module_t xsg_modules_array[] = {
 	{ parse_daemon, help_daemon, info_daemon, "daemon" },
+	{ parse_env, help_env, info_env, "env" },
 	{ parse_exec, help_exec, info_exec, "exec" },
 	{ parse_file, help_file, info_file, "file" },
 	{ parse_number, help_number, info_number, "number" },
