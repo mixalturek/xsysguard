@@ -34,6 +34,12 @@
 
 /******************************************************************************/
 
+#ifndef STDERR_FILENO
+# define STDERR_FILENO 2
+#endif
+
+/******************************************************************************/
+
 #define ESCAPE "\033"
 #define COLOR_MAGENTA ESCAPE"[35m"
 #define COLOR_YELLOW  ESCAPE"[33m"
@@ -362,6 +368,10 @@ main(int argc, char **argv)
 		{ "modules", 0, NULL, 'm' },
 		{ NULL,      0, NULL,  0  }
 	};
+
+	if (isatty(STDERR_FILENO)) {
+		log_to_stderr = TRUE;
+	}
 
 	opterr = 0;
 	while (1) {
