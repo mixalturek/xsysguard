@@ -71,19 +71,19 @@ ARCH += m68k
 
 ################################################################################
 
-ALL := $(patsubst %,xsysguardd-linux-%,$(ARCH))
-ALL += $(patsubst %,xsysguardd-linux-%-upx,$(ARCH))
+ALL := $(patsubst %,xsysguardd-static-linux-%,$(ARCH))
+ALL += $(patsubst %,xsysguardd-static-linux-%-upx,$(ARCH))
 
 ################################################################################
 
 all: $(ALL)
 
-xsysguardd-linux-%-upx: xsysguardd-linux-%
+xsysguardd-static-linux-%-upx: xsysguardd-static-linux-%
 	upx --lzma -o $@ $^ || exit 0
 
-xsysguardd-linux-%: $(SRC)
-	$(patsubst xsysguardd-linux-%,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
-	$(patsubst xsysguardd-linux-%,%,$@)-$(STRIP) $@
+xsysguardd-static-linux-%: $(SRC)
+	$(patsubst xsysguardd-static-linux-%,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
+	$(patsubst xsysguardd-static-linux-%,%,$@)-$(STRIP) $@
 
 clean:
 	$(RM) $(ALL)
