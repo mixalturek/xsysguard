@@ -34,7 +34,9 @@
 
 struct _xsg_rpn_t {
 	xsg_list_t *op_list;
-	xsg_string_t *stack; /* S=string, N=number, X=both */
+	xsg_string_t *stack;	/* S=string, N=number, X=both */
+	double num_heap;	/* for LOAD and STORE */
+	xsg_string_t *str_heap; /* for LOAD and STORE */
 };
 
 typedef struct _op_t {
@@ -53,6 +55,46 @@ static xsg_string_t **str_stack = NULL;
 
 static unsigned stack_index;
 static unsigned max_stack_size = 0;
+
+static xsg_rpn_t *current_rpn = NULL; /* for LOAD and STORE */
+
+/******************************************************************************/
+
+static void
+op_load(void)
+{
+	num_stack[stack_index + 1] = current_rpn->num_heap;
+	xsg_string_assign(str_stack[stack_index + 1], current_rpn->str_heap->str);
+	stack_index += 1;
+}
+
+static void
+op_store(void)
+{
+	if (num_stack[stack_index - 1] != 0.0) {
+		current_rpn->num_heap = num_stack[stack_index];
+		xsg_string_assign(current_rpn->str_heap, str_stack[stack_index]->str);
+	}
+	stack_index -= 2;
+}
+
+static void
+op_store_str(void)
+{
+	if (num_stack[stack_index - 1] != 0.0) {
+		xsg_string_assign(current_rpn->str_heap, str_stack[stack_index]->str);
+	}
+	stack_index -= 2;
+}
+
+static void
+op_store_num(void)
+{
+	if (num_stack[stack_index - 1] != 0.0) {
+		current_rpn->num_heap = num_stack[stack_index];
+	}
+	stack_index -= 2;
+}
 
 /******************************************************************************/
 
@@ -568,6 +610,8 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 	rpn[0] = xsg_new(xsg_rpn_t, 1);
 	rpn[0]->op_list = NULL;
 	rpn[0]->stack = xsg_string_new(NULL);
+	rpn[0]->str_heap = xsg_string_new(NULL);
+	rpn[0]->num_heap = DNAN;
 
 	rpn_list = xsg_list_append(rpn_list, rpn[0]);
 
@@ -588,6 +632,23 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			op->str_func = get_string;
 			op->arg = (void *) string;
 			PUSH("S");
+		} else if (xsg_conf_find_command("LOAD")) {
+			op->op = op_load;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STORE")) {
+			/* NOTE: "NX" needs to be first!
+			 * ("NN" and "NS" will match "NX" too) */
+			if (pop(rpn[0]->stack, "NX")) {
+				op->op = op_store;
+			} else if (pop(rpn[0]->stack, "NN")) {
+				op->op = op_store_num;
+			} else if (pop(rpn[0]->stack, "NS")) {
+				op->op = op_store_str;
+			} else {
+				xsg_conf_error("RPN: STORE: stack was '%s', "
+						"but 'NN' or 'NS' expected",
+						rpn[0]->stack->str);
+			}
 		} else if (xsg_conf_find_command("LT")) {
 			POP("NN", "LT");
 			op->op = op_lt;
@@ -830,6 +891,7 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 
 			if (!xsg_modules_parse(update, var, &num, &str, &arg)) {
 				xsg_conf_error("number, string, module name, "
+						"LOAD, STORE, "
 						"LT, LE, GT, GE, EQ, NE, UN, "
 						"ISINF, IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, "
@@ -887,6 +949,8 @@ calc(xsg_rpn_t *rpn)
 	xsg_list_t *l;
 
 	stack_index = -1;
+
+	current_rpn = rpn;
 
 	for (l = rpn->op_list; l; l = l->next) {
 		op_t *op = (op_t *) l->data;
