@@ -63,22 +63,27 @@ ARCH += armeb
 ARCH += mips
 ARCH += mipsel
 ARCH += powerpc
+ARCH += sparc
+ARCH += avr32
+ARCH += cris
+ARCH += sh4
+ARCH += m68k
 
 ################################################################################
 
-ALL := $(patsubst %,xsysguardd-%-linux,$(ARCH))
-ALL += $(patsubst %,xsysguardd-%-linux-upx,$(ARCH))
+ALL := $(patsubst %,xsysguardd-linux-%,$(ARCH))
+ALL += $(patsubst %,xsysguardd-linux-%-upx,$(ARCH))
 
 ################################################################################
 
 all: $(ALL)
 
-xsysguardd-%-linux: $(SRC)
-	$(patsubst xsysguardd-%-linux,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
-	$(patsubst xsysguardd-%-linux,%,$@)-$(STRIP) $@
+xsysguardd-linux-%-upx: xsysguardd-linux-%
+	upx --lzma -o $@ $^ || exit 0
 
-xsysguardd-%-linux-upx: xsysguardd-%-linux
-	upx --best -o $@ $^ || exit 0
+xsysguardd-linux-%: $(SRC)
+	$(patsubst xsysguardd-linux-%,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
+	$(patsubst xsysguardd-linux-%,%,$@)-$(STRIP) $@
 
 clean:
 	$(RM) $(ALL)
