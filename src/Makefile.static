@@ -50,6 +50,7 @@ SRC += writebuffer.c writebuffer.h
 
 ################################################################################
 
+UPX   := upx --lzma
 GCC   := linux-uclibc-gcc $(CFLAGS)
 STRIP := linux-uclibc-strip -R .comment -R .note
 
@@ -79,7 +80,8 @@ ALL += $(patsubst %,xsysguardd-static-linux-%-upx,$(ARCH))
 all: $(ALL)
 
 xsysguardd-static-linux-%-upx: xsysguardd-static-linux-%
-	upx --lzma -o $@ $^ || exit 0
+	$(RM) $@
+	$(UPX) -o $@ $^ || exit 0
 
 xsysguardd-static-linux-%: $(SRC)
 	$(patsubst xsysguardd-static-linux-%,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
