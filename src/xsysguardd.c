@@ -240,7 +240,8 @@ read_config(FILE *stream, bool log_level_overwrite)
 
 	/* interval */
 	read_data(&interval, sizeof(uint64_t), stream);
-	xsg_main_set_interval(xsg_uint64_be(interval));
+	interval = xsg_uint64_be(interval);
+	xsg_main_set_interval(interval);
 
 	/* log level */
 	read_data(&log_level, sizeof(uint8_t), stream);
@@ -250,6 +251,7 @@ read_config(FILE *stream, bool log_level_overwrite)
 
 	/* last alive timeout */
 	read_data(&timeout, sizeof(uint64_t), stream);
+	timeout = xsg_uint64_be(timeout);
 
 	while (TRUE) {
 		uint8_t type;
