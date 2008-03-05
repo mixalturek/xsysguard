@@ -194,17 +194,17 @@ xsg_imlib_blend_mask(Imlib_Image mask)
 
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
-			unsigned char *image;
-			unsigned char *mask;
-			image = (unsigned char *) image_data
+			unsigned char *img;
+			unsigned char *msk;
+			img = (unsigned char *) image_data
 					+ x + y * image_height;
-			mask = (unsigned char *) mask_data
+			msk = (unsigned char *) mask_data
 					+ x + y * mask_height;
 
-			image[0] = (image[0] * mask[0]) / 0xff;
-			image[1] = (image[1] * mask[1]) / 0xff;
-			image[2] = (image[2] * mask[2]) / 0xff;
-			image[3] = (image[3] * mask[3]) / 0xff;
+			img[0] = (img[0] * msk[0]) / 0xff;
+			img[1] = (img[1] * msk[1]) / 0xff;
+			img[2] = (img[2] * msk[2]) / 0xff;
+			img[3] = (img[3] * msk[3]) / 0xff;
 		}
 	}
 
@@ -385,11 +385,11 @@ xsg_imlib_check_text_draw_bug(void)
 
 		for (x = 0; x < width * 2; x++) {
 			for (y = 0; y < height; y++) {
-				Imlib_Color c = { 0 };
+				Imlib_Color col = { 0 };
 
-				imlib_image_query_pixel(x, y, &c);
+				imlib_image_query_pixel(x, y, &col);
 
-				if (c.red != 0 || c.green != 0 || c.blue != 0) {
+				if (col.red != 0 || col.green != 0 || col.blue != 0) {
 					imlib_free_image();
 					has_bug = FALSE;
 					goto restore_context;
@@ -500,9 +500,9 @@ xsg_imlib_text_draw_with_return_metrics(
 			break;
 		case IMLIB_TEXT_TO_DOWN:
 			{
-				int tmp = width;
+				int tmp0 = width;
 				width = height;
-				height = tmp;;
+				height = tmp0;
 			}
 			angle = 0.0;
 			imlib_image_orientate(1);
@@ -513,9 +513,9 @@ xsg_imlib_text_draw_with_return_metrics(
 			break;
 		case IMLIB_TEXT_TO_UP:
 			{
-				int tmp = width;
+				int tmp0 = width;
 				width = height;
-				height = tmp;
+				height = tmp0;
 			}
 			angle = 0.0;
 			imlib_image_orientate(3);
@@ -595,58 +595,58 @@ xsg_imlib_text_draw_with_return_metrics(
 		case IMLIB_TEXT_TO_ANGLE:
 			{
 				double sa, ca;
-				double x1, x2, xt;
-				double y1, y2, yt;
+				double xx1, xx2, xxt;
+				double yy1, yy2, yyt;
 
 				sa = sin(angle);
 				ca = cos(angle);
 
-				x1 = x2 = 0.0;
-				xt = ca * width;
-				if (xt < x1) {
-					x1 = xt;
+				xx1 = xx2 = 0.0;
+				xxt = ca * width;
+				if (xxt < xx1) {
+					xx1 = xxt;
 				}
-				if (xt > x2) {
-					x2 = xt;
+				if (xxt > xx2) {
+					xx2 = xxt;
 				}
-				xt = -(sa * height);
-				if (xt < x1) {
-					x1 = xt;
+				xxt = -(sa * height);
+				if (xxt < xx1) {
+					xx1 = xxt;
 				}
-				if (xt > x2) {
-					x2 = xt;
+				if (xxt > xx2) {
+					xx2 = xxt;
 				}
-				xt = ca * width - sa * height;
-				if (xt < x1) {
-					x1 = xt;
+				xxt = ca * width - sa * height;
+				if (xxt < xx1) {
+					xx1 = xxt;
 				}
-				if (xt > x2) {
-					x2 = xt;
+				if (xxt > xx2) {
+					xx2 = xxt;
 				}
-				width = (int) (x2 - x1);
-				y1 = y2 = 0.0;
-				yt = sa * width;
-				if (yt < y1) {
-					y1 = yt;
+				width = (int) (xx2 - xx1);
+				yy1 = yy2 = 0.0;
+				yyt = sa * width;
+				if (yyt < yy1) {
+					yy1 = yyt;
 				}
-				if (yt > y2) {
-					y2 = yt;
+				if (yyt > yy2) {
+					yy2 = yyt;
 				}
-				yt = ca * height;
-				if (yt < y1) {
-					y1 = yt;
+				yyt = ca * height;
+				if (yyt < yy1) {
+					yy1 = yyt;
 				}
-				if (yt > y2) {
-					y2 = yt;
+				if (yyt > yy2) {
+					yy2 = yyt;
 				}
-				yt = sa * width + ca * height;
-				if (yt < y1) {
-					y1 = yt;
+				yyt = sa * width + ca * height;
+				if (yyt < yy1) {
+					yy1 = yyt;
 				}
-				if (yt > y2) {
-					y2 = yt;
+				if (yyt > yy2) {
+					yy2 = yyt;
 				}
-				height = (int) (y2 - y1);
+				height = (int) (yy2 - yy1);
 			}
 			if (width_return) {
 				*width_return = width;
