@@ -3837,7 +3837,7 @@ help_align(xsg_string_t *string)
 }
 
 static void
-help2n0(xsg_string_t *string, char *s1, char *s2, double num)
+help2n0(xsg_string_t *string, const char *s1, const char *s2, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2);
@@ -3846,7 +3846,7 @@ help2n0(xsg_string_t *string, char *s1, char *s2, double num)
 }
 
 static void
-help3n0(xsg_string_t *string, char *s1, char *s2, char *s3, double num)
+help3n0(xsg_string_t *string, const char *s1, const char *s2, const char *s3, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2, s3);
@@ -3855,7 +3855,7 @@ help3n0(xsg_string_t *string, char *s1, char *s2, char *s3, double num)
 }
 
 static void
-help2n2(xsg_string_t *string, char *s1, char *s2, double num)
+help2n2(xsg_string_t *string, const char *s1, const char *s2, double num)
 {
 	xsg_string_append_printf(string, "N %s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2);
@@ -3864,7 +3864,7 @@ help2n2(xsg_string_t *string, char *s1, char *s2, double num)
 }
 
 static void
-help2s(xsg_string_t *string, char *s1, char *s2, char *str)
+help2s(xsg_string_t *string, const char *s1, const char *s2, char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2);
@@ -3873,7 +3873,7 @@ help2s(xsg_string_t *string, char *s1, char *s2, char *str)
 }
 
 static void
-help3s(xsg_string_t *string, char *s1, char *s2, char *s3, char *str)
+help3s(xsg_string_t *string, const char *s1, const char *s2, const char *s3, char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2, s3);
