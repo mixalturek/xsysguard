@@ -79,7 +79,7 @@ xsg_logv(const char *domain, int level, const char *format, va_list args)
 	pid = getpid();
 
 	if (log_to_stderr) {
-		char *prefix = NULL;
+		const char *prefix = NULL;
 
 		if (timestamps) {
 			struct timeval tv;
@@ -220,7 +220,7 @@ read_data(void *ptr, size_t size, FILE *stream)
 static uint64_t
 read_config(FILE *stream, bool log_level_overwrite)
 {
-	char *init = "\0\nxsysguard\n";
+	const char *init = "\0\nxsysguard\n";
 	unsigned i;
 	uint64_t interval;
 	uint8_t log_level;
