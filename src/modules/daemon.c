@@ -332,7 +332,7 @@ daemon_write_buffer_add_var(
 	uint32_t config_len_be;
 
 	if (daemon->write_buffer_len == 0) {
-		static char *init = "\0\nxsysguard\n";
+		static const char *init = "\0\nxsysguard\n";
 		uint64_t interval;
 		uint8_t log_level;
 		uint64_t timeout;
@@ -833,7 +833,7 @@ get_num(void *arg)
 	return num;
 }
 
-static char *
+static const char *
 get_str(void *arg)
 {
 	daemon_var_t *daemon_var = (daemon_var_t *) arg;
@@ -958,7 +958,7 @@ parse_daemon(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
