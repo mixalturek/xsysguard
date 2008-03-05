@@ -251,19 +251,19 @@ xsg_list_free(xsg_list_t *list)
 }
 
 xsg_list_t *
-xsg_list_delete_link(xsg_list_t *list, xsg_list_t *link)
+xsg_list_delete_link(xsg_list_t *list, xsg_list_t *llink)
 {
-	if (link) {
-		if (link->prev) {
-			link->prev->next = link->next;
+	if (llink) {
+		if (llink->prev) {
+			llink->prev->next = llink->next;
 		}
-		if (link->next) {
-			link->next->prev = link->prev;
+		if (llink->next) {
+			llink->next->prev = llink->prev;
 		}
-		if (link == list) {
+		if (llink == list) {
 			list = list->next;
 		}
-		xsg_free(link);
+		xsg_free(llink);
 	}
 
 	return list;
