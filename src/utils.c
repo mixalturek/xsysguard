@@ -272,10 +272,10 @@ xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens)
 	while (*s != '\0') {
 		if (delim_table[*(const unsigned char *)s]
 		 && n_tokens + 1 < max_tokens) {
-			char *token;
+			char *tok;
 
-			token = xsg_strndup(current, s - current);
-			tokens = xsg_list_prepend(tokens, token);
+			tok = xsg_strndup(current, s - current);
+			tokens = xsg_list_prepend(tokens, tok);
 			++n_tokens;
 
 			current = s + 1;
