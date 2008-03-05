@@ -25,6 +25,11 @@
 
 /******************************************************************************/
 
+/* hack... */
+#define CAST (char *) (unsigned long)
+
+/******************************************************************************/
+
 static long long
 strtoll_len(const char *nptr, char **endptr, int base, unsigned long maxlen)
 {
@@ -47,7 +52,9 @@ strtoll_len(const char *nptr, char **endptr, int base, unsigned long maxlen)
 		ret = strtoll(s->str, &end, base);
 
 		len = end - s->str;
-		*endptr = (char *) nptr + len;
+		if (endptr) {
+			*endptr = CAST nptr + len;
+		}
 
 		return ret;
 	}
@@ -75,7 +82,9 @@ strtoull_len(const char *nptr, char **endptr, int base, unsigned long maxlen)
 		ret = strtoull(s->str, &end, base);
 
 		len = end - s->str;
-		*endptr = (char *) nptr + len;
+		if (endptr) {
+			*endptr = CAST nptr + len;
+		}
 
 		return ret;
 	}
@@ -103,7 +112,9 @@ strtod_len(const char *nptr, char **endptr, unsigned long maxlen)
 		ret = strtod(s->str, &end);
 
 		len = end - s->str;
-		*endptr = (char *) nptr + len;
+		if (endptr) {
+			*endptr = CAST nptr + len;
+		}
 
 		return ret;
 	}
@@ -126,7 +137,7 @@ scan_s_len(const char *nptr, char **endptr, unsigned long maxlen)
 	}
 
 	if (endptr != NULL) {
-		*endptr = (char *) nptr;
+		*endptr = CAST nptr;
 	}
 }
 
@@ -145,7 +156,7 @@ scan_c_len(const char *nptr, char **endptr, unsigned long maxlen)
 	}
 
 	if (endptr != NULL) {
-		*endptr = (char *) nptr;
+		*endptr = CAST nptr;
 	}
 }
 
@@ -165,10 +176,10 @@ scan_set_len(
 
 	if (*fmt != '[') {
 		if (endptr != NULL) {
-			*endptr = (char *) nptr;
+			*endptr = CAST nptr;
 		}
 		if (endfmt != NULL) {
-			*endfmt = (char *) fmt;
+			*endfmt = CAST fmt;
 		}
 		return;
 	}
@@ -196,10 +207,10 @@ scan_set_len(
 	while (*fmt != ']') {
 		if (*fmt == '\0') {
 			if (endptr != NULL) {
-				*endptr = (char *) nptr;
+				*endptr = CAST nptr;
 			}
 			if (endfmt != NULL) {
-				*endfmt = (char *) fmt;
+				*endfmt = CAST fmt;
 			}
 			return;
 		}
@@ -217,10 +228,10 @@ scan_set_len(
 	while ((maxlen == 0 || len < maxlen) && *nptr != '\0') {
 		if (!scanset[(int) *nptr]) {
 			if (endptr != NULL) {
-				*endptr = (char *) nptr;
+				*endptr = CAST nptr;
 			}
 			if (endfmt != NULL) {
-				*endfmt = (char *) fmt;
+				*endfmt = CAST fmt;
 			}
 			return;
 		}
@@ -229,10 +240,10 @@ scan_set_len(
 	}
 
 	if (endptr != NULL) {
-		*endptr = (char *) nptr;
+		*endptr = CAST nptr;
 	}
 	if (endfmt != NULL) {
-		*endfmt = (char *) fmt;
+		*endfmt = CAST fmt;
 	}
 }
 
