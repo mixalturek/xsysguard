@@ -916,7 +916,7 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 	}
 
 	areachart_var->var = var;
-	areachart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &areachart_var->color);
 	areachart_var->range = NULL;
 	areachart_var->range_angle = 0.0;
 	areachart_var->top_height = 0;
@@ -951,8 +951,8 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_imlib_uint2color(
-						xsg_conf_read_color());
+				xsg_imlib_uint2color(xsg_conf_read_color(),
+						&color);
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);
@@ -969,8 +969,8 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 			areachart_var->top_colors = xsg_new(Imlib_Color, count);
 
 			for (i = 0; i < count; i++) {
-				areachart_var->top_colors[i] = xsg_imlib_uint2color(
-						xsg_conf_read_color());
+				xsg_imlib_uint2color(xsg_conf_read_color(),
+						&areachart_var->top_colors[i]);
 			}
 
 		} else if (xsg_conf_find_command("AddPrev")) {

@@ -800,7 +800,7 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 	barchart_var = xsg_new(barchart_var_t, 1);
 
 	barchart_var->var = var;
-	barchart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &barchart_var->color);
 	barchart_var->range = NULL;
 	barchart_var->range_angle = 0.0;
 	barchart_var->add_prev = FALSE;
@@ -829,8 +829,8 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_imlib_uint2color(
-						xsg_conf_read_color());
+				xsg_imlib_uint2color(xsg_conf_read_color(),
+						&color);
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);

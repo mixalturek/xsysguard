@@ -175,7 +175,7 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 	widget->data = (void *) rectangle;
 
 	rectangle->angle = NULL;
-	rectangle->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &rectangle->color);
 	rectangle->range = NULL;
 	rectangle->range_angle = 0.0;
 	rectangle->filled = FALSE;
@@ -206,8 +206,8 @@ xsg_widget_rectangle_parse(xsg_window_t *window)
 				int distance;
 				Imlib_Color color;
 				distance = xsg_conf_read_uint();
-				color = xsg_imlib_uint2color(
-						xsg_conf_read_color());
+				xsg_imlib_uint2color(xsg_conf_read_color(),
+						&color);
 				imlib_context_set_color(color.red, color.green,
 						color.blue, color.alpha);
 				imlib_add_color_to_color_range(distance);

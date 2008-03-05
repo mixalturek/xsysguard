@@ -295,8 +295,8 @@ xsg_window_parse_background(xsg_window_t * window)
 		window->copy_from_root = TRUE;
 		window->background_image_update = xsg_conf_read_uint();
 	} else if (xsg_conf_find_command("Color")) {
-		window->background_color = xsg_imlib_uint2color(
-				xsg_conf_read_color());
+		xsg_imlib_uint2color(xsg_conf_read_color(),
+				&window->background_color);
 	} else {
 		xsg_conf_error("CopyFromParent, CopyFromRoot or Color "
 				"expected");

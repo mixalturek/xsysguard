@@ -560,7 +560,7 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 	}
 
 	linechart_var->var = var;
-	linechart_var->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &linechart_var->color);
 	linechart_var->values = xsg_new(double, width);
 
 	for (i = 0; i < width; i++) {

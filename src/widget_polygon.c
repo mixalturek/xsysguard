@@ -102,7 +102,7 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 
 	polygon = xsg_new(polygon_t, 1);
 
-	polygon->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &polygon->color);
 	polygon->point_count = xsg_conf_read_uint();
 	polygon->points = xsg_new(point_t, polygon->point_count);;
 	polygon->filled = FALSE;

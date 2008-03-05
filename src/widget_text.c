@@ -671,7 +671,7 @@ xsg_widget_text_parse(xsg_window_t *window)
 	widget->scroll_func = scroll_text;
 	widget->data = (void *) text;
 
-	text->color = xsg_imlib_uint2color(xsg_conf_read_color());
+	xsg_imlib_uint2color(xsg_conf_read_color(), &text->color);
 	text->font = NULL;
 	text->font_name = xsg_conf_read_string();
 	text->print = xsg_printf_new(xsg_conf_read_string());

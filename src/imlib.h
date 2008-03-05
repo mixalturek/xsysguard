@@ -44,8 +44,8 @@ xsg_imlib_list_fonts(void);
 extern void
 xsg_imlib_flush_cache(int signum);
 
-extern Imlib_Color
-xsg_imlib_uint2color(uint32_t u);
+extern void
+xsg_imlib_uint2color(uint32_t u, Imlib_Color *color_return);
 
 extern Imlib_Image
 xsg_imlib_load_image(const char *filename);
