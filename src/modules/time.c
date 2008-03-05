@@ -343,7 +343,7 @@ help_time(void)
 	}
 
 	for (local = 0; local < 2; local++) {
-		char *format;
+		const char *format;
 
 		if (local) {
 			xsg_string_append_printf(string,
