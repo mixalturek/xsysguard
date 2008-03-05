@@ -48,14 +48,8 @@ find_file_buffer(const char *filename, uint64_t update)
 	for (l = file_list; l; l = l->next) {
 		f = l->data;
 
-		if (strcmp(f->filename, filename) == 0 && update == f->update) {
-			if ((update % f->update) == 0) {
-				return f->buffer;
-			}
-			if ((f->update % update) == 0) {
-				f->update = update;
-				return f->buffer;
-			}
+		if (!strcmp(f->filename, filename) && f->update == update) {
+			return f->buffer;
 		}
 	}
 
