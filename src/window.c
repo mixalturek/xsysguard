@@ -1128,18 +1128,18 @@ set_class_hints(xsg_window_t *window)
  ******************************************************************************/
 
 static int
-io_error_handler(Display *display)
+io_error_handler(Display *dpy)
 {
 	xsg_error("X connection broken");
 	return 0;
 }
 
 static int
-error_handler(Display *display, XErrorEvent *event)
+error_handler(Display *dpy, XErrorEvent *event)
 {
 	char buf[1024];
 
-	XGetErrorText(display, event->error_code, buf, sizeof(buf));
+	XGetErrorText(dpy, event->error_code, buf, sizeof(buf));
 	xsg_error("XError: %s", buf);
 	return 0;
 }
