@@ -601,7 +601,7 @@ update_stats(uint64_t tick)
  *
  ******************************************************************************/
 
-static char *
+static const char *
 get_host_info_os_name(void *arg)
 {
 	if (likely(host_info != NULL)) {
@@ -613,7 +613,7 @@ get_host_info_os_name(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_host_info_os_release(void *arg)
 {
 	if (likely(host_info != NULL)) {
@@ -626,7 +626,7 @@ get_host_info_os_release(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_host_info_os_version(void *arg)
 {
 	if (likely(host_info != NULL)) {
@@ -639,7 +639,7 @@ get_host_info_os_version(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_host_info_platform(void *arg)
 {
 	if (likely(host_info != NULL)) {
@@ -652,7 +652,7 @@ get_host_info_platform(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_host_info_hostname(void *arg)
 {
 	if (likely(host_info != NULL)) {
@@ -684,7 +684,7 @@ static void
 parse_host_info(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -804,7 +804,7 @@ static void
 parse_cpu_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -970,7 +970,7 @@ static void
 parse_cpu_stats_diff(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1080,7 +1080,7 @@ static void
 parse_cpu_percents(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1163,7 +1163,7 @@ static void
 parse_mem_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1228,7 +1228,7 @@ static void
 parse_load_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1249,7 +1249,7 @@ parse_load_stats(
  *
  ******************************************************************************/
 
-static char *
+static const char *
 get_user_stats_name_list(void *arg)
 {
 	if (likely(user_stats != NULL)) {
@@ -1281,7 +1281,7 @@ static void
 parse_user_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1343,7 +1343,7 @@ static void
 parse_swap_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1386,7 +1386,7 @@ get_fs_stats_for_mnt_point(char *mnt_point)
 
 /******************************************************************************/
 
-static char *
+static const char *
 get_fs_stats_device_name(void *arg)
 {
 	sg_fs_stats *ret;
@@ -1413,7 +1413,7 @@ get_fs_stats_device_name(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_fs_stats_fs_type(void *arg)
 {
 	sg_fs_stats *ret;
@@ -1440,7 +1440,7 @@ get_fs_stats_fs_type(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_fs_stats_mnt_point(void *arg)
 {
 	sg_fs_stats *ret;
@@ -1842,7 +1842,7 @@ static void
 parse_fs_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -1964,7 +1964,7 @@ static void
 parse_disk_io_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2087,7 +2087,7 @@ static void
 parse_disk_io_stats_diff(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2290,7 +2290,7 @@ static void
 parse_network_io_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2531,7 +2531,7 @@ static void
 parse_network_io_stats_diff(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2617,9 +2617,9 @@ get_network_iface_stats_speed(void *arg)
 
 typedef struct {
 	char *interface_name;
-	char *full;
-	char *half;
-	char *unknown;
+	const char *full;
+	const char *half;
+	const char *unknown;
 } network_iface_stats_duplex_data_t;
 
 static double
@@ -2646,7 +2646,7 @@ get_network_iface_stats_duplex_number(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_network_iface_stats_duplex_string(void *arg)
 {
 	sg_network_iface_stats *ret;
@@ -2689,7 +2689,7 @@ static void
 parse_network_iface_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2764,7 +2764,7 @@ static void
 parse_page_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -2845,7 +2845,7 @@ static void
 parse_page_stats_diff(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -3021,7 +3021,7 @@ typedef struct {
 	char *unknown;
 } process_stats_state_data_t;
 
-static char *
+static const char *
 get_process_stats_process_name(void *arg)
 {
 	sg_process_stats *sg_list, *sg;
@@ -3050,7 +3050,7 @@ get_process_stats_process_name(void *arg)
 	return sg->process_name;
 }
 
-static char *
+static const char *
 get_process_stats_proctitle(void *arg)
 {
 	sg_process_stats *sg_list, *sg;
@@ -3457,7 +3457,7 @@ get_process_stats_state_number(void *arg)
 	return (double) sg->state;
 }
 
-static char *
+static const char *
 get_process_stats_state_string(void *arg)
 {
 	sg_process_stats *sg_list, *sg;
@@ -3512,7 +3512,7 @@ static void
 parse_process_stats(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -3686,7 +3686,7 @@ static void
 parse_process_count(
 	uint64_t update,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -3746,7 +3746,7 @@ parse_statgrab(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -3864,7 +3864,7 @@ help2n2(xsg_string_t *string, const char *s1, const char *s2, double num)
 }
 
 static void
-help2s(xsg_string_t *string, const char *s1, const char *s2, char *str)
+help2s(xsg_string_t *string, const char *s1, const char *s2, const char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2);
@@ -3873,7 +3873,7 @@ help2s(xsg_string_t *string, const char *s1, const char *s2, char *str)
 }
 
 static void
-help3s(xsg_string_t *string, const char *s1, const char *s2, const char *s3, char *str)
+help3s(xsg_string_t *string, const char *s1, const char *s2, const char *s3, const char *str)
 {
 	xsg_string_append_printf(string, "S %s:%s:%s:%s ",
 			XSG_MODULE_NAME, s1, s2, s3);
