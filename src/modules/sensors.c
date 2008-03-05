@@ -27,7 +27,7 @@
 /******************************************************************************/
 
 typedef struct _feature_t {
-	const sensors_chip_name *chip_name;
+	sensors_chip_name *chip_name;
 	int number;
 } feature_t;
 
@@ -37,7 +37,7 @@ static bool
 init_sensors(void)
 {
 	static bool initialized = FALSE;
-	char *config;
+	const char *config;
 	FILE *f;
 
 	if (initialized) {
@@ -90,7 +90,7 @@ parse_sensors(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -151,7 +151,7 @@ parse_sensors(
 			feature = xsg_new(feature_t, 1);
 			feature->number = feature_data->number;
 			feature->chip_name = xsg_new(sensors_chip_name, 1);
-			memcpy((void *) feature->chip_name, (void *) chip_name,
+			memcpy((void *) feature->chip_name, (const void *) chip_name,
 					sizeof(sensors_chip_name));
 
 			num[0] = get_sensors_feature;
