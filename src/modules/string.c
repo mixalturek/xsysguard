@@ -22,7 +22,7 @@
 
 /******************************************************************************/
 
-static char *
+static const char *
 get_string(void *arg)
 {
 	char *s;
@@ -41,7 +41,7 @@ parse_string(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
