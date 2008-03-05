@@ -930,7 +930,7 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("ColorRange")) {
-			unsigned int count, i;
+			unsigned int count;
 
 			if (areachart_var->range != NULL) {
 				imlib_context_set_color_range(
@@ -958,7 +958,7 @@ parse_var(xsg_widget_t *widget, xsg_var_t *var)
 				imlib_add_color_to_color_range(distance);
 			}
 		} else if (xsg_conf_find_command("Top")) {
-			unsigned int count, i;
+			unsigned int count;
 
 			if (areachart_var->top_colors != NULL) {
 				xsg_free(areachart_var->top_colors);
