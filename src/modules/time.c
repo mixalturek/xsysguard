@@ -75,7 +75,7 @@ time_tm(bool local)
 
 /******************************************************************************/
 
-static char *
+static const char *
 get_strftime(void *arg)
 {
 	strftime_args_t *args = (strftime_args_t *) arg;
@@ -267,7 +267,7 @@ parse_time(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
