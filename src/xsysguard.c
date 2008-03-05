@@ -80,7 +80,7 @@ static void
 xsg_logv(const char *domain, int level, const char *format, va_list args)
 {
 	unsigned int pid;
-	char *prefix = NULL;
+	const char *prefix = NULL;
 
 	if (unlikely(level == XSG_LOG_LEVEL_ERROR)) {
 		if (xsg_log_level < XSG_LOG_LEVEL_ERROR) {
