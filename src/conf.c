@@ -200,7 +200,7 @@ is_env(void)
 static char *
 env(int *n)
 {
-	char *p, *env;
+	char *p, *e;
 	int m;
 
 	while (ptr[0] == ' ' || ptr[0] == '\t') {
@@ -227,16 +227,16 @@ env(int *n)
 	}
 
 	p = xsg_strndup(ptr, m);
-	env = xsg_getenv(p);
+	e = xsg_getenv(p);
 	xsg_free(p);
 
 	*n = m + 1;
 
-	if (env == NULL) {
+	if (e == NULL) {
 		xsg_conf_error("cannot find name in environment");
 	}
 
-	return env;
+	return e;
 }
 
 /******************************************************************************/
