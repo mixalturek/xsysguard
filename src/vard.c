@@ -131,7 +131,7 @@ update_var(xsg_var_t *var)
 /******************************************************************************/
 
 static void
-update(uint64_t tick)
+update_vard(uint64_t tick)
 {
 	xsg_list_t *l;
 
@@ -241,6 +241,6 @@ xsg_vard_init(uint64_t timeout)
 	last_alive_timeout = timeout;
 
 	xsg_main_add_poll(&alive_poll);
-	xsg_main_add_update_func(update);
+	xsg_main_add_update_func(update_vard);
 }
 
