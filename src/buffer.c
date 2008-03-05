@@ -89,7 +89,7 @@ typedef struct _complete_t {
 	xsg_string_t *string;
 } complete_t;
 
-static char *
+static const char *
 get_complete(void *arg)
 {
 	complete_t *complete = (complete_t *) arg;
@@ -129,7 +129,7 @@ typedef struct _sscanf_t {
 	char *format;
 } sscanf_t;
 
-static char *
+static const char *
 get_sscanf(void *arg)
 {
 	sscanf_t *sscanf = (sscanf_t *) arg;
@@ -287,7 +287,7 @@ typedef struct _re_t {
 	regmatch_t *regmatch;
 } re_t;
 
-static char *
+static const char *
 get_re(void *arg)
 {
 	re_t *re = (re_t *) arg;
@@ -364,7 +364,7 @@ xsg_buffer_parse(
 	xsg_buffer_t *buffer,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
