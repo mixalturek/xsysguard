@@ -119,11 +119,11 @@ xsg_window_new(char *config_name)
 
 	window->config = config_name;
 
-	window->name = "xsysguard";
-	window->class = "xsysguard";
-	window->resource = "xsysguard";
+	window->name = xsg_strdup("xsysguard");
+	window->class = xsg_strdup("xsysguard");
+	window->resource = xsg_strdup("xsysguard");
 
-	window->geometry = "64x64+128+128";
+	window->geometry = xsg_strdup("64x64+128+128");
 	window->flags = 0;
 	window->gravity = NorthWestGravity;
 
@@ -208,6 +208,7 @@ xsg_window_get_config_name(xsg_window_t *window)
 void
 xsg_window_parse_name(xsg_window_t *window)
 {
+	xsg_free(window->name);
 	window->name = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
@@ -215,6 +216,7 @@ xsg_window_parse_name(xsg_window_t *window)
 void
 xsg_window_parse_class(xsg_window_t *window)
 {
+	xsg_free(window->class);
 	window->class = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
@@ -222,6 +224,7 @@ xsg_window_parse_class(xsg_window_t *window)
 void
 xsg_window_parse_resource(xsg_window_t *window)
 {
+	xsg_free(window->resource);
 	window->resource = xsg_conf_read_string();
 	xsg_conf_read_newline();
 }
@@ -229,6 +232,7 @@ xsg_window_parse_resource(xsg_window_t *window)
 void
 xsg_window_parse_geometry(xsg_window_t *window)
 {
+	xsg_free(window->geometry);
 	window->geometry = xsg_conf_read_string();
 	xsg_conf_read_newline();
 	window->flags = XParseGeometry(window->geometry, &window->xoffset,
