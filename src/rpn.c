@@ -197,14 +197,14 @@ op_isinf(void)
 static void
 op_if(void){
 	xsg_string_t *str_tmp;
-	unsigned index;
+	unsigned idx;
 
-	index = num_stack[stack_index - 2] != 0.0
+	idx = num_stack[stack_index - 2] != 0.0
 			? stack_index - 1 : stack_index;
 	str_tmp = str_stack[stack_index - 2];
-	str_stack[stack_index - 2] = str_stack[index];
-	str_stack[index] = str_tmp;
-	num_stack[stack_index - 2] = num_stack[index];
+	str_stack[stack_index - 2] = str_stack[idx];
+	str_stack[idx] = str_tmp;
+	num_stack[stack_index - 2] = num_stack[idx];
 	stack_index -= 2;
 }
 
@@ -212,13 +212,13 @@ static void
 op_if_str(void)
 {
 	xsg_string_t *str_tmp;
-	unsigned index;
+	unsigned idx;
 
-	index = num_stack[stack_index - 2] != 0.0
+	idx = num_stack[stack_index - 2] != 0.0
 			? stack_index - 1 : stack_index;
 	str_tmp = str_stack[stack_index - 2];
-	str_stack[stack_index - 2] = str_stack[index];
-	str_stack[index] = str_tmp;
+	str_stack[stack_index - 2] = str_stack[idx];
+	str_stack[idx] = str_tmp;
 	stack_index -= 2;
 }
 
