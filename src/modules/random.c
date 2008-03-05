@@ -64,14 +64,14 @@ static rand_t *global_random = NULL;
 
 static void
 rand_set_seed_array(
-	rand_t *rand,
+	rand_t *r,
 	const uint32_t *seed,
 	unsigned int seed_length
 )
 {
 	int i, j, k;
 
-	if (rand == NULL) {
+	if (r == NULL) {
 		return;
 	}
 
@@ -83,39 +83,39 @@ rand_set_seed_array(
 	j = 0;
 	k = (N > seed_length ? N : seed_length);
 	for (; k; k--) {
-		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1]
-			^ (rand->mt[i-1] >> 30)) * 1664525UL)) + seed[j] + j;
-		rand->mt[i] &= 0xffffffffUL;
+		r->mt[i] = (r->mt[i] ^ ((r->mt[i-1]
+			^ (r->mt[i-1] >> 30)) * 1664525UL)) + seed[j] + j;
+		r->mt[i] &= 0xffffffffUL;
 		i++;
 		j++;
 		if (i >= N) {
-			rand->mt[0] = rand->mt[N-1];
+			r->mt[0] = r->mt[N-1];
 			i = 1;
 		}
 		if (j >= seed_length)
 			j = 0;
 	}
 	for (k = N-1; k; k--) {
-		rand->mt[i] = (rand->mt[i] ^ ((rand->mt[i-1]
-				^ (rand->mt[i-1] >> 30)) * 1566083941UL)) - i;
-		rand->mt[i] &= 0xffffffffUL;
+		r->mt[i] = (r->mt[i] ^ ((r->mt[i-1]
+				^ (r->mt[i-1] >> 30)) * 1566083941UL)) - i;
+		r->mt[i] &= 0xffffffffUL;
 		i++;
 		if (i >= N) {
-			rand->mt[0] = rand->mt[N-1];
+			r->mt[0] = r->mt[N-1];
 			i = 1;
 		}
 	}
-	rand->mt[0] = 0x80000000UL;
+	r->mt[0] = 0x80000000UL;
 }
 
 static rand_t *
 rand_new_with_seed_array(const uint32_t *seed, unsigned int seed_length)
 {
-	rand_t *rand = xsg_new0(rand_t, 1);
+	rand_t *r = xsg_new0(rand_t, 1);
 
-	rand_set_seed_array(rand, seed, seed_length);
+	rand_set_seed_array(r, seed, seed_length);
 
-	return rand;
+	return r;
 }
 
 static rand_t *
@@ -163,35 +163,35 @@ rand_new(void)
 }
 
 static uint32_t
-rand_int(rand_t *rand)
+rand_int(rand_t *r)
 {
 	uint32_t y;
 	static const uint32_t mag01[2] = { 0x0, MATRIX_A };
 
-	if (rand == NULL) {
+	if (r == NULL) {
 		return 0;
 	}
 
-	if (rand->mti >= N) {
+	if (r->mti >= N) {
 		int kk;
 
 		for (kk = 0; kk < N-M; kk++) {
-			y = (rand->mt[kk] & UPPER_MASK)
-				| (rand->mt[kk+1] & LOWER_MASK);
-			rand->mt[kk] = rand->mt[kk+M] ^ (y >> 1)
+			y = (r->mt[kk] & UPPER_MASK)
+				| (r->mt[kk+1] & LOWER_MASK);
+			r->mt[kk] = r->mt[kk+M] ^ (y >> 1)
 				^ mag01[y & 0x1];
 		}
 		for (; kk < N-1; kk++) {
-			y = (rand->mt[kk] & UPPER_MASK)
-				| (rand->mt[kk+1] & LOWER_MASK);
-			rand->mt[kk] = rand->mt[kk+(M-N)]
+			y = (r->mt[kk] & UPPER_MASK)
+				| (r->mt[kk+1] & LOWER_MASK);
+			r->mt[kk] = r->mt[kk+(M-N)]
 				^ (y >> 1) ^ mag01[y & 0x1];
 		}
-		y = (rand->mt[N-1] & UPPER_MASK) | (rand->mt[0] & LOWER_MASK);
-		rand->mt[N-1] = rand->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1];
-		rand->mti = 0;
+		y = (r->mt[N-1] & UPPER_MASK) | (r->mt[0] & LOWER_MASK);
+		r->mt[N-1] = r->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1];
+		r->mti = 0;
 	}
-	y = rand->mt[rand->mti++];
+	y = r->mt[r->mti++];
 	y ^= TEMPERING_SHIFT_U(y);
 	y ^= TEMPERING_SHIFT_S(y) & TEMPERING_MASK_B;
 	y ^= TEMPERING_SHIFT_T(y) & TEMPERING_MASK_C;
@@ -201,13 +201,13 @@ rand_int(rand_t *rand)
 }
 
 static double
-rand_double(rand_t *rand)
+rand_double(rand_t *r)
 {
-	double retval = rand_int(rand) * RAND_DOUBLE_TRANSFORM;
-	retval = (retval + rand_int(rand)) * RAND_DOUBLE_TRANSFORM;
+	double retval = rand_int(r) * RAND_DOUBLE_TRANSFORM;
+	retval = (retval + rand_int(r)) * RAND_DOUBLE_TRANSFORM;
 
 	if (retval >= 1.0) {
-		return rand_double(rand);
+		return rand_double(r);
 	}
 
 	return retval;
@@ -265,7 +265,7 @@ parse_random(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
