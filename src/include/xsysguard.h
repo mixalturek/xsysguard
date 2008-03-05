@@ -82,7 +82,7 @@ typedef struct _xsg_module_t {
 		uint64_t update,
 		xsg_var_t *var,
 		double (**num)(void *),
-		char *(**str)(void *),
+		const char *(**str)(void *),
 		void **arg
 	);
 	const char *(*help)(void);

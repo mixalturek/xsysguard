@@ -42,7 +42,7 @@ struct _xsg_rpn_t {
 typedef struct _op_t {
 	void (*op)(void);
 	double (*num_func)(void *arg);
-	char *(*str_func)(void *arg);
+	const char *(*str_func)(void *arg);
 	void *arg;
 } op_t;
 
@@ -559,7 +559,7 @@ get_number(void *arg)
 	return *d;
 }
 
-static char *
+static const char *
 get_string(void *arg)
 {
 	return (char *) arg;
@@ -886,7 +886,7 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			PUSH("S");
 		} else {
 			double (*num)(void *);
-			char *(*str)(void *);
+			const char *(*str)(void *);
 			void *arg;
 
 			if (!xsg_modules_parse(update, var, &num, &str, &arg)) {
