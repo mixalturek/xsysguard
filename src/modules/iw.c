@@ -38,10 +38,10 @@ static xsg_list_t *device_list = NULL;
 /******************************************************************************/
 
 static int
-handle_iw(int skfd, char *ifname, char *args[], int count)
+handle_iw(int fd, char *ifname, char *args[], int count)
 {
 	/* if no wireless name: no wireless extensions */
-	if (iw_get_ext(skfd, ifname, SIOCGIWNAME, &wrq) >= 0) {
+	if (iw_get_ext(fd, ifname, SIOCGIWNAME, &wrq) >= 0) {
 		device_list = xsg_list_append(device_list,
 				(void *) xsg_strdup(ifname));
 	}
@@ -66,7 +66,7 @@ dbm2mw(double dbm)
 
 /******************************************************************************/
 
-static char *
+static const char *
 get_name(void *arg)
 {
 	static char name[IFNAMSIZ + 1];
@@ -117,7 +117,7 @@ get_freq_number(void *arg)
 	return freq;
 }
 
-static char *
+static const char *
 get_freq_string(void *arg)
 {
 	double freq;
@@ -157,7 +157,7 @@ get_channel(void *arg)
 	return freq;
 }
 
-static char *
+static const char *
 get_key(void *arg)
 {
 	unsigned char key[IW_ENCODING_TOKEN_MAX];
@@ -213,7 +213,7 @@ get_keyid(void *arg)
 	return (double) (key_flags & IW_ENCODE_INDEX);
 }
 
-static char *
+static const char *
 get_essid(void *arg)
 {
 	static char essid[IW_ESSID_MAX_SIZE + 1];
@@ -256,7 +256,7 @@ get_mode_number(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_mode_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWMODE, &wrq) < 0) {
@@ -290,7 +290,7 @@ get_sens(void *arg)
 	return (double) wrq.u.sens.value;
 }
 
-static char *
+static const char *
 get_nickname(void *arg)
 {
 	static char nickname[IW_ESSID_MAX_SIZE + 1];
@@ -313,7 +313,7 @@ get_nickname(void *arg)
 	return nickname;
 }
 
-static char *
+static const char *
 get_ap(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWAP, &wrq) < 0) {
@@ -339,7 +339,7 @@ get_bitrate_number(void *arg)
 	return (double) wrq.u.bitrate.value;
 }
 
-static char *
+static const char *
 get_bitrate_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRATE, &wrq) < 0) {
@@ -370,7 +370,7 @@ get_rts_number(void *arg)
 	return (double) wrq.u.rts.value;
 }
 
-static char *
+static const char *
 get_rts_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRTS, &wrq) < 0) {
@@ -406,7 +406,7 @@ get_frag_number(void *arg)
 	return (double) wrq.u.frag.value;
 }
 
-static char *
+static const char *
 get_frag_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWFRAG, &wrq) < 0) {
@@ -425,7 +425,7 @@ get_frag_string(void *arg)
 	return buffer;
 }
 
-static char *
+static const char *
 get_power_management(void *arg)
 {
 	static xsg_string_t *string = NULL;
@@ -515,7 +515,7 @@ get_txpower_mw(void *arg)
 	return mw;
 }
 
-static char *
+static const char *
 get_retry(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
@@ -838,7 +838,7 @@ parse_iw(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -855,9 +855,9 @@ parse_iw(
 		if (device_list == NULL) {
 			xsg_conf_warning("no devices with wireless "
 					"extensions found");
-			ifname = "";
+			ifname = xsg_strdup("");
 		} else {
-			ifname = device_list->data;
+			ifname = xsg_strdup(device_list->data);
 		}
 	}
 
