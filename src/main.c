@@ -508,7 +508,7 @@ shutdown(void)
 static void
 signal_handler(int signum)
 {
-	char *signame;
+	const char *signame;
 
 	/* NOTE: strsignal is not part of any standard */
 
