@@ -262,7 +262,7 @@ xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens)
 
 	memset(delim_table, FALSE, sizeof(delim_table));
 	for (s = delimiters; *s != '\0'; ++s) {
-		delim_table[*(unsigned char *)s] = TRUE;
+		delim_table[*(const unsigned char *)s] = TRUE;
 	}
 
 	tokens = NULL;
@@ -270,7 +270,7 @@ xsg_strsplit_set(const char *string, const char *delimiters, int max_tokens)
 
 	s = current = string;
 	while (*s != '\0') {
-		if (delim_table[*(unsigned char *)s]
+		if (delim_table[*(const unsigned char *)s]
 		 && n_tokens + 1 < max_tokens) {
 			char *token;
 
