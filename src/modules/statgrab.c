@@ -4128,49 +4128,49 @@ help_statgrab(void)
 
 	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "process_name",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "proctitle",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "pid",
-			"<sort_by>", "{ascending|descending} ", "<number>");
+			"<sortby>", "{ascending|descending} ", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "parent",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "pgid",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "uid",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "euid",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "gid",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "egid",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "proc_size",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "proc_resident",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "time_spent",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "cpu_percent",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "nice",
-			"<sort_by>", "{ascending|descending}", "<number>");
+			"<sortby>", "{ascending|descending}", "<number>");
 	xsg_string_append_printf(string, "X %s:%s:%s:%s:%s:%s\n",
 			XSG_MODULE_NAME, "process_stats", "state",
-			"<sort_by>", "{ascending|descending}",
+			"<sortby>", "{ascending|descending}",
 			"<number>:<running>:<sleeping>:<stopped>:<zombie>:<unknown>");
 	xsg_string_append_c(string, '\n');
 
