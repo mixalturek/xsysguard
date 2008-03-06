@@ -494,6 +494,136 @@ op_exc(void)
 /******************************************************************************/
 
 static void
+op_atof(void)
+{
+	double num;
+
+	num = atof(str_stack[stack_index]->str);
+	num_stack[stack_index] = num;
+}
+
+static void
+op_atoi(void)
+{
+	int num;
+
+	num = atoi(str_stack[stack_index]->str);
+	num_stack[stack_index] = num;
+}
+
+static void
+op_atol(void)
+{
+	long int num;
+
+	num = atol(str_stack[stack_index]->str);
+	num_stack[stack_index] = num;
+}
+
+static void
+op_atoll(void)
+{
+	long long int num;
+
+	num = atoll(str_stack[stack_index]->str);
+	num_stack[stack_index] = num;
+}
+
+static void
+op_strtof(void)
+{
+	char *nptr, *endptr;
+	float num;
+
+	nptr = str_stack[stack_index]->str;
+	num = strtof(nptr, &endptr);
+	num_stack[stack_index] = num;
+	xsg_string_erase(str_stack[stack_index], 0, endptr - nptr);
+}
+
+static void
+op_strtod(void)
+{
+	char *nptr, *endptr;
+	double num;
+
+	nptr = str_stack[stack_index]->str;
+	num = strtod(nptr, &endptr);
+	num_stack[stack_index] = num;
+	xsg_string_erase(str_stack[stack_index], 0, endptr - nptr);
+}
+
+static void
+op_strtold(void)
+{
+	char *nptr, *endptr;
+	long double num;
+
+	nptr = str_stack[stack_index]->str;
+	num = strtold(nptr, &endptr);
+	num_stack[stack_index] = num;
+	xsg_string_erase(str_stack[stack_index], 0, endptr - nptr);
+}
+
+static void
+op_strtol(void)
+{
+	char *nptr, *endptr;
+	long int num;
+	int base;
+
+	nptr = str_stack[stack_index - 1]->str;
+	base = (int) num_stack[stack_index];
+	num = strtol(nptr, &endptr, base);
+	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
+	stack_index -= 1;
+}
+
+static void
+op_strtoll(void)
+{
+	char *nptr, *endptr;
+	long long int num;
+	int base;
+
+	nptr = str_stack[stack_index - 1]->str;
+	base = (int) num_stack[stack_index];
+	num = strtoll(nptr, &endptr, base);
+	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
+	stack_index -= 1;
+}
+
+static void
+op_strtoul(void)
+{
+	char *nptr, *endptr;
+	unsigned long int num;
+	int base;
+
+	nptr = str_stack[stack_index - 1]->str;
+	base = (int) num_stack[stack_index];
+	num = strtoul(nptr, &endptr, base);
+	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
+	stack_index -= 1;
+}
+
+static void
+op_strtoull(void)
+{
+	char *nptr, *endptr;
+	unsigned long long int num;
+	int base;
+
+	nptr = str_stack[stack_index - 1]->str;
+	base = (int) num_stack[stack_index];
+	num = strtoull(nptr, &endptr, base);
+	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
+	stack_index -= 1;
+}
+
+/******************************************************************************/
+
+static void
 op_strlen(void)
 {
 	num_stack[stack_index] = (double) str_stack[stack_index]->len;
@@ -860,6 +990,50 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 				xsg_conf_error("RPN: EXC: no two elements on "
 						"the stack");
 			}
+		} else if (xsg_conf_find_command("ATOF")) {
+			POP("S", "ATOF");
+			op->op = op_atof;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ATOI")) {
+			POP("S", "ATOI");
+			op->op = op_atoi;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ATOL")) {
+			POP("S", "ATOL");
+			op->op = op_atol;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ATOLL")) {
+			POP("S", "ATOLL");
+			op->op = op_atoll;
+			PUSH("N");
+		} else if (xsg_conf_find_command("STRTOF")) {
+			POP("S", "STRTOF");
+			op->op = op_strtof;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOD")) {
+			POP("S", "STRTOD");
+			op->op = op_strtod;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOLD")) {
+			POP("S", "STRTOLD");
+			op->op = op_strtold;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOL")) {
+			POP("SN", "STRTOL");
+			op->op = op_strtol;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOLL")) {
+			POP("SN", "STRTOLL");
+			op->op = op_strtoll;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOUL")) {
+			POP("SN", "STRTOUL");
+			op->op = op_strtoul;
+			PUSH("X");
+		} else if (xsg_conf_find_command("STRTOULL")) {
+			POP("SN", "STRTOULL");
+			op->op = op_strtoull;
+			PUSH("X");
 		} else if (xsg_conf_find_command("STRLEN")) {
 			POP("S", "STRLEN");
 			op->op = op_strlen;
@@ -900,7 +1074,11 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"LOG, EXP, SQRT, POW, "
 						"ATAN, ATAN2, FLOOR, CEIL, "
 						"DEG2RAD, RAD2DEG, ABS, DUP, "
-						"POP, EXC, STRLEN, STRCMP, "
+						"POP, EXC, "
+						"ATOF, ATOI, ATOL, ATOLL, "
+						"STRTOF, STRTOD, STRTOLD, "
+						"STRTOL, STRTOLL, STRTOUL, "
+						"STRTOULL, STRLEN, STRCMP, "
 						"STRCASECMP, STRUP, STRDOWN "
 						"or STRREVERSE expected");
 			}
