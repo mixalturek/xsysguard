@@ -1,0 +1,6 @@
+Set Background Color white
+Set Geometry 200x60
+
+Ellipse 60 30 50 20 blue
+Ellipse 150 30 15 15 orange Filled
+
