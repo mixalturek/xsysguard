@@ -67,6 +67,7 @@ ARCH += powerpc
 ARCH += sparc
 ARCH += avr32
 ARCH += cris
+ARCH += sh3
 ARCH += sh4
 ARCH += m68k
 
