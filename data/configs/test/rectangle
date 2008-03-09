@@ -1,0 +1,9 @@
+Set Background Color white
+Set Geometry 500x60
+
+Rectangle 10 10 80 40 blue
+Rectangle 110 10 80 40 orange Filled
+Rectangle 210 10 80 40 red ColorRange 45 1 50 blue
+Rectangle 310 10 80 40 blue ColorRange 0 1 20 black Angle 10
+Rectangle 410 10 80 40 red ColorRange 270 3 20 green 20 blue 20 black
+
