@@ -1,0 +1,12 @@
+Set Background Color white
+Set Geometry "800x600"
+
+Line 0 0 799 599 #FF0000FF
+Line 0 599 799 0 #FF0000FF
+
+Line 2 1 797 1 #0000FFFF
+Line 798 2 798 597 #0000FFFF
+
+Line 1 2 1 597 #0000FFFF
+Line 2 598 797 598 #0000FFFF
+
