@@ -1,0 +1,125 @@
+Set Background Color black
+Set Geometry 700x320
+
+SetEnv font Arial_Bold/14 Overwrite
+
+################################################################################
+
+Rectangle 0 0 100 80 blue Filled
+Rectangle 0 0 100 80 orange Filled Angle 0.0
+Text 0    0 0 100 80 blue ${font} "0.0" Alignment Center Angle 0.0
+
+Rectangle 100 0 100 80 black Filled
+Rectangle 100 0 100 80 white Filled Angle 10.0
+Text 0    100 0 100 80 black ${font} "10.0" Alignment Center Angle 10.0
+
+Rectangle 200 0 100 80 blue Filled
+Rectangle 200 0 100 80 orange Filled Angle 35.0
+Text 0    200 0 100 80 blue ${font} "35.0" Alignment Center Angle 35.0
+
+Rectangle 300 0 100 80 black Filled
+Rectangle 300 0 100 80 white Filled Angle 45.0
+Text 0    300 0 100 80 black ${font} "45.0" Alignment Center Angle 45.0
+
+Rectangle 400 0 100 80 blue Filled
+Rectangle 400 0 100 80 orange Filled Angle 55.0
+Text 0	  400 0 100 80 blue ${font} "55.0" Alignment Center Angle 55.0
+
+Rectangle 500 0 100 80 black Filled
+Rectangle 500 0 100 80 white Filled Angle 80.0
+Text 0    500 0 100 80 black ${font} "80.0" Alignment Center Angle 80.0
+
+Rectangle 600 0 100 80 blue Filled
+Rectangle 600 0 100 80 orange Filled Angle 90.0
+Text 0    600 0 100 80 blue ${font} "90.0" Alignment Center Angle 90.0
+
+################################################################################
+
+Rectangle 0 80 100 80 black Filled
+Rectangle 0 80 100 80 white Filled Angle 90.0
+Text 0    0 80 100 80 black ${font} "90.0" Alignment Center Angle 90.0
+
+Rectangle 100 80 100 80 blue Filled
+Rectangle 100 80 100 80 orange Filled Angle 100.0
+Text 0    100 80 100 80 blue ${font} "100.0" Alignment Center Angle 100.0
+
+Rectangle 200 80 100 80 black Filled
+Rectangle 200 80 100 80 white Filled Angle 125.0
+Text 0    200 80 100 80 black ${font} "125.0" Alignment Center Angle 125.0
+
+Rectangle 300 80 100 80 blue Filled
+Rectangle 300 80 100 80 orange Filled Angle 135.0
+Text 0    300 80 100 80 blue ${font} "135.0" Alignment Center Angle 135.0
+
+Rectangle 400 80 100 80 black Filled
+Rectangle 400 80 100 80 white Filled Angle 145.0
+Text 0    400 80 100 80 black ${font} "145.0" Alignment Center Angle 145.0
+
+Rectangle 500 80 100 80 blue Filled
+Rectangle 500 80 100 80 orange Filled Angle 170.0
+Text 0    500 80 100 80 blue ${font} "170.0" Alignment Center Angle 170.0
+
+Rectangle 600 80 100 80 black Filled
+Rectangle 600 80 100 80 white Filled Angle 180.0
+Text 0    600 80 100 80 black ${font} "180.0" Alignment Center Angle 180.0
+
+################################################################################
+
+Rectangle 0 160 100 80 blue Filled
+Rectangle 0 160 100 80 orange Filled Angle 180.0
+Text 0    0 160 100 80 blue ${font} "180.0" Alignment Center Angle 180.0
+
+Rectangle 100 160 100 80 black Filled
+Rectangle 100 160 100 80 white Filled Angle 190.0
+Text 0    100 160 100 80 black ${font} "190.0" Alignment Center Angle 190.0
+
+Rectangle 200 160 100 80 blue Filled
+Rectangle 200 160 100 80 orange Filled Angle 215.0
+Text 0    200 160 100 80 blue ${font} "215.0" Alignment Center Angle 215.0
+
+Rectangle 300 160 100 80 black Filled
+Rectangle 300 160 100 80 white Filled Angle 225.0
+Text 0    300 160 100 80 black ${font} "225.0" Alignment Center Angle 225.0
+
+Rectangle 400 160 100 80 blue Filled
+Rectangle 400 160 100 80 orange Filled Angle 235.0
+Text 0    400 160 100 80 blue ${font} "235.0" Alignment Center Angle 235.0
+
+Rectangle 500 160 100 80 black Filled
+Rectangle 500 160 100 80 white Filled Angle 260.0
+Text 0    500 160 100 80 black ${font} "260.0" Alignment Center Angle 260.0
+
+Rectangle 600 160 100 80 blue Filled
+Rectangle 600 160 100 80 orange Filled Angle 270.0
+Text 0    600 160 100 80 blue ${font} "270.0" Alignment Center Angle 270.0
+
+################################################################################
+
+Rectangle 0 240 100 80 black Filled
+Rectangle 0 240 100 80 white Filled Angle 270.0
+Text 0    0 240 100 80 black ${font} "270.0" Alignment Center Angle 270.0
+
+Rectangle 100 240 100 80 blue Filled
+Rectangle 100 240 100 80 orange Filled Angle 280.0
+Text 0    100 240 100 80 blue ${font} "280.0" Alignment Center Angle 280.0
+
+Rectangle 200 240 100 80 black Filled
+Rectangle 200 240 100 80 white Filled Angle 305.0
+Text 0    200 240 100 80 black ${font} "305.0" Alignment Center Angle 305.0
+
+Rectangle 300 240 100 80 blue Filled
+Rectangle 300 240 100 80 orange Filled Angle 315.0
+Text 0    300 240 100 80 blue ${font} "315.0" Alignment Center Angle 315.0
+
+Rectangle 400 240 100 80 black Filled
+Rectangle 400 240 100 80 white Filled Angle 325.0
+Text 0    400 240 100 80 black ${font} "325.0" Alignment Center Angle 325.0
+
+Rectangle 500 240 100 80 blue Filled
+Rectangle 500 240 100 80 orange Filled Angle 350.0
+Text 0    500 240 100 80 blue ${font} "350.0" Alignment Center Angle 350.0
+
+Rectangle 600 240 100 80 black Filled
+Rectangle 600 240 100 80 white Filled Angle 360.0
+Text 0    600 240 100 80 black ${font} "360.0" Alignment Center Angle 360.0
+
