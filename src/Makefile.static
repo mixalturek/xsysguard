@@ -17,6 +17,22 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+################################################################################
+
+# To build statically linked xsysguardd executables, you need to have a uClibc
+# toolchain for each architecture. You can build your uClibc toolchains using
+# the uClibc buildroot system: http://www.uclibc.org/FAQ.html#compiling
+#
+# Recommended versions:
+#   GCC 4.2 or newer (for -combine and -fwhole-program flags)
+#   Kernel 2.6.23 or newer (for full inotify support on cris)
+#
+#
+# To compress your executables, you need upx - the Ultimate Packer for
+# eXecutables: http://upx.sourceforge.net
+
+################################################################################
+
 VERSION := $(shell cat ../VERSION)
 ifndef VERSION
 $(error cannot read VERSION file)
