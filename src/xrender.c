@@ -176,10 +176,11 @@ xsg_xrender_init(Display *dpy)
 	int opcode = 0, event = 0, error = 0;
 	int major, minor;
 
-	if (ok)
+	if (ok) {
 		return;
-	else
+	} else {
 		ok = TRUE;
+	}
 
 	if ((librender = dlopen("libXrender.so", RTLD_LAZY | RTLD_LOCAL)) == NULL) {
 		xsg_error("Cannot open libXrender.so: %s", dlerror());
