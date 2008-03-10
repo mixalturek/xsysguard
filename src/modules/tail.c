@@ -67,10 +67,12 @@ find_tail_buffer(const char *filename)
 	t->size = 0;
 	t->mtime = 0;
 
-	if ((fd = open(t->filename, O_RDONLY | O_NONBLOCK)) > 0) {
+	fd = open(t->filename, O_RDONLY | O_NONBLOCK);
+
+	if (fd >= 0) {
 		struct stat stats;
 
-		if ((fstat(fd, &stats)) == 0) {
+		if (fstat(fd, &stats) == 0) {
 			t->dev = stats.st_dev;
 			t->ino = stats.st_ino;
 			t->size = 0;
