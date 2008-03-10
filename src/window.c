@@ -1202,6 +1202,8 @@ xsg_window_init(void)
 		xsg_error("Cannot open display");
 	}
 
+	xsg_set_cloexec_flag(ConnectionNumber(display), TRUE);
+
 	if (screen == 0) {
 		screen = XDefaultScreen(display);
 	}
@@ -1348,6 +1350,8 @@ xsg_window_color_lookup(char *name, uint32_t *color)
 	if (unlikely(display == NULL)) {
 		xsg_error("cannot open display");
 	}
+
+	xsg_set_cloexec_flag(ConnectionNumber(display), TRUE);
 
 	if (screen == 0) {
 		screen = XDefaultScreen(display);

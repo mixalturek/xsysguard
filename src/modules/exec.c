@@ -245,6 +245,8 @@ run_exec(exec_t *e)
 	e->poll.fd = p[0];
 
 	xsg_main_add_poll(&e->poll);
+
+	xsg_set_cloexec_flag(p[0], TRUE);
 }
 
 static void

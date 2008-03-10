@@ -360,6 +360,8 @@ get_config_file(const char *config_name, const char *filename)
 				strerror(errno));
 	}
 
+	xsg_set_cloexec_flag(fd, TRUE);
+
 	if (fstat(fd, &stat_buf) < 0) {
 		xsg_error("cannot read config file: %s: fstat failed",
 				filename);

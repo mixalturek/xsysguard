@@ -822,6 +822,8 @@ init_iw(void)
 	}
 	if (skfd < 0) {
 		xsg_warning("iw_socket_open() failed");
+	} else {
+		xsg_set_cloexec_flag(skfd, TRUE);
 	}
 }
 

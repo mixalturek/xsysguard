@@ -796,6 +796,10 @@ exec_daemon(daemon_t *daemon)
 	xsg_main_add_poll(&daemon->stdout_poll);
 	xsg_main_add_poll(&daemon->stderr_poll);
 
+	xsg_set_cloexec_flag(pipe1[1], TRUE);
+	xsg_set_cloexec_flag(pipe2[0], TRUE);
+	xsg_set_cloexec_flag(pipe3[0], TRUE);
+
 	daemon->id_buffer = 0;
 	daemon->id_buffer_fill = 0;
 	daemon->log_level_buffer = 0;
