@@ -35,6 +35,8 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <signal.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include "main.h"
 
@@ -824,5 +826,29 @@ int
 xsg_unsetenv(const char *name)
 {
 	return unsetenv(name);
+}
+
+/******************************************************************************/
+
+void
+xsg_set_cloexec_flag(int fd, bool value)
+{
+	int oldflags;
+
+	oldflags = fcntl(fd, F_GETFD, 0);
+
+	if (oldflags < 0) {
+		xsg_error("fcntl failed: %s", strerror(errno));
+	}
+
+	if (value) {
+		oldflags |= FD_CLOEXEC;
+	} else {
+		oldflags &= ~FD_CLOEXEC;
+	}
+
+	if (fcntl(fd, F_SETFD, oldflags) < 0) {
+		xsg_error("fcntl failed: %s", strerror(errno));
+	}
 }
 

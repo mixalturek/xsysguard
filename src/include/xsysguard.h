@@ -545,6 +545,9 @@ xsg_setenv(const char *name, const char *value, int overwrite);
 extern XSG_API int
 xsg_unsetenv(const char *name);
 
+extern XSG_API void
+xsg_set_cloexec_flag(int fd, bool value);
+
 #define xsg_timerisset(tvp) ((tvp)->tv_sec || (tvp)->tv_usec)
 
 #define xsg_timerclear(tvp) ((tvp)->tv_sec = (tvp)->tv_usec = 0)
