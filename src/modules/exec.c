@@ -31,7 +31,6 @@
 /******************************************************************************/
 
 typedef struct _exec_t {
-	char *name;
 	char *command;
 
 	int updatec;
@@ -60,8 +59,8 @@ kill_exec(exec_t *e)
 		return;
 	}
 
-	xsg_message("[%d]%s: killing exec \"%s\"", (int) e->pid,
-			e->name, e->command);
+	xsg_message("[%d]%s: killing...", (int) e->pid,
+			e->command);
 
 	kill(e->pid, 15); /* SIGTERM */
 }
@@ -83,20 +82,20 @@ read_stdout_exec(void *arg, xsg_main_poll_events_t events)
 
 	if (n == -1 && errno == EINTR) {
 		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) e->pid,
-				e->name, strerror(errno));
+				e->command, strerror(errno));
 		return;
 	}
 
 	if (n == -1) {
 		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) e->pid,
-				e->name, strerror(errno));
+				e->command, strerror(errno));
 		kill_exec(e);
 		return;
 	}
 
 	if (n == 0) {
 		xsg_debug("[%d]%s: read(stdout) returned EOF", (int) e->pid,
-				e->name);
+				e->command);
 		kill_exec(e);
 		return;
 	}
@@ -107,17 +106,16 @@ read_stdout_exec(void *arg, xsg_main_poll_events_t events)
 /******************************************************************************/
 
 static xsg_buffer_t *
-find_exec_buffer(const char *name, uint64_t update)
+find_exec_buffer(const char *command, uint64_t update)
 {
 	xsg_list_t *l;
 	exec_t *e;
 	int i;
-	const char *command;
 
 	for (l = exec_list; l; l = l->next) {
 		e = l->data;
 
-		if (!strcmp(e->name, name)) {
+		if (!strcmp(e->command, command)) {
 			for (i = 0; i < e->updatec; i++) {
 				if ((update % e->updatev[i]) == 0) {
 					return e->buffer;
@@ -139,14 +137,7 @@ find_exec_buffer(const char *name, uint64_t update)
 
 	exec_list = xsg_list_append(exec_list, e);
 
-	e->name = xsg_strdup(name);
-
-	command = xsg_getenv(name);
-	if (command != NULL) {
-		e->command = xsg_strdup(command);
-	} else {
-		e->command = e->name;
-	}
+	e->command = xsg_strdup(command);
 
 	e->updatev = xsg_new(uint64_t, 1);
 	e->updatev[0] = update;
@@ -180,12 +171,12 @@ catch_execs(void)
 			int ret;
 
 			xsg_debug("[%d]%s: calling waitpid...",
-					(int) e->pid, e->name);
+					(int) e->pid, e->command);
 
 			ret = waitpid(e->pid, &status, WNOHANG);
 
 			xsg_debug("[%d]%s: waitpid returned %d",
-					(int) e->pid, e->name, ret);
+					(int) e->pid, e->command, ret);
 
 			if (ret > 0) {
 				if (WIFEXITED(status) || WIFSIGNALED(status)) {
@@ -208,10 +199,10 @@ run_exec(exec_t *e)
 		return;
 	}
 
-	xsg_debug("%s: executing \"%s\"", e->name, e->command);
+	xsg_debug("executing %s", e->command);
 
 	if (pipe(p) < 0) {
-		xsg_warning("%s: cannot create pipe: %s", e->name,
+		xsg_warning("%s: cannot create pipe: %s", e->command,
 				strerror(errno));
 		return;
 	}
@@ -219,7 +210,7 @@ run_exec(exec_t *e)
 	pid = fork();
 
 	if (pid < 0) {
-		xsg_warning("%s: cannot fork: %s", e->name,
+		xsg_warning("%s: cannot fork: %s", e->command,
 				strerror(errno));
 		close(p[0]);
 		close(p[1]);
@@ -240,7 +231,7 @@ run_exec(exec_t *e)
 
 	e->pid = pid;
 
-	xsg_debug("[%u]%s: running...", e->pid, e->name);
+	xsg_debug("[%u]%s: running...", e->pid, e->command);
 
 	e->poll.fd = p[0];
 
@@ -312,14 +303,14 @@ parse_exec(
 	void **arg
 )
 {
-	char *name;
+	char *command;
 	xsg_buffer_t *buffer;
 
-	name = xsg_conf_read_string();
+	command = xsg_conf_read_string();
 
-	buffer = find_exec_buffer(name, update);
+	buffer = find_exec_buffer(command, update);
 
-	xsg_free(name);
+	xsg_free(command);
 
 	xsg_buffer_parse(buffer, var, num, str, arg);
 
