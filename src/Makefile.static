@@ -106,7 +106,8 @@ xsysguardd-$(VERSION)-static-linux-%.tar.gz: xsysguardd-static-linux-%
 	mkdir $(patsubst %.tar.gz,%,$@)
 	cp $^ README.static ../COPYING $(patsubst %.tar.gz,%,$@)
 	if test -x $^-upx; then cp $^-upx README.upx $(patsubst %.tar.gz,%,$@); else true; fi
-	tar -czf $@ $(patsubst %.tar.gz,%,$@)
+	tar -cvf $(patsubst %.gz,%,$@) $(patsubst %.tar.gz,%,$@)
+	gzip --best $(patsubst %.gz,%,$@)
 	$(RM) -r $(patsubst %.tar.gz,%,$@)
 
 clean:
