@@ -1,0 +1,10 @@
+Set Geometry 100x100+100+100
+Set OverrideRedirect on
+Set Background Color #0000
+Set Mouse 1 Move
+Set Mouse 2 Exit
+Set XShape 1
+
+Ellipse 50 50 49 49 red Filled Visible 1 tick,2,MOD
+Rectangle 0 0 100 100 blue Filled Visible 1 tick,1,ADD,2,MOD
+
