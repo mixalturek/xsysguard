@@ -701,7 +701,7 @@ gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec)
 }
 
 static void
-handle_move_event(XEvent *event)
+handle_move_event(xsg_window_t *window, XEvent *event)
 {
 	static int x, y, press_x, press_y;
 	static Window win = None;
@@ -716,9 +716,16 @@ handle_move_event(XEvent *event)
 		win = event->xbutton.window;
 
 		XGetWindowAttributes(display, win, &win_attr);
-		XTranslateCoordinates(display, win,
-				RootWindow(display, screen),
-				win_attr.x, win_attr.y, &x, &y, &child);
+
+		if (window->override_redirect) {
+			x = win_attr.x;
+			y = win_attr.y;
+		} else {
+			XTranslateCoordinates(display, win,
+					RootWindow(display, screen),
+					win_attr.x, win_attr.y, &x, &y, &child);
+		}
+
 		XQueryPointer(display, RootWindow(display, screen),
 				&root, &child, &press_x, &press_y,
 				&win_x, &win_y, &mask);
@@ -800,7 +807,7 @@ handle_xevent(void)
 						window->button_exit);
 			}
 			if (event.xbutton.button == window->button_move) {
-				handle_move_event(&event);
+				handle_move_event(window, &event);
 			}
 			break;
 		case ButtonRelease:
@@ -810,7 +817,7 @@ handle_xevent(void)
 			xsg_debug("received XEvent: ButtonRelease %u",
 					(unsigned) event.xbutton.button);
 			if (event.xbutton.button == window->button_move) {
-				handle_move_event(&event);
+				handle_move_event(window, &event);
 			}
 			break;
 		case MotionNotify:
@@ -818,7 +825,7 @@ handle_xevent(void)
 				break;
 			}
 			xsg_debug("received XEvent: MotionNotify");
-			handle_move_event(&event);
+			handle_move_event(window, &event);
 			break;
 		default:
 			break;
