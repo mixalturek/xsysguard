@@ -90,22 +90,28 @@ ARCH += m68k
 ################################################################################
 
 ALL := $(patsubst %,xsysguardd-static-linux-%,$(ARCH))
-ALL += $(patsubst %,xsysguardd-static-linux-%-upx,$(ARCH))
+ALL += $(patsubst %,xsysguardd-$(VERSION)-static-linux-%.tar.gz,$(ARCH))
 
 ################################################################################
 
 all: $(ALL)
 
-xsysguardd-static-linux-%-upx: xsysguardd-static-linux-%
-	$(RM) $@
-	$(UPX) -o $@ $^ || exit 0
-
 xsysguardd-static-linux-%: $(SRC)
 	$(patsubst xsysguardd-static-linux-%,%,$@)-$(GCC) -o $@ $(filter %.c,$^) -lm
 	$(patsubst xsysguardd-static-linux-%,%,$@)-$(STRIP) $@
+	$(RM) $@-upx
+	$(UPX) -o $@-upx $@ || true
+
+xsysguardd-$(VERSION)-static-linux-%.tar.gz: xsysguardd-static-linux-%
+	mkdir $(patsubst %.tar.gz,%,$@)
+	cp $^ README.static ../COPYING $(patsubst %.tar.gz,%,$@)
+	if test -x $^-upx; then cp $^-upx README.upx $(patsubst %.tar.gz,%,$@); else true; fi
+	tar -czf $@ $(patsubst %.tar.gz,%,$@)
+	$(RM) -r $(patsubst %.tar.gz,%,$@)
 
 clean:
-	$(RM) $(ALL)
+	$(RM) xsysguardd-static-linux-*
+	$(RM) xsysguardd-*.tar.gz
 
-.PHONY: all
+.PHONY: all clean
 
