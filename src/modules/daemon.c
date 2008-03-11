@@ -56,7 +56,6 @@ typedef enum _type_t {
 } type_t;
 
 typedef struct _daemon_t {
-	char *name;
 	char *command;
 
 	pid_t pid;
@@ -210,8 +209,8 @@ kill_daemon(daemon_t *daemon)
 {
 	int n;
 
-	xsg_message("[%d]%s: killing daemon \"%s\"", (int) daemon->pid,
-			daemon->name, daemon->command);
+	xsg_message("[%d]%s: killing daemon...", (int) daemon->pid,
+			daemon->command);
 
 	if (unlikely(daemon == NULL)) {
 		return;
@@ -226,21 +225,21 @@ kill_daemon(daemon_t *daemon)
 	n = sclose(daemon->stdin_poll.fd);
 	if (unlikely(n == -1)) {
 		xsg_warning("[%d]%s: close(stdin) failed: %s",
-				(int) daemon->pid, daemon->name,
+				(int) daemon->pid, daemon->command,
 				strerror(errno));
 	}
 
 	n = sclose(daemon->stdout_poll.fd);
 	if (unlikely(n == -1)) {
 		xsg_warning("[%d]%s: close(stdout) failed: %s",
-				(int) daemon->pid, daemon->name,
+				(int) daemon->pid, daemon->command,
 				strerror(errno));
 	}
 
 	n = sclose(daemon->stderr_poll.fd);
 	if (unlikely(n == -1)) {
 		xsg_warning("[%d]%s: close(stderr) failed: %s",
-				(int) daemon->pid, daemon->name,
+				(int) daemon->pid, daemon->command,
 				strerror(errno));
 	}
 
@@ -256,16 +255,15 @@ kill_daemon(daemon_t *daemon)
 /******************************************************************************/
 
 static daemon_t *
-find_daemon(char *name)
+find_daemon(char *command)
 {
 	xsg_list_t *l;
 	daemon_t *daemon;
-	char *command;
 
 	for (l = daemon_list; l; l = l->next) {
 		daemon = l->data;
 
-		if (strcmp(daemon->name, name) == 0) {
+		if (strcmp(daemon->command, command) == 0) {
 			return daemon;
 		}
 	}
@@ -273,14 +271,7 @@ find_daemon(char *name)
 	daemon = xsg_new(daemon_t, 1);
 	daemon_list = xsg_list_append(daemon_list, daemon);
 
-	daemon->name = xsg_strdup(name);
-
-	command = xsg_getenv(name);
-	if (command != NULL) {
-		daemon->command = xsg_strdup(command);
-	} else {
-		daemon->command = daemon->name;
-	}
+	daemon->command = xsg_strdup(command);
 
 	daemon->pid = 0;
 	daemon->state = NOTRUNNING;
@@ -432,19 +423,19 @@ stdin_daemon(void *arg, xsg_main_poll_events_t events)
 
 	if (daemon->state != RUNNING) {
 		xsg_warning("%s: write(stdin) failed: daemon is not running",
-				daemon->name);
+				daemon->command);
 		return;
 	}
 
 	if (unlikely(n == -1) && errno == EINTR) {
 		xsg_debug("[%d]%s: write(stdin) failed: %s", (int) daemon->pid,
-				daemon->name, strerror(errno));
+				daemon->command, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
 		xsg_warning("[%d]%s: write(stdin) failed: %s",
-				(int) daemon->pid, daemon->name,
+				(int) daemon->pid, daemon->command,
 				strerror(errno));
 		kill_daemon(daemon);
 		return;
@@ -477,7 +468,8 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 			sprintf(hex + i * 3, "%02x ", buffer[i] & 0xff);
 		}
 
-		xsg_debug("%s: received: %s", daemon->name, hex);
+		xsg_debug("[%d]%s: received: %s", (int) daemon->pid,
+				daemon->command, hex);
 	}
 
 	if (daemon->state != RUNNING) {
@@ -486,13 +478,13 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 
 	if (unlikely(n == -1) && errno == EINTR) {
 		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) daemon->pid,
-				daemon->name, strerror(errno));
+				daemon->command, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
 		xsg_warning("[%d]%s: read(stdout) failed: %s",
-				(int) daemon->pid, daemon->name,
+				(int) daemon->pid, daemon->command,
 				strerror(errno));
 		kill_daemon(daemon);
 		return;
@@ -500,7 +492,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 
 	if (unlikely(n == 0)) {
 		xsg_warning("[%d]%s: read(stdout) returned EOF",
-				(int) daemon->pid, daemon->name);
+				(int) daemon->pid, daemon->command);
 		kill_daemon(daemon);
 		return;
 	}
@@ -564,7 +556,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 						MAX(daemon->log_level_buffer,
 						2), "[%d]%s: Received log "
 						"message: %s",
-						(int) daemon->pid, daemon->name,
+						(int) daemon->pid, daemon->command,
 						daemon->log_buffer->str);
 				}
 
@@ -582,7 +574,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 			 || unlikely(daemon_var->daemon != daemon)) {
 				xsg_warning("[%d]%s: Received invalid "
 						"id: %"PRIu32,
-						(int) daemon->pid, daemon->name,
+						(int) daemon->pid, daemon->command,
 						daemon->id_buffer);
 				kill_daemon(daemon);
 				return;
@@ -618,7 +610,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 					xsg_debug("[%d]%s: Received number for "
 							"id %"PRIu32": %f",
 							(int) daemon->pid,
-							daemon->name,
+							daemon->command,
 							daemon->id_buffer,
 							daemon_var->num);
 
@@ -655,7 +647,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 
 				xsg_debug("[%d]%s: received string for "
 						"id %"PRIu32": \"%s\"",
-						(int) daemon->pid, daemon->name,
+						(int) daemon->pid, daemon->command,
 						daemon->id_buffer,
 						daemon_var->str->str);
 
@@ -682,26 +674,26 @@ stderr_daemon(void *arg, xsg_main_poll_events_t events)
 
 	if (unlikely(n == -1) && errno == EINTR) {
 		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid,
-				daemon->name, strerror(errno));
+				daemon->command, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == -1)) {
 		xsg_debug("[%d]%s: read(stderr) failed: %s", (int) daemon->pid,
-				daemon->name, strerror(errno));
+				daemon->command, strerror(errno));
 		return;
 	}
 
 	if (unlikely(n == 0)) {
 		xsg_debug("[%d]%s: read(stderr) returned EOF",
-				(int) daemon->pid, daemon->name);
+				(int) daemon->pid, daemon->command);
 		return;
 	}
 
 	buffer[n] = '\0';
 
 	xsg_warning("[%d]%s: received message on stderr: \"%s\"",
-			(int) daemon->pid, daemon->name, buffer);
+			(int) daemon->pid, daemon->command, buffer);
 }
 
 /******************************************************************************/
@@ -715,16 +707,16 @@ exec_daemon(daemon_t *daemon)
 	pid_t pid;
 	xsg_list_t *l;
 
-	xsg_message("%s: executing \"%s\"", daemon->name, daemon->command);
+	xsg_message("%s: executing...", daemon->command);
 
 	if (pipe(pipe1) < 0) {
-		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+		xsg_warning("%s: cannot create pipe: %s", daemon->command,
 				strerror(errno));
 		return;
 	}
 
 	if (pipe(pipe2) < 0) {
-		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+		xsg_warning("%s: cannot create pipe: %s", daemon->command,
 				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
@@ -732,7 +724,7 @@ exec_daemon(daemon_t *daemon)
 	}
 
 	if (pipe(pipe3) < 0) {
-		xsg_warning("%s: cannot create pipe: %s", daemon->name,
+		xsg_warning("%s: cannot create pipe: %s", daemon->command,
 				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
@@ -744,7 +736,7 @@ exec_daemon(daemon_t *daemon)
 	pid = fork();
 
 	if (pid < 0) {
-		xsg_warning("%s: cannot fork: %s", daemon->name,
+		xsg_warning("%s: cannot fork: %s", daemon->command,
 				strerror(errno));
 		sclose(pipe1[0]);
 		sclose(pipe1[1]);
@@ -786,7 +778,7 @@ exec_daemon(daemon_t *daemon)
 	daemon->state = RUNNING;
 	daemon->pid = pid;
 
-	xsg_message("[%u]%s: running...", daemon->pid, daemon->name);
+	xsg_message("[%u]%s: running...", daemon->pid, daemon->command);
 
 	daemon->stdin_poll.fd = pipe1[1];
 	daemon->stdout_poll.fd = pipe2[0];
@@ -832,7 +824,8 @@ get_num(void *arg)
 
 	num = daemon_var->num;
 
-	xsg_debug("%s: get_number: %f", daemon_var->daemon->name, num);
+	xsg_debug("[%d]%s: get_number: %f", (int) daemon_var->daemon->pid,
+			daemon_var->daemon->command, num);
 
 	return num;
 }
@@ -845,7 +838,8 @@ get_str(void *arg)
 
 	str = daemon_var->str->str;
 
-	xsg_debug("%s: get_string: \"%s\"", daemon_var->daemon->name, str);
+	xsg_debug("[%d]%s: get_string: \"%s\"", (int) daemon_var->daemon->pid,
+			daemon_var->daemon->command, str);
 
 	return str;
 }
@@ -922,7 +916,7 @@ update_daemons(uint64_t tick)
 			int status;
 
 			xsg_debug("[%d]%s: calling waitpid...",
-					(int) daemon->pid, daemon->name);
+					(int) daemon->pid, daemon->command);
 
 			if (waitpid(daemon->pid, &status, WNOHANG) > 0) {
 				if (WIFEXITED(status) || WIFSIGNALED(status)) {
@@ -944,7 +938,7 @@ update_daemons(uint64_t tick)
 		case SEND_SIGKILL:
 			xsg_warning("[%d]%s: send SIGKILL to process, but "
 					"waitpid failed", (int) daemon->pid,
-					daemon->name);
+					daemon->command);
 			break;
 		case NOTRUNNING:
 			exec_daemon(daemon);
@@ -968,7 +962,7 @@ parse_daemon(
 {
 	daemon_t *daemon;
 	daemon_var_t *daemon_var;
-	char *name;
+	char *command;
 	type_t type = 0;
 
 	xsg_main_add_init_func(init_daemons);
@@ -977,9 +971,9 @@ parse_daemon(
 
 	daemon_var = xsg_new(daemon_var_t, 1);
 
-	name = xsg_conf_read_string();
-	daemon = find_daemon(name);
-	xsg_free(name);
+	command = xsg_conf_read_string();
+	daemon = find_daemon(command);
+	xsg_free(command);
 
 	if (xsg_conf_find_command("n")) {
 		type = NUM;
@@ -1032,9 +1026,9 @@ help_daemon(void)
 		xsg_string_truncate(string, 0);
 	}
 
-	xsg_string_append_printf(string, "N %s:exec:<name>:num:<variable>\n",
+	xsg_string_append_printf(string, "N %s:<command>:num:<variable>\n",
 			XSG_MODULE_NAME);
-	xsg_string_append_printf(string, "S %s:exec:<name>:str:<variable>\n",
+	xsg_string_append_printf(string, "S %s:<command>:str:<variable>\n",
 			XSG_MODULE_NAME);
 
 	return string->str;
