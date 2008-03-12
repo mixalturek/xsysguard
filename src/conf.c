@@ -700,7 +700,7 @@ xsg_conf_read_string(void)
 			break;
 		}
 		if (quote == '\0') {
-			if (is_space() || ptr[0] == '\n')
+			if (is_space() || ptr[0] == '\n' || ptr[0] == ',')
 				break;
 		}
 		if ((quote == '\"' || quote == '\0') && is_env()) {
