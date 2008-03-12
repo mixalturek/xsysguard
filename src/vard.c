@@ -108,8 +108,10 @@ update_var(xsg_var_t *var)
 		double num;
 
 		num = xsg_rpn_get_num(var->rpn);
-
+#if 0
 		if ((num != var->num) && !(isnan(num) && isnan(var->num))) {
+#endif
+		if (num != var->num) {
 			var->num = num;
 			var->dirty = TRUE;
 			dirty = TRUE;
