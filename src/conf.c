@@ -178,7 +178,7 @@ skip_space(void)
 		ptr++;
 	}
 	if (ptr[0] == '\\') {
-		char *p = ptr;
+		char *p = ptr + 1;
 		while (is_space()) {
 			p++;
 		}
