@@ -179,13 +179,16 @@ skip_space(void)
 	}
 	if (ptr[0] == '\\') {
 		char *p = ptr + 1;
-		while (is_space()) {
+		while (p[0] == ' ' || p[0] == '\t') {
 			p++;
 		}
 		if (p[0] == '\n') {
 			ptr = p + 1;
 			line++;
 		}
+	}
+	while (is_space()) {
+		ptr++;
 	}
 }
 
