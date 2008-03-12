@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <alloca.h>
+#include <math.h>
 
 #include "vard.h"
 #include "rpn.h"
@@ -108,7 +109,7 @@ update_var(xsg_var_t *var)
 
 		num = xsg_rpn_get_num(var->rpn);
 
-		if (num != var->num) {
+		if ((num != var->num) && !(isnan(num) && isnan(var->num))) {
 			var->num = num;
 			var->dirty = TRUE;
 			dirty = TRUE;
