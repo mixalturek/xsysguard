@@ -27,8 +27,8 @@ LineChart 1 0 0 180 40 Min 0
 + file:/proc/net/dev:readline:0:cscanf:${rbyt} green
 
 LineChart 1 180 0 180 40 Min 0
-+ file:/proc/net/dev:readline:0:cscanf:${rpac} red
-+ file:/proc/net/dev:readline:0:cscanf:${tpac} green
++ file:/proc/net/dev:readline:0:cscanf:${tpac} red
++ file:/proc/net/dev:readline:0:cscanf:${rpac} green
 
 Text 1 0 40 360 20 green ${font} "RX bytes/s:\t%d\t(%.1f KiB/s)" TabWidth 120
 + file:/proc/net/dev:readline:0:cscanf:${rbyt}
