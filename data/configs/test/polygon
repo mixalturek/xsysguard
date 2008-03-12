@@ -1,0 +1,7 @@
+Set Background Color white
+Set Geometry 300x60
+
+Polygon blue 4 0 0 20 59 30 20 70 40
+Polygon red 3 100 0 160 0 130 59 Closed
+Polygon orange 3 200 0 260 0 230 59 Filled
+
