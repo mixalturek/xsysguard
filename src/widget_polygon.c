@@ -91,6 +91,10 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 
 	count = xsg_conf_read_uint();
 
+	if (count < 1) {
+		xsg_conf_error("count is 0");
+	}
+
 	for (i = 0; i < count; i++) {
 		int x, y;
 
