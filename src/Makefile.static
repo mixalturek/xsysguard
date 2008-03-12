@@ -45,7 +45,7 @@ endif
 ################################################################################
 
 DEF := -D_GNU_SOURCE
-DEF += -D XSG_LOG_LEVEL=2
+DEF += -D XSG_MAX_LOG_LEVEL=2
 DEF += -D XSG_LOG_DOMAIN=NULL
 DEF += -D XSYSGUARD_VERSION=\"$(VERSION)\"
 DEF += -D XSG_API=
@@ -107,6 +107,7 @@ xsysguardd-$(VERSION)-static-linux-%.tar.gz: xsysguardd-static-linux-%
 	cp $^ README.static ../COPYING $(patsubst %.tar.gz,%,$@)
 	if test -x $^-upx; then cp $^-upx README.upx $(patsubst %.tar.gz,%,$@); else true; fi
 	tar -cvf $(patsubst %.gz,%,$@) $(patsubst %.tar.gz,%,$@)
+	$(RM) $@
 	gzip --best $(patsubst %.gz,%,$@)
 	$(RM) -r $(patsubst %.tar.gz,%,$@)
 
