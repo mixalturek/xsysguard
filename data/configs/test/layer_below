@@ -1,0 +1,8 @@
+Set Background CopyFromRoot 0
+Set Geometry 200x200+10+10
+Set Layer Below
+Set Decorations off
+
+AreaChart 1 0 0 200 200 Min 0 Max 1
++ random blue Top 1 orange
+
