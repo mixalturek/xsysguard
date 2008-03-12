@@ -1,0 +1,61 @@
+Set Background Color black
+Set Geometry 360x240
+
+SetEnv font Arial_Bold/12
+
+SetEnv dev eth0
+
+SetEnv rbyt " ${dev}: %d" Overwrite
+SetEnv rpac " ${dev}: %*d %d" Overwrite
+SetEnv rerr " ${dev}: %*d %*d %d" Overwrite
+SetEnv rdro " ${dev}: %*d %*d %*d %d" Overwrite
+SetEnv rfif " ${dev}: %*d %*d %*d %*d %d" Overwrite
+SetEnv rfra " ${dev}: %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv rcom " ${dev}: %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv rmul " ${dev}: %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tbyt " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tpac " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv terr " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tdro " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tfif " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tcol " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tcar " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv tcom " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
+
+LineChart 1 0 0 180 40 Min 0
++ file:/proc/net/dev:readline:0:cscanf:${tbyt} red
++ file:/proc/net/dev:readline:0:cscanf:${rbyt} green
+
+LineChart 1 180 0 180 40 Min 0
++ file:/proc/net/dev:readline:0:cscanf:${rpac} red
++ file:/proc/net/dev:readline:0:cscanf:${tpac} green
+
+Text 1 0 40 360 20 green ${font} "RX bytes/s:\t%d\t(%.1f KiB/s)" TabWidth 120
++ file:/proc/net/dev:readline:0:cscanf:${rbyt}
++ file:/proc/net/dev:readline:0:cscanf:${rbyt},1024,DIV
+Text 1 0 60 360 20 red ${font} "TX bytes/s:\t%d\t(%.1f KiB/s)" TabWidth 120
++ file:/proc/net/dev:readline:0:cscanf:${tbyt}
++ file:/proc/net/dev:readline:0:cscanf:${tbyt},1024,DIV
+
+Text 1 0 80 360 20 green ${font} "RX bytes:\t%d\t(%.1f MiB)" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${rbyt}
++ file:/proc/net/dev:readline:0:nscanf:${rbyt},1024,DIV,1024,DIV
+Text 1 0 100 360 20 red ${font} "TX bytes:\t%d\t(%.1f MiB)" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${tbyt}
++ file:/proc/net/dev:readline:0:nscanf:${tbyt},1024,DIV,1024,DIV
+
+Text 1 0 120 360 20 green ${font} "RX packets:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${rpac}
+Text 1 0 140 360 20 red ${font} "TX packets:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${tpac}
+
+Text 1 0 160 360 20 green ${font} "RX errors:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${rerr}
+Text 1 0 180 360 20 red ${font} "TX errors:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${terr}
+
+Text 1 0 200 360 20 green ${font} "RX dropped:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${rdro}
+Text 1 0 220 360 20 red ${font} "TX dropped:\t%d" TabWidth 120
++ file:/proc/net/dev:readline:0:nscanf:${tdro}
+
