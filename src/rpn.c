@@ -189,9 +189,51 @@ op_un(void)
 }
 
 static void
+op_isnan(void)
+{
+	num_stack[stack_index] = isnan(num_stack[stack_index]) ? 1.0 : 0.0;
+}
+
+static void
 op_isinf(void)
 {
 	num_stack[stack_index] = isinf(num_stack[stack_index]) ? 1.0 : 0.0;
+}
+
+static void
+op_isnanzero(void)
+{
+	double num;
+
+	num = num_stack[stack_index];
+	num_stack[stack_index] = isnan(num) ? 0.0 : num;
+}
+
+static void
+op_isinfzero(void)
+{
+	double num;
+
+	num = num_stack[stack_index];
+	num_stack[stack_index] = isinf(num) ? 0.0 : num;
+}
+
+static void
+op_isnanone(void)
+{
+	double num;
+
+	num = num_stack[stack_index];
+	num_stack[stack_index] = isnan(num) ? 1.0 : num;
+}
+
+static void
+op_isinfone(void)
+{
+	double num;
+
+	num = num_stack[stack_index];
+	num_stack[stack_index] = isinf(num) ? 1.0 : num;
 }
 
 static void
@@ -807,9 +849,29 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("N", "UN");
 			op->op = op_un;
 			PUSH("N");
+		} else if (xsg_conf_find_command("ISNAN")) {
+			POP("N", "ISNAN");
+			op->op = op_isnan;
+			PUSH("N");
 		} else if (xsg_conf_find_command("ISINF")) {
 			POP("N", "ISINF");
 			op->op = op_isinf;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ISNANZERO")) {
+			POP("N", "ISNANZERO");
+			op->op = op_isnanzero;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ISINFZERO")) {
+			POP("N", "ISINFZERO");
+			op->op = op_isinfzero;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ISNANONE")) {
+			POP("N", "ISNANONE");
+			op->op = op_isnanone;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ISINFONE")) {
+			POP("N", "ISINFONE");
+			op->op = op_isinfone;
 			PUSH("N");
 		} else if (xsg_conf_find_command("IF")) {
 			/* NOTE: "NXX" needs to be first!
@@ -1067,7 +1129,9 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 				xsg_conf_error("number, string, module name, "
 						"LOAD, STORE, "
 						"LT, LE, GT, GE, EQ, NE, UN, "
-						"ISINF, IF, MIN, MAX, "
+						"ISNAN, ISINF, ISNANZERO, "
+						"ISINFZERO, ISNANONE, ISINFONE, "
+						"IF, MIN, MAX, "
 						"LIMIT, UNKN, INF, NEGINF, "
 						"INC, DEC, ADD, SUB, "
 						"MUL, DIV, MOD, SIN, COS, "
