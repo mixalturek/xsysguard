@@ -1,0 +1,137 @@
+Set Background Color white
+Set Geometry 800x200
+
+SetEnv font Arial_Bold/12 Overwrite
+
+################################################################################
+
+Text 1 0 0 100 200 black ${font} \nuser\nnice\nsystem\nidle\niowait\nirq\nsoftirq
+
+################################################################################
+
+SetEnv us "cpu %d" Overwrite
+SetEnv ni "cpu %*d %d" Overwrite
+SetEnv sy "cpu %*d %*d %d" Overwrite
+SetEnv id "cpu %*d %*d %*d %d" Overwrite
+SetEnv io "cpu %*d %*d %*d %*d %d" Overwrite
+SetEnv ir "cpu %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv so "cpu %*d %*d %*d %*d %*d %*d %d" Overwrite
+
+Text 1 100 0 100 200 black ${font} \n%.1f%%\n%.1f%%\n%.1f%%\n%.1f%%\n%.1f%%\n%.1f%%\n%.1f%% Alignment TopRight
++ file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${ni}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${sy}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${id}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${io}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${ir}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
++ file:/proc/stat:readline:1:cscanf:${so}, \
+	file:/proc/stat:readline:1:cscanf:${us}, \
+	file:/proc/stat:readline:1:cscanf:${ni},ADD, \
+	file:/proc/stat:readline:1:cscanf:${sy},ADD, \
+	file:/proc/stat:readline:1:cscanf:${id},ADD, \
+	file:/proc/stat:readline:1:cscanf:${io},ADD, \
+	file:/proc/stat:readline:1:cscanf:${ir},ADD, \
+	file:/proc/stat:readline:1:cscanf:${so},ADD,DIV,100,MUL
+
+################################################################################
+
+Text 1 200 0 100 200 black ${font} cpu\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:1:cscanf:"cpu %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %*d %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %*d %*d %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:1:cscanf:"cpu %*d %*d %*d %*d %*d %*d %d"
+
+Text 1 300 0 100 200 black ${font} cpu\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:1:nscanf:"cpu %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %*d %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %*d %*d %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:1:nscanf:"cpu %*d %*d %*d %*d %*d %*d %d"
+
+################################################################################
+
+Text 1 400 0 100 200 black ${font} cpu0\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:2:cscanf:"cpu0 %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %*d %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %*d %*d %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:2:cscanf:"cpu0 %*d %*d %*d %*d %*d %*d %d"
+
+Text 1 500 0 100 200 black ${font} cpu0\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:2:nscanf:"cpu0 %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %*d %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %*d %*d %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:2:nscanf:"cpu0 %*d %*d %*d %*d %*d %*d %d"
+
+################################################################################
+
+Text 1 600 0 100 200 black ${font} cpu1\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:3:cscanf:"cpu1 %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %*d %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %*d %*d %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:3:cscanf:"cpu1 %*d %*d %*d %*d %*d %*d %d"
+
+Text 1 700 0 100 200 black ${font} cpu1\n%d\n%d\n%d\n%d\n%d\n%d\n%d Alignment TopRight
++ file:/proc/stat:readline:3:nscanf:"cpu1 %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %*d %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %*d %*d %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %*d %*d %*d %*d %d"
++ file:/proc/stat:readline:3:nscanf:"cpu1 %*d %*d %*d %*d %*d %*d %d"
+
