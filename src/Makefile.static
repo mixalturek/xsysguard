@@ -45,7 +45,7 @@ endif
 ################################################################################
 
 DEF := -D_GNU_SOURCE
-DEF += -D XSG_MAX_LOG_LEVEL=2
+DEF += -D XSG_LOG_LEVEL_MAX=2
 DEF += -D XSG_LOG_DOMAIN=NULL
 DEF += -D XSYSGUARD_VERSION=\"$(VERSION)\"
 DEF += -D XSG_API=
