@@ -183,12 +183,6 @@ op_ne(void)
 }
 
 static void
-op_un(void)
-{
-	num_stack[stack_index] = isnan(num_stack[stack_index]) ? 1.0 : 0.0;
-}
-
-static void
 op_isnan(void)
 {
 	num_stack[stack_index] = isnan(num_stack[stack_index]) ? 1.0 : 0.0;
@@ -316,7 +310,7 @@ op_limit(void)
 }
 
 static void
-op_unkn(void)
+op_nan(void)
 {
 	num_stack[stack_index + 1] = DNAN;
 	stack_index += 1;
@@ -845,10 +839,6 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("NN", "NE");
 			op->op = op_ne;
 			PUSH("N");
-		} else if (xsg_conf_find_command("UN")) {
-			POP("N", "UN");
-			op->op = op_un;
-			PUSH("N");
 		} else if (xsg_conf_find_command("ISNAN")) {
 			POP("N", "ISNAN");
 			op->op = op_isnan;
@@ -902,8 +892,8 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("NNN", "LIMIT");
 			op->op = op_limit;
 			PUSH("N");
-		} else if (xsg_conf_find_command("UNKN")) {
-			op->op = op_unkn;
+		} else if (xsg_conf_find_command("NAN")) {
+			op->op = op_nan;
 			PUSH("N");
 		} else if (xsg_conf_find_command("INF")) {
 			op->op = op_inf;
@@ -1128,11 +1118,11 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			if (!xsg_modules_parse(update, var, &num, &str, &arg)) {
 				xsg_conf_error("number, string, module name, "
 						"LOAD, STORE, "
-						"LT, LE, GT, GE, EQ, NE, UN, "
+						"LT, LE, GT, GE, EQ, NE, "
 						"ISNAN, ISINF, ISNANZERO, "
 						"ISINFZERO, ISNANONE, ISINFONE, "
 						"IF, MIN, MAX, "
-						"LIMIT, UNKN, INF, NEGINF, "
+						"LIMIT, NAN, INF, NEGINF, "
 						"INC, DEC, ADD, SUB, "
 						"MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, POW, "
