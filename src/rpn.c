@@ -310,6 +310,13 @@ op_limit(void)
 }
 
 static void
+op_pi(void)
+{
+	num_stack[stack_index + 1] = M_PI;
+	stack_index += 1;
+}
+
+static void
 op_nan(void)
 {
 	num_stack[stack_index + 1] = DNAN;
@@ -892,6 +899,9 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("NNN", "LIMIT");
 			op->op = op_limit;
 			PUSH("N");
+		} else if (xsg_conf_find_command("PI")) {
+			op->op = op_pi;
+			PUSH("N");
 		} else if (xsg_conf_find_command("NAN")) {
 			op->op = op_nan;
 			PUSH("N");
@@ -1121,8 +1131,8 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"LT, LE, GT, GE, EQ, NE, "
 						"ISNAN, ISINF, ISNANZERO, "
 						"ISINFZERO, ISNANONE, ISINFONE, "
-						"IF, MIN, MAX, "
-						"LIMIT, NAN, INF, NEGINF, "
+						"IF, MIN, MAX, LIMIT, "
+						"PI, NAN, INF, NEGINF, "
 						"INC, DEC, ADD, SUB, "
 						"MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, POW, "
