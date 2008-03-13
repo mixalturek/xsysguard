@@ -438,6 +438,12 @@ op_atan2(void)
 }
 
 static void
+op_round(void)
+{
+	num_stack[stack_index] = round(num_stack[stack_index]);
+}
+
+static void
 op_floor(void)
 {
 	num_stack[stack_index] = floor(num_stack[stack_index]);
@@ -971,6 +977,10 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			POP("NN", "ATAN2");
 			op->op = op_atan2;
 			PUSH("N");
+		} else if (xsg_conf_find_command("ROUND")) {
+			POP("N", "ROUND");
+			op->op = op_round;
+			PUSH("N");
 		} else if (xsg_conf_find_command("FLOOR")) {
 			POP("N", "FLOOR");
 			op->op = op_floor;
@@ -1136,7 +1146,8 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"INC, DEC, ADD, SUB, "
 						"MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, POW, "
-						"ATAN, ATAN2, FLOOR, CEIL, "
+						"ATAN, ATAN2, "
+						"ROUND, FLOOR, CEIL, "
 						"DEG2RAD, RAD2DEG, ABS, DUP, "
 						"POP, EXC, "
 						"ATOF, ATOI, ATOL, ATOLL, "
