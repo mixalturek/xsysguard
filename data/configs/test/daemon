@@ -1,0 +1,35 @@
+Set Background Color black
+Set Geometry 120x100
+
+SetEnv command "ssh localhost xsysguardd"
+
+SetEnv font Arial_Bold/12
+
+
+SetEnv us "file:/proc/stat:readline:1:cscanf:\"cpu %d\"" Overwrite
+SetEnv ni "file:/proc/stat:readline:1:cscanf:\"cpu %*d %d\"" Overwrite
+SetEnv sy "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %d\"" Overwrite
+SetEnv id "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %d\"" Overwrite
+SetEnv io "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %d\"" Overwrite
+SetEnv ir "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %*d %d\"" Overwrite
+SetEnv so "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %*d %*d %d\"" Overwrite
+
+
+# iowait, irq and softirq only since Linux 2.6 - convert nan's to zero for Linux 2.4
+SetEnv add_io_ir_so "${io},ISNANZERO,ADD,${ir},ISNANZERO,ADD,${so},ISNANZERO,ADD" Overwrite
+
+SetEnv sum "${us},${ni},ADD,${sy},ADD,${id},ADD,${add_io_ir_so}" Overwrite
+
+AreaChart 1 0 0 120 100 Min 0 Max 1
++ daemon:${command}:num:"${us},${sum},DIV" #00f
++ daemon:${command}:num:"${ni},${sum},DIV" #00d AddPrev
++ daemon:${command}:num:"${sy},${sum},DIV" #00b AddPrev
++ daemon:${command}:num:"${io},${sum},DIV" #009 AddPrev
++ daemon:${command}:num:"${ir},${sum},DIV" #007 AddPrev
++ daemon:${command}:num:"${so},${sum},DIV" #005 AddPrev
+
+
+# (1 - (idle / (idle + user + nice + system + iowait + irq + softirq))) * 100
+Text 1 0 0 120 100 red ${font} "%.1f%%" Alignment Center
++ daemon:${command}:num:"1,${id},DUP,${us},ADD,${ni},ADD,${sy},ADD,${add_io_ir_so},DIV,SUB,100,MUL"
+
