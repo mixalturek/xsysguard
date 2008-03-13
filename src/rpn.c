@@ -338,6 +338,12 @@ op_neginf(void)
 }
 
 static void
+op_neg(void)
+{
+	num_stack[stack_index] = - num_stack[stack_index];
+}
+
+static void
 op_inc(void)
 {
 	num_stack[stack_index] = num_stack[stack_index] + 1.0;
@@ -917,6 +923,10 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		} else if (xsg_conf_find_command("NEGINF")) {
 			op->op = op_neginf;
 			PUSH("N");
+		} else if (xsg_conf_find_command("NEG")) {
+			POP("N", "NEG");
+			op->op = op_neg;
+			PUSH("N");
 		} else if (xsg_conf_find_command("INC")) {
 			POP("N", "INC");
 			op->op = op_inc;
@@ -1143,7 +1153,7 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"ISINFZERO, ISNANONE, ISINFONE, "
 						"IF, MIN, MAX, LIMIT, "
 						"PI, NAN, INF, NEGINF, "
-						"INC, DEC, ADD, SUB, "
+						"NEG, INC, DEC, ADD, SUB, "
 						"MUL, DIV, MOD, SIN, COS, "
 						"LOG, EXP, SQRT, POW, "
 						"ATAN, ATAN2, "
