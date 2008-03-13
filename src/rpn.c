@@ -452,13 +452,13 @@ op_ceil(void)
 static void
 op_deg2rad(void)
 {
-	num_stack[stack_index] *= 0.0174532952;
+	num_stack[stack_index] *= M_PI / 180.0; /* 0.0174532952 */
 }
 
 static void
 op_rad2deg(void)
 {
-	num_stack[stack_index] *= 57.29577951;
+	num_stack[stack_index] *= 180.0 / M_PI; /* 57.29577951 */
 }
 
 static void
