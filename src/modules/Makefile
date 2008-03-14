@@ -93,7 +93,11 @@ install-strip:
 endif
 
 %.Module:%.mk
-	@-$(MAKE) --no-print-directory --file=$^
+	@-($(MAKE) --no-print-directory --file=$^) || (echo; \
+	echo "********************************************************"; \
+	echo "*** WARNING: Failed: $^"; \
+	echo "********************************************************"; \
+	echo)
 
 %.so: %.c
 	$(CC) -o $@ $^ $(ALL_CFLAGS) $(ALL_LDFLAGS)
