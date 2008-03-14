@@ -177,15 +177,18 @@ module_load(module_t *m)
 	}
 
 	if (module->parse == NULL) {
-		xsg_error("cannot load module %s: parse function is NULL");
+		xsg_error("cannot load module %s: parse function is NULL",
+				m->name);
 	}
 
 	if (module->help == NULL) {
-		xsg_error("cannot load module %s: help function is NULL");
+		xsg_error("cannot load module %s: help function is NULL",
+				m->name);
 	}
 
 	if (module->info == NULL) {
-		xsg_error("cannot load module %s: info char* is NULL");
+		xsg_error("cannot load module %s: info char* is NULL",
+				m->name);
 	}
 
 	module->name = m->name;
