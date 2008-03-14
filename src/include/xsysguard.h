@@ -45,6 +45,10 @@
 # endif
 #endif
 
+#if defined(__GNUC__)
+# define XSG_PRINTF(a, b) __attribute__((__format__(__printf__, a, b)))
+#endif
+
 #if defined(__GNUC__) && (__GNUC__ < 3)
 # if !defined va_copy && defined __va_copy
 #  define va_copy(d, s) __va_copy((d), (s))
@@ -123,10 +127,10 @@ xsg_conf_read_string(void);
 extern XSG_API bool
 xsg_conf_find_command(const char *command);
 
-extern XSG_API void
+extern XSG_API XSG_PRINTF(1, 2) void
 xsg_conf_error(const char *format, ...);
 
-extern XSG_API void
+extern XSG_API XSG_PRINTF(1, 2) void
 xsg_conf_warning(const char *format, ...);
 
 /******************************************************************************
@@ -304,10 +308,10 @@ xsg_string_up(xsg_string_t *string);
 extern XSG_API void
 xsg_string_down(xsg_string_t *string);
 
-extern XSG_API void
+extern XSG_API XSG_PRINTF(2, 3) void
 xsg_string_printf(xsg_string_t *string, const char *format, ...);
 
-extern XSG_API void
+extern XSG_API XSG_PRINTF(2, 3) void
 xsg_string_append_printf(xsg_string_t *string, const char *format, ...);
 
 extern XSG_API char *
@@ -505,7 +509,7 @@ xsg_free_(void *mem, const char *file, int line);
 extern XSG_API int
 xsg_vasprintf(char **strp, const char *fmt, va_list ap);
 
-extern XSG_API int
+extern XSG_API XSG_PRINTF(2, 3) int
 xsg_asprintf(char **strp, const char *fmt, ...);
 
 /* misc */
@@ -597,7 +601,7 @@ xsg_set_cloexec_flag(int fd, bool value);
 
 extern XSG_API int xsg_log_level;
 
-extern XSG_API void
+extern XSG_API XSG_PRINTF(3, 4) void
 xsg_log(const char *domain, int level, const char *format, ...);
 
 #if (XSG_LOG_LEVEL_ERROR <= XSG_LOG_LEVEL_MAX)
