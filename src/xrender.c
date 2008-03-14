@@ -195,7 +195,7 @@ xsg_xrender_init(Display *dpy)
 	}
 
 	if ((XRenderQueryVersion = (Status (*)(Display *, int *, int *)) (intptr_t) dlsym(librender, "XRenderQueryVersion")) == NULL) {
-		xsg_error("Cannot find symbol XRenderQueryVersion: %S", dlerror());
+		xsg_error("Cannot find symbol XRenderQueryVersion: %s", dlerror());
 	}
 
 	if ((XCompositeQueryExtension = (Bool (*)(Display *, int *, int *)) (intptr_t) dlsym(libcomposite, "XCompositeQueryExtension")) == NULL) {
