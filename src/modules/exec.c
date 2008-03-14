@@ -180,9 +180,11 @@ catch_execs(void)
 
 			if (ret > 0) {
 				if (WIFEXITED(status) || WIFSIGNALED(status)) {
+					xsg_buffer_clear(e->buffer);
 					e->pid = 0;
 				}
 			} else if (ret < 0) {
+				xsg_buffer_clear(e->buffer);
 				e->pid = 0;
 			}
 		}
