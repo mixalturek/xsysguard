@@ -49,7 +49,7 @@ typedef struct {
 	double max;
 	xsg_var_t *min_var;
 	xsg_var_t *max_var;
-	Imlib_Image mask;
+	char *mask;
 	xsg_list_t *var_list;
 } barchart_t;
 
@@ -76,7 +76,7 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		mask_img = xsg_imlib_load_image(barchart->mask);
 
 		if (unlikely(mask_img == NULL)) {
-			xsg_warning("cannot load image \"%s\"", barchart->mask);
+			xsg_warning("cannot load mask image \"%s\"", barchart->mask);
 		}
 	}
 
