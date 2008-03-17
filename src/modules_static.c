@@ -99,6 +99,12 @@
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
+#define XSG_MODULE(parse, help, info) static const char info_uname[] = info
+#define XSG_MODULE_NAME "uname"
+#include "modules/uname.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
 #undef XSG_LOG_DOMAIN
 #define XSG_LOG_DOMAIN NULL
 
@@ -116,6 +122,7 @@ xsg_module_t xsg_modules_array[] = {
 	{ parse_tail, help_tail, info_tail, "tail" },
 	{ parse_tick, help_tick, info_tick, "tick" },
 	{ parse_time, help_time, info_time, "time" },
+	{ parse_uname, help_uname, info_uname, "uname" },
 	{ NULL }
 };
 

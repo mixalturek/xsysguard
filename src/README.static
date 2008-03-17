@@ -10,7 +10,7 @@ Statically linked executables for Linux
 
   Dynamic module loading is not supported, instead the following modules are
   statically linked: daemon, env, exec, file, inotail, number, random, string,
-  tail, tick and time.
+  tail, tick, time and uname.
 
 
 Copyright
