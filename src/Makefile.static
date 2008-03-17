@@ -81,6 +81,7 @@ ARCH += mips
 ARCH += mipsel
 ARCH += powerpc
 ARCH += sparc
+ARCH += sparc64
 ARCH += avr32
 ARCH += cris
 ARCH += sh3
