@@ -85,7 +85,7 @@ distclean: clean
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(MODULE_DIR)
-	$(INSTALL_DATA) $(wildcard *.so) $(DESTDIR)$(MODULE_DIR)
+	$(INSTALL_PROGRAM) $(wildcard *.so) $(DESTDIR)$(MODULE_DIR)
 
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
