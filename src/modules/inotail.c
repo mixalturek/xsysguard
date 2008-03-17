@@ -253,11 +253,11 @@ help_inotail(void)
 {
 	static xsg_string_t *string = NULL;
 
-	if (string == NULL) {
-		string = xsg_string_new(NULL);
-	} else {
-		xsg_string_truncate(string, 0);
+	if (string != NULL) {
+		return string->str;
 	}
+
+	string = xsg_string_new(NULL);
 
 	xsg_buffer_help(string, XSG_MODULE_NAME, "<filename>");
 
