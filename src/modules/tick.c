@@ -66,5 +66,5 @@ help_tick(void)
 
 /******************************************************************************/
 
-XSG_MODULE(parse_tick, help_tick, "get the current tick");
+XSG_MODULE(parse_tick, help_tick, "get current tick");
 
