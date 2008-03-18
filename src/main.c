@@ -52,6 +52,9 @@ static flist_t *handler_sighup_list = NULL;
 static xsg_list_t *poll_list = NULL;
 static xsg_list_t *timeout_list = NULL;
 
+static xsg_list_t *poll_remove_list = NULL;
+static xsg_list_t *timeout_remove_list = NULL;
+
 static uint64_t tick = 0;
 static uint64_t interval = 1000;
 
@@ -111,45 +114,12 @@ add_func(flist_t *list, void (*func)(void))
 	return tmp;
 }
 
-static flist_t *
-remove_func(flist_t *list, void (*func)(void))
-{
-	flist_t *tmp, *prev = NULL;
-
-	if (unlikely(func == NULL)) {
-		return list;
-	}
-
-	tmp = list;
-	while (tmp) {
-		if (tmp->func == func) {
-			if (prev) {
-				prev->next = tmp->next;
-			} else {
-				list = tmp->next;
-			}
-			xsg_free(tmp);
-			break;
-		}
-		prev = tmp;
-		tmp = prev->next;
-	}
-
-	return list;
-}
-
 /******************************************************************************/
 
 void
 xsg_main_add_init_func(void (*func)(void))
 {
 	init_list = add_func(init_list, func);
-}
-
-void
-xsg_main_remove_init_func(void (*func)(void))
-{
-	init_list = remove_func(init_list, func);
 }
 
 /******************************************************************************/
@@ -160,24 +130,12 @@ xsg_main_add_shutdown_func(void (*func)(void))
 	shutdown_list = add_func(shutdown_list, func);
 }
 
-void
-xsg_main_remove_shutdown_func(void (*func)(void))
-{
-	shutdown_list = remove_func(shutdown_list, func);
-}
-
 /******************************************************************************/
 
 void
 xsg_main_add_update_func(void (*func)(uint64_t))
 {
 	update_list = add_func(update_list, (void (*)(void)) func);
-}
-
-void
-xsg_main_remove_update_func(void (*func)(uint64_t))
-{
-	update_list = remove_func(update_list, (void (*)(void)) func);
 }
 
 /******************************************************************************/
@@ -204,8 +162,21 @@ void
 xsg_main_remove_poll(xsg_main_poll_t *poll)
 {
 	if (likely(poll != NULL)) {
-		poll_list = xsg_list_remove(poll_list, poll);
+		poll_remove_list = xsg_list_prepend(poll_remove_list, poll);
 	}
+}
+
+static void
+remove_polls(void)
+{
+	xsg_list_t *l;
+
+	for (l = poll_remove_list; l; l = l->next) {
+		poll_list = xsg_list_remove(poll_list, l->data);
+	}
+
+	xsg_list_free(poll_remove_list);
+	poll_remove_list = NULL;
 }
 
 /******************************************************************************/
@@ -232,8 +203,21 @@ void
 xsg_main_remove_timeout(xsg_main_timeout_t *timeout)
 {
 	if (likely(timeout != NULL)) {
-		timeout_list = xsg_list_remove(timeout_list, timeout);
+		timeout_remove_list = xsg_list_prepend(timeout_remove_list, timeout);
 	}
+}
+
+static void
+remove_timeouts(void)
+{
+	xsg_list_t *l;
+
+	for (l = timeout_remove_list; l; l = l->next) {
+		timeout_list = xsg_list_remove(timeout_list, l->data);
+	}
+
+	xsg_list_free(timeout_remove_list);
+	timeout_remove_list = NULL;
 }
 
 /******************************************************************************/
@@ -268,39 +252,6 @@ xsg_main_add_signal_handler(void (*func)(int signum), int signum)
 		break;
 	default:
 		xsg_error("cannot add signal handler for signal %d", signum);
-		break;
-	}
-}
-
-void
-xsg_main_remove_signal_handler(void (*func)(int signum), int signum)
-{
-	switch (signum) {
-	case SIGALRM:
-		handler_sigalrm_list = remove_func(handler_sigalrm_list,
-				(void (*)(void)) func);
-		break;
-	case SIGCHLD:
-		handler_sigchld_list = remove_func(handler_sigchld_list,
-				(void (*)(void)) func);
-		break;
-	case SIGPIPE:
-		handler_sigpipe_list = remove_func(handler_sigpipe_list,
-				(void (*)(void)) func);
-		break;
-	case SIGUSR1:
-		handler_sigusr1_list = remove_func(handler_sigusr1_list,
-				(void (*)(void)) func);
-		break;
-	case SIGUSR2:
-		handler_sigusr2_list = remove_func(handler_sigusr2_list,
-				(void (*)(void)) func);
-		break;
-	case SIGHUP:
-		handler_sighup_list = remove_func(handler_sighup_list,
-				(void (*)(void)) func);
-		break;
-	default:
 		break;
 	}
 }
@@ -428,6 +379,7 @@ loop(uint64_t num)
 					xsg_main_timeout_t *t = l->data;
 					t->func(t->arg, TRUE);
 				}
+				remove_timeouts();
 				time_error = FALSE;
 			}
 
@@ -470,16 +422,13 @@ loop(uint64_t num)
 					t->func(t->arg, FALSE);
 				}
 
-				if (xsg_timercmp(&t->tv, &time_now, <)) {
-					continue;
-				}
-
 				if (xsg_timercmp(&t->tv, &time_next, <)) {
 					time_next.tv_sec = t->tv.tv_sec;
 					time_next.tv_usec = t->tv.tv_usec;
 					time_next_is_update = FALSE;
 				}
 			}
+			remove_timeouts();
 
 			xsg_var_flush_dirty();
 
@@ -572,6 +521,7 @@ loop(uint64_t num)
 						(p->func)(p->arg, events);
 					}
 				}
+				remove_polls();
 			} else if (time_next_is_update) {
 				break; /* next tick */
 			}

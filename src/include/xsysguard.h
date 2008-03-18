@@ -154,25 +154,25 @@ extern XSG_API void
 xsg_main_add_init_func(void (*func)(void));
 
 extern XSG_API void
-xsg_main_remove_init_func(void (*func)(void));
-
-extern XSG_API void
 xsg_main_add_shutdown_func(void (*func)(void));
-
-extern XSG_API void
-xsg_main_remove_shutdown_func(void (*func)(void));
 
 extern XSG_API void
 xsg_main_add_update_func(void (*func)(uint64_t tick));
 
 extern XSG_API void
-xsg_main_remove_update_func(void (*func)(uint64_t tick));
-
-extern XSG_API void
 xsg_main_add_signal_handler(void (*func)(int signum), int signum);
 
+typedef struct _xsg_main_timeout_t {
+	struct timeval tv; /* absolute time */
+	void (*func)(void *arg, bool time_error);
+	void *arg;
+} xsg_main_timeout_t;
+
 extern XSG_API void
-xsg_main_remove_signal_handler(void (*func)(int signum), int signum);
+xsg_main_add_timeout(xsg_main_timeout_t *timeout);
+
+extern XSG_API void
+xsg_main_remove_timeout(xsg_main_timeout_t *timeout);
 
 typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,
@@ -192,18 +192,6 @@ xsg_main_add_poll(xsg_main_poll_t *poll);
 
 extern XSG_API void
 xsg_main_remove_poll(xsg_main_poll_t *poll);
-
-typedef struct _xsg_main_timeout_t {
-	struct timeval tv; /* absolute time */
-	void (*func)(void *arg, bool time_error);
-	void *arg;
-} xsg_main_timeout_t;
-
-extern XSG_API void
-xsg_main_add_timeout(xsg_main_timeout_t *timeout);
-
-extern XSG_API void
-xsg_main_remove_timeout(xsg_main_timeout_t *timeout);
 
 /******************************************************************************
  * list.c
