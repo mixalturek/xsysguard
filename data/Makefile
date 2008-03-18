@@ -100,6 +100,7 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(FONT_DIR)
 	$(INSTALL_DATA) $(CONFIG_FILES) $(DESTDIR)$(CONFIG_DIR)/test
 	$(INSTALL_DATA) $(IMAGE_FILES) $(DESTDIR)$(IMAGE_DIR)/test
+	ln -s /usr/share/icons $(DESTDIR)$(IMAGE_DIR)/icons
 
 .PHONY: all clean distclean install
 
