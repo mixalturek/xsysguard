@@ -51,17 +51,13 @@ parse_tick(
 static const char *
 help_tick(void)
 {
-	static xsg_string_t *string = NULL;
+	static char *string = NULL;
 
-	if (string != NULL) {
-		return string->str;
+	if (string == NULL) {
+		xsg_asprintf(&string, "N %s\n", XSG_MODULE_NAME);
 	}
 
-	string = xsg_string_new(NULL);
-
-	xsg_string_append_printf(string, "N %s\n", XSG_MODULE_NAME);
-
-	return string->str;
+	return string;
 }
 
 /******************************************************************************/
