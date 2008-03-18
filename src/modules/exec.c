@@ -76,10 +76,6 @@ read_stdout_exec(void *arg, xsg_main_poll_events_t events)
 
 	n = read(e->poll.fd, buffer, BUFFER_SIZE);
 
-	if (!e->pid) {
-		return;
-	}
-
 	if (n == -1 && errno == EINTR) {
 		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) e->pid,
 				e->command, strerror(errno));
