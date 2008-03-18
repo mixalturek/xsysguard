@@ -42,7 +42,12 @@ struct flist_t {
 static flist_t *init_list = NULL;
 static flist_t *shutdown_list = NULL;
 static flist_t *update_list = NULL;
-static flist_t *signal_handler_list = NULL;
+static flist_t *handler_sigalrm_list = NULL;
+static flist_t *handler_sigchld_list = NULL;
+static flist_t *handler_sigpipe_list = NULL;
+static flist_t *handler_sigusr1_list = NULL;
+static flist_t *handler_sigusr2_list = NULL;
+static flist_t *handler_sighup_list = NULL;
 
 static xsg_list_t *poll_list = NULL;
 static xsg_list_t *timeout_list = NULL;
@@ -50,7 +55,12 @@ static xsg_list_t *timeout_list = NULL;
 static uint64_t tick = 0;
 static uint64_t interval = 1000;
 
-static int last_received_signum = 0;
+static bool received_sigalrm = FALSE;
+static bool received_sigchld = FALSE;
+static bool received_sigpipe = FALSE;
+static bool received_sigusr1 = FALSE;
+static bool received_sigusr2 = FALSE;
+static bool received_sighup = FALSE;
 
 static bool time_error = FALSE;
 
@@ -229,17 +239,103 @@ xsg_main_remove_timeout(xsg_main_timeout_t *timeout)
 /******************************************************************************/
 
 void
-xsg_main_add_signal_handler(void (*func)(int signum))
+xsg_main_add_signal_handler(void (*func)(int signum), int signum)
 {
-	signal_handler_list = add_func(signal_handler_list,
-			(void (*)(void)) func);
+	switch (signum) {
+	case SIGALRM:
+		handler_sigalrm_list = add_func(handler_sigalrm_list,
+				(void (*)(void)) func);
+		break;
+	case SIGCHLD:
+		handler_sigchld_list = add_func(handler_sigchld_list,
+				(void (*)(void)) func);
+		break;
+	case SIGPIPE:
+		handler_sigpipe_list = add_func(handler_sigpipe_list,
+				(void (*)(void)) func);
+		break;
+	case SIGUSR1:
+		handler_sigusr1_list = add_func(handler_sigusr1_list,
+				(void (*)(void)) func);
+		break;
+	case SIGUSR2:
+		handler_sigusr2_list = add_func(handler_sigusr2_list,
+				(void (*)(void)) func);
+		break;
+	case SIGHUP:
+		handler_sighup_list = add_func(handler_sighup_list,
+				(void (*)(void)) func);
+		break;
+	default:
+		xsg_error("cannot add signal handler for signal %d", signum);
+		break;
+	}
 }
 
 void
-xsg_main_remove_signal_handler(void (*func)(int signum))
+xsg_main_remove_signal_handler(void (*func)(int signum), int signum)
 {
-	signal_handler_list = remove_func(signal_handler_list,
-			(void (*)(void)) func);
+	switch (signum) {
+	case SIGALRM:
+		handler_sigalrm_list = remove_func(handler_sigalrm_list,
+				(void (*)(void)) func);
+		break;
+	case SIGCHLD:
+		handler_sigchld_list = remove_func(handler_sigchld_list,
+				(void (*)(void)) func);
+		break;
+	case SIGPIPE:
+		handler_sigpipe_list = remove_func(handler_sigpipe_list,
+				(void (*)(void)) func);
+		break;
+	case SIGUSR1:
+		handler_sigusr1_list = remove_func(handler_sigusr1_list,
+				(void (*)(void)) func);
+		break;
+	case SIGUSR2:
+		handler_sigusr2_list = remove_func(handler_sigusr2_list,
+				(void (*)(void)) func);
+		break;
+	case SIGHUP:
+		handler_sighup_list = remove_func(handler_sighup_list,
+				(void (*)(void)) func);
+		break;
+	default:
+		break;
+	}
+}
+
+/* NOTE: strsignal is not part of any standard, so... */
+static const char *
+signum2str(int signum)
+{
+	switch (signum) {
+	case SIGALRM: return "SIGALRM";
+	case SIGCHLD: return "SIGCHLD";
+	case SIGHUP: return "SIGHUP";
+	case SIGINT: return "SIGINT";
+	case SIGPIPE: return "SIGPIPE";
+	case SIGQUIT: return "SIGQUIT";
+	case SIGTERM: return "SIGTERM";
+	case SIGUSR1: return "SIGUSR1";
+	case SIGUSR2: return "SIGUSR2";
+	default: return "";
+	}
+}
+
+static void
+run_signal_handler(flist_t *list, int signum)
+{
+	flist_t *fl;
+
+	xsg_message("running signal handler for signal %d: %s", signum,
+			signum2str(signum));
+
+	for (fl = list; fl; fl = fl->next) {
+		void (*func)(int) = (void (*)(int)) fl->func;
+
+		func(signum);
+	}
 }
 
 /******************************************************************************/
@@ -335,13 +431,29 @@ loop(uint64_t num)
 				time_error = FALSE;
 			}
 
-			if (unlikely(last_received_signum != 0)) {
-				xsg_message("running signal handler functions...");
-				for (fl = signal_handler_list; fl; fl = fl->next) {
-					void (*func)(int) = (void (*)(int)) fl->func;
-					func(last_received_signum);
-				}
-				last_received_signum = 0;
+			if (unlikely(received_sigalrm)) {
+				run_signal_handler(handler_sigalrm_list, SIGALRM);
+				received_sigalrm = FALSE;
+			}
+			if (unlikely(received_sigchld)) {
+				run_signal_handler(handler_sigchld_list, SIGCHLD);
+				received_sigchld = FALSE;
+			}
+			if (unlikely(received_sigpipe)) {
+				run_signal_handler(handler_sigpipe_list, SIGPIPE);
+				received_sigpipe = FALSE;
+			}
+			if (unlikely(received_sigusr1)) {
+				run_signal_handler(handler_sigusr1_list, SIGUSR1);
+				received_sigusr1 = FALSE;
+			}
+			if (unlikely(received_sigusr2)) {
+				run_signal_handler(handler_sigusr2_list, SIGUSR2);
+				received_sigusr2 = FALSE;
+			}
+			if (unlikely(received_sighup)) {
+				run_signal_handler(handler_sighup_list, SIGHUP);
+				received_sighup = FALSE;
 			}
 
 			xsg_gettimeofday(&time_now, 0);
@@ -505,92 +617,28 @@ shutdown(void)
 	xsg_message("terminating...");
 }
 
+/******************************************************************************/
+
 static void
-signal_handler(int signum)
+signal_handler_error(int signum)
 {
-	const char *signame;
+	xsg_error("received signal %d: %s", signum, signum2str(signum));
+}
 
-	/* NOTE: strsignal is not part of any standard */
-
-	switch (signum) {
-	case SIGABRT:
-		signame = "SIGABRT";
-		break;
-	case SIGALRM:
-		signame = "SIGALRM";
-		break;
-	case SIGCHLD:
-		signame = "SIGCHLD";
-		break;
-	case SIGCONT:
-		signame = "SIGCONT";
-		break;
-	case SIGFPE:
-		signame = "SIGFPE";
-		break;
-	case SIGHUP:
-		signame = "SIGHUP";
-		break;
-	case SIGILL:
-		signame = "SIGILL";
-		break;
-	case SIGINT:
-		signame = "SIGINT";
-		break;
-	case SIGKILL:
-		signame = "SIGKILL";
-		break;
-	case SIGPIPE:
-		signame = "SIGPIPE";
-		break;
-	case SIGQUIT:
-		signame = "SIGQUIT";
-		break;
-	case SIGSEGV:
-		signame = "SIGSEGV";
-		break;
-	case SIGSTOP:
-		signame = "SIGSTOP";
-		break;
-	case SIGTERM:
-		signame = "SIGTERM";
-		break;
-	case SIGTSTP:
-		signame = "SIGTSTP";
-		break;
-	case SIGTTIN:
-		signame = "SIGTTIN";
-		break;
-	case SIGTTOU:
-		signame = "SIGTTOU";
-		break;
-	case SIGUSR1:
-		signame = "SIGUSR1";
-		break;
-	case SIGUSR2:
-		signame = "SIGUSR2";
-		break;
-	default:
-		signame = "";
-		break;
-	}
+static void
+signal_handler_user(int signum)
+{
+	xsg_message("received signal %d: %s", signum, signum2str(signum));
 
 	switch (signum) {
-	case SIGABRT:
-	case SIGINT:
-	case SIGKILL:
-	case SIGQUIT:
-	case SIGSEGV:
-	case SIGSTOP:
-	case SIGTERM:
-		xsg_error("received signal %d: %s", signum, signame);
-		break;
-	default:
-		xsg_message("received signal %d: %s", signum, signame);
-		break;
+	case SIGALRM: received_sigalrm = TRUE; return;
+	case SIGCHLD: received_sigchld = TRUE; return;
+	case SIGPIPE: received_sigpipe = TRUE; return;
+	case SIGUSR1: received_sigusr1 = TRUE; return;
+	case SIGUSR2: received_sigusr2 = TRUE; return;
+	case SIGHUP: received_sighup = TRUE; return;
+	default: return;
 	}
-
-	last_received_signum = signum;
 }
 
 static int
@@ -611,32 +659,29 @@ ssigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
 void
 xsg_main_loop(uint64_t num)
 {
-	struct sigaction action;
+	struct sigaction action_error;
+	struct sigaction action_user;
 
 	xsg_message("installing signal handler");
 
-	action.sa_handler = signal_handler;
-	sigemptyset(&action.sa_mask);
-	action.sa_flags = 0;
+	action_error.sa_handler = signal_handler_error;
+	sigemptyset(&action_error.sa_mask);
+	action_error.sa_flags = 0;
 
-	ssigaction(SIGABRT, &action, NULL);
-	ssigaction(SIGALRM, &action, NULL);
-	ssigaction(SIGCHLD, &action, NULL);
-	ssigaction(SIGCONT, &action, NULL);
-	ssigaction(SIGFPE, &action, NULL);
-	ssigaction(SIGHUP, &action, NULL);
-	ssigaction(SIGILL, &action, NULL);
-	ssigaction(SIGINT, &action, NULL);
-	/* ssigaction(SIGKILL, &action, NULL); */
-	ssigaction(SIGPIPE, &action, NULL);
-	ssigaction(SIGQUIT, &action, NULL);
-	/* ssigaction(SIGSEGV, &action, NULL); */
-	/* ssigaction(SIGSTOP, &action, NULL); */
-	ssigaction(SIGTERM, &action, NULL);
-	/* ssigaction(SIGTSTP, &action, NULL); */
-	/* ssigaction(SIGTTOU, &action, NULL); */
-	ssigaction(SIGUSR1, &action, NULL);
-	ssigaction(SIGUSR2, &action, NULL);
+	action_user.sa_handler = signal_handler_user;
+	sigemptyset(&action_user.sa_mask);
+	action_user.sa_flags = 0;
+
+	ssigaction(SIGTERM, &action_error, NULL);
+	ssigaction(SIGQUIT, &action_error, NULL);
+	ssigaction(SIGINT,  &action_error, NULL);
+
+	ssigaction(SIGALRM, &action_user, NULL);
+	ssigaction(SIGCHLD, &action_user, NULL);
+	ssigaction(SIGPIPE, &action_user, NULL);
+	ssigaction(SIGUSR1, &action_user, NULL);
+	ssigaction(SIGUSR2, &action_user, NULL);
+	ssigaction(SIGHUP,  &action_user, NULL);
 
 	xsg_message("registering shutdown function");
 

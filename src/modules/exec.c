@@ -318,7 +318,8 @@ parse_exec(
 
 	xsg_main_add_update_func(update_execs);
 	xsg_main_add_shutdown_func(shutdown_execs);
-	xsg_main_add_signal_handler(signal_handler_exec);
+	xsg_main_add_signal_handler(signal_handler_exec, SIGCHLD);
+	xsg_main_add_signal_handler(signal_handler_exec, SIGPIPE);
 }
 
 static const char *

@@ -169,10 +169,10 @@ extern XSG_API void
 xsg_main_remove_update_func(void (*func)(uint64_t tick));
 
 extern XSG_API void
-xsg_main_add_signal_handler(void (*func)(int signum));
+xsg_main_add_signal_handler(void (*func)(int signum), int signum);
 
 extern XSG_API void
-xsg_main_remove_signal_handler(void (*func)(int signum));
+xsg_main_remove_signal_handler(void (*func)(int signum), int signum);
 
 typedef enum _xsg_main_poll_events_t {
 	XSG_MAIN_POLL_READ   = 1 << 0,

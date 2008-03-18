@@ -1333,7 +1333,9 @@ xsg_window_init(void)
 		update_visible(window);
 	}
 
-	xsg_main_add_signal_handler(signal_handler);
+	xsg_main_add_signal_handler(signal_handler, SIGUSR1);
+	xsg_main_add_signal_handler(signal_handler, SIGUSR2);
+	xsg_main_add_signal_handler(signal_handler, SIGHUP);
 }
 
 /******************************************************************************

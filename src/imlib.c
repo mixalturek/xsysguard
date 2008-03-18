@@ -740,7 +740,8 @@ xsg_imlib_init_font_path(bool enable_fontconfig)
 void
 xsg_imlib_init(void)
 {
-	xsg_main_add_signal_handler(signal_handler);
+	xsg_main_add_signal_handler(signal_handler, SIGUSR1);
+	xsg_main_add_signal_handler(signal_handler, SIGUSR2);
 }
 
 /******************************************************************************/
