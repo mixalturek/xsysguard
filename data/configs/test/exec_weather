@@ -1,0 +1,14 @@
+Set Background Color white
+Set Geometry 400x100
+
+SetEnv loc EDDN
+
+SetEnv url "http://weather.noaa.gov/pub/data/observations/metar/decoded/${loc}.TXT" Overwrite
+SetEnv get "wget -o /dev/null -O - ${url}" Overwrite
+
+Text 300 0 0 400 100 black VeraBd/10 "%s\n%s\n%d°C, %s"
++ exec:${get}:readline:1:complete
++ exec:${get}:readline:2:complete
++ exec:${get}:readline:0:nscanf:"Temperature: %*d F (%d C)"
++ exec:${get}:readline:0:sscanf:"Sky conditions: %[^\n]"
+
