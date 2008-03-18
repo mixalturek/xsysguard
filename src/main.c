@@ -489,7 +489,7 @@ loop(uint64_t num)
 					&except_fds, &time_sleep);
 
 			if (unlikely(fd_count == -1) && (errno == EINTR)) {
-				xsg_debug("interrupted by signal");
+				xsg_debug("select: interrupted by signal");
 				continue;
 			}
 
@@ -498,7 +498,7 @@ loop(uint64_t num)
 			}
 
 			if (fd_count != 0) {
-				xsg_debug("interrupted by file descriptor");
+				xsg_debug("select: interrupted by file descriptor");
 
 				for (l = poll_list; l; l = l->next) {
 					xsg_main_poll_events_t events = 0;
