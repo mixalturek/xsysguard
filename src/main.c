@@ -421,6 +421,12 @@ loop(uint64_t num)
 				if (xsg_timercmp(&t->tv, &time_now, <)) {
 					t->func(t->arg, FALSE);
 				}
+			}
+
+			remove_timeouts();
+
+			for (l = timeout_list; l; l = l->next) {
+				xsg_main_timeout_t *t = l->data;
 
 				if (xsg_timercmp(&t->tv, &time_next, <)) {
 					time_next.tv_sec = t->tv.tv_sec;
@@ -428,7 +434,6 @@ loop(uint64_t num)
 					time_next_is_update = FALSE;
 				}
 			}
-			remove_timeouts();
 
 			xsg_var_flush_dirty();
 
