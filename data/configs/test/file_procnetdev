@@ -23,39 +23,39 @@ SetEnv tcar " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d
 SetEnv tcom " ${dev}: %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d" Overwrite
 
 LineChart 1 0 0 180 40 Min 0
-+ file:/proc/net/dev:readline:0:cscanf:${tbyt} red
-+ file:/proc/net/dev:readline:0:cscanf:${rbyt} green
++ file:/proc/net/dev:readline:0:scanf:c:${tbyt} red
++ file:/proc/net/dev:readline:0:scanf:c:${rbyt} green
 
 LineChart 1 180 0 180 40 Min 0
-+ file:/proc/net/dev:readline:0:cscanf:${tpac} red
-+ file:/proc/net/dev:readline:0:cscanf:${rpac} green
++ file:/proc/net/dev:readline:0:scanf:c:${tpac} red
++ file:/proc/net/dev:readline:0:scanf:c:${rpac} green
 
 Text 1 0 40 360 20 green ${font} "RX bytes/s:\t%d\t(%.1f KiB/s)" TabWidth 120
-+ file:/proc/net/dev:readline:0:cscanf:${rbyt}
-+ file:/proc/net/dev:readline:0:cscanf:${rbyt},1024,DIV
++ file:/proc/net/dev:readline:0:scanf:c:${rbyt}
++ file:/proc/net/dev:readline:0:scanf:c:${rbyt},1024,DIV
 Text 1 0 60 360 20 red ${font} "TX bytes/s:\t%d\t(%.1f KiB/s)" TabWidth 120
-+ file:/proc/net/dev:readline:0:cscanf:${tbyt}
-+ file:/proc/net/dev:readline:0:cscanf:${tbyt},1024,DIV
++ file:/proc/net/dev:readline:0:scanf:c:${tbyt}
++ file:/proc/net/dev:readline:0:scanf:c:${tbyt},1024,DIV
 
 Text 1 0 80 360 20 green ${font} "RX bytes:\t%d\t(%.1f MiB)" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${rbyt}
-+ file:/proc/net/dev:readline:0:nscanf:${rbyt},1024,DIV,1024,DIV
++ file:/proc/net/dev:readline:0:scanf:n:${rbyt}
++ file:/proc/net/dev:readline:0:scanf:n:${rbyt},1024,DIV,1024,DIV
 Text 1 0 100 360 20 red ${font} "TX bytes:\t%d\t(%.1f MiB)" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${tbyt}
-+ file:/proc/net/dev:readline:0:nscanf:${tbyt},1024,DIV,1024,DIV
++ file:/proc/net/dev:readline:0:scanf:n:${tbyt}
++ file:/proc/net/dev:readline:0:scanf:n:${tbyt},1024,DIV,1024,DIV
 
 Text 1 0 120 360 20 green ${font} "RX packets:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${rpac}
++ file:/proc/net/dev:readline:0:scanf:n:${rpac}
 Text 1 0 140 360 20 red ${font} "TX packets:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${tpac}
++ file:/proc/net/dev:readline:0:scanf:n:${tpac}
 
 Text 1 0 160 360 20 green ${font} "RX errors:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${rerr}
++ file:/proc/net/dev:readline:0:scanf:n:${rerr}
 Text 1 0 180 360 20 red ${font} "TX errors:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${terr}
++ file:/proc/net/dev:readline:0:scanf:n:${terr}
 
 Text 1 0 200 360 20 green ${font} "RX dropped:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${rdro}
++ file:/proc/net/dev:readline:0:scanf:n:${rdro}
 Text 1 0 220 360 20 red ${font} "TX dropped:\t%d" TabWidth 120
-+ file:/proc/net/dev:readline:0:nscanf:${tdro}
++ file:/proc/net/dev:readline:0:scanf:n:${tdro}
 
