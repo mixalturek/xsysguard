@@ -10,8 +10,8 @@ SetEnv url "http://weather.noaa.gov/pub/data/observations/metar/decoded/${loc}.T
 SetEnv get "wget -o /dev/null -O - ${url}" Overwrite
 
 Text 60 0 0 400 100 black VeraBd/10 "%s\n%s\n%d°C, %s"
-+ exec:${get}:readline:1:total
-+ exec:${get}:readline:2:total
++ exec:${get}:readline:1:all
++ exec:${get}:readline:2:all
 + exec:${get}:readline:0:scanf:n:"Temperature: %*d F (%d C)"
 + exec:${get}:readline:0:scanf:s:"Sky conditions: %[^\n]"
 
