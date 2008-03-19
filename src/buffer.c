@@ -19,14 +19,14 @@
  */
 
 /*
- * read:total
+ * read:all
  * read:sscanf:<format>
  * read:nscanf:<format>
  * read:cscanf:<format>
  * read:grep:<pattern>:<index>
  * read:igrep:<pattern>:<index>
  *
- * readline:<number>:total
+ * readline:<number>:all
  * readline:<number>:sscanf:<format>
  * readline:<number>:nscanf:<format>
  * readline:<number>:cscanf:<format>
@@ -84,41 +84,41 @@ xsg_buffer_new(void)
 
 /******************************************************************************/
 
-typedef struct _total_t {
+typedef struct _all_t {
 	xsg_var_t *var;
 	xsg_string_t *string;
-} total_t;
+} all_t;
 
 static const char *
-get_total(void *arg)
+get_all(void *arg)
 {
-	total_t *total = (total_t *) arg;
+	all_t *all = (all_t *) arg;
 
-	return total->string->str;
+	return all->string->str;
 }
 
 static void
-process_total(void *arg, xsg_string_t *string)
+process_all(void *arg, xsg_string_t *string)
 {
-	total_t *total = (total_t *) arg;
+	all_t *all = (all_t *) arg;
 
-	xsg_string_assign(total->string, string->str);
+	xsg_string_assign(all->string, string->str);
 
-	if (total->var) {
-		xsg_var_dirty(total->var);
+	if (all->var) {
+		xsg_var_dirty(all->var);
 	}
 }
 
 static void *
-parse_total(xsg_buffer_t *buffer, xsg_var_t *var)
+parse_all(xsg_buffer_t *buffer, xsg_var_t *var)
 {
-	total_t *total;
+	all_t *all;
 
-	total = xsg_new(total_t, 1);
-	total->var = var;
-	total->string = xsg_string_new(NULL);
+	all = xsg_new(all_t, 1);
+	all->var = var;
+	all->string = xsg_string_new(NULL);
 
-	return (void *) total;
+	return (void *) all;
 }
 
 /******************************************************************************/
@@ -400,10 +400,10 @@ xsg_buffer_parse(
 			buffer->read_string = xsg_string_new(NULL);
 		}
 
-		if (xsg_conf_find_command("total")) {
-			*str = get_total;
-			*arg = parse_total(buffer, var);
-			read_var->func = process_total;
+		if (xsg_conf_find_command("all")) {
+			*str = get_all;
+			*arg = parse_all(buffer, var);
+			read_var->func = process_all;
 			read_var->arg = *arg;
 		} else if (xsg_conf_find_command("scanf")) {
 			if (xsg_conf_find_command("string")
@@ -443,7 +443,7 @@ xsg_buffer_parse(
 			read_var->func = process_re;
 			read_var->arg = *arg;
 		} else {
-			xsg_conf_error("total, scanf, "
+			xsg_conf_error("all, scanf, "
 					"grep or igrep expected");
 		}
 	} else if (xsg_conf_find_command("readline")) {
@@ -461,10 +461,10 @@ xsg_buffer_parse(
 			buffer->readline_string = xsg_string_new(NULL);
 		}
 
-		if (xsg_conf_find_command("total")) {
-			*str = get_total;
-			*arg = parse_total(buffer, var);
-			readline_var->func = process_total;
+		if (xsg_conf_find_command("all")) {
+			*str = get_all;
+			*arg = parse_all(buffer, var);
+			readline_var->func = process_all;
 			readline_var->arg = *arg;
 		} else if (xsg_conf_find_command("scanf")) {
 			if (xsg_conf_find_command("string")
@@ -504,7 +504,7 @@ xsg_buffer_parse(
 			readline_var->func = process_re;
 			readline_var->arg = *arg;
 		} else {
-			xsg_conf_error("total, scanf, "
+			xsg_conf_error("all, scanf, "
 					"grep or igrep expected");
 		}
 	} else {
@@ -590,7 +590,7 @@ xsg_buffer_help_helper(
 )
 {
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
-			opt, s, "total");
+			opt, s, "all");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
 			opt, s, "scanf:string:<format>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", module_name,
