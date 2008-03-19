@@ -6,13 +6,13 @@ SetEnv command "ssh localhost xsysguardd"
 SetEnv font Arial_Bold/12
 
 
-SetEnv us "file:/proc/stat:readline:1:cscanf:\"cpu %d\"" Overwrite
-SetEnv ni "file:/proc/stat:readline:1:cscanf:\"cpu %*d %d\"" Overwrite
-SetEnv sy "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %d\"" Overwrite
-SetEnv id "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %d\"" Overwrite
-SetEnv io "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %d\"" Overwrite
-SetEnv ir "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %*d %d\"" Overwrite
-SetEnv so "file:/proc/stat:readline:1:cscanf:\"cpu %*d %*d %*d %*d %*d %*d %d\"" Overwrite
+SetEnv us "file:/proc/stat:readline:1:scanf:c:\"cpu %d\"" Overwrite
+SetEnv ni "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %d\"" Overwrite
+SetEnv sy "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %*d %d\"" Overwrite
+SetEnv id "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %*d %*d %d\"" Overwrite
+SetEnv io "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %*d %*d %*d %d\"" Overwrite
+SetEnv ir "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %*d %*d %*d %*d %d\"" Overwrite
+SetEnv so "file:/proc/stat:readline:1:scanf:c:\"cpu %*d %*d %*d %*d %*d %*d %d\"" Overwrite
 
 
 # iowait, irq and softirq only since Linux 2.6 - convert nan's to zero for Linux 2.4
