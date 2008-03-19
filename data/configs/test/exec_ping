@@ -1,0 +1,13 @@
+Set Background Color black
+Set Geometry 100x100
+
+SetEnv host www.google.com
+
+SetEnv ping "ping ${host}" Overwrite
+
+LineChart 1 0 0 100 100 
++ exec:${ping}:readline:0:grep:"time=([0-9]+.[0-9]) ms":1,STRTOF blue
+
+Text 1 0 0 100 100 red VeraBd/10 %.1f\ ms Alignment Center
++ exec:${ping}:readline:0:grep:"time=([0-9]+.[0-9]) ms":1,STRTOF
+
