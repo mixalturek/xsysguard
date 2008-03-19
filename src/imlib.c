@@ -189,17 +189,18 @@ xsg_imlib_blend_mask(Imlib_Image mask)
 	image_height = imlib_image_get_height();
 	image_data = imlib_image_get_data();
 
-	width = MIN(mask_width, image_height);
+	width = MIN(mask_width, image_width);
 	height = MIN(mask_height, image_height);
 
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
 			unsigned char *img;
 			unsigned char *msk;
-			img = (unsigned char *) image_data
-					+ x + y * image_height;
-			msk = (unsigned char *) mask_data
-					+ x + y * mask_height;
+
+			img = (unsigned char *) (image_data
+					+ x + y * image_width);
+			msk = (unsigned char *) (mask_data
+					+ x + y * mask_width);
 
 			img[0] = (img[0] * msk[0]) / 0xff;
 			img[1] = (img[1] * msk[1]) / 0xff;
