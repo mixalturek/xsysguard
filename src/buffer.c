@@ -332,6 +332,7 @@ parse_re(xsg_buffer_t *buffer, xsg_var_t *var, bool ignore_case)
 	re->var = var;
 	re->string = xsg_string_new(NULL);
 	re->pattern = xsg_conf_read_string();
+	re->index = xsg_conf_read_uint();
 	re->regex = xsg_new(regex_t, 1);
 	re->regmatch = (re->index == 0) ? 0 : xsg_new(regmatch_t, re->index);
 
@@ -351,8 +352,6 @@ parse_re(xsg_buffer_t *buffer, xsg_var_t *var, bool ignore_case)
 
 		xsg_conf_error("%s", errbuffer);
 	}
-
-	re->index = xsg_conf_read_uint();
 
 	return (void *) re;
 }
