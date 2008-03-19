@@ -405,21 +405,33 @@ xsg_buffer_parse(
 			*arg = parse_total(buffer, var);
 			read_var->func = process_total;
 			read_var->arg = *arg;
-		} else if (xsg_conf_find_command("sscanf")) {
-			*str = get_sscanf;
-			*arg = parse_sscanf(buffer, var);
-			read_var->func = process_sscanf;
-			read_var->arg = *arg;
-		} else if (xsg_conf_find_command("nscanf")) {
-			*num = get_nscanf;
-			*arg = parse_nscanf(buffer, var);
-			read_var->func = process_nscanf;
-			read_var->arg = *arg;
-		} else if (xsg_conf_find_command("cscanf")) {
-			*num = get_cscanf;
-			*arg = parse_cscanf(buffer, var);
-			read_var->func = process_cscanf;
-			read_var->arg = *arg;
+		} else if (xsg_conf_find_command("scanf")) {
+			if (xsg_conf_find_command("string")
+			 || xsg_conf_find_command("str")
+			 || xsg_conf_find_command("s")) {
+				*str = get_sscanf;
+				*arg = parse_sscanf(buffer, var);
+				read_var->func = process_sscanf;
+				read_var->arg = *arg;
+			} else if (xsg_conf_find_command("number")
+				|| xsg_conf_find_command("num")
+				|| xsg_conf_find_command("n")) {
+				*num = get_nscanf;
+				*arg = parse_nscanf(buffer, var);
+				read_var->func = process_nscanf;
+				read_var->arg = *arg;
+			} else if (xsg_conf_find_command("counter")
+				|| xsg_conf_find_command("count")
+				|| xsg_conf_find_command("c")) {
+				*num = get_cscanf;
+				*arg = parse_cscanf(buffer, var);
+				read_var->func = process_cscanf;
+				read_var->arg = *arg;
+			} else {
+				xsg_conf_error("string, str, s, number, num, "
+						"n, counter, count or c "
+						"expected");
+			}
 		} else if (xsg_conf_find_command("grep")) {
 			*str = get_re;
 			*arg = parse_re(buffer, var, FALSE);
@@ -431,7 +443,7 @@ xsg_buffer_parse(
 			read_var->func = process_re;
 			read_var->arg = *arg;
 		} else {
-			xsg_conf_error("total, sscanf, nscanf, cscanf, "
+			xsg_conf_error("total, scanf, "
 					"grep or igrep expected");
 		}
 	} else if (xsg_conf_find_command("readline")) {
@@ -454,21 +466,33 @@ xsg_buffer_parse(
 			*arg = parse_total(buffer, var);
 			readline_var->func = process_total;
 			readline_var->arg = *arg;
-		} else if (xsg_conf_find_command("sscanf")) {
-			*str = get_sscanf;
-			*arg = parse_sscanf(buffer, var);
-			readline_var->func = process_sscanf;
-			readline_var->arg = *arg;
-		} else if (xsg_conf_find_command("nscanf")) {
-			*num = get_nscanf;
-			*arg = parse_nscanf(buffer, var);
-			readline_var->func = process_nscanf;
-			readline_var->arg = *arg;
-		} else if (xsg_conf_find_command("cscanf")) {
-			*num = get_cscanf;
-			*arg = parse_cscanf(buffer, var);
-			readline_var->func = process_cscanf;
-			readline_var->arg = *arg;
+		} else if (xsg_conf_find_command("scanf")) {
+			if (xsg_conf_find_command("string")
+			 || xsg_conf_find_command("str")
+			 || xsg_conf_find_command("s")) {
+				*str = get_sscanf;
+				*arg = parse_sscanf(buffer, var);
+				readline_var->func = process_sscanf;
+				readline_var->arg = *arg;
+			} else if (xsg_conf_find_command("number")
+				|| xsg_conf_find_command("num")
+				|| xsg_conf_find_command("n")) {
+				*num = get_nscanf;
+				*arg = parse_nscanf(buffer, var);
+				readline_var->func = process_nscanf;
+				readline_var->arg = *arg;
+			} else if (xsg_conf_find_command("counter")
+				|| xsg_conf_find_command("count")
+				|| xsg_conf_find_command("c")) {
+				*num = get_cscanf;
+				*arg = parse_cscanf(buffer, var);
+				readline_var->func = process_cscanf;
+				readline_var->arg = *arg;
+			} else {
+				xsg_conf_error("string, str, s, number, num, "
+						"n, counter, count or c "
+						"expected");
+			}
 		} else if (xsg_conf_find_command("grep")) {
 			*str = get_re;
 			*arg = parse_re(buffer, var, FALSE);
@@ -480,7 +504,7 @@ xsg_buffer_parse(
 			readline_var->func = process_re;
 			readline_var->arg = *arg;
 		} else {
-			xsg_conf_error("total, sscanf, nscanf, cscanf, "
+			xsg_conf_error("total, scanf, "
 					"grep or igrep expected");
 		}
 	} else {
@@ -568,11 +592,11 @@ xsg_buffer_help_helper(
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
 			opt, s, "total");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
-			opt, s, "sscanf:<format>");
+			opt, s, "scanf:string:<format>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", module_name,
-			opt, s, "nscanf:<format>");
+			opt, s, "scanf:number:<format>");
 	xsg_string_append_printf(string, "N %s:%s:%s:%s\n", module_name,
-			opt, s, "cscanf:<format>");
+			opt, s, "scanf:counter:<format>");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
 			opt, s, "grep:<pattern>:<index>");
 	xsg_string_append_printf(string, "S %s:%s:%s:%s\n", module_name,
