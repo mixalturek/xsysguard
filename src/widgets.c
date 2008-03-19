@@ -58,22 +58,6 @@ xsg_widget_t *xsg_widgets_new(xsg_window_t *window) {
 	return widget;
 }
 
-/******************************************************************************/
-
-xsg_widget_t *
-xsg_widgets_last(void)
-{
-	xsg_list_t *l;
-
-	l = xsg_list_last(widget_list);
-
-	if (unlikely(l == NULL)) {
-		xsg_error("No widgets available");
-	}
-
-	return l->data;
-}
-
 /******************************************************************************
  *
  * render

@@ -37,9 +37,6 @@ xsg_widgets_update_var(xsg_widget_t *widget, xsg_var_t *var);
 extern xsg_widget_t *
 xsg_widgets_new(xsg_window_t *window);
 
-extern xsg_widget_t *
-xsg_widgets_last(void);
-
 extern void
 xsg_widgets_render(
 	xsg_widget_t *widget,
