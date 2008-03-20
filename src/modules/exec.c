@@ -255,7 +255,7 @@ update_execs(uint64_t tick)
 		}
 
 		for (i = 0; i < e->updatec; i++) {
-			if ((tick == 0) || (tick % e->updatev[i]) == 0) {
+			if (tick % e->updatev[i] == 0) {
 				run_exec(e);
 			}
 		}
