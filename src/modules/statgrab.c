@@ -3581,7 +3581,17 @@ parse_process_stats(
 
 	if (xsg_conf_find_command("ascending")) {
 		ascending = TRUE;
+	} else if (xsg_conf_find_command("asc")) {
+		ascending = TRUE;
+	} else if (xsg_conf_find_command("a")) {
+		ascending = TRUE;
 	} else if (xsg_conf_find_command("descending")) {
+		ascending = FALSE;
+	} else if (xsg_conf_find_command("desc")) {
+		ascending = FALSE;
+	} else if (xsg_conf_find_command("des")) {
+		ascending = FALSE;
+	} else if (xsg_conf_find_command("d")) {
 		ascending = FALSE;
 	} else {
 		xsg_conf_error("ascending or descending expected");
