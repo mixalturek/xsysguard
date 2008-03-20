@@ -49,6 +49,7 @@ typedef struct _var_t {
 /******************************************************************************/
 
 struct _xsg_printf_t {
+	const char *format; /* not used */
 	char *begin;
 	xsg_list_t *var_list;
 	xsg_list_t *next_var;
@@ -75,6 +76,7 @@ xsg_printf_new(const char *format)
 
 	p = xsg_new(xsg_printf_t, 1);
 
+	p->format = format;
 	p->begin = NULL;
 	p->var_list = NULL;
 	p->next_var = NULL;
