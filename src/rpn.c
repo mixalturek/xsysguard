@@ -1230,8 +1230,13 @@ calc(xsg_rpn_t *rpn)
 				num_stack[stack_index] = op->num_func(op->arg);
 			}
 			if (op->str_func) {
-				xsg_string_assign(str_stack[stack_index],
-						op->str_func(op->arg));
+				const char *s = op->str_func(op->arg);
+
+				if (s == NULL) {
+					xsg_string_truncate(str_stack[stack_index], 0);
+				} else {
+					xsg_string_assign(str_stack[stack_index], s);
+				}
 			}
 		}
 	}
