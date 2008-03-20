@@ -150,7 +150,7 @@ update_vard(uint64_t tick)
 	for (l = var_list; l; l = l->next) {
 		xsg_var_t *var = l->data;
 
-		if ((var->update != 0) && (tick % var->update) == 0) {
+		if (tick % var->update == 0) {
 			update_var(var);
 		}
 	}
@@ -188,7 +188,7 @@ xsg_vard_parse(uint8_t type, uint32_t remote_id, uint64_t update)
 
 	xsg_rpn_parse(update, var, &rpn);
 
-	var->update = update;
+	var->update = (update == 0) ? UINT64_MAX : update;
 	var->remote_id = remote_id;
 	var->dirty = FALSE;
 	var->type = type;
