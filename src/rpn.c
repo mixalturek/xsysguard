@@ -630,6 +630,7 @@ op_strtol(void)
 	nptr = str_stack[stack_index - 1]->str;
 	base = (int) num_stack[stack_index];
 	num = strtol(nptr, &endptr, base);
+	num_stack[stack_index - 1] = num;
 	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
 	stack_index -= 1;
 }
@@ -644,6 +645,7 @@ op_strtoll(void)
 	nptr = str_stack[stack_index - 1]->str;
 	base = (int) num_stack[stack_index];
 	num = strtoll(nptr, &endptr, base);
+	num_stack[stack_index - 1] = num;
 	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
 	stack_index -= 1;
 }
@@ -658,6 +660,7 @@ op_strtoul(void)
 	nptr = str_stack[stack_index - 1]->str;
 	base = (int) num_stack[stack_index];
 	num = strtoul(nptr, &endptr, base);
+	num_stack[stack_index - 1] = num;
 	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
 	stack_index -= 1;
 }
@@ -672,6 +675,7 @@ op_strtoull(void)
 	nptr = str_stack[stack_index - 1]->str;
 	base = (int) num_stack[stack_index];
 	num = strtoull(nptr, &endptr, base);
+	num_stack[stack_index - 1] = num;
 	xsg_string_erase(str_stack[stack_index - 1], 0, endptr - nptr);
 	stack_index -= 1;
 }
