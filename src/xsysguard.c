@@ -200,6 +200,9 @@ parse_env(const char *config_name)
 		xsg_warning("%s: cannot set environment variable %s=\"%s\": %s",
 				config_name, variable, value, strerror(errno));
 	}
+
+	xsg_free(variable);
+	xsg_free(value);
 }
 
 static void
