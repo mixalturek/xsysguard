@@ -1,0 +1,10 @@
+Set Background Color black
+Set Geometry 200x100
+
+SetEnv url "http://www.kernel.org/kdist/finger_banner" Overwrite
+SetEnv get "wget -o /dev/null -O - ${url}" Overwrite
+
+Text 60 0 0 200 200 white VeraBd/10 "stable:\t%s\nprepatch:\t%s" TabWidth 100
++ exec:${get}:readline:1:grep:".*stable version.*:[ ]*([^ ]+)":1
++ exec:${get}:readline:2:grep:".*prepatch.*:[ ]*([^ ]+)":1
+
