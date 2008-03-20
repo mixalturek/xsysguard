@@ -63,14 +63,14 @@ find_env_buffer(const char *name, uint64_t update)
 /******************************************************************************/
 
 static void
-update_envs(uint64_t update)
+update_envs(uint64_t tick)
 {
 	xsg_list_t *l;
 
 	for (l = env_list; l; l = l->next) {
 		env_t *e = l->data;
 
-		if (update % e->update == 0) {
+		if (tick % e->update == 0) {
 			const char *value;
 
 			value = xsg_getenv(e->name);
