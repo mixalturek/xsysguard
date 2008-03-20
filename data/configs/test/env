@@ -1,0 +1,18 @@
+Set Background Color black
+Set Geometry 240x240
+
+Text 0 10 10 230 60 lightblue "VeraBd/12" "USER:\t${USER}\nHOME:\t${HOME}\nSHELL:\t${SHELL}" TabWidth 40
+
+Text 0 10 90 230 60 orange "VeraBd/12" "%s\n%s\n%s" TabWidth 40
++ "USER:\t${USER}"
++ "HOME:\t${HOME}"
++ "SHELL:\t${SHELL}"
+
+Text 0 10 170 230 60 magenta "VeraBd/12" "%s:\t%s\n%s:\t%s\n%s:\t%s" TabWidth 40
++ "USER"
++ env:USER:read:all
++ "HOME"
++ env:HOME:read:all
++ "SHELL"
++ env:SHELL:read:all
+
