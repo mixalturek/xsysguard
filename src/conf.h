@@ -61,6 +61,9 @@ xsg_conf_read_newline(void);
 extern uint32_t
 xsg_conf_read_color(void);
 
+extern uint64_t
+xsg_conf_read_update(void);
+
 /******************************************************************************/
 
 #endif /* __CONF_H__ */

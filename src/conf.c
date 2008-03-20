@@ -483,6 +483,18 @@ xsg_conf_read_double(void)
 
 /******************************************************************************/
 
+uint64_t
+xsg_conf_read_update(void)
+{
+	uint64_t update;
+
+	update = xsg_conf_read_uint();
+
+	return (update == 0) ? UINT64_MAX : update;
+}
+
+/******************************************************************************/
+
 static bool (*color_lookup)(char *name, uint32_t *color) = NULL;
 
 void
