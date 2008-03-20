@@ -38,12 +38,12 @@ xsg_widget_t *xsg_widgets_new(xsg_window_t *window) {
 	widget = xsg_new(xsg_widget_t, 1);
 
 	widget->window = window;
-	widget->update = 0;
+	widget->update = UINT64_MAX;
 	widget->xoffset = 0;
 	widget->yoffset = 0;
 	widget->width = 0;
 	widget->height = 0;
-	widget->visible_update = 0;
+	widget->visible_update = UINT64_MAX;
 	widget->visible_var = NULL;
 	widget->visible = TRUE;
 	widget->render_func = NULL;
@@ -139,8 +139,7 @@ xsg_widgets_update(uint64_t tick)
 	for (l = widget_list; l; l = l->next) {
 		xsg_widget_t *widget = l->data;
 
-		if ((widget->visible_update != 0)
-		 && (tick % widget->visible_update) == 0) {
+		if (widget->visible_var && tick % widget->visible_update == 0) {
 			bool visible = widget->visible;
 
 			widget->visible = (xsg_var_get_num(widget->visible_var)
@@ -154,12 +153,8 @@ xsg_widgets_update(uint64_t tick)
 			}
 		}
 
-		if ((widget->update != 0) && (tick % widget->update) == 0) {
+		if (tick % widget->update == 0) {
 			(widget->scroll_func)(widget);
-			(widget->update_func)(widget, NULL);
-		}
-
-		if (tick == 0) {
 			(widget->update_func)(widget, NULL);
 		}
 	}

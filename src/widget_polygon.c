@@ -131,7 +131,7 @@ xsg_widget_polygon_parse(xsg_window_t *window)
 
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
-			widget->visible_update = xsg_conf_read_uint();
+			widget->visible_update = xsg_conf_read_update();
 			widget->visible_var = xsg_var_parse(
 					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Filled")) {
