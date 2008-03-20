@@ -554,6 +554,7 @@ xsg_conf_read_color(void)
 			} else {
 				ptr += n;
 			}
+			xsg_free(name);
 			return color;
 		}
 		xsg_conf_error("color (#RGB, #RGBA, #RRGGBB, #RRGGBBAA or "
@@ -726,9 +727,7 @@ xsg_conf_read_string(void)
 		}
 	}
 
-	str = xsg_strndup(string->str, string->len);
-
-	xsg_string_free(string, TRUE);
+	str = xsg_string_free(string, FALSE);
 
 	return str;
 }
