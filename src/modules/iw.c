@@ -73,7 +73,7 @@ get_name(void *arg)
 
 	if (iw_get_ext(skfd, arg, SIOCGIWNAME, &wrq) < 0) {
 		xsg_debug("get_name: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	strncpy(name, wrq.u.name, IFNAMSIZ);
@@ -126,7 +126,7 @@ get_freq_string(void *arg)
 
 	if (isnan(freq)) {
 		xsg_debug("get_freq_string: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	iw_print_freq_value(buffer, sizeof(buffer), freq);
@@ -169,7 +169,7 @@ get_key(void *arg)
 
 	if (iw_get_ext(skfd, arg, SIOCGIWENCODE, &wrq) < 0) {
 		xsg_debug("get_key: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	key_size = wrq.u.data.length;
@@ -225,7 +225,7 @@ get_essid(void *arg)
 
 	if (iw_get_ext(skfd, arg, SIOCGIWESSID, &wrq) < 0) {
 		xsg_debug("get_essid: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	essid_on = wrq.u.data.flags;
@@ -261,7 +261,7 @@ get_mode_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWMODE, &wrq) < 0) {
 		xsg_debug("get_mode_string: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.mode < IW_NUM_OPER_MODE) {
@@ -301,12 +301,12 @@ get_nickname(void *arg)
 
 	if (iw_get_ext(skfd, arg, SIOCGIWNICKN, &wrq) < 0) {
 		xsg_debug("get_nickname: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.essid.length <= 1) {
 		xsg_debug("get_nickname: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	xsg_debug("get_nickname: \"%s\"", nickname);
@@ -318,7 +318,7 @@ get_ap(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWAP, &wrq) < 0) {
 		xsg_debug("get_ap: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	iw_sawap_ntop(&(wrq.u.ap_addr), buffer);
@@ -344,7 +344,7 @@ get_bitrate_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRATE, &wrq) < 0) {
 		xsg_debug("get_bitrate_string: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	iw_print_bitrate(buffer, sizeof(buffer), wrq.u.bitrate.value);
@@ -375,7 +375,7 @@ get_rts_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWRTS, &wrq) < 0) {
 		xsg_debug("get_rts_string: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.rts.disabled) {
@@ -411,7 +411,7 @@ get_frag_string(void *arg)
 {
 	if (iw_get_ext(skfd, arg, SIOCGIWFRAG, &wrq) < 0) {
 		xsg_debug("get_frag_string: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.frag.disabled) {
@@ -433,7 +433,7 @@ get_power_management(void *arg)
 
 	if (iw_get_ext(skfd, arg, SIOCGIWPOWER, &wrq) < 0) {
 		xsg_debug("get_power_management: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.power.disabled) {
@@ -520,17 +520,17 @@ get_retry(void *arg)
 {
 	if (iw_get_range_info(skfd, arg, &range) < 0) {
 		xsg_debug("get_retry: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (range.we_version_compiled <= 10) {
 		xsg_debug("get_retry: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (iw_get_ext(skfd, arg, SIOCGIWRETRY, &wrq) < 0) {
 		xsg_debug("get_retry: UNKNOWN");
-		return "";
+		return NULL;
 	}
 
 	if (wrq.u.retry.disabled) {
@@ -558,7 +558,7 @@ get_retry(void *arg)
 	}
 
 	xsg_debug("get_retry: UNKNOWN");
-	return "";
+	return NULL;
 }
 
 static double
