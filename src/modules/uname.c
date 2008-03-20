@@ -32,7 +32,7 @@ get_sysname(void *arg)
 {
 	if (uname(&utsname) < 0) {
 		xsg_debug("get_sysname: %s", "ERROR");
-		return "";
+		return NULL;
 	} else {
 		xsg_debug("get_sysname: %s", utsname.sysname);
 		return utsname.sysname;
@@ -44,7 +44,7 @@ get_nodename(void *arg)
 {
 	if (uname(&utsname) < 0) {
 		xsg_debug("get_nodename: %s", "ERROR");
-		return "";
+		return NULL;
 	} else {
 		xsg_debug("get_nodename: %s", utsname.nodename);
 		return utsname.nodename;
@@ -56,7 +56,7 @@ get_release(void *arg)
 {
 	if (uname(&utsname) < 0) {
 		xsg_debug("get_release: %s", "ERROR");
-		return "";
+		return NULL;
 	} else {
 		xsg_debug("get_release: %s", utsname.release);
 		return utsname.release;
@@ -68,7 +68,7 @@ get_version(void *arg)
 {
 	if (uname(&utsname) < 0) {
 		xsg_debug("get_version: %s", "ERROR");
-		return "";
+		return NULL;
 	} else {
 		xsg_debug("get_version: %s", utsname.version);
 		return utsname.version;
@@ -80,7 +80,7 @@ get_machine(void *arg)
 {
 	if (uname(&utsname) < 0) {
 		xsg_debug("get_machine: %s", "ERROR");
-		return "";
+		return NULL;
 	} else {
 		xsg_debug("get_machine: %s", utsname.machine);
 		return utsname.machine;
