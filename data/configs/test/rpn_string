@@ -1,0 +1,46 @@
+Set Background Color #eef
+Set Geometry 600x400
+
+Rectangle 0 0 200 600 #fee Filled
+Rectangle 400 0 200 600 #efe Filled
+
+SetEnv str " -123.456 abcdef ABCDEF" Overwrite
+
+Text 0 0 0 800 100 black VeraBd/12 " \t%s\nSTRUP:\t%s\nSTRDOWN:\t%s\nSTRREVERSE:\t%s\nSTRLEN:\t%d" TabWidth 200
++ env:str:read:all
++ env:str:read:all,STRUP
++ env:str:read:all,STRDOWN
++ env:str:read:all,STRREVERSE
++ env:str:read:all,STRLEN
+
+Text 0 0 100 800 60 black VeraBd/12 "STRCMP:\t%d\nSTRCMP(\" -0\"):\t%d\nSTRCMP(\" -2\"):\t%d" TabWidth 200
++ "${str}",env:str:read:all,STRCMP
++ "${str}"," -0",STRCMP
++ "${str}"," -2",STRCMP
+
+Text 0 0 160 800 80 black VeraBd/12 "ATOF:\t%f\nATOI:\t%f\nATOL:\t%f\nATOLL:\t%f" TabWidth 200
++ "${str}",ATOF
++ "${str}",ATOI
++ "${str}",ATOL
++ "${str}",ATOLL
+
+Text 0 0 240 800 60 black VeraBd/12 "STRTOF:\t%f\t%s\nSTRTOD:\t%f\t%s\nSTRTOLD:\t%f\t%s" TabWidth 200
++ "${str}",STRTOF
++ "${str}",STRTOF
++ "${str}",STRTOD
++ "${str}",STRTOD
++ "${str}",STRTOLD
++ "${str}",STRTOLD
+
+Text 0 0 300 800 40 black VeraBd/12 "STRTOL:\t%f\t%s\nSTRTOLL:\t%f\t%s" TabWidth 200
++ "${str}",10,STRTOL
++ "${str}",10,STRTOL
++ "${str}",10,STRTOLL
++ "${str}",10,STRTOLL
+
+Text 0 0 340 800 60 black VeraBd/12 "STRTOUL:\t%f\t%s\nSTRTOULL:\t%f\n \t \t%s" TabWidth 200
++ "${str}",10,STRTOUL
++ "${str}",10,STRTOUL
++ "${str}",10,STRTOULL
++ "${str}",10,STRTOULL
+
