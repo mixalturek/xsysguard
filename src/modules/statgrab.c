@@ -3591,7 +3591,9 @@ parse_process_stats(
 
 	if (*str == get_process_stats_state_string) {
 		process_stats_state_data_t *data;
+
 		data = xsg_new(process_stats_state_data_t, 1);
+
 		data->list_func = list_func;
 		data->ascending = ascending;
 		data->number = number;
@@ -3600,12 +3602,18 @@ parse_process_stats(
 		data->stopped = xsg_conf_read_string();
 		data->zombie = xsg_conf_read_string();
 		data->unknown = xsg_conf_read_string();
+
+		*arg = (void *) data;
 	} else {
 		process_stats_data_t *data;
+
 		data = xsg_new(process_stats_data_t, 1);
+
 		data->list_func = list_func;
 		data->ascending = ascending;
 		data->number = number;
+
+		*arg = (void *) data;
 	}
 }
 
