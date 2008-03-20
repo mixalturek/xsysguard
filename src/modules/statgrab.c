@@ -3039,7 +3039,7 @@ get_process_stats_process_name(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3068,7 +3068,7 @@ get_process_stats_proctitle(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3097,7 +3097,7 @@ get_process_stats_pid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3126,7 +3126,7 @@ get_process_stats_parent(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3155,7 +3155,7 @@ get_process_stats_pgid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3184,7 +3184,7 @@ get_process_stats_uid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3213,7 +3213,7 @@ get_process_stats_euid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3242,7 +3242,7 @@ get_process_stats_gid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3271,7 +3271,7 @@ get_process_stats_egid(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3300,7 +3300,7 @@ get_process_stats_proc_size(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3329,7 +3329,7 @@ get_process_stats_proc_resident(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3359,7 +3359,7 @@ get_process_stats_time_spent(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3388,7 +3388,7 @@ get_process_stats_cpu_percent(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3417,7 +3417,7 @@ get_process_stats_nice(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3446,7 +3446,7 @@ get_process_stats_state_number(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
@@ -3475,7 +3475,7 @@ get_process_stats_state_string(void *arg)
 	if (data->ascending) {
 		index = data->number;
 	} else {
-		index = process_entries - data->number;
+		index = process_entries - data->number - 1;
 	}
 
 	sg_list = (data->list_func)();
