@@ -168,14 +168,14 @@ update_file_test(file_test_t *f)
 }
 
 static void
-update_files(uint64_t update)
+update_files(uint64_t tick)
 {
 	xsg_list_t *l;
 
 	for (l = file_buffer_list; l; l = l->next) {
 		file_buffer_t *f = l->data;
 
-		if (update % f->update == 0) {
+		if (tick % f->update == 0) {
 			update_file_buffer(f);
 		}
 	}
@@ -183,7 +183,7 @@ update_files(uint64_t update)
 	for (l = file_test_list; l; l = l->next) {
 		file_test_t *f = l->data;
 
-		if (update % f->update == 0) {
+		if (tick % f->update == 0) {
 			update_file_test(f);
 		}
 	}
