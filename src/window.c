@@ -130,8 +130,8 @@ xsg_window_new(char *config_name, int flags, int xoffset, int yoffset)
 	window->flags = flags | WidthValue | HeightValue;
 	window->gravity = NorthWestGravity;
 
-	window->xoffset = xoffset;
-	window->yoffset = yoffset;
+	window->xoffset = xoffset; /* 64 */
+	window->yoffset = yoffset; /* 64 */
 	window->width = 128;
 	window->height = 128;
 
@@ -1423,13 +1423,14 @@ xsg_window_extract_position(
 	int flags = XValue | YValue;
 	size_t len;
 	char *s;
-
 	len = strlen(str);
 
 	s = str + len - 1;
 
 	if (!isdigit(*s)) {
 		*flags_return = 0;
+		*x_return = 64;
+		*y_return = 64;
 		return xsg_strdup(str);
 	}
 
@@ -1443,6 +1444,8 @@ xsg_window_extract_position(
 		flags |= YNegative;
 	} else if (*s != '+' || s == str) {
 		*flags_return = 0;
+		*x_return = 64;
+		*y_return = 64;
 		return xsg_strdup(str);
 	}
 
@@ -1450,6 +1453,8 @@ xsg_window_extract_position(
 
 	if (!isdigit(*s)) {
 		*flags_return = 0;
+		*x_return = 64;
+		*y_return = 64;
 		return xsg_strdup(str);
 	}
 
@@ -1463,6 +1468,8 @@ xsg_window_extract_position(
 		flags |= XNegative;
 	} else if (*s != '+' || s == str) {
 		*flags_return = 0;
+		*x_return = 64;
+		*y_return = 64;
 		return xsg_strdup(str);
 	}
 
