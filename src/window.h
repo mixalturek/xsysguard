@@ -33,6 +33,14 @@ xsg_window_init(void);
 extern bool
 xsg_window_color_lookup(char *name, uint32_t *color);
 
+extern char *
+xsg_window_extract_position(
+	char *str,
+	int *flags_return,
+	int *x_return,
+	int *y_return
+);
+
 extern void
 xsg_window_update(uint64_t tick);
 
@@ -46,7 +54,7 @@ xsg_window_update_var(
 /*****************************************************************************/
 
 extern xsg_window_t *
-xsg_window_new(char *config_name);
+xsg_window_new(char *config_name, int flags, int xoffset, int yoffset);
 
 /******************************************************************************/
 
@@ -60,7 +68,10 @@ extern void
 xsg_window_parse_resource(xsg_window_t *window);
 
 extern void
-xsg_window_parse_geometry(xsg_window_t *window);
+xsg_window_parse_size(xsg_window_t *window);
+
+extern void
+xsg_window_parse_position(xsg_window_t *window);
 
 extern void
 xsg_window_parse_sticky(xsg_window_t *window);

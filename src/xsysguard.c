@@ -207,13 +207,18 @@ parse_env(const char *config_name)
 }
 
 static void
-parse_config(char *config_name, char *config_buffer)
+parse_config(
+	char *config_name,
+	char *config_buffer,
+	int flags,
+	int xoffset,
+	int yoffset)
 {
 	xsg_window_t *window;
 
 	xsg_conf_set_buffer(config_name, config_buffer);
 
-	window = xsg_window_new(config_name);
+	window = xsg_window_new(config_name, flags, xoffset, yoffset);
 
 	while (!xsg_conf_find_end()) {
 		if (xsg_conf_find_newline()) {
@@ -229,8 +234,10 @@ parse_config(char *config_name, char *config_buffer)
 				xsg_window_parse_class(window);
 			} else if (xsg_conf_find_command("Resource")) {
 				xsg_window_parse_resource(window);
-			} else if (xsg_conf_find_command("Geometry")) {
-				xsg_window_parse_geometry(window);
+			} else if (xsg_conf_find_command("Size")) {
+				xsg_window_parse_size(window);
+			} else if (xsg_conf_find_command("Position")) {
+				xsg_window_parse_position(window);
 			} else if (xsg_conf_find_command("Sticky")) {
 				xsg_window_parse_sticky(window);
 			} else if (xsg_conf_find_command("SkipTaskbar")) {
@@ -255,7 +262,7 @@ parse_config(char *config_name, char *config_buffer)
 				xsg_window_parse_mouse(window);
 			} else {
 				xsg_conf_error("Name, Class, Resource, "
-						"Geometry, Sticky, "
+						"Size, Position, Sticky, "
 						"SkipTaskbar, SkipPager, "
 						"Layer, Decorations, "
 						"OverrideRedirect, Background, "
@@ -693,7 +700,8 @@ main(int argc, char **argv)
 	}
 
 	while (optind < argc) {
-		char *filename, *config_buffer;
+		char *config_name, *config_buffer, *filename;
+		int flags = 0, xoffset = 0, yoffset = 0;
 
 		if (strchr(argv[optind], '=') != NULL) {
 			xsg_message("putenv: %s", argv[optind]);
@@ -702,11 +710,18 @@ main(int argc, char **argv)
 			continue;
 		}
 
-		filename = find_config_file(argv[optind]);
+		/* extract {+-}<xoffset>{+-}<yoffset> */
+		config_name = xsg_window_extract_position(argv[optind], &flags,
+				&xoffset, &yoffset);
+
+		filename = find_config_file(config_name);
 		config_buffer = get_config_file(argv[optind], filename);
-		parse_config(argv[optind], config_buffer);
+		parse_config(argv[optind], config_buffer, flags, xoffset, yoffset);
+
+		xsg_free(config_name);
 		xsg_free(config_buffer);
 		xsg_free(filename);
+
 		optind++;
 	}
 

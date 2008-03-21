@@ -21,6 +21,7 @@
 #include <xsysguard.h>
 #include <signal.h>
 #include <string.h>
+#include <ctype.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
@@ -43,7 +44,8 @@ struct _xsg_window_t {
 	char *name;
 	char *class;
 	char *resource;
-	char *geometry;
+
+	int position_overwrite;
 	int flags;
 	int gravity;
 
@@ -112,26 +114,26 @@ static void
 copy_from_parent_timeout(void *arg, bool time_error);
 
 xsg_window_t *
-xsg_window_new(char *config_name)
+xsg_window_new(char *config_name, int flags, int xoffset, int yoffset)
 {
 	xsg_window_t *window;
 
 	window = xsg_new(xsg_window_t, 1);
 
-	window->config = config_name;
+	window->config = xsg_strdup(config_name);
 
 	window->name = xsg_strdup("xsysguard");
 	window->class = xsg_strdup("xsysguard");
 	window->resource = xsg_strdup("xsysguard");
 
-	window->geometry = xsg_strdup("64x64+128+128");
-	window->flags = 0;
+	window->position_overwrite = !!flags;
+	window->flags = flags | WidthValue | HeightValue;
 	window->gravity = NorthWestGravity;
 
-	window->xoffset = 128;
-	window->yoffset = 128;
-	window->width = 64;
-	window->height = 64;
+	window->xoffset = xoffset;
+	window->yoffset = yoffset;
+	window->width = 128;
+	window->height = 128;
 
 	window->sticky = FALSE;
 	window->skip_taskbar = FALSE;
@@ -231,13 +233,36 @@ xsg_window_parse_resource(xsg_window_t *window)
 }
 
 void
-xsg_window_parse_geometry(xsg_window_t *window)
+xsg_window_parse_size(xsg_window_t *window)
 {
-	xsg_free(window->geometry);
-	window->geometry = xsg_conf_read_string();
+	window->width = xsg_conf_read_uint();
+	window->height = xsg_conf_read_uint();
 	xsg_conf_read_newline();
-	window->flags = XParseGeometry(window->geometry, &window->xoffset,
-			&window->yoffset, &window->width, &window->height);
+}
+
+void
+xsg_window_parse_position(xsg_window_t *window)
+{
+	int xoffset, yoffset, flags;
+
+	flags = XValue | YValue;
+
+	if (xsg_conf_read_offset(&xoffset)) {
+		flags |= XNegative;
+	}
+	if (xsg_conf_read_offset(&yoffset)) {
+		flags |= YNegative;
+	}
+
+	xsg_conf_read_newline();
+
+	if (!window->position_overwrite) {
+		window->flags &= ~XNegative;
+		window->flags &= ~YNegative;
+		window->flags |= flags;
+		window->xoffset = xoffset;
+		window->yoffset = yoffset;
+	}
 }
 
 void
@@ -1381,4 +1406,68 @@ xsg_window_color_lookup(char *name, uint32_t *color)
 	return TRUE;
 }
 
+/******************************************************************************
+ *
+ * extract position form config name
+ *
+ ******************************************************************************/
+
+char *
+xsg_window_extract_position(
+	char *str,
+	int *flags_return,
+	int *x_return,
+	int *y_return
+)
+{
+	int flags = XValue | YValue;
+	size_t len;
+	char *s;
+
+	len = strlen(str);
+
+	s = str + len - 1;
+
+	if (!isdigit(*s)) {
+		*flags_return = 0;
+		return xsg_strdup(str);
+	}
+
+	while (s > str && isdigit(*s)) {
+		s--;
+	}
+
+	*y_return = atoi(s + 1);
+
+	if (*s == '-') {
+		flags |= YNegative;
+	} else if (*s != '+' || s == str) {
+		*flags_return = 0;
+		return xsg_strdup(str);
+	}
+
+	s--;
+
+	if (!isdigit(*s)) {
+		*flags_return = 0;
+		return xsg_strdup(str);
+	}
+
+	while (s > str && isdigit(*s)) {
+		s--;
+	}
+
+	*x_return = atoi(s + 1);
+
+	if (*s == '-') {
+		flags |= XNegative;
+	} else if (*s != '+' || s == str) {
+		*flags_return = 0;
+		return xsg_strdup(str);
+	}
+
+	*flags_return = flags;
+
+	return xsg_strndup(str, s - str);
+}
 
