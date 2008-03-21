@@ -55,6 +55,9 @@ xsg_conf_find_string(char **string_return);
 
 /******************************************************************************/
 
+extern bool
+xsg_conf_read_offset(int *offset);
+
 extern void
 xsg_conf_read_newline(void);
 

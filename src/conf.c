@@ -456,6 +456,41 @@ xsg_conf_read_uint(void)
 	return u;
 }
 
+bool
+xsg_conf_read_offset(int *offset)
+{
+	bool retval = FALSE;
+	int n = 0;
+	int m = 0;
+
+	skip_space();
+
+	if (is_env()) {
+		char *s = env(&n);
+
+		if (s[0] == '-') {
+			retval = TRUE;
+			s++;
+		}
+		sscanf(s, "%d%n", offset, &m);
+		if (m < 1) {
+			xsg_conf_error("cannot convert environment "
+				"variable to offset");
+		}
+	} else {
+		if (ptr[0] == '-') {
+			retval = TRUE;
+			ptr++;
+		}
+		sscanf(ptr, "%d%n", offset, &n);
+		if (n < 1) {
+			xsg_conf_error("offset expected");
+		}
+	}
+	ptr += n;
+	return retval;
+}
+
 double
 xsg_conf_read_double(void)
 {
