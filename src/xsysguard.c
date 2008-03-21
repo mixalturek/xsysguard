@@ -29,6 +29,7 @@
 #include <getopt.h>
 #include <stdarg.h>
 #include <time.h>
+#include <string.h>
 
 #include "modules.h"
 #include "conf.h"
@@ -693,6 +694,13 @@ main(int argc, char **argv)
 
 	while (optind < argc) {
 		char *filename, *config_buffer;
+
+		if (strchr(argv[optind], '=') != NULL) {
+			xsg_message("putenv: %s", argv[optind]);
+			putenv(argv[optind]);
+			optind++;
+			continue;
+		}
 
 		filename = find_config_file(argv[optind]);
 		config_buffer = get_config_file(argv[optind], filename);
