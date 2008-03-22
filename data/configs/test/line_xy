@@ -1,5 +1,5 @@
 Set Background Color white
-Set Geometry "800x600"
+Set Size 800 600
 
 Line 0 0 799 599 #FF0000FF
 Line 0 599 799 0 #FF0000FF

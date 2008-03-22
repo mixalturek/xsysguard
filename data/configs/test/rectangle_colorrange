@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry "240x120"
+Set Size 240 120
 
 Rectangle 10 10 100 100 #f00f ColorRange 90.0 1 50 #00ff
 Rectangle 130 10 100 100 #f00f ColorRange 0.0 1 50 #00ff Angle 90.0

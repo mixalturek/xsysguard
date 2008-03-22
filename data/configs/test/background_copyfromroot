@@ -1,5 +1,5 @@
 Set Background CopyFromRoot 0
-Set Geometry 400x300
+Set Size 400 300
 
 Rectangle 100 100 200 100 #00ff ColorRange 90 1 200 #f000
 

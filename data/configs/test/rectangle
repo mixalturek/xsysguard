@@ -1,5 +1,5 @@
 Set Background Color white
-Set Geometry 500x60
+Set Size 500 60
 
 Rectangle 10 10 80 40 blue
 Rectangle 110 10 80 40 orange Filled

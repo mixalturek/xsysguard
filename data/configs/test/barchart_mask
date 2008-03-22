@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 250x300
+Set Size 250 300
 
 BarChart 1 50 50 150 200 Mask test/barchart_mask.png Min 0 Max 1
 + 1 blue

@@ -1,5 +1,5 @@
 Set Background Color white
-Set Geometry 300x40
+Set Size 300 40
 
 Line 0 0 99 39 blue
 Line 100 10 199 29 orange

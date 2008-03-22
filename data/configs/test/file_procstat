@@ -1,5 +1,5 @@
 Set Background Color white
-Set Geometry 800x200
+Set Size 800 200
 
 SetEnv font Arial_Bold/12 Overwrite
 

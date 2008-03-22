@@ -1,5 +1,5 @@
 Set Background CopyFromRoot 0
-Set Geometry 200x200+10+10
+Set Size 200 200
 Set Layer Below
 Set Decorations off
 

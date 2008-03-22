@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 700x320
+Set Size 700 320
 
 SetEnv font Arial_Bold/14 Overwrite
 

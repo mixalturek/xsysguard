@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 200x100
+Set Size 200 100
 
 SetEnv url "http://www.kernel.org/kdist/finger_banner" Overwrite
 SetEnv get "wget -o /dev/null -O - ${url}" Overwrite

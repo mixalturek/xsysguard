@@ -1,5 +1,5 @@
 Set Background Color #eef
-Set Geometry 600x400
+Set Size 600 400
 
 Rectangle 0 0 200 600 #fee Filled
 Rectangle 400 0 200 600 #efe Filled

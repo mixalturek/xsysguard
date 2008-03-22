@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 120x100
+Set Size 120 100
 
 SetEnv command "ssh localhost xsysguardd"
 

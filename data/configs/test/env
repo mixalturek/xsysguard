@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 240x240
+Set Size 240 240
 
 Text 0 10 10 230 60 lightblue "VeraBd/12" "USER:\t${USER}\nHOME:\t${HOME}\nSHELL:\t${SHELL}" TabWidth 40
 

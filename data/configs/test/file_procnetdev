@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 360x240
+Set Size 360 240
 
 SetEnv font Arial_Bold/12
 

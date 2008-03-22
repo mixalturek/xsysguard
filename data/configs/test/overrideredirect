@@ -1,4 +1,5 @@
-Set Geometry 100x100+100+100
+Set Size 100 100
+Set Position +100 +100
 Set OverrideRedirect on
 Set Background Color #0000
 Set Mouse 1 Move

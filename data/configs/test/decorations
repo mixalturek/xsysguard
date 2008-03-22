@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 100x100
+Set Size 100 100
 Set Decorations off
 Set Mouse 1 Move
 Set Mouse 3 Exit

@@ -1,5 +1,5 @@
 Set Background Color black
-Set Geometry 100x100
+Set Size 100 100
 
 SetEnv host www.google.com
 
