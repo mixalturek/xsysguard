@@ -459,7 +459,7 @@ xsg_conf_read_uint(void)
 bool
 xsg_conf_read_offset(int *offset)
 {
-	bool retval = FALSE;
+	bool negative = FALSE;
 	int n = 0;
 	int m = 0;
 
@@ -469,7 +469,7 @@ xsg_conf_read_offset(int *offset)
 		char *s = env(&n);
 
 		if (s[0] == '-') {
-			retval = TRUE;
+			negative = TRUE;
 			s++;
 		}
 		sscanf(s, "%d%n", offset, &m);
@@ -479,7 +479,7 @@ xsg_conf_read_offset(int *offset)
 		}
 	} else {
 		if (ptr[0] == '-') {
-			retval = TRUE;
+			negative = TRUE;
 			ptr++;
 		}
 		sscanf(ptr, "%d%n", offset, &n);
@@ -488,7 +488,12 @@ xsg_conf_read_offset(int *offset)
 		}
 	}
 	ptr += n;
-	return retval;
+
+	if (negative) {
+		*offset = -*offset;
+	}
+
+	return negative;
 }
 
 double
