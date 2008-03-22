@@ -1,7 +1,7 @@
 Set Background Color white
 Set Size 300 60
 
-Polygon blue 4 5 5 20 55 30 20 90 40
-Polygon red 3 100 5 190 15 130 55 Closed
-Polygon orange 3 230 55 290 5 200 35 Filled
+Polygon blue 4 10 10 20 50 30 20 90 36
+Polygon red 3 100 10 190 15 130 50 Closed
+Polygon orange 3 230 50 290 10 200 35 Filled
 
