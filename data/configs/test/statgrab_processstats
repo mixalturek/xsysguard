@@ -1,0 +1,536 @@
+Set Background Color black
+Set Size 1000 420
+
+Rectangle 0 0 50 420 #004 Filled
+Text 0 0 0 50 20 white VeraBd/8 PID Alignment Center
+Text 3 0 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:pid:cpu:d:0
++ statgrab:process_stats:pid:cpu:d:1
++ statgrab:process_stats:pid:cpu:d:2
++ statgrab:process_stats:pid:cpu:d:3
++ statgrab:process_stats:pid:cpu:d:4
++ statgrab:process_stats:pid:cpu:d:5
++ statgrab:process_stats:pid:cpu:d:6
++ statgrab:process_stats:pid:cpu:d:7
++ statgrab:process_stats:pid:cpu:d:8
++ statgrab:process_stats:pid:cpu:d:9
++ statgrab:process_stats:pid:cpu:d:10
++ statgrab:process_stats:pid:cpu:d:11
++ statgrab:process_stats:pid:cpu:d:12
++ statgrab:process_stats:pid:cpu:d:13
++ statgrab:process_stats:pid:cpu:d:14
++ statgrab:process_stats:pid:cpu:d:15
++ statgrab:process_stats:pid:cpu:d:16
++ statgrab:process_stats:pid:cpu:d:17
++ statgrab:process_stats:pid:cpu:d:18
++ statgrab:process_stats:pid:cpu:d:19
++ statgrab:process_stats:pid:cpu:d:20
++ statgrab:process_stats:pid:cpu:d:21
++ statgrab:process_stats:pid:cpu:d:22
++ statgrab:process_stats:pid:cpu:d:23
++ statgrab:process_stats:pid:cpu:d:24
++ statgrab:process_stats:pid:cpu:d:25
++ statgrab:process_stats:pid:cpu:d:26
++ statgrab:process_stats:pid:cpu:d:27
++ statgrab:process_stats:pid:cpu:d:28
++ statgrab:process_stats:pid:cpu:d:29
++ statgrab:process_stats:pid:cpu:d:30
++ statgrab:process_stats:pid:cpu:d:31
+
+Text 0 50 0 50 20 white VeraBd/8 PARENT Alignment Center
+Text 3 50 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:parent:cpu:d:0
++ statgrab:process_stats:parent:cpu:d:1
++ statgrab:process_stats:parent:cpu:d:2
++ statgrab:process_stats:parent:cpu:d:3
++ statgrab:process_stats:parent:cpu:d:4
++ statgrab:process_stats:parent:cpu:d:5
++ statgrab:process_stats:parent:cpu:d:6
++ statgrab:process_stats:parent:cpu:d:7
++ statgrab:process_stats:parent:cpu:d:8
++ statgrab:process_stats:parent:cpu:d:9
++ statgrab:process_stats:parent:cpu:d:10
++ statgrab:process_stats:parent:cpu:d:11
++ statgrab:process_stats:parent:cpu:d:12
++ statgrab:process_stats:parent:cpu:d:13
++ statgrab:process_stats:parent:cpu:d:14
++ statgrab:process_stats:parent:cpu:d:15
++ statgrab:process_stats:parent:cpu:d:16
++ statgrab:process_stats:parent:cpu:d:17
++ statgrab:process_stats:parent:cpu:d:18
++ statgrab:process_stats:parent:cpu:d:19
++ statgrab:process_stats:parent:cpu:d:20
++ statgrab:process_stats:parent:cpu:d:21
++ statgrab:process_stats:parent:cpu:d:22
++ statgrab:process_stats:parent:cpu:d:23
++ statgrab:process_stats:parent:cpu:d:24
++ statgrab:process_stats:parent:cpu:d:25
++ statgrab:process_stats:parent:cpu:d:26
++ statgrab:process_stats:parent:cpu:d:27
++ statgrab:process_stats:parent:cpu:d:28
++ statgrab:process_stats:parent:cpu:d:29
++ statgrab:process_stats:parent:cpu:d:30
++ statgrab:process_stats:parent:cpu:d:31
+
+Rectangle 100 0 50 420 #004 Filled
+Text 0 100 0 50 20 white VeraBd/8 PGID Alignment Center
+Text 3 100 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:pgid:cpu:d:0
++ statgrab:process_stats:pgid:cpu:d:1
++ statgrab:process_stats:pgid:cpu:d:2
++ statgrab:process_stats:pgid:cpu:d:3
++ statgrab:process_stats:pgid:cpu:d:4
++ statgrab:process_stats:pgid:cpu:d:5
++ statgrab:process_stats:pgid:cpu:d:6
++ statgrab:process_stats:pgid:cpu:d:7
++ statgrab:process_stats:pgid:cpu:d:8
++ statgrab:process_stats:pgid:cpu:d:9
++ statgrab:process_stats:pgid:cpu:d:10
++ statgrab:process_stats:pgid:cpu:d:11
++ statgrab:process_stats:pgid:cpu:d:12
++ statgrab:process_stats:pgid:cpu:d:13
++ statgrab:process_stats:pgid:cpu:d:14
++ statgrab:process_stats:pgid:cpu:d:15
++ statgrab:process_stats:pgid:cpu:d:16
++ statgrab:process_stats:pgid:cpu:d:17
++ statgrab:process_stats:pgid:cpu:d:18
++ statgrab:process_stats:pgid:cpu:d:19
++ statgrab:process_stats:pgid:cpu:d:20
++ statgrab:process_stats:pgid:cpu:d:21
++ statgrab:process_stats:pgid:cpu:d:22
++ statgrab:process_stats:pgid:cpu:d:23
++ statgrab:process_stats:pgid:cpu:d:24
++ statgrab:process_stats:pgid:cpu:d:25
++ statgrab:process_stats:pgid:cpu:d:26
++ statgrab:process_stats:pgid:cpu:d:27
++ statgrab:process_stats:pgid:cpu:d:28
++ statgrab:process_stats:pgid:cpu:d:29
++ statgrab:process_stats:pgid:cpu:d:30
++ statgrab:process_stats:pgid:cpu:d:31
+
+Text 0 150 0 50 20 white VeraBd/8 UID Alignment Center
+Text 3 150 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:uid:cpu:d:0
++ statgrab:process_stats:uid:cpu:d:1
++ statgrab:process_stats:uid:cpu:d:2
++ statgrab:process_stats:uid:cpu:d:3
++ statgrab:process_stats:uid:cpu:d:4
++ statgrab:process_stats:uid:cpu:d:5
++ statgrab:process_stats:uid:cpu:d:6
++ statgrab:process_stats:uid:cpu:d:7
++ statgrab:process_stats:uid:cpu:d:8
++ statgrab:process_stats:uid:cpu:d:9
++ statgrab:process_stats:uid:cpu:d:10
++ statgrab:process_stats:uid:cpu:d:11
++ statgrab:process_stats:uid:cpu:d:12
++ statgrab:process_stats:uid:cpu:d:13
++ statgrab:process_stats:uid:cpu:d:14
++ statgrab:process_stats:uid:cpu:d:15
++ statgrab:process_stats:uid:cpu:d:16
++ statgrab:process_stats:uid:cpu:d:17
++ statgrab:process_stats:uid:cpu:d:18
++ statgrab:process_stats:uid:cpu:d:19
++ statgrab:process_stats:uid:cpu:d:20
++ statgrab:process_stats:uid:cpu:d:21
++ statgrab:process_stats:uid:cpu:d:22
++ statgrab:process_stats:uid:cpu:d:23
++ statgrab:process_stats:uid:cpu:d:24
++ statgrab:process_stats:uid:cpu:d:25
++ statgrab:process_stats:uid:cpu:d:26
++ statgrab:process_stats:uid:cpu:d:27
++ statgrab:process_stats:uid:cpu:d:28
++ statgrab:process_stats:uid:cpu:d:29
++ statgrab:process_stats:uid:cpu:d:30
++ statgrab:process_stats:uid:cpu:d:31
+
+Rectangle 200 0 50 420 #004 Filled
+Text 0 200 0 50 20 white VeraBd/8 EUID Alignment Center
+Text 3 200 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:euid:cpu:d:0
++ statgrab:process_stats:euid:cpu:d:1
++ statgrab:process_stats:euid:cpu:d:2
++ statgrab:process_stats:euid:cpu:d:3
++ statgrab:process_stats:euid:cpu:d:4
++ statgrab:process_stats:euid:cpu:d:5
++ statgrab:process_stats:euid:cpu:d:6
++ statgrab:process_stats:euid:cpu:d:7
++ statgrab:process_stats:euid:cpu:d:8
++ statgrab:process_stats:euid:cpu:d:9
++ statgrab:process_stats:euid:cpu:d:10
++ statgrab:process_stats:euid:cpu:d:11
++ statgrab:process_stats:euid:cpu:d:12
++ statgrab:process_stats:euid:cpu:d:13
++ statgrab:process_stats:euid:cpu:d:14
++ statgrab:process_stats:euid:cpu:d:15
++ statgrab:process_stats:euid:cpu:d:16
++ statgrab:process_stats:euid:cpu:d:17
++ statgrab:process_stats:euid:cpu:d:18
++ statgrab:process_stats:euid:cpu:d:19
++ statgrab:process_stats:euid:cpu:d:20
++ statgrab:process_stats:euid:cpu:d:21
++ statgrab:process_stats:euid:cpu:d:22
++ statgrab:process_stats:euid:cpu:d:23
++ statgrab:process_stats:euid:cpu:d:24
++ statgrab:process_stats:euid:cpu:d:25
++ statgrab:process_stats:euid:cpu:d:26
++ statgrab:process_stats:euid:cpu:d:27
++ statgrab:process_stats:euid:cpu:d:28
++ statgrab:process_stats:euid:cpu:d:29
++ statgrab:process_stats:euid:cpu:d:30
++ statgrab:process_stats:euid:cpu:d:31
+
+Text 0 250 0 50 20 white VeraBd/8 GID Alignment Center
+Text 3 250 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:gid:cpu:d:0
++ statgrab:process_stats:gid:cpu:d:1
++ statgrab:process_stats:gid:cpu:d:2
++ statgrab:process_stats:gid:cpu:d:3
++ statgrab:process_stats:gid:cpu:d:4
++ statgrab:process_stats:gid:cpu:d:5
++ statgrab:process_stats:gid:cpu:d:6
++ statgrab:process_stats:gid:cpu:d:7
++ statgrab:process_stats:gid:cpu:d:8
++ statgrab:process_stats:gid:cpu:d:9
++ statgrab:process_stats:gid:cpu:d:10
++ statgrab:process_stats:gid:cpu:d:11
++ statgrab:process_stats:gid:cpu:d:12
++ statgrab:process_stats:gid:cpu:d:13
++ statgrab:process_stats:gid:cpu:d:14
++ statgrab:process_stats:gid:cpu:d:15
++ statgrab:process_stats:gid:cpu:d:16
++ statgrab:process_stats:gid:cpu:d:17
++ statgrab:process_stats:gid:cpu:d:18
++ statgrab:process_stats:gid:cpu:d:19
++ statgrab:process_stats:gid:cpu:d:20
++ statgrab:process_stats:gid:cpu:d:21
++ statgrab:process_stats:gid:cpu:d:22
++ statgrab:process_stats:gid:cpu:d:23
++ statgrab:process_stats:gid:cpu:d:24
++ statgrab:process_stats:gid:cpu:d:25
++ statgrab:process_stats:gid:cpu:d:26
++ statgrab:process_stats:gid:cpu:d:27
++ statgrab:process_stats:gid:cpu:d:28
++ statgrab:process_stats:gid:cpu:d:29
++ statgrab:process_stats:gid:cpu:d:30
++ statgrab:process_stats:gid:cpu:d:31
+
+Rectangle 300 0 50 420 #004 Filled
+Text 0 300 0 50 20 white VeraBd/8 EGID Alignment Center
+Text 3 300 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:egid:cpu:d:0
++ statgrab:process_stats:egid:cpu:d:1
++ statgrab:process_stats:egid:cpu:d:2
++ statgrab:process_stats:egid:cpu:d:3
++ statgrab:process_stats:egid:cpu:d:4
++ statgrab:process_stats:egid:cpu:d:5
++ statgrab:process_stats:egid:cpu:d:6
++ statgrab:process_stats:egid:cpu:d:7
++ statgrab:process_stats:egid:cpu:d:8
++ statgrab:process_stats:egid:cpu:d:9
++ statgrab:process_stats:egid:cpu:d:10
++ statgrab:process_stats:egid:cpu:d:11
++ statgrab:process_stats:egid:cpu:d:12
++ statgrab:process_stats:egid:cpu:d:13
++ statgrab:process_stats:egid:cpu:d:14
++ statgrab:process_stats:egid:cpu:d:15
++ statgrab:process_stats:egid:cpu:d:16
++ statgrab:process_stats:egid:cpu:d:17
++ statgrab:process_stats:egid:cpu:d:18
++ statgrab:process_stats:egid:cpu:d:19
++ statgrab:process_stats:egid:cpu:d:20
++ statgrab:process_stats:egid:cpu:d:21
++ statgrab:process_stats:egid:cpu:d:22
++ statgrab:process_stats:egid:cpu:d:23
++ statgrab:process_stats:egid:cpu:d:24
++ statgrab:process_stats:egid:cpu:d:25
++ statgrab:process_stats:egid:cpu:d:26
++ statgrab:process_stats:egid:cpu:d:27
++ statgrab:process_stats:egid:cpu:d:28
++ statgrab:process_stats:egid:cpu:d:29
++ statgrab:process_stats:egid:cpu:d:30
++ statgrab:process_stats:egid:cpu:d:31
+
+Text 0 350 0 50 20 white VeraBd/8 SIZE Alignment Center
+Text 3 350 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:proc_size:cpu:d:0,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:1,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:2,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:3,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:4,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:5,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:6,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:7,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:8,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:9,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:10,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:11,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:12,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:13,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:14,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:15,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:16,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:17,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:18,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:19,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:20,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:21,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:22,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:23,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:24,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:25,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:26,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:27,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:28,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:29,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:30,1024,DIV
++ statgrab:process_stats:proc_size:cpu:d:31,1024,DIV
+
+Rectangle 400 0 50 420 #004 Filled
+Text 0 400 0 50 20 white VeraBd/8 RES Alignment Center
+Text 3 400 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:proc_resident:cpu:d:0,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:1,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:2,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:3,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:4,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:5,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:6,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:7,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:8,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:9,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:10,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:11,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:12,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:13,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:14,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:15,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:16,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:17,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:18,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:19,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:20,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:21,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:22,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:23,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:24,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:25,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:26,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:27,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:28,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:29,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:30,1024,DIV
++ statgrab:process_stats:proc_resident:cpu:d:31,1024,DIV
+
+Text 0 450 0 20 20 white VeraBd/8 S Alignment Center
+Text 3 450 20 20 400 white Vera/8 "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s" Alignment TopCenter
++ statgrab:process_stats:state:cpu:d:0:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:1:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:2:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:3:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:4:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:5:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:6:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:7:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:8:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:9:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:10:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:11:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:12:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:13:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:14:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:15:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:16:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:17:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:18:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:19:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:20:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:21:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:22:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:23:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:24:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:25:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:26:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:27:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:28:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:29:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:30:R:S:T:Z:U
++ statgrab:process_stats:state:cpu:d:31:R:S:T:Z:U
+
+Rectangle 470 0 30 420 #004 Filled
+Text 0 470 0 30 20 white VeraBd/8 NI Alignment Center
+Text 3 470 20 30 400 white Vera/8 "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n" Alignment TopRight
++ statgrab:process_stats:nice:cpu:d:0
++ statgrab:process_stats:nice:cpu:d:1
++ statgrab:process_stats:nice:cpu:d:2
++ statgrab:process_stats:nice:cpu:d:3
++ statgrab:process_stats:nice:cpu:d:4
++ statgrab:process_stats:nice:cpu:d:5
++ statgrab:process_stats:nice:cpu:d:6
++ statgrab:process_stats:nice:cpu:d:7
++ statgrab:process_stats:nice:cpu:d:8
++ statgrab:process_stats:nice:cpu:d:9
++ statgrab:process_stats:nice:cpu:d:10
++ statgrab:process_stats:nice:cpu:d:11
++ statgrab:process_stats:nice:cpu:d:12
++ statgrab:process_stats:nice:cpu:d:13
++ statgrab:process_stats:nice:cpu:d:14
++ statgrab:process_stats:nice:cpu:d:15
++ statgrab:process_stats:nice:cpu:d:16
++ statgrab:process_stats:nice:cpu:d:17
++ statgrab:process_stats:nice:cpu:d:18
++ statgrab:process_stats:nice:cpu:d:19
++ statgrab:process_stats:nice:cpu:d:20
++ statgrab:process_stats:nice:cpu:d:21
++ statgrab:process_stats:nice:cpu:d:22
++ statgrab:process_stats:nice:cpu:d:23
++ statgrab:process_stats:nice:cpu:d:24
++ statgrab:process_stats:nice:cpu:d:25
++ statgrab:process_stats:nice:cpu:d:26
++ statgrab:process_stats:nice:cpu:d:27
++ statgrab:process_stats:nice:cpu:d:28
++ statgrab:process_stats:nice:cpu:d:29
++ statgrab:process_stats:nice:cpu:d:30
++ statgrab:process_stats:nice:cpu:d:31
+
+Text 0 500 0 50 20 white VeraBd/8 CPU Alignment Center
+Text 3 500 20 50 400 white Vera/8 "%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n%.1f\n" Alignment TopRight
++ statgrab:process_stats:cpu_percent:cpu:d:0
++ statgrab:process_stats:cpu_percent:cpu:d:1
++ statgrab:process_stats:cpu_percent:cpu:d:2
++ statgrab:process_stats:cpu_percent:cpu:d:3
++ statgrab:process_stats:cpu_percent:cpu:d:4
++ statgrab:process_stats:cpu_percent:cpu:d:5
++ statgrab:process_stats:cpu_percent:cpu:d:6
++ statgrab:process_stats:cpu_percent:cpu:d:7
++ statgrab:process_stats:cpu_percent:cpu:d:8
++ statgrab:process_stats:cpu_percent:cpu:d:9
++ statgrab:process_stats:cpu_percent:cpu:d:10
++ statgrab:process_stats:cpu_percent:cpu:d:11
++ statgrab:process_stats:cpu_percent:cpu:d:12
++ statgrab:process_stats:cpu_percent:cpu:d:13
++ statgrab:process_stats:cpu_percent:cpu:d:14
++ statgrab:process_stats:cpu_percent:cpu:d:15
++ statgrab:process_stats:cpu_percent:cpu:d:16
++ statgrab:process_stats:cpu_percent:cpu:d:17
++ statgrab:process_stats:cpu_percent:cpu:d:18
++ statgrab:process_stats:cpu_percent:cpu:d:19
++ statgrab:process_stats:cpu_percent:cpu:d:20
++ statgrab:process_stats:cpu_percent:cpu:d:21
++ statgrab:process_stats:cpu_percent:cpu:d:22
++ statgrab:process_stats:cpu_percent:cpu:d:23
++ statgrab:process_stats:cpu_percent:cpu:d:24
++ statgrab:process_stats:cpu_percent:cpu:d:25
++ statgrab:process_stats:cpu_percent:cpu:d:26
++ statgrab:process_stats:cpu_percent:cpu:d:27
++ statgrab:process_stats:cpu_percent:cpu:d:28
++ statgrab:process_stats:cpu_percent:cpu:d:29
++ statgrab:process_stats:cpu_percent:cpu:d:30
++ statgrab:process_stats:cpu_percent:cpu:d:31
+
+Rectangle 550 0 50 420 #004 Filled
+Text 0 550 0 50 20 white VeraBd/8 TIME Alignment Center
+Text 3 550 20 50 400 white Vera/8 "%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n%u" Alignment TopRight
++ statgrab:process_stats:time_spent:cpu:d:0
++ statgrab:process_stats:time_spent:cpu:d:1
++ statgrab:process_stats:time_spent:cpu:d:2
++ statgrab:process_stats:time_spent:cpu:d:3
++ statgrab:process_stats:time_spent:cpu:d:4
++ statgrab:process_stats:time_spent:cpu:d:5
++ statgrab:process_stats:time_spent:cpu:d:6
++ statgrab:process_stats:time_spent:cpu:d:7
++ statgrab:process_stats:time_spent:cpu:d:8
++ statgrab:process_stats:time_spent:cpu:d:9
++ statgrab:process_stats:time_spent:cpu:d:10
++ statgrab:process_stats:time_spent:cpu:d:11
++ statgrab:process_stats:time_spent:cpu:d:12
++ statgrab:process_stats:time_spent:cpu:d:13
++ statgrab:process_stats:time_spent:cpu:d:14
++ statgrab:process_stats:time_spent:cpu:d:15
++ statgrab:process_stats:time_spent:cpu:d:16
++ statgrab:process_stats:time_spent:cpu:d:17
++ statgrab:process_stats:time_spent:cpu:d:18
++ statgrab:process_stats:time_spent:cpu:d:19
++ statgrab:process_stats:time_spent:cpu:d:20
++ statgrab:process_stats:time_spent:cpu:d:21
++ statgrab:process_stats:time_spent:cpu:d:22
++ statgrab:process_stats:time_spent:cpu:d:23
++ statgrab:process_stats:time_spent:cpu:d:24
++ statgrab:process_stats:time_spent:cpu:d:25
++ statgrab:process_stats:time_spent:cpu:d:26
++ statgrab:process_stats:time_spent:cpu:d:27
++ statgrab:process_stats:time_spent:cpu:d:28
++ statgrab:process_stats:time_spent:cpu:d:29
++ statgrab:process_stats:time_spent:cpu:d:30
++ statgrab:process_stats:time_spent:cpu:d:31
+
+Text 0 600 0 100 20 white VeraBd/8 NAME Alignment Center
+Text 3 600 20 100 400 white Vera/8 "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s"
++ statgrab:process_stats:process_name:cpu:d:0
++ statgrab:process_stats:process_name:cpu:d:1
++ statgrab:process_stats:process_name:cpu:d:2
++ statgrab:process_stats:process_name:cpu:d:3
++ statgrab:process_stats:process_name:cpu:d:4
++ statgrab:process_stats:process_name:cpu:d:5
++ statgrab:process_stats:process_name:cpu:d:6
++ statgrab:process_stats:process_name:cpu:d:7
++ statgrab:process_stats:process_name:cpu:d:8
++ statgrab:process_stats:process_name:cpu:d:9
++ statgrab:process_stats:process_name:cpu:d:10
++ statgrab:process_stats:process_name:cpu:d:11
++ statgrab:process_stats:process_name:cpu:d:12
++ statgrab:process_stats:process_name:cpu:d:13
++ statgrab:process_stats:process_name:cpu:d:14
++ statgrab:process_stats:process_name:cpu:d:15
++ statgrab:process_stats:process_name:cpu:d:16
++ statgrab:process_stats:process_name:cpu:d:17
++ statgrab:process_stats:process_name:cpu:d:18
++ statgrab:process_stats:process_name:cpu:d:19
++ statgrab:process_stats:process_name:cpu:d:20
++ statgrab:process_stats:process_name:cpu:d:21
++ statgrab:process_stats:process_name:cpu:d:22
++ statgrab:process_stats:process_name:cpu:d:23
++ statgrab:process_stats:process_name:cpu:d:24
++ statgrab:process_stats:process_name:cpu:d:25
++ statgrab:process_stats:process_name:cpu:d:26
++ statgrab:process_stats:process_name:cpu:d:27
++ statgrab:process_stats:process_name:cpu:d:28
++ statgrab:process_stats:process_name:cpu:d:29
++ statgrab:process_stats:process_name:cpu:d:30
++ statgrab:process_stats:process_name:cpu:d:31
+
+Rectangle 700 0 300 420 #004 Filled
+Text 0 700 0 300 20 white VeraBd/8 TITLE Alignment Center
+Text 3 700 20 300 400 white Vera/8 "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s"
++ statgrab:process_stats:proctitle:cpu:d:0
++ statgrab:process_stats:proctitle:cpu:d:1
++ statgrab:process_stats:proctitle:cpu:d:2
++ statgrab:process_stats:proctitle:cpu:d:3
++ statgrab:process_stats:proctitle:cpu:d:4
++ statgrab:process_stats:proctitle:cpu:d:5
++ statgrab:process_stats:proctitle:cpu:d:6
++ statgrab:process_stats:proctitle:cpu:d:7
++ statgrab:process_stats:proctitle:cpu:d:8
++ statgrab:process_stats:proctitle:cpu:d:9
++ statgrab:process_stats:proctitle:cpu:d:10
++ statgrab:process_stats:proctitle:cpu:d:11
++ statgrab:process_stats:proctitle:cpu:d:12
++ statgrab:process_stats:proctitle:cpu:d:13
++ statgrab:process_stats:proctitle:cpu:d:14
++ statgrab:process_stats:proctitle:cpu:d:15
++ statgrab:process_stats:proctitle:cpu:d:16
++ statgrab:process_stats:proctitle:cpu:d:17
++ statgrab:process_stats:proctitle:cpu:d:18
++ statgrab:process_stats:proctitle:cpu:d:19
++ statgrab:process_stats:proctitle:cpu:d:20
++ statgrab:process_stats:proctitle:cpu:d:21
++ statgrab:process_stats:proctitle:cpu:d:22
++ statgrab:process_stats:proctitle:cpu:d:23
++ statgrab:process_stats:proctitle:cpu:d:24
++ statgrab:process_stats:proctitle:cpu:d:25
++ statgrab:process_stats:proctitle:cpu:d:26
++ statgrab:process_stats:proctitle:cpu:d:27
++ statgrab:process_stats:proctitle:cpu:d:28
++ statgrab:process_stats:proctitle:cpu:d:29
++ statgrab:process_stats:proctitle:cpu:d:30
++ statgrab:process_stats:proctitle:cpu:d:31
+
