@@ -1,6 +1,7 @@
 Set Background Color white
-Set Size 200 60
+Set Size 210 60
 
 Ellipse 60 30 50 20 blue
-Ellipse 150 30 15 15 orange Filled
+Ellipse 145 30 15 15 orange Filled
+Ellipse 190 30 10 20 red
 
