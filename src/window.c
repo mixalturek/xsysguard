@@ -1442,6 +1442,7 @@ xsg_window_extract_position(
 
 	if (*s == '-') {
 		flags |= YNegative;
+		*y_return = -*y_return;
 	} else if (*s != '+' || s == str) {
 		*flags_return = 0;
 		*x_return = 64;
@@ -1466,6 +1467,7 @@ xsg_window_extract_position(
 
 	if (*s == '-') {
 		flags |= XNegative;
+		*x_return = -*x_return;
 	} else if (*s != '+' || s == str) {
 		*flags_return = 0;
 		*x_return = 64;
