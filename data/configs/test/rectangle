@@ -2,7 +2,8 @@ Set Background Color white
 Set Size 500 60
 
 Rectangle 10 10 80 40 blue
-Rectangle 110 10 80 40 orange Filled
+Rectangle 110 10 30 40 orange Filled
+Rectangle 160 10 30 40 darkgrey Filled Angle -15
 Rectangle 210 10 80 40 red ColorRange 45 1 50 blue
 Rectangle 310 10 80 40 blue ColorRange 0 1 20 black Angle 10
 Rectangle 410 10 80 40 red ColorRange 270 3 20 green 20 blue 20 black
