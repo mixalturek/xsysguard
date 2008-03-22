@@ -1,7 +1,7 @@
 Set Background Color white
-Set Size 300 40
+Set Size 300 60
 
-Line 0 0 99 39 blue
-Line 100 10 199 29 orange
-Line 200 20 299 20 red
+Line 10 10 90 50 blue
+Line 100 20 190 40 orange
+Line 200 30 290 30 red
 
