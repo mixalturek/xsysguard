@@ -1,0 +1,11 @@
+Set Background Color white
+Set Size 250 60
+
+LineChart 1 10 10 60 40 Min 0 Max 1.5
++ random,0.5,ADD darkred
++ random darkgreen
+LineChart 1 90 10 60 40 Min 0 Max 1 Background "test/linechart_background.png"
++ random blue
+LineChart 1 160 5 80 50 Angle 25
++ random red
+
