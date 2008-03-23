@@ -78,6 +78,8 @@ typedef struct _daemon_t {
 
 	uint64_t last_alive_tick;
 
+	size_t init;
+
 	uint32_t id_buffer; /* buffer for next daemon_var_id */
 	ssize_t id_buffer_fill;
 
@@ -110,6 +112,8 @@ typedef struct _daemon_var_t {
 } daemon_var_t;
 
 /******************************************************************************/
+
+static const char *magic_init = "\nxsysguardd_init_version_1\n";
 
 static xsg_list_t *daemon_list = NULL;
 
@@ -323,7 +327,6 @@ daemon_write_buffer_add_var(
 	uint32_t config_len_be;
 
 	if (daemon->write_buffer_len == 0) {
-		static const char *init = "\0\nxsysguard\n";
 		uint64_t interval;
 		uint8_t log_level;
 		uint64_t timeout;
@@ -332,7 +335,7 @@ daemon_write_buffer_add_var(
 		log_level = xsg_log_level;
 		timeout = xsg_uint64_be(last_alive_timeout);
 
-		size_t init_len = sizeof(init) + sizeof(uint64_t)
+		size_t init_len = sizeof(magic_init) + sizeof(uint64_t)
 				+ sizeof(uint8_t) + sizeof(uint64_t);
 
 		daemon->write_buffer = xsg_realloc(daemon->write_buffer,
@@ -340,8 +343,8 @@ daemon_write_buffer_add_var(
 
 		/* init */
 		memcpy(daemon->write_buffer + daemon->write_buffer_len,
-				init, sizeof(init));
-		daemon->write_buffer_len += sizeof(init);
+				magic_init, sizeof(magic_init));
+		daemon->write_buffer_len += sizeof(magic_init);
 
 		/* interval */
 		memcpy(daemon->write_buffer + daemon->write_buffer_len,
@@ -500,6 +503,18 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 	daemon->last_alive_tick = xsg_main_get_tick();
 
 	while (n != 0) {
+		while (daemon->init < sizeof(magic_init)) {
+			if (magic_init[daemon->init] == *buffer) {
+				daemon->init++;
+			} else {
+				daemon->init = 1; /* skip the first '\n' */
+			}
+			buffer++;
+			n--;
+			if (unlikely(n == 0)) {
+				return;
+			}
+		}
 
 		while (daemon->id_buffer_fill < sizeof(uint32_t)) {
 			if (am_big_endian()) {
@@ -792,6 +807,7 @@ exec_daemon(daemon_t *daemon)
 	xsg_set_cloexec_flag(pipe2[0], TRUE);
 	xsg_set_cloexec_flag(pipe3[0], TRUE);
 
+	daemon->init = 1; /* skip the first '\n' */
 	daemon->id_buffer = 0;
 	daemon->id_buffer_fill = 0;
 	daemon->log_level_buffer = 0;

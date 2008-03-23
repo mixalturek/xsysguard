@@ -245,5 +245,7 @@ xsg_vard_init(uint64_t timeout)
 
 	xsg_main_add_poll(&alive_poll);
 	xsg_main_add_update_func(update_vard);
+
+	xsg_writebuffer_queue_init();
 }
 
