@@ -34,6 +34,14 @@
 
 /******************************************************************************/
 
+#ifndef STDIN_FILENO
+# define STDIN_FILENO 0
+#endif
+
+#ifndef STDOUT_FILENO
+# define STDOUT_FILENO 1
+#endif
+
 #ifndef STDERR_FILENO
 # define STDERR_FILENO 2
 #endif
@@ -220,7 +228,7 @@ read_data(void *ptr, size_t size, FILE *stream)
 static uint64_t
 read_config(FILE *stream, bool log_level_overwrite)
 {
-	const char *init = "\0\nxsysguard\n";
+	const char *init = "\nxsysguardd_init_version_1\n";
 	unsigned i;
 	uint64_t interval;
 	uint8_t log_level;
@@ -371,6 +379,10 @@ main(int argc, char **argv)
 		{ NULL,      0, NULL,  0  }
 	};
 
+	if (isatty(STDOUT_FILENO) || isatty(STDIN_FILENO)) {
+		print_usage = TRUE;
+	}
+
 	if (isatty(STDERR_FILENO)) {
 		log_to_stderr = TRUE;
 	}
@@ -423,20 +435,16 @@ main(int argc, char **argv)
 		}
 	}
 
-	if (print_usage) {
-		usage();
-		exit(EXIT_SUCCESS);
-	}
-
-	xsg_modules_init();
-
 	if (list_modules) {
+		xsg_modules_init();
 		xsg_modules_list();
 		exit(EXIT_SUCCESS);
 	}
 
 	if (mhelp != NULL) {
 		const char *info, *help;
+
+		xsg_modules_init();
 
 		info = xsg_modules_info(mhelp);
 		help = xsg_modules_help(mhelp);
@@ -449,6 +457,13 @@ main(int argc, char **argv)
 
 		exit(EXIT_SUCCESS);
 	}
+
+	if (print_usage) {
+		usage();
+		exit(EXIT_SUCCESS);
+	}
+
+	xsg_modules_init();
 
 	xsg_vard_init(read_config(stdin, log_level_overwrite));
 
