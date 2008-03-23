@@ -149,6 +149,8 @@ xsg_main_add_poll(xsg_main_poll_t *poll)
 		return;
 	}
 
+	poll_remove_list = xsg_list_remove(poll_remove_list, poll);
+
 	for (l = poll_list; l; l = l->next) {
 		if (unlikely(poll == l->data)) {
 			return;
@@ -189,6 +191,8 @@ xsg_main_add_timeout(xsg_main_timeout_t *timeout)
 	if (unlikely(timeout == NULL)) {
 		return;
 	}
+
+	timeout_remove_list = xsg_list_remove(timeout_remove_list, timeout);
 
 	for (l = timeout_list; l; l = l->next) {
 		if (unlikely(timeout == l->data)) {
