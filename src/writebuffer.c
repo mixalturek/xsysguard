@@ -228,6 +228,17 @@ xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str)
 /******************************************************************************/
 
 void
+xsg_writebuffer_queue_init(void)
+{
+	const char *init = "\nxsysguardd_init_version_1\n";
+
+	buffer_maybe_expand(send_buffer, sizeof(init));
+
+	memcpy(send_buffer->buf + send_buffer->len, init, sizeof(init));
+	send_buffer->len += sizeof(init);
+}
+
+void
 xsg_writebuffer_queue_alive(void)
 {
 	uint8_t alive[] = { 0xff, 0xff, 0xff, 0xff, 0x00 };

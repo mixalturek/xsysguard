@@ -43,6 +43,9 @@ extern void
 xsg_writebuffer_queue_str(uint32_t id, xsg_string_t *str);
 
 extern void
+xsg_writebuffer_queue_init(void);
+
+extern void
 xsg_writebuffer_queue_alive(void);
 
 extern void
