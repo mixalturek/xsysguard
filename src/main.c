@@ -442,6 +442,7 @@ loop(uint64_t num)
 			FD_ZERO(&write_fds);
 			FD_ZERO(&except_fds);
 
+			remove_polls();
 			for (l = poll_list; l; l = l->next) {
 				xsg_main_poll_t *p = l->data;
 
