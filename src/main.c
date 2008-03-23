@@ -143,18 +143,14 @@ xsg_main_add_update_func(void (*func)(uint64_t))
 void
 xsg_main_add_poll(xsg_main_poll_t *poll)
 {
-	xsg_list_t *l;
-
 	if (unlikely(poll == NULL)) {
 		return;
 	}
 
 	poll_remove_list = xsg_list_remove(poll_remove_list, poll);
 
-	for (l = poll_list; l; l = l->next) {
-		if (unlikely(poll == l->data)) {
-			return;
-		}
+	if (xsg_list_find(poll_list, poll)) {
+		return;
 	}
 
 	poll_list = xsg_list_prepend(poll_list, poll);
@@ -186,18 +182,14 @@ remove_polls(void)
 void
 xsg_main_add_timeout(xsg_main_timeout_t *timeout)
 {
-	xsg_list_t *l;
-
 	if (unlikely(timeout == NULL)) {
 		return;
 	}
 
 	timeout_remove_list = xsg_list_remove(timeout_remove_list, timeout);
 
-	for (l = timeout_list; l; l = l->next) {
-		if (unlikely(timeout == l->data)) {
-			return;
-		}
+	if (xsg_list_find(timeout_list, timeout)) {
+		return;
 	}
 
 	timeout_list = xsg_list_prepend(timeout_list, timeout);
@@ -422,6 +414,10 @@ loop(uint64_t num)
 			for (l = timeout_list; l; l = l->next) {
 				xsg_main_timeout_t *t = l->data;
 
+				if (xsg_list_find(timeout_remove_list, t)) {
+					continue;
+				}
+
 				if (xsg_timercmp(&t->tv, &time_now, <)) {
 					t->func(t->arg, FALSE);
 				}
@@ -509,6 +505,10 @@ loop(uint64_t num)
 					xsg_main_poll_events_t events = 0;
 					xsg_main_poll_t *p = l->data;
 
+					if (xsg_list_find(poll_remove_list, p)) {
+						continue;
+					}
+
 					if (unlikely(p->fd < 0)) {
 						xsg_warning("invalid poll fd: %d",
 								p->fd);
@@ -531,7 +531,6 @@ loop(uint64_t num)
 						(p->func)(p->arg, events);
 					}
 				}
-				remove_polls();
 			} else if (time_next_is_update) {
 				break; /* next tick */
 			}
