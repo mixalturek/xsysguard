@@ -45,6 +45,18 @@ xsg_list_last(xsg_list_t *list)
 }
 
 xsg_list_t *
+xsg_list_find(xsg_list_t *list, const void *data)
+{
+	while (list) {
+		if (list->data == data) {
+			break;
+		}
+		list = list->next;
+	}
+	return list;
+}
+
+xsg_list_t *
 xsg_list_nth(xsg_list_t *list, unsigned int n)
 {
 	while ((n-- > 0) && list) {

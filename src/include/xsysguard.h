@@ -227,6 +227,9 @@ xsg_list_remove(xsg_list_t *list, const void *data);
 extern XSG_API xsg_list_t *
 xsg_list_last(xsg_list_t *list);
 
+extern XSG_API xsg_list_t *
+xsg_list_find(xsg_list_t *list, const void *data);
+
 extern XSG_API unsigned int
 xsg_list_length(xsg_list_t *list);
 
