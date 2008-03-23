@@ -1,0 +1,75 @@
+Set Size 200 400
+Set Background Color #fff
+
+Rectangle 0 0 100 100 #ddd Filled
+
+Rectangle 100 100 100 100 #ddd Filled
+
+Rectangle 0 200 100 100 #ddd Filled
+
+Rectangle 100 300 100 100 #ddd Filled
+
+AreaChart 1 0 0 100 100 Min 0.0 Max 100.0
++ 50 #bbb
++ statgrab:cpu_percents:kernel #0000ffff
++ statgrab:cpu_percents:user #4444ffff AddPrev
++ statgrab:cpu_percents:iowait #00ffffff AddPrev
++ statgrab:cpu_percents:swap #ff00ffff AddPrev
++ statgrab:cpu_percents:nice #ff0000ff AddPrev
+
+AreaChart 1 100 0 100 100 Min -100.0 Max 0.0
++ -50 #bbb
++ statgrab:cpu_percents:kernel,-1,MUL #0000ffff
++ statgrab:cpu_percents:user,-1,MUL #4444ffff AddPrev
++ statgrab:cpu_percents:iowait,-1,MUL #00ffffff AddPrev
++ statgrab:cpu_percents:swap,-1,MUL #ff00ffff AddPrev
++ statgrab:cpu_percents:nice,-1,MUL #ff0000ff AddPrev
+
+AreaChart 1 0 100 100 100 Min 0.0 Max 100.0 Angle 90.0
++ 50 #bbb
++ statgrab:cpu_percents:kernel #0000ffff
++ statgrab:cpu_percents:user #4444ffff AddPrev
++ statgrab:cpu_percents:iowait #00ffffff AddPrev
++ statgrab:cpu_percents:swap #ff00ffff AddPrev
++ statgrab:cpu_percents:nice #ff0000ff AddPrev
+
+AreaChart 1 100 100 100 100 Min -100.0 Max 0.0 Angle 90.0
++ -50 #bbb
++ statgrab:cpu_percents:kernel,-1,MUL #0000ffff
++ statgrab:cpu_percents:user,-1,MUL #4444ffff AddPrev
++ statgrab:cpu_percents:iowait,-1,MUL #00ffffff AddPrev
++ statgrab:cpu_percents:swap,-1,MUL #ff00ffff AddPrev
++ statgrab:cpu_percents:nice,-1,MUL #ff0000ff AddPrev
+
+AreaChart 1 0 200 100 100 Min 0.0 Max 100.0 Angle 180.0
++ 50 #bbb
++ statgrab:cpu_percents:kernel #0000ffff
++ statgrab:cpu_percents:user #4444ffff AddPrev
++ statgrab:cpu_percents:iowait #00ffffff AddPrev
++ statgrab:cpu_percents:swap #ff00ffff AddPrev
++ statgrab:cpu_percents:nice #ff0000ff AddPrev
+
+AreaChart 1 100 200 100 100 Min -100.0 Max 0.0 Angle 180.0
++ -50 #bbb
++ statgrab:cpu_percents:kernel,-1,MUL #0000ffff
++ statgrab:cpu_percents:user,-1,MUL #4444ffff AddPrev
++ statgrab:cpu_percents:iowait,-1,MUL #00ffffff AddPrev
++ statgrab:cpu_percents:swap,-1,MUL #ff00ffff AddPrev
++ statgrab:cpu_percents:nice,-1,MUL #ff0000ff AddPrev
+
+AreaChart 1 0 300 100 100 Min 0.0 Max 100.0 Angle 270.0
++ 50 #bbb
++ statgrab:cpu_percents:kernel #0000ffff
++ statgrab:cpu_percents:user #4444ffff AddPrev
++ statgrab:cpu_percents:iowait #00ffffff AddPrev
++ statgrab:cpu_percents:swap #ff00ffff AddPrev
++ statgrab:cpu_percents:nice #ff0000ff AddPrev
+
+AreaChart 1 100 300 100 100 Min -100.0 Max 0.0 Angle 270.0
++ -50 #bbb
++ statgrab:cpu_percents:kernel,-1,MUL #0000ffff
++ statgrab:cpu_percents:user,-1,MUL #4444ffff AddPrev
++ statgrab:cpu_percents:iowait,-1,MUL #00ffffff AddPrev
++ statgrab:cpu_percents:swap,-1,MUL #ff00ffff AddPrev
++ statgrab:cpu_percents:nice,-1,MUL #ff0000ff AddPrev
+
