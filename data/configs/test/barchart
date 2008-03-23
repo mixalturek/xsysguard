@@ -1,5 +1,5 @@
 Set Background Color white
-Set Size 240 60
+Set Size 320 60
 
 BarChart 1 10 10 20 40 Min 0 Max 1
 + random orange
@@ -13,4 +13,8 @@ BarChart 1 90 10 40 40 Min 0 Angle 45
 BarChart 1 160 20 60 20 Min 0 Angle 270 Mask "test/barchart_maskbat.png"
 + 1 darkred
 + random darkgreen
+BarChart 1 240 20 60 20 Min 0 Max 2 Angle 90
++ 2 grey
++ random green ColorRange 0 1 60 darkgreen
++ random lightblue ColorRange 0 1 60 darkblue AddPrev
 
