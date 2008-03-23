@@ -29,7 +29,7 @@
 
 /******************************************************************************/
 
-#define LAST_ALIVE_TIMEOUT 8
+#define LAST_ALIVE_TIMEOUT 16
 #define MAX_BUF_LEN 262144
 #define BUFFER_SIZE 4096
 
