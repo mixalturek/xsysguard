@@ -1,0 +1,22 @@
+Set Background Color white
+Set Size 620 60
+
+Text 1 8 18 160 40 grey "VeraBd/20" "%s"
++ time:local:strftime:"%T"
+Text 1 5 15 160 40 black "VeraBd/20" "%s"
++ time:local:strftime:"%T"
+Text 0 160 5 190 50 orange	"Vera/7" "TopLeft"	Alignment TopLeft
+Text 0 160 5 190 50 blue	"Vera/7" "TopCenter"	Alignment TopCenter
+Text 0 160 5 190 50 green	"Vera/7" "TopRight"	Alignment TopRight
+Text 0 160 5 190 50 pink	"Vera/7" "CenterLeft"	Alignment CenterLeft
+Text 0 160 5 190 50 cyan	"Vera/7" "Center"	Alignment Center
+Text 0 160 5 190 50 yellow	"Vera/7" "CenterRight"	Alignment CenterRight
+Text 0 160 5 190 50 khaki	"Vera/7" "BottomLeft"	Alignment BottomLeft
+Text 0 160 5 190 50 sienna	"Vera/7" "BottomCenter"	Alignment BottomCenter
+Text 0 160 5 190 50 purple	"Vera/7" "BottomRight"	Alignment BottomRight
+Text 0 360 5 120 50 blue "Comic_Sans_MS_Bold/11" "Comic @ 15°" Angle 15
+Text 1 490 10 120 50 darkred "VeraBd/9" "USER:\t%.1f%%\nKERNEL:\t%.1f%%\nNICE:\t%.1f%%" TabWidth 80
++ statgrab:cpu_stats_diff:user,   statgrab:cpu_stats_diff:total, DIV, 100, MUL
++ statgrab:cpu_stats_diff:kernel, statgrab:cpu_stats_diff:total, DIV, 100, MUL
++ statgrab:cpu_stats_diff:nice,   statgrab:cpu_stats_diff:total, DIV, 100, MUL
+
