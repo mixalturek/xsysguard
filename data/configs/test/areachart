@@ -1,0 +1,19 @@
+Set Background Color white
+Set Size 400 60
+
+AreaChart 1 10 10 60 40 Min 0 Max 2
++ random blue
++ random orange AddPrev
+AreaChart 1 90 10 60 40 Min 0 Max 1
++ random #00f8 ColorRange 0 1 50 #f008
+AreaChart 1 170 10 60 40 Min 0 Max 1 Background "test/areachart_background.png"
++ random #00f8 Top 2 #77f8 #77f8 ColorRange 0 1 50 #f008
+AreaChart 1 245 5 70 50 Min 0 Angle 200
++ random lightblue Top 3 blue red darkred
+AreaChart 1 330 10 60 40 Min 0 Max 1
++ statgrab:cpu_stats_diff:user,statgrab:cpu_stats_diff:total,DIV blue
++ statgrab:cpu_stats_diff:kernel,statgrab:cpu_stats_diff:total,DIV red AddPrev
++ statgrab:cpu_stats_diff:nice,statgrab:cpu_stats_diff:total,DIV yellow AddPrev
++ statgrab:cpu_stats_diff:iowait,statgrab:cpu_stats_diff:total,DIV orange AddPrev
++ statgrab:cpu_stats_diff:swap,statgrab:cpu_stats_diff:total,DIV lightgreen AddPrev
+
