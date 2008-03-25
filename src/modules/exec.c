@@ -52,6 +52,12 @@ static xsg_list_t *exec_list = NULL;
 static void
 kill_exec(exec_t *e)
 {
+	int n;
+
+	do {
+		n = close(e->poll.fd);
+	} while (unlikely(n < 0) && errno == EINTR);
+
 	xsg_main_remove_poll(&e->poll);
 	e->poll.fd = -1;
 
