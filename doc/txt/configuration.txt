@@ -1,0 +1,521 @@
+xsysguard - Configuration
+=========================
+
+- xref:moduleenv[ModuleEnv]
+- xref:setenv[SetEnv]
+- xref:set[Set]
+- xref:line[Line]
+- xref:rectangle[Rectangle]
+- xref:ellipse[Ellipse]
+- xref:polygon[Polygon]
+- xref:image[Image]
+- xref:barchart[BarChart]
+- xref:linechart[LineChart]
+- xref:areachart[AreaChart]
+- xref:text[Text]
+
+- xref:rpn[RPN (reverse polish notation) expressions]
+
+== ModuleEnv [[moduleenv]]
+
+------------------------------------------------------------
+ModuleEnv <module>
+------------------------------------------------------------
+
+Some modules set useful environment variables this way.
+See link:modules.html[modules] page for more informations.
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleEnv statgrab
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== SetEnv [[setenv]]
+
+------------------------------------------------------------
+SetEnv <name> <value> [Overwrite]
+------------------------------------------------------------
+
+Like 'setenv(3)', the SetEnv command adds the variable `name` to the environment
+with the value `value`, if `name` does not already exist. If `name` does exist
+in the environment, then its value is changed to `value` if `Overwrite` is
+specified. If `Overwrite` is not specified, then the value of `name` is not
+changed.
+
+Please note that all windows share the same environment.
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SetEnv "host" "remote.host.name"
+SetEnv "user" "login_name"
+SetEnv "command" "ssh ${user}@${host} xsysguardd" Overwrite
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Set [[set]]
+
+Set window properties like name, size, ...
+
+------------------------------------------------------------
+Set Name <name>
+Set Class <class>
+Set Resource <resource>
+Set Size <width> <height>
+Set Position <xoffset> <yoffset>
+Set Sticky {on|off}
+Set SkipTaskbar {on|off}
+Set SkipPager {on|off}
+Set Layer {Above|Normal|Below}
+Set Decorations {on|off}
+Set OverrideRedirect {on|off}
+Set Background {CopyFromParent <update>|CopyFromRoot <update>|Color <color>}
+Set XShape <alpha_threshold>
+Set ARGBVisual {on|off}
+Set Visible <update> <rpn>
+Set Mouse <button> {Move|Exit}
+------------------------------------------------------------
+
+`Position`:: window placement relative to the left/top edge (positive value) or
+	relative to the right/bottom edge (negative value); so `-0` is not
+	equal to `+0`; may be overwritten by command line options:
+	`xsysguard <config>{+-}<xoffset>{+-}<yoffset>`
+`OverrideRedirect`:: set override-redirect for the window, making it almost
+	invisible to window managers
+`CopyFromParent`:: grab background image from parent window (e.g. for
+	windows swallowed in FvwmButtons); if `update` is not 0, xsysguard
+	grabs the background image every `update` * `interval` milliseconds which may
+	cause flickering; sending a SIGHUP to a xsysguard process forces
+	grabbing too
+`CopyFromRoot`:: grab background image from root window; see `CopyFromParent`
+	for details
+`Xshape`:: select the alpha threshold above which mask bits are set; the default
+	alpha threshold is 0, meaning that a mask bit will be set if the pixel
+	alpha value is greater or equal to 0; that is each one
+`Visible`:: unmap window if `rpn` is equal to `0`; evaluate
+	xref:rpn[RPN expression] every `update` * `interval` milliseconds
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Set Name "xsysguard"
+Set Class "xsysguard"
+Set Resource "xsysguard"
+Set Size 640 480
+Set Position -0 -0
+Set Sticky off
+Set SkipTaskbar off
+Set SkipPager off
+Set Layer Normal
+Set Decorations on
+Set OverrideRedirect off
+Set Background Color #000
+Set XShape 0
+Set ARGBVisual off
+Set Visible 1 1
+Set Mouse 1 Move
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Line [[line]]
+
+------------------------------------------------------------
+Line <x1> <y1> <x2> <y2> <color> [Visible <update> <rpn>]
+------------------------------------------------------------
+
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+
+=== Example
+
+image:images/configuration_line.png["xsysguard test/line"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Line 10 10 90 50 blue
+Line 100 20 190 40 orange
+Line 200 30 290 30 red
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Rectangle [[rectangle]]
+
+------------------------------------------------------------
+Rectangle <x> <y> <width> <height> <color> [Visible <update> <rpn>] [Angle <angle>] [ColorRange <angle> <count> <distance> <color> ...] [Filled]
+------------------------------------------------------------
+
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+
+=== Example
+
+image:images/configuration_rectangle.png["xsysguard test/rectangle"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Rectangle 10 10 80 40 blue
+Rectangle 110 10 30 40 orange Filled
+Rectangle 160 10 30 40 darkgrey Filled Angle -15
+Rectangle 210 10 80 40 red ColorRange 45 1 50 blue
+Rectangle 310 10 80 40 blue ColorRange 0 1 20 black Angle 10
+Rectangle 410 10 80 40 red ColorRange 270 3 20 green 20 blue 20 black
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Ellipse [[ellipse]]
+
+------------------------------------------------------------
+Ellipse <xc> <yc> <a> <b> <color> [Visible <update> <rpn>] [Filled]
+------------------------------------------------------------
+
+`xc`:: x center
+`yc`:: y center
+`a`:: horizontal amplitude
+`b`:: vertical amplitude
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+
+=== Example
+
+image:images/configuration_ellipse.png["xsysguard test/ellipse"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ellipse 60 30 50 20 blue
+Ellipse 145 30 15 15 orange Filled
+Ellipse 190 30 10 20 red
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Polygon [[polygon]]
+
+------------------------------------------------------------
+Polygon <color> <count> <x> <y> <x> <y> ... [Visible <update> <rpn>] [Filled|Closed]
+------------------------------------------------------------
+
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+
+=== Example
+
+image:images/configuration_polygon.png["xsysguard test/polygon"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Polygon blue 4 10 10 20 50 30 20 90 36
+Polygon red 3 100 10 190 15 130 50 Closed
+Polygon orange 3 230 50 290 10 200 35 Filled
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Image [[image]]
+
+------------------------------------------------------------
+Image <update> <x> <y> <width> <height> <printformat> [Visible <update> <rpn>] [Angle <angle>]
++ <rpn>
+------------------------------------------------------------
+
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`printformat`:: a 'printf(3)' format string
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+
+=== Example
+
+image:images/configuration_image.png["xsysguard test/image"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Image 0 10 10 48 40 "test/image_xorg.png"
+Image 0 80 00 64 60 "test/image_xorg.png" Angle 30
+Image 0 160 10 48 20 "test/%s.png"
++ "image_xorg"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== BarChart [[barchart]]
+
+------------------------------------------------------------
+BarChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Mask <mask_image>]
++ <rpn> <color> [ColorRange <angle> <count> <distance> <color> ...] [AddPrev]
+------------------------------------------------------------
+
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`mask_image`:: for each pixel:
+		- red =	(red * mask.red) / 255
+		- green = (green * mask.green) / 255
+		- blue = (blue * mask.blue) / 255
+		- alpha = (alpha * mask.alpha) / 255
+
+=== Example
+
+image:images/configuration_barchart.png["xsysguard test/barchart"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+BarChart 1 10 10 20 40 Min 0 Max 1
++ random orange
+BarChart 1 30 10 20 40 Min 0 Max 1
++ random blue
+BarChart 1 50 10 20 40 Min 0 Max 1
++ random darkgreen
+BarChart 1 90 10 40 40 Min 0 Angle 45
++ 1 darkred
++ random red
+BarChart 1 160 20 60 20 Min 0 Angle 270 Mask "test/barchart_maskbat.png"
++ 1 darkred
++ random darkgreen
+BarChart 1 240 20 60 20 Min 0 Max 2 Angle 90
++ 2 grey
++ random green ColorRange 0 1 60 darkgreen
++ random lightblue ColorRange 0 1 60 darkblue AddPrev
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== LineChart [[linechart]]
+
+------------------------------------------------------------
+LineChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Background <image>]
++ <rpn> <color>
+------------------------------------------------------------
+
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+
+=== Example
+
+image:images/configuration_linechart.png["xsysguard test/linechart"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+LineChart 1 10 10 60 40 Min 0 Max 1.5
++ random,0.5,ADD darkred
++ random darkgreen
+LineChart 1 90 10 60 40 Min 0 Max 1 Background "test/linechart_background.png"
++ random blue
+LineChart 1 160 5 80 50 Angle 25
++ random red
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== AreaChart [[areachart]]
+
+------------------------------------------------------------
+AreaChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Background <image>]
++ <rpn> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [AddPrev]
+------------------------------------------------------------
+
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+
+=== Example
+
+image:images/configuration_areachart.png["xsysguard test/areachart"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AreaChart 1 10 10 60 40 Min 0 Max 2
++ random blue
++ random orange AddPrev
+AreaChart 1 90 10 60 40 Min 0 Max 1
++ random #00f8 ColorRange 0 1 50 #f008
+AreaChart 1 170 10 60 40 Min 0 Max 1 Background "test/areachart_background.png"
++ random #00f8 Top 2 #77f8 #77f8 ColorRange 0 1 50 #f008
+AreaChart 1 245 5 70 50 Min 0 Angle 200
++ random lightblue Top 3 blue red darkred
+AreaChart 1 330 10 60 40 Min 0 Max 1
++ statgrab:cpu_stats_diff:user,statgrab:cpu_stats_diff:total,DIV blue
++ statgrab:cpu_stats_diff:kernel,statgrab:cpu_stats_diff:total,DIV red AddPrev
++ statgrab:cpu_stats_diff:nice,statgrab:cpu_stats_diff:total,DIV yellow AddPrev
++ statgrab:cpu_stats_diff:iowait,statgrab:cpu_stats_diff:total,DIV orange AddPrev
++ statgrab:cpu_stats_diff:swap,statgrab:cpu_stats_diff:total,DIV lightgreen AddPrev
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Text [[text]]
+
+------------------------------------------------------------
+Text <update> <x> <y> <width> <height> <color> <font> <printformat> [Visible <update> <rpn>] [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
++ <rpn>
+------------------------------------------------------------
+
+`update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
+`color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
+`font`:: an imlib2 font name: `name/size`
+`printformat`:: a 'printf(3)' format string
+`rpn`:: see xref:rpn[RPN expressions]
+`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`alignment`:: one of `TopLeft`, `TopCenter`, `TopRight`, `CenterLeft`, `Center`, `CenterRight`, `BottomLeft`, `BottomCenter` or `BottomRight`
+
+=== Example
+
+image:images/configuration_text.png["xsysguard test/text"]
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Text 1 8 18 160 40 grey "VeraBd/20" "%s"
++ time:local:strftime:"%T"
+Text 1 5 15 160 40 black "VeraBd/20" "%s"
++ time:local:strftime:"%T"
+Text 0 160 5 190 50 orange      "Vera/7" "TopLeft"      Alignment TopLeft
+Text 0 160 5 190 50 blue        "Vera/7" "TopCenter"    Alignment TopCenter
+Text 0 160 5 190 50 green       "Vera/7" "TopRight"     Alignment TopRight
+Text 0 160 5 190 50 pink        "Vera/7" "CenterLeft"   Alignment CenterLeft
+Text 0 160 5 190 50 cyan        "Vera/7" "Center"       Alignment Center
+Text 0 160 5 190 50 yellow      "Vera/7" "CenterRight"  Alignment CenterRight
+Text 0 160 5 190 50 khaki       "Vera/7" "BottomLeft"   Alignment BottomLeft
+Text 0 160 5 190 50 sienna      "Vera/7" "BottomCenter" Alignment BottomCenter
+Text 0 160 5 190 50 purple      "Vera/7" "BottomRight"  Alignment BottomRight
+Text 0 360 5 120 50 blue "Comic_Sans_MS_Bold/11" "Comic @ 15°" Angle 15
+Text 1 490 10 120 50 darkred "VeraBd/9" "USER:\t%.1f%%\nKERNEL:\t%.1f%%\nNICE:\t%.1f%%" TabWidth 80
++ statgrab:cpu_stats_diff:user,   statgrab:cpu_stats_diff:total, DIV, 100, MUL
++ statgrab:cpu_stats_diff:kernel, statgrab:cpu_stats_diff:total, DIV, 100, MUL
++ statgrab:cpu_stats_diff:nice,   statgrab:cpu_stats_diff:total, DIV, 100, MUL
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== RPN (reverse polish notation) expressions [[rpn]]
+
+An rpn expression is a series of values and operators separated by commas.
+
+The rpn interpreter is stack-based; values are pushed onto the stack, and when
+an operation is performed, its operands are popped from the stack and its
+result pushed back on. 
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3,4,MUL				3 * 4
+3,4,5,DIV,SUB			3 - (4 / 5)
+time:local:sec,tick,SUB		time:local:sec - tick
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+=== Values
+
+------------------------------------------------------------
+<module>:<conf>			a module can push
+		-> [n]		a number (N)
+		-> [s]		a string (S)
+		-> [x]		or both (X)
+
+<number>	-> [n]
+"<string>"	-> [s]
+
+PI		-> [PI]
+NAN		-> [NAN]
+INF		-> [INF]
+NEGINF		-> [-INF]
+------------------------------------------------------------
+
+=== Operators
+
+==== Boolean operators
+
+------------------------------------------------------------
+LT		[n][m] -> (n < m ? [1] : [0])
+LE		[n][m] -> (n <= m ? [1] : [0])
+GT		[n][m] -> (n > m ? [1] : [0])
+GE		[n][m] -> (n >= m ? [1] : [0])
+EQ		[n][m] -> (n == m ? [1] : [0])
+NE		[n][m] -> (n != m ? [1] : [0])
+
+ISNAN		[n] -> (n == NAN ? [1] : [0])
+ISINF		[n] -> (n == INF ? [1] : [0])
+
+ISNANZERO	[n] -> (n == NAN ? [0] : [n])
+ISINFZERO	[n] -> (n == INF ? [0] : [n])
+ISNANONE	[n] -> (n == NAN ? [1] : [n])
+ISINFONE	[n] -> (n == INF ? [1] : [n])
+
+IF		[n][x][y] -> (n != 0 ? [x] : [y])
+------------------------------------------------------------
+
+==== Comparing values
+
+------------------------------------------------------------
+MIN		[n][m] -> ([n] < [m] ? [n] : [m])
+MAX		[n][m] -> ([n] > [m] ? [n] : [m])
+
+LIMIT		[n][m][o] -> ([m] <= [n] <= [o] ? [n] : [NAN])
+------------------------------------------------------------
+
+==== Arithmetics
+
+------------------------------------------------------------
+NEG		[n] -> [-n]
+INC		[n] -> [n+1]
+DEC		[n] -> [n-1]
+ADD		[n][m] -> [n+m]
+SUB		[n][m] -> [n-m]
+MUL		[n][m] -> [n*m]
+DIV		[n][m] -> [n/m]
+MOD		[n][m] -> [n%m]
+
+SIN		[n] -> [sin(n)]			sine function
+COS		[n] -> [cos(n)]			cosine function
+LOG		[n] -> [log(n)]			natural logarithmic function
+EXP		[n] -> [e^n]			base-e exponential function
+SQRT		[n] -> [sqrt(n)]		square root function
+POW		[n][m] -> [pow(n, m)]		pow function
+
+ATAN		[n] -> [atan(n)]		arc tangent function
+ATAN2		[n][m] -> [atan2(n, m)]		arc tangent function of two variables
+
+ROUND		[n] -> [round(n)]		round to nearest integer, away from zero
+FLOOR		[n] -> [floor(n)]		round down to the nearest integer
+CEIL		[n] -> [ceil(n)]		round up to the nearest integer
+
+DEG2RAD		[n] -> [n*PI/180]		convert degrees to radians
+RAD2DEG		[n] -> [n*180/PI]		convert radians to degrees
+
+ABS		[n] -> [abs(n)]			absolute value
+------------------------------------------------------------
+
+==== Processing the stack directly
+
+------------------------------------------------------------
+DUP		[x] -> [x][x]
+POP		[x] ->
+EXC		[x][y] -> [y][x]
+------------------------------------------------------------
+
+==== String utility functions
+
+------------------------------------------------------------
+ATOF		[s] -> [atof(s)]		convert a string to a double
+ATOI		[s] -> [atoi(s)]		convert a string to an integer
+ATOL		[s] -> [atol(s)]		convert a string to an integer
+ATOLL		[s] -> [atoll(s)]		convert a string to an integer
+
+STRTOF		[s] -> [strtof(s, &s)]		convert a string to a floating point number
+STRTOD		[s] -> [strtod(s, &s)]		convert a string to a floating point number
+STRTOLD		[s] -> [strtold(s, &s)]		convert a string to a floating point number
+
+STRTOL		[s][n] -> [strtol(s, &s, n)]	convert a string to a long integer
+STRTOLL		[s][n] -> [strtoll(s, &s, n)]	convert a string to a long integer
+
+STRTOUL		[s][n] -> [strtoul(s, &s, n)]	convert a string to an unsigned long integer
+STRTOULL	[s][n] -> [strtoull(s, &s, n)]	convert a string to an unsigned long integer
+
+STRLEN		[s] -> [strlen(s)]		calculate the length of a string
+STRCMP		[s][t] -> [strcmp(s, t)]	compare two strings
+STRCASECMP	[s][t] -> [strcasecmp(s, t)]	compare two strings ignoring case
+
+STRUP		[s] -> [strup(s)]		convert a string to upper case
+STRDOWN		[s] -> [strdown(s)]		convert a string to lower case
+STRREVERSE	[s] -> [strreverse(s)]		reverse all of the bytes in a string
+------------------------------------------------------------
+
+==== Load and Store
+
+------------------------------------------------------------
+LOAD		-> [HEAP]
+STORE		[n][x] -> (n != 0 ? HEAP=x)
+------------------------------------------------------------
+
