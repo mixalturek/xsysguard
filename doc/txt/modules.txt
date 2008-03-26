@@ -1,0 +1,605 @@
+xsysguard - Modules
+===================
+
+xref:daemon[daemon]::		execute xsysguardd processes
+xref:env[env]::			get environment variables
+xref:exec[exec]::		execute processes and read from their stdout
+xref:file[file]::		read regular files
+xref:inotail[inotail]::		tail files in follow mode (`tail -F`) using inotify
+xref:iw[iw]::			libiw (wireless extension library)
+xref:number[number]::		get a fixed number
+xref:random[random]::		random number generator
+xref:sensors[sensors]::		libsensors (lm-sensors - Linux hardware monitoring)
+xref:statgrab[statgrab]::	libstatgrab (get system statistics)
+xref:string[string]::		get a fixed string
+xref:tail[tail]::		tail files in follow mode (`tail -F`)
+xref:tick[tick]::		get current tick
+xref:time[time]::		date and time functions
+xref:uname[uname]::		get name and information about current kernel
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+.Return types:
+`N`:: returns a number
+`S`:: returns a string
+`X`:: returns both
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== daemon - execute xsysguardd processes [[daemon]]
+
+------------------------------------------------------------
+N daemon:<command>:number:<rpn>
+S daemon:<command>:string:<rpn>
+------------------------------------------------------------
+
+`command`::  command executed by `/bin/sh -c`
+`rpn`::	remote link:configuration.html#rpn[RPN] expression
+
+=== Environment variables
+
+`XSYSGUARD_DAEMON_TIMEOUT`:: timeout in ticks until the daemon process will be
+	restarted (default: 16)
+`XSYSGUARD_DAEMON_MAXBUFLEN`:: maximum buffer length for received strings and
+	log messages (default: 262144)
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SetEnv "XSYSGUARD_DAEMON_TIMEOUT"	16
+SetEnv "XSYSGUARD_DAEMON_MAXBUFLEN"	262144
+
+SetEnv "localhost" "xsysguardd" Overwrite
+SetEnv "remotehost" "ssh login@server xsysguardd" Overwrite
+
++ daemon:${localhost}:str:"uname:nodename"
++ daemon:${remotehost}:str:"uname:nodename"
++ daemon:${remotehost}:num:"statgrab:network_io_stats:eth0:tx,1024,DIV"
++ daemon:${remotehost}:num:"statgrab:network_io_stats:eth0:rx,1024,DIV"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== env - get environment variables [[env]]
+
+------------------------------------------------------------
+S env:<name>:read:all
+S env:<name>:read:scanf:string:<format>
+N env:<name>:read:scanf:number:<format>
+N env:<name>:read:scanf:counter:<format>
+S env:<name>:read:grep:<pattern>:<index>
+S env:<name>:read:igrep:<pattern>:<index>
+S env:<name>:readline:<number>:all
+S env:<name>:readline:<number>:scanf:string:<format>
+N env:<name>:readline:<number>:scanf:number:<format>
+N env:<name>:readline:<number>:scanf:counter:<format>
+S env:<name>:readline:<number>:grep:<pattern>:<index>
+S env:<name>:readline:<number>:igrep:<pattern>:<index>
+------------------------------------------------------------
+
+`name`:: environment variable name
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== exec - execute processes and read from their stdout [[exec]]
+
+------------------------------------------------------------
+S exec:<command>:read:all
+S exec:<command>:read:scanf:string:<format>
+N exec:<command>:read:scanf:number:<format>
+N exec:<command>:read:scanf:counter:<format>
+S exec:<command>:read:grep:<pattern>:<index>
+S exec:<command>:read:igrep:<pattern>:<index>
+S exec:<command>:readline:<number>:all
+S exec:<command>:readline:<number>:scanf:string:<format>
+N exec:<command>:readline:<number>:scanf:number:<format>
+N exec:<command>:readline:<number>:scanf:counter:<format>
+S exec:<command>:readline:<number>:grep:<pattern>:<index>
+S exec:<command>:readline:<number>:igrep:<pattern>:<index>
+------------------------------------------------------------
+
+`command`:: command executed by `/bin/sh -c`
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++ exec:"ping localhost":readline:0:all
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== file - read regular files [[file]]
+
+------------------------------------------------------------
+N file:<filename>:exists
+N file:<filename>:is_regular
+N file:<filename>:is_symlink
+N file:<filename>:is_dir
+N file:<filename>:is_executable
+S file:<filename>:read:all
+S file:<filename>:read:scanf:string:<format>
+N file:<filename>:read:scanf:number:<format>
+N file:<filename>:read:scanf:counter:<format>
+S file:<filename>:read:grep:<pattern>:<index>
+S file:<filename>:read:igrep:<pattern>:<index>
+S file:<filename>:readline:<number>:all
+S file:<filename>:readline:<number>:scanf:string:<format>
+N file:<filename>:readline:<number>:scanf:number:<format>
+N file:<filename>:readline:<number>:scanf:counter:<format>
+S file:<filename>:readline:<number>:grep:<pattern>:<index>
+S file:<filename>:readline:<number>:igrep:<pattern>:<index>
+------------------------------------------------------------
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SetEnv "user"	"cpu %d"		Overwrite
+SetEnv "nice"	"cpu %*d %d"		Overwrite
+SetEnv "system"	"cpu %*d %*d %d"	Overwrite
+SetEnv "idle"	"cpu %*d %*d %*d %d"	Overwrite
+
++ file:/proc/stat:readline:1:scanf:counter:${user}
++ file:/proc/stat:readline:1:scanf:counter:${nice}
++ file:/proc/stat:readline:1:scanf:counter:${system}
++ file:/proc/stat:readline:1:scanf:counter:${idle}
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== inotail - tail files in follow mode (`tail -F`) using inotify [[inotail]]
+
+// From inotail(1):
+Inotail module is a replacement for the xref:tail[tail] module. It makes use of
+the inotify infrastructure in recent versions of the Linux kernel to speed up
+tailing files. Standard xref:tail[tail] module polls the file every tick while
+inotail module listens to special events sent by the kernel through the inotify
+API to determine whether a file needs to be reread.
+
+Inotail module will not work on systems running a kernel without inotify. To
+enable inotify, please set `CONFIG_INOTIFY=y` in your Linux kernel configuration
+and recompile it.
+
+------------------------------------------------------------
+S inotail:<filename>:read:all
+S inotail:<filename>:read:scanf:string:<format>
+N inotail:<filename>:read:scanf:number:<format>
+N inotail:<filename>:read:scanf:counter:<format>
+S inotail:<filename>:read:grep:<pattern>:<index>
+S inotail:<filename>:read:igrep:<pattern>:<index>
+S inotail:<filename>:readline:<number>:all
+S inotail:<filename>:readline:<number>:scanf:string:<format>
+N inotail:<filename>:readline:<number>:scanf:number:<format>
+N inotail:<filename>:readline:<number>:scanf:counter:<format>
+S inotail:<filename>:readline:<number>:grep:<pattern>:<index>
+S inotail:<filename>:readline:<number>:igrep:<pattern>:<index>
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== iw - libiw (wireless extension library) [[iw]]
+
+http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html[Library Homepage]
+
+------------------------------------------------------------
+S iw:<interface>:config:name
+N iw:<interface>:config:nwid
+X iw:<interface>:config:freq
+N iw:<interface>:config:channel
+S iw:<interface>:config:key
+N iw:<interface>:config:keyid
+S iw:<interface>:config:essid
+X iw:<interface>:config:mode
+N iw:<interface>:info:sensitivity
+S iw:<interface>:info:nickname
+S iw:<interface>:info:access_point
+X iw:<interface>:info:bitrate
+X iw:<interface>:info:rts
+X iw:<interface>:info:fragment
+S iw:<interface>:info:power_management
+N iw:<interface>:info:txpower:dbm
+N iw:<interface>:info:txpower:mw
+S iw:<interface>:info:retry
+N iw:<interface>:stats:quality:quality
+N iw:<interface>:stats:quality:signal
+N iw:<interface>:stats:quality:noise
+N iw:<interface>:stats:discarded:nwid
+N iw:<interface>:stats:discarded:code
+N iw:<interface>:stats:discarded:fragment
+N iw:<interface>:stats:discarded:retries
+N iw:<interface>:stats:discarded:misc
+N iw:<interface>:stats:missed:beacon
+N iw:<interface>:range:sensitivity
+N iw:<interface>:range:max_quality:quality
+------------------------------------------------------------
+
+=== ModuleEnv variables
+
+`IW_INTERFACE0`, `IW_INTERFACE1`, ...
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++ iw:*:stats:quality:quality,iw:*:range:max_quality:quality,DIV,100,MUL
++ iw:*:config:essid
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== number - get a fixed number [[number]]
+
+------------------------------------------------------------
+N number:<number>
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== random - random number generator [[random]]
+
+------------------------------------------------------------
+N random
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== sensors - libsensors (lm-sensors - Linux hardware monitoring) [[sensors]]
+
+http://www.lm-sensors.org[Library Homepage]
+
+------------------------------------------------------------
+N sensors:<chip>:<sensor>
+------------------------------------------------------------
+
+`chip`:: sensors chip name or `*`
+`sensor`:: e.g. `temp1`, `temp2`, `temp3`, `fan1`, `fan2`, `fan3`, ...
+
+=== ModuleEnv variables
+
+`SENSORS_CHIP0`, `SENSORS_CHIP1`, ...
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== statgrab - libstatgrab (get system statistics) [[statgrab]]
+
+http://www.i-scream.org/libstatgrab[Library Homepage]
+
+=== Get general operating system statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_host_info.3.html['sg_get_host_info(3)']
+
+------------------------------------------------------------
+S statgrab:host_info:os_name 
+S statgrab:host_info:os_release 
+S statgrab:host_info:os_version 
+S statgrab:host_info:platform 
+S statgrab:host_info:hostname 
+N statgrab:host_info:uptime
+------------------------------------------------------------
+
+`os_name`:: The operating system name (e.g. SunOS or Linux).
+`os_release`:: The operating system release (e.g. 5.8 or 5.9 or Solaris).
+`os_version`:: The version level of the OS.
+`platform`:: The hardware platform (architecture) the OS runs on.
+`hostname`:: The name of the machine.
+`uptime`:: The uptime of the machine in seconds.
+
+=== Get cpu usage
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_cpu_stats.3.html['sg_get_cpu_stats(3)']
+
+------------------------------------------------------------
+N statgrab:cpu_stats:user 
+N statgrab:cpu_stats:kernel 
+N statgrab:cpu_stats:idle 
+N statgrab:cpu_stats:iowait 
+N statgrab:cpu_stats:swap 
+N statgrab:cpu_stats:nice 
+N statgrab:cpu_stats:total 
+
+N statgrab:cpu_stats_diff:user 
+N statgrab:cpu_stats_diff:kernel 
+N statgrab:cpu_stats_diff:idle 
+N statgrab:cpu_stats_diff:iowait 
+N statgrab:cpu_stats_diff:swap 
+N statgrab:cpu_stats_diff:nice 
+N statgrab:cpu_stats_diff:total 
+
+N statgrab:cpu_percents:user 
+N statgrab:cpu_percents:kernel 
+N statgrab:cpu_percents:idle 
+N statgrab:cpu_percents:iowait 
+N statgrab:cpu_percents:swap
+N statgrab:cpu_percents:nice
+------------------------------------------------------------
+
+Avoid `statgrab:cpu_percents:*` on linux/unix systems. Instead:
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++ statgrab:cpu_stats_diff:user,statgrab:cpu_stats_diff:total,DIV,100,MUL
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+=== Get VM statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_mem_stats.3.html['sg_get_mem_stats(3)']
+
+------------------------------------------------------------
+N statgrab:mem_stats:total
+N statgrab:mem_stats:free
+N statgrab:mem_stats:used
+N statgrab:mem_stats:cache
+
+N statgrab:swap_stats:total
+N statgrab:swap_stats:used
+N statgrab:swap_stats:free
+------------------------------------------------------------
+
+=== Get system load
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_load_stats.3.html['sg_get_load_stats(3)']
+
+------------------------------------------------------------
+N statgrab:load_stats:min1
+N statgrab:load_stats:min5
+N statgrab:load_stats:min15
+------------------------------------------------------------
+
+=== Get the current logged in users
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_user_stats.3.html['sg_get_user_stats(3)']
+
+------------------------------------------------------------
+S statgrab:user_stats:name_list
+N statgrab:user_stats:num_entries 
+------------------------------------------------------------
+
+`name_list`:: A space separated list of the currently logged in users.
+`num_entries`:: The number of users currently logged in.
+
+=== Get filesystem statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_fs_stats.3.html['sg_get_fs_stats(3)']
+
+------------------------------------------------------------
+S statgrab:fs_stats:<device_name|mnt_point>:device_name 
+S statgrab:fs_stats:<device_name|mnt_point>:fs_type 
+S statgrab:fs_stats:<device_name|mnt_point>:mnt_point 
+N statgrab:fs_stats:<device_name|mnt_point>:size 
+N statgrab:fs_stats:<device_name|mnt_point>:used 
+N statgrab:fs_stats:<device_name|mnt_point>:avail 
+N statgrab:fs_stats:<device_name|mnt_point>:total_inodes 
+N statgrab:fs_stats:<device_name|mnt_point>:used_inodes 
+N statgrab:fs_stats:<device_name|mnt_point>:free_inodes 
+N statgrab:fs_stats:<device_name|mnt_point>:avail_inodes 
+N statgrab:fs_stats:<device_name|mnt_point>:io_size 
+N statgrab:fs_stats:<device_name|mnt_point>:block_size 
+N statgrab:fs_stats:<device_name|mnt_point>:total_blocks 
+N statgrab:fs_stats:<device_name|mnt_point>:free_blocks 
+N statgrab:fs_stats:<device_name|mnt_point>:used_blocks 
+N statgrab:fs_stats:<device_name|mnt_point>:avail_blocks 
+------------------------------------------------------------
+
+=== Get disk io statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html['sg_get_disk_io_stats(3)']
+
+------------------------------------------------------------
+N statgrab:disk_io_stats:<disk_name>:read_bytes 
+N statgrab:disk_io_stats:<disk_name>:write_bytes
+
+N statgrab:disk_io_stats_diff:<disk_name>:read_bytes 
+N statgrab:disk_io_stats_diff:<disk_name>:write_bytes
+------------------------------------------------------------
+
+=== Get network statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_network_io_stats.3.html['sg_get_network_io_stats(3)']
+
+------------------------------------------------------------
+N statgrab:network_io_stats:<interface_name>:tx
+N statgrab:network_io_stats:<interface_name>:rx
+N statgrab:network_io_stats:<interface_name>:ipackets
+N statgrab:network_io_stats:<interface_name>:opackets
+N statgrab:network_io_stats:<interface_name>:ierrors
+N statgrab:network_io_stats:<interface_name>:oerrors
+N statgrab:network_io_stats:<interface_name>:collisions
+
+N statgrab:network_io_stats_diff:<interface_name>:tx
+N statgrab:network_io_stats_diff:<interface_name>:rx
+N statgrab:network_io_stats_diff:<interface_name>:ipackets
+N statgrab:network_io_stats_diff:<interface_name>:opackets
+N statgrab:network_io_stats_diff:<interface_name>:ierrors
+N statgrab:network_io_stats_diff:<interface_name>:oerrors
+N statgrab:network_io_stats_diff:<interface_name>:collisions
+------------------------------------------------------------
+
+=== Get network interface statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html['sg_get_network_iface_stats(3)']
+
+------------------------------------------------------------
+N statgrab:network_iface_stats:<interface_name>:speed 
+X statgrab:network_iface_stats:<interface_name>:duplex:<full>:<half>:<unknown> 
+------------------------------------------------------------
+
+=== Get paging statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_page_stats.3.html['sg_get_page_stats(3)']
+
+------------------------------------------------------------
+N statgrab:page_stats:pages_pagein
+N statgrab:page_stats:pages_pageout
+
+N statgrab:page_stats_diff:pages_pagein
+N statgrab:page_stats_diff:pages_pageout
+------------------------------------------------------------
+
+=== Get process statistics
+
+http://www.i-scream.org/libstatgrab/docs/sg_get_process_stats.3.html['sg_get_process_stats(3)']
+
+------------------------------------------------------------
+S statgrab:process_stats:process_name:<sortby>:{ascending|descending}:<number>
+S statgrab:process_stats:proctitle:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:pid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:parent:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:pgid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:uid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:euid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:gid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:egid:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:proc_size:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:proc_resident:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:time_spent:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:cpu_percent:<sortby>:{ascending|descending}:<number>
+N statgrab:process_stats:nice:<sortby>:{ascending|descending}:<number>
+X statgrab:process_stats:state:<sortby>:{ascending|descending}:<number>:<running>:<sleeping>:<stopped>:<zombie>:<unknown>
+
+N statgrab:process_count:total 
+N statgrab:process_count:running 
+N statgrab:process_count:sleeping 
+N statgrab:process_count:stopped 
+N statgrab:process_count:zombie 
+------------------------------------------------------------
+
+`sortby`:: `name`, `pid`, `uid`, `gid`, `size`, `res`, `cpu` or `time`
+
+=== ModuleEnv variables
+
+`STATGRAB_DEVICE0`, `STATGRAB_DEVICE1`, ...
+
+`STATGRAB_MNTPOINT0`, `STATGRAB_MNTPOINT1`, ...
+
+`STATGRAB_DISK0`, `STATGRAB_DISK1`, ...
+
+`STATGRAB_INTERFACE0`, `STATGRAB_INTERFACE1`, ...
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== string - get a fixed string [[string]]
+
+------------------------------------------------------------
+S string:<string>
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== tail - tail files in follow mode (`tail -F`) [[tail]]
+
+Poll files every tick.
+
+See also: xref:inotail[inotail]
+
+------------------------------------------------------------
+S tail:<filename>:read:all
+S tail:<filename>:read:scanf:string:<format>
+N tail:<filename>:read:scanf:number:<format>
+N tail:<filename>:read:scanf:counter:<format>
+S tail:<filename>:read:grep:<pattern>:<index>
+S tail:<filename>:read:igrep:<pattern>:<index>
+S tail:<filename>:readline:<number>:all
+S tail:<filename>:readline:<number>:scanf:string:<format>
+N tail:<filename>:readline:<number>:scanf:number:<format>
+N tail:<filename>:readline:<number>:scanf:counter:<format>
+S tail:<filename>:readline:<number>:grep:<pattern>:<index>
+S tail:<filename>:readline:<number>:igrep:<pattern>:<index>
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== tick - get current tick [[tick]]
+
+------------------------------------------------------------
+N tick
+------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== time - date and time functions [[time]]
+
+------------------------------------------------------------
+S time:{gm|local}:strftime:<timeformat>
+
+N time:{gm|local}:sec
+N time:{gm|local}:usec
+
+N time:{gm|local}:tm_sec
+N time:{gm|local}:tm_min
+N time:{gm|local}:tm_hour
+N time:{gm|local}:tm_mday
+N time:{gm|local}:tm_mon
+N time:{gm|local}:tm_year
+N time:{gm|local}:tm_wday
+N time:{gm|local}:tm_yday
+N time:{gm|local}:tm_isdst
+------------------------------------------------------------
+
+Select timezone:
+
+`gm`:: Coordinated Universal Time (UTC).
+`local`:: Time relative to the user's specified time zone.
+
+Format date and time:
+
+`strftime`:: Format date and time according to the format specification
+             `timeformat`. For conversion details see 'strftime(3)'.
+
+The number of seconds and microseconds since 00:00:00, January 1, 1970:
+
+`sec`::  seconds
+`usec`:: microseconds
+
+Broken-down time representation:
+
+`tm_sec`::   The number of seconds after the minute, normally in the range 0 to
+             59, but can be up to 60 to allow for leap seconds.
+`tm_min`::   The number of minutes after the hour, in the range 0 to 59.
+`tm_hour`::  The number of hours past midnight, in the range 0 to 23.
+`tm_mday`::  The day of the month, in the range 1 to 31.
+`tm_mon`::   The number of months since January, in the range 0 to 11.
+`tm_year`::  The number of years since 1900.
+`tm_wday`::  The number of days since Sunday, in the range 0 to 6.
+`tm_yday`::  The number of days since January 1, in the range 0 to 365.
+`tm_isdst`:: A flag that indicates wheter daylight saving time is in effect at
+             the time described. The value is positive if daylight saving time
+	     is in effect, zero if it is not, and negative if the information is
+	     not available.
+
+=== Example
+
+[xsysguard,source-highlight/xsysguard.lang]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++ time:local:strftime:"%a %b %e / %H:%M:%S"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== uname - get name and information about current kernel
+
+------------------------------------------------------------
+S uname:sysname
+S uname:nodename
+S uname:release
+S uname:version
+S uname:machine
+------------------------------------------------------------
+
