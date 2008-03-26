@@ -430,8 +430,8 @@ usage(bool enable_fontconfig)
 	char **p;
 
 	printf( "xsysguard " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
-		"Usage: xsysguard [ARGUMENTS...] CONFIG[{+-}<X>{+-}<Y>] [CONFIGS...]\n\n"
-		"Arguments:\n"
+		"Usage: xsysguard [OPTIONS...] CONFIG[{+-}<X>{+-}<Y>] [NAME=VALUE] [CONFIG] ...\n\n"
+		"Options:\n"
 		"  -h, --help         Print this help message to stdout\n"
 		"  -H, --mhelp=MODULE Print help message for MODULE to stdout\n"
 		"  -m, --modules      Print a list of all available modules to stdout\n"

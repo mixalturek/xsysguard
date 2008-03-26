@@ -312,8 +312,8 @@ usage(void)
 #endif
 
 	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
-		"Usage: xsysguardd [ARGUMENTS...]\n\n"
-		"Arguments:\n"
+		"Usage: xsysguardd [OPTIONS...]\n\n"
+		"Options:\n"
 		"  -h, --help          Print this help message to stdout\n"
 		"  -H, --mhelp=MODULE  Print help message for MODULE to stdout\n"
 		"  -m, --modules       Print a list of all available modules to stdout\n"
