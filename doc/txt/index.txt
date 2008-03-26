@@ -1,0 +1,130 @@
+xsysguard - General Info
+========================
+
+xsysguard is a resource friendly system monitor based on
+http://enlightenment.org[libImlib2].
+
+== Features
+
+- written in c, minimal dependencies
+- powerful link:configuration.html[configuration] file format
+- full alpha channel support, including XShape and ARGB visuals
+- configurable widgets:
+	link:configuration.html#line[Line],
+	link:configuration.html#rectangle[Rectangle],
+	link:configuration.html#ellipse[Ellipse],
+	link:configuration.html#polygon[Polygon],
+	link:configuration.html#image[Image],
+	link:configuration.html#barchart[BarChart],
+	link:configuration.html#linechart[LineChart],
+	link:configuration.html#areachart[AreaChart] and
+	link:configuration.html#text[Text]
+- data sources extendable by link:modules.html[modules]
+  * link:modules.html#daemon[daemon module]: run a
+    link:xsysguardd.1.html[xsysguardd] daemon process on your linux based
+    server, router, wlan accesspoint or satellite/cable receiver
+  * link:modules.html#file[file module]: parse files with scanf or regexp's
+    (e.g. `/proc/\*` or `/sys/*`)
+  * link:modules.html#exec[exec module]: execute processes and parse their
+    stdout with scanf or regexp's
+  * ...
+
+////////////////////////////////////////////////////////////////////////////////
+
+== Changelog
+
+[changelog]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// include::../../changelog[]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+
+== Requirements
+
+- xsysguard: http://enlightenment.org[libImlib2]
+- modules (optional):
+  * iw: http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html[libiw]
+    (wireless extension library)
+  * sensors: http://www.lm-sensors.org[libsensors] (lm-sensors - Linux hardware
+    monitoring)
+  * statgrab: http://www.i-scream.org/libstatgrab[libstatgrab] (get system
+    statistics)
+- documentation (svn only):
+  * html: http://www.python.org[Python], http://www.gnu.org/software/src-highlite[GNU Source-highlight]
+  * manual pages: http://www.python.org[Python], http://xmlsoft.org/XSLT[xsltproc and docbook-xsl]
+
+== Download
+
+Download latest http://sourceforge.net/project/showfiles.php?group_id=169315[source release]
+or checkout the Subversion http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk[repository]:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+svn co https://xsysguard.svn.sourceforge.net/svnroot/xsysguard/trunk xsysguard
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+== Build
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+make config prefix=/opt/xsysguard
+make all
+make install-strip
+
+# GCC optimizations
+make config all install-strip prefix=/opt/xsysguard CC=gcc CFLAGS="-O2 -fomit-frame-pointer"
+
+# For GCC 4.2 and newer append "-combine -fwhole-program" to CFLAGS:
+make config all install-strip prefix=/opt/xsysguard CC=gcc-4.2 CFLAGS="-O2 -fomit-frame-pointer -combine -fwhole-program"
+
+# To optimize for size append "-D XSG_LOG_LEVEL_MAX=2 -Os" to CFLAGS:
+make config xsysguardd prefix=/opt/xsysguard CC=gcc-4.2 CFLAGS="-D XSG_LOG_LEVEL_MAX=2 -Os -fomit-frame-pointer -combine -fwhole-program"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Run
+
+Check search path for config files, modules, images and fonts:
+
+- `XSYSGUARD_CONFIG_PATH`
+- `XSYSGUARD_MODULE_PATH`
+- `XSYSGUARD_IMAGE_PATH`
+- `XSYSGUARD_FONT_PATH`
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+xsysguard -h
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Print a list of all available modules to stdout and exit:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+xsysguard -m
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Print help message for the uname module to stdout and exit:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+xsysguard -H uname
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create two windows: one window for config file test/barchart at
+position x=40, y=40 and one window for config file test/linechart
+at position x=40, y=140:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+xsysguard test/barchart+40+40 test/linechart+40+140
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create two windows for the config file test/daemon: one window
+for host1 and one window for host2:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+xsysguard command=ssh\ host1\ xsysguardd test/daemon command=ssh\ host2\ xsysguardd test/daemon
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
