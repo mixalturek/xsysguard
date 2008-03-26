@@ -1043,8 +1043,8 @@ help_daemon(void)
 	static char *string = NULL;
 
 	if (string == NULL) {
-		xsg_asprintf(&string, "N %s:<command>:num:<variable>\n"
-					"S %s:<command>:str:<variable>\n",
+		xsg_asprintf(&string, "N %s:<command>:number:<variable>\n"
+					"S %s:<command>:string:<variable>\n",
 					XSG_MODULE_NAME, XSG_MODULE_NAME);
 	}
 
