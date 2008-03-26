@@ -1,0 +1,30 @@
+string delim "\"" "\"" escape "\\"
+string delim "'" "'" escape "\\"
+
+number = '\<[+-]?(?:(?:0x[[:xdigit:]]+)|(?:(?:[[:digit:]]*\.)?[[:digit:]]+(?:[eE][+-]?[[:digit:]]+)?))u?(?:(?:int(?:8|16|32|64))|L)?\>|#[[:xdigit:]]{3}[[:xdigit:]]*'
+
+preproc = "Set|SetEnv|ModuleEnv"
+
+keyword = "^+|^.|LineChart|Line|Rectangle|Ellipse|Polygon|Image|BarChart",
+	"AreaChart|Text"
+
+function = "+|.|:|,|Interval|Name|Class|Resource|Size|Position|Sticky|Mouse",
+	"SkipTaskbar|SkipPager|Layer|Decorations|OverrideRedirect|Background",
+	"CacheSize|FontCacheSize|XShape|ARGBVisual|Visible|Angle|ColorRange",
+	"Filled|Closed|Min|Max|Background|Mask|AddPrev|Dump|Alignment",
+	"TabWidth|Past|Overwrite"
+
+variable = "on|off|Above|Normal|Below|Color|CopyFromParent|CopyFromRoot",
+	"TopLeft|TopCenter|TopRight|CenterLeft|CenterRight|Center|BottomLeft",
+	"BottomCenter|BottomRight|Move|Exit"
+
+type = "LT|LE|GT|GE|EQ|NE|ISNAN|ISINF|ISNANZERO|ISINFZERO|ISNANONE|ISINFONE",
+	"IF|MIN|MAX|LIMIT|NEG|INC|DEC|ADD|SUB|MUL|DIV|MOD|SIN",
+	"COS|LOG|EXP|SQRT|POW|ATAN|ATAN2|ROUND|FLOOR|CEIL|DEG2RAD|RAD2DEG|ABS",
+	"PI|NAN|INF|NEGINF|DUP|POP|EXC",
+	"ATOF|ATOI|ATOL|ATOLL|STRTOF|STRTOD|STRTOLD|STRTOL|STRTOLL",
+	"STRTOUL|STRTOULL|STRLEN|STRCMP|STRCASECMP|STRUP|STRDOWN|STRREVERSE",
+	"LOAD|STORE"
+
+comment start '#'
+
