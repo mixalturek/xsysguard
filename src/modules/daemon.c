@@ -683,7 +683,7 @@ stderr_daemon(void *arg, xsg_main_poll_events_t events)
 {
 	daemon_t *daemon = (daemon_t *) arg;
 	char buffer[BUFFER_SIZE];
-	ssize_t n;
+	ssize_t n, m;
 
 	n = read(daemon->stderr_poll.fd, buffer, BUFFER_SIZE - 1);
 
@@ -706,6 +706,12 @@ stderr_daemon(void *arg, xsg_main_poll_events_t events)
 	}
 
 	buffer[n] = '\0';
+
+	for (m = 0; m < n; m++) {
+		if (buffer[m] == '\n' || buffer[m] == '\r') {
+			buffer[m] = ' ';
+		}
+	}
 
 	xsg_warning("[%d]%s: received message on stderr: \"%s\"",
 			(int) daemon->pid, daemon->command, buffer);
