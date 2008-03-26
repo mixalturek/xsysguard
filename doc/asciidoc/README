@@ -1,0 +1,24 @@
+asciidoc links
+* http://www.methods.co.nz/asciidoc/
+* http://sourceforge.net/projects/asciidoc/
+
+from asciidoc-7.1.2.tar.gz
+* asciidoc.py
+* asciidoc.conf
+* docbook.conf
+* xhtml11.conf
+* xhtml11-quirks.conf
+* common.xsl
+* manpage.xsl
+* stylesheets/xhtml11-manpage.css
+* stylesheets/xhtml11-quirks.css
+* stylesheets/xhtml11.css
+
+xsysguard source filters
+* source-highlight-filter.conf
+* source-filter.conf
+
+xsysguard html layout
+* layout.conf
+* stylesheets/layout.css
+
