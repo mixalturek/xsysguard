@@ -149,7 +149,7 @@ html/%.1.html: txt/%.1.txt
 	-o $@ $<
 
 html/%.html: txt/%.txt
-	$(ASCIIDOC) -a icons \
+	$(ASCIIDOC) \
 	-b xhtml11 -d article \
 	-f asciidoc/asciidoc.conf \
 	-f asciidoc/xhtml11.conf \
