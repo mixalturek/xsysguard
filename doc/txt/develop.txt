@@ -1,0 +1,120 @@
+xsysguard - Develop
+===================
+
+- xref:minimal[Example: Minimal module]
+- xref:config[Example: Parsing config options]
+
+// TODO: - xref:poll[Example: Polling file descriptors]
+
+- xref:xsysguard_header[Header file: xsysguard.h]
+
+Compile the examples:
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+gcc -o my.so my.c -fPIC -shared
+cp my.so ~/.xsysguard/modules/my.so
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Example: Minimal module [[minimal]]
+
+[c]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#include <xsysguard.h>
+
+static double
+get_number(void *arg)
+{
+	return 47.11;
+}
+
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
+	*num = get_number;
+}
+
+static const char *
+help(void)
+{
+	return "my help message";
+}
+
+XSG_MODULE(parse, help, "my module");
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Example: Parse config options [[config]]
+
+[c]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#include <xsysguard.h>
+
+static const char *
+get_string(void *arg)
+{
+	xsg_debug("get_string: \"%s\"", (char *) arg);
+	return (char *) arg;
+}
+
+static double
+get_number(void *arg)
+{
+	double d = *(double *) arg;
+	xsg_debug("get_number: %f", d);
+	return d;
+}
+
+static void
+parse(
+	uint64_t update,
+	xsg_var_t *var,
+	double (**num)(void *),
+	char *(**str)(void *),
+	void **arg
+)
+{
+	if (xsg_conf_find_command("string")) {
+		*arg = xsg_conf_read_string();
+		*str = get_string;
+	} else if (xsg_conf_find_command("number")) {
+		double *d = xsg_new(double, 1);
+		*d = xsg_conf_read_double();
+		*arg = (void *) d;
+		*num = get_number;
+	} else {
+		xsg_conf_error("string or number expected");
+	}
+}
+
+static const char *
+help(void)
+{
+	static char *string = NULL;
+
+	if (string == NULL) {
+		xsg_asprintf(&string, "N %s:number:<number>\nS %s:string:<string>\n",
+				XSG_MODULE_NAME, XSG_MODULE_NAME);
+	}
+
+	return string;
+}
+
+XSG_MODULE(parse, help, "config example");
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+== Header file: xsysguard.h [[xsysguard_header]]
+
+You can download `xsysguard.h` from the Subversion
+http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk/src/include/xsysguard.h?view=markup[repository].
+
+[c]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+include::../../src/include/xsysguard.h[]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
