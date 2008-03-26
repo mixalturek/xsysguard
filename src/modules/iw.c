@@ -1002,7 +1002,7 @@ help_iw(void)
 	for (l = device_list; l; l = l->next) {
 		char name[128];
 
-		snprintf(name, sizeof(name), "IW_DEVICE%d", i++);
+		snprintf(name, sizeof(name), "IW_INTERFACE%d", i++);
 		xsg_setenv(name, (char *) device_list->data, TRUE);
 
 		xsg_string_append_printf(string, "%s:   %s\n", name,
