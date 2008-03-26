@@ -121,8 +121,9 @@ clean:
 
 distclean: clean
 
-#install: all
 install:
+	test -d man1 || $(MAKE) man1
+	test -d html || $(MAKE) html
 	$(INSTALL) -d $(DESTDIR)$(man1dir)
 	$(INSTALL) -d $(DESTDIR)$(docdir)
 	$(INSTALL) -d $(DESTDIR)$(docdir)/images
