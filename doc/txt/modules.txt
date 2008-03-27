@@ -312,12 +312,12 @@ S statgrab:host_info:hostname
 N statgrab:host_info:uptime
 ------------------------------------------------------------
 
-`os_name`:: The operating system name (e.g. SunOS or Linux).
-`os_release`:: The operating system release (e.g. 5.8 or 5.9 or Solaris).
-`os_version`:: The version level of the OS.
-`platform`:: The hardware platform (architecture) the OS runs on.
-`hostname`:: The name of the machine.
-`uptime`:: The uptime of the machine in seconds.
+`os_name`:: the operating system name (e.g. SunOS or Linux)
+`os_release`:: the operating system release (e.g. 5.8 or 5.9 or Solaris)
+`os_version`:: the version level of the OS
+`platform`:: the hardware platform (architecture) the OS runs on
+`hostname`:: the name of the machine
+`uptime`:: the uptime of the machine in seconds
 
 === Get cpu usage
 
@@ -389,8 +389,8 @@ S statgrab:user_stats:name_list
 N statgrab:user_stats:num_entries 
 ------------------------------------------------------------
 
-`name_list`:: A space separated list of the currently logged in users.
-`num_entries`:: The number of users currently logged in.
+`name_list`:: a space separated list of the currently logged in users
+`num_entries`:: the number of users currently logged in
 
 === Get filesystem statistics
 
@@ -582,13 +582,13 @@ N time:{gm|local}:tm_isdst
 
 Select timezone:
 
-`gm`:: Coordinated Universal Time (UTC).
-`local`:: Time relative to the user's specified time zone.
+`gm`:: Coordinated Universal Time (UTC)
+`local`:: time relative to the user's specified time zone
 
 Format date and time:
 
-`strftime`:: Format date and time according to the format specification
-             `timeformat`. For conversion details see 'strftime(3)'.
+`strftime`:: format date and time according to the format specification
+             `timeformat`; for conversion details see 'strftime(3)'
 
 The number of seconds and microseconds since 00:00:00, January 1, 1970:
 
@@ -597,19 +597,19 @@ The number of seconds and microseconds since 00:00:00, January 1, 1970:
 
 Broken-down time representation:
 
-`tm_sec`::   The number of seconds after the minute, normally in the range 0 to
-             59, but can be up to 60 to allow for leap seconds.
-`tm_min`::   The number of minutes after the hour, in the range 0 to 59.
-`tm_hour`::  The number of hours past midnight, in the range 0 to 23.
-`tm_mday`::  The day of the month, in the range 1 to 31.
-`tm_mon`::   The number of months since January, in the range 0 to 11.
-`tm_year`::  The number of years since 1900.
-`tm_wday`::  The number of days since Sunday, in the range 0 to 6.
-`tm_yday`::  The number of days since January 1, in the range 0 to 365.
-`tm_isdst`:: A flag that indicates wheter daylight saving time is in effect at
-             the time described. The value is positive if daylight saving time
+`tm_sec`::   the number of seconds after the minute, normally in the range 0 to
+             59, but can be up to 60 to allow for leap seconds
+`tm_min`::   the number of minutes after the hour, in the range 0 to 59
+`tm_hour`::  the number of hours past midnight, in the range 0 to 23
+`tm_mday`::  the day of the month, in the range 1 to 31
+`tm_mon`::   the number of months since January, in the range 0 to 11
+`tm_year`::  the number of years since 1900
+`tm_wday`::  the number of days since Sunday, in the range 0 to 6
+`tm_yday`::  the number of days since January 1, in the range 0 to 365
+`tm_isdst`:: a flag that indicates wheter daylight saving time is in effect at
+             the time described; the value is positive if daylight saving time
 	     is in effect, zero if it is not, and negative if the information is
-	     not available.
+	     not available
 
 === Example
 
