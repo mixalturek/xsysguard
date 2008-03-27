@@ -466,6 +466,15 @@ N statgrab:network_io_stats_diff:<interface_name>:oerrors
 N statgrab:network_io_stats_diff:<interface_name>:collisions
 ------------------------------------------------------------
 
+`interface_name`:: the name known to the operating system (eg. on linux it might be eth0)
+`tx`:: the number of bytes transmitted
+`rx`:: the number of bytes received
+`ipackets`:: the number of packets received
+`opackets`:: the number of packets transmitted
+`ierrors`:: the number of receive errors
+`oerrors`:: the number of transmit errors
+`collisions`:: the number of collisions
+
 === Get network interface statistics
 
 http://www.i-scream.org/libstatgrab/docs/sg_get_network_iface_stats.3.html['sg_get_network_iface_stats(3)']
