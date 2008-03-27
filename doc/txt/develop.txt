@@ -6,7 +6,7 @@ xsysguard - Develop
 
 // TODO: - xref:poll[Example: Polling file descriptors]
 
-- xref:xsysguard_header[Header file: xsysguard.h]
+- xref:header[Header file: xsysguard.h]
 
 Compile the examples:
 
@@ -16,7 +16,7 @@ gcc -o my.so my.c -fPIC -shared
 cp my.so ~/.xsysguard/modules/my.so
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Example: Minimal module [[minimal]]
+== Example: Minimal module [["minimal"]]
 
 [c]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,7 +49,7 @@ help(void)
 XSG_MODULE(parse, help, "my module");
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Example: Parse config options [[config]]
+== Example: Parse config options [["config"]]
 
 [c]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -108,7 +108,7 @@ help(void)
 XSG_MODULE(parse, help, "config example");
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Header file: xsysguard.h [[xsysguard_header]]
+== Header file: xsysguard.h [["header"]]
 
 You can download `xsysguard.h` from the Subversion
 http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk/src/include/xsysguard.h?view=markup[repository].
