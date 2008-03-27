@@ -2,7 +2,7 @@ xsysguard - General Info
 ========================
 
 xsysguard is a resource friendly system monitor based on
-http://enlightenment.org[libImlib2].
+http://enlightenment.org[Imlib2].
 
 == Features
 
@@ -42,7 +42,7 @@ http://enlightenment.org[libImlib2].
 
 == Requirements
 
-- xsysguard: http://enlightenment.org[libImlib2]
+- xsysguard: http://enlightenment.org[Imlib2]
 - modules (optional):
   * iw: http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html[libiw]
     (wireless extension library)
@@ -53,6 +53,16 @@ http://enlightenment.org[libImlib2].
 - documentation (svn only):
   * html: http://www.python.org[Python], http://www.gnu.org/software/src-highlite[GNU Source-highlight]
   * manual pages: http://www.python.org[Python], http://xmlsoft.org/XSLT[xsltproc and docbook-xsl]
+
+[sh]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# debian packages required for xsysguard
+sudo apt-get install libimlib2-dev
+# debian packages required for modules (optional)
+sudo apt-get install libstatgrab-dev libsensors-dev libiw-dev
+# debian packages required for documentation (svn only)
+sudo apt-get install python source-highlight xsltproc docbook-xsl
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 == Download
 
