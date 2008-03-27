@@ -79,8 +79,8 @@ make config all install-strip prefix=/opt/xsysguard CC=gcc CFLAGS="-O2 -fomit-fr
 # For GCC 4.2 and newer append "-combine -fwhole-program" to CFLAGS:
 make config all install-strip prefix=/opt/xsysguard CC=gcc-4.2 CFLAGS="-O2 -fomit-frame-pointer -combine -fwhole-program"
 
-# To optimize for size append "-D XSG_LOG_LEVEL_MAX=2 -Os" to CFLAGS:
-make config xsysguardd prefix=/opt/xsysguard CC=gcc-4.2 CFLAGS="-D XSG_LOG_LEVEL_MAX=2 -Os -fomit-frame-pointer -combine -fwhole-program"
+# To optimize xsysguardd for size append "-D XSG_LOG_LEVEL_MAX=2 -Os" to CFLAGS:
+make config xsysguardd modules prefix=/opt/xsysguard CC=gcc-4.2 CFLAGS="-D XSG_LOG_LEVEL_MAX=2 -Os -fomit-frame-pointer -combine -fwhole-program"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 == Run
@@ -125,6 +125,6 @@ for host1 and one window for host2:
 
 [sh]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-xsysguard command=ssh\ host1\ xsysguardd test/daemon command=ssh\ host2\ xsysguardd test/daemon
+xsysguard "command=ssh host1 xsysguardd" test/daemon "command=ssh host2 xsysguardd" test/daemon
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
