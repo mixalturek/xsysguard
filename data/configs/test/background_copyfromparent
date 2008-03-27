@@ -1,0 +1,13 @@
+Set Background CopyFromParent 0
+Set Position 0 2000
+Set Size 100 100
+Set Resource "xsysguard-copyfromparent"
+
+# *FvwmButtons: Geometry 100x100
+# *FvwmButtons: ColorSet 1
+# *FvwmButtons: (Swallow xsysguard-copyfromparent `Exec xsysguard test/background_copyfromparent &`)
+# Module FvwmButtons
+
+AreaChart 1 0 0 100 100 Min 0 Max 1
++ random #00f8
+
