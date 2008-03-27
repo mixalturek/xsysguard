@@ -6,7 +6,7 @@ Sascha Wessel <sawe@users.sf.net>
 NAME
 ----
 
-xsysguard - a resource friendly system monitor based on libImlib2
+xsysguard - a resource friendly system monitor based on Imlib2
 
 
 SYNOPSIS
@@ -48,9 +48,9 @@ OPTIONS
 -N, --nofontconfig::
   Disbale libfontconfig.
 -F, --fontcache::
-  Set imlib's font cache size to N bytes (default: 2097152).
+  Set Imlib2's font cache size to N bytes (default: 2097152).
 -I, --imgcache::
-  Set imlib's image cache size to N bytes (default: 4194304).
+  Set Imlib2's image cache size to N bytes (default: 4194304).
 -c, --color::
   Enable colored logging.
 -t, --time::
