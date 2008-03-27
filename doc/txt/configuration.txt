@@ -16,7 +16,7 @@ xsysguard - Configuration
 
 - xref:rpn[RPN (reverse polish notation) expressions]
 
-== ModuleEnv [[moduleenv]]
+== ModuleEnv [["moduleenv"]]
 
 ------------------------------------------------------------
 ModuleEnv <module>
@@ -32,7 +32,7 @@ See link:modules.html[modules] page for more informations.
 ModuleEnv statgrab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== SetEnv [[setenv]]
+== SetEnv [["setenv"]]
 
 ------------------------------------------------------------
 SetEnv <name> <value> [Overwrite]
@@ -55,7 +55,7 @@ SetEnv "user" "login_name"
 SetEnv "command" "ssh ${user}@${host} xsysguardd" Overwrite
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Set [[set]]
+== Set [["set"]]
 
 Set window properties like name, size, ...
 
@@ -119,7 +119,7 @@ Set Visible 1 1
 Set Mouse 1 Move
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Line [[line]]
+== Line [["line"]]
 
 ------------------------------------------------------------
 Line <x1> <y1> <x2> <y2> <color> [Visible <update> <rpn>]
@@ -140,7 +140,7 @@ Line 100 20 190 40 orange
 Line 200 30 290 30 red
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Rectangle [[rectangle]]
+== Rectangle [["rectangle"]]
 
 ------------------------------------------------------------
 Rectangle <x> <y> <width> <height> <color> [Visible <update> <rpn>] [Angle <angle>] [ColorRange <angle> <count> <distance> <color> ...] [Filled]
@@ -165,7 +165,7 @@ Rectangle 310 10 80 40 blue ColorRange 0 1 20 black Angle 10
 Rectangle 410 10 80 40 red ColorRange 270 3 20 green 20 blue 20 black
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Ellipse [[ellipse]]
+== Ellipse [["ellipse"]]
 
 ------------------------------------------------------------
 Ellipse <xc> <yc> <a> <b> <color> [Visible <update> <rpn>] [Filled]
@@ -190,7 +190,7 @@ Ellipse 145 30 15 15 orange Filled
 Ellipse 190 30 10 20 red
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Polygon [[polygon]]
+== Polygon [["polygon"]]
 
 ------------------------------------------------------------
 Polygon <color> <count> <x> <y> <x> <y> ... [Visible <update> <rpn>] [Filled|Closed]
@@ -211,7 +211,7 @@ Polygon red 3 100 10 190 15 130 50 Closed
 Polygon orange 3 230 50 290 10 200 35 Filled
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Image [[image]]
+== Image [["image"]]
 
 ------------------------------------------------------------
 Image <update> <x> <y> <width> <height> <printformat> [Visible <update> <rpn>] [Angle <angle>]
@@ -235,7 +235,7 @@ Image 0 160 10 48 20 "test/%s.png"
 + "image_xorg"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== BarChart [[barchart]]
+== BarChart [["barchart"]]
 
 ------------------------------------------------------------
 BarChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Mask <mask_image>]
@@ -276,7 +276,7 @@ BarChart 1 240 20 60 20 Min 0 Max 2 Angle 90
 + random lightblue ColorRange 0 1 60 darkblue AddPrev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== LineChart [[linechart]]
+== LineChart [["linechart"]]
 
 ------------------------------------------------------------
 LineChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Background <image>]
@@ -303,7 +303,7 @@ LineChart 1 160 5 80 50 Angle 25
 + random red
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== AreaChart [[areachart]]
+== AreaChart [["areachart"]]
 
 ------------------------------------------------------------
 AreaChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Background <image>]
@@ -338,7 +338,7 @@ AreaChart 1 330 10 60 40 Min 0 Max 1
 + statgrab:cpu_stats_diff:swap,statgrab:cpu_stats_diff:total,DIV lightgreen AddPrev
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Text [[text]]
+== Text [["text"]]
 
 ------------------------------------------------------------
 Text <update> <x> <y> <width> <height> <color> <font> <printformat> [Visible <update> <rpn>] [Angle <angle>] [Alignment <alignment>] [TabWidth <width>]
@@ -379,7 +379,7 @@ Text 1 490 10 120 50 darkred "VeraBd/9" "USER:\t%.1f%%\nKERNEL:\t%.1f%%\nNICE:\t
 + statgrab:cpu_stats_diff:nice,   statgrab:cpu_stats_diff:total, DIV, 100, MUL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== RPN (reverse polish notation) expressions [[rpn]]
+== RPN (reverse polish notation) expressions [["rpn"]]
 
 An rpn expression is a series of values and operators separated by commas.
 
