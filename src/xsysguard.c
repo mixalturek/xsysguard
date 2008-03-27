@@ -440,8 +440,8 @@ usage(bool enable_fontconfig)
 		"  -i, --interval=N   Set main interval to N milliseconds (default: %"PRIu64")\n"
 		"  -n, --num=N        Exit after N tick's\n"
 		"  -N, --nofontconfig Disable libfontconfig\n"
-		"  -F, --fontcache=N  Set imlib's font cache size to N bytes (default: %d)\n"
-		"  -I, --imgcache=N   Set imlib's image cache size to N bytes (default: %d)\n"
+		"  -F, --fontcache=N  Set Imlib2's font cache size to N bytes (default: %d)\n"
+		"  -I, --imgcache=N   Set Imlib2's image cache size to N bytes (default: %d)\n"
 		"  -c, --color        Enable colored logging\n"
 		"  -t, --time         Add current time to each log line\n"
 		"  -l, --log=N        Set loglevel to N: ",
