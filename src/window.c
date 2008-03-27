@@ -419,7 +419,6 @@ grab_background(xsg_window_t *window, Window src_window)
 	Imlib_Image background;
 	int status;
 	int x, y;
-	XEvent event;
 	Window src;
 	XSetWindowAttributes attrs;
 
@@ -452,18 +451,12 @@ grab_background(xsg_window_t *window, Window src_window)
 	imlib_context_set_visual(window->visual);
 	imlib_context_set_colormap(window->colormap);
 
-	XGrabServer(display);
 	XMapRaised(display, src);
 	XSync(display, False);
-
-	do {
-		XWindowEvent(display, src, ExposureMask, &event);
-	} while (event.type != Expose);
 
 	background = imlib_create_image_from_drawable(0, 0, 0, window->width,
 			window->height, 0);
 
-	XUngrabServer(display);
 	XDestroyWindow(display, src);
 
 	if (background) {
