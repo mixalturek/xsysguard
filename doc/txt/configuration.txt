@@ -347,7 +347,7 @@ Text <update> <x> <y> <width> <height> <color> <font> <printformat> [Visible <up
 
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
-`font`:: an imlib2 font name: `name/size`
+`font`:: an Imlib2 font name: `name/size`
 `printformat`:: a 'printf(3)' format string
 `rpn`:: see xref:rpn[RPN expressions]
 `angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
