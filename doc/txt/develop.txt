@@ -6,7 +6,7 @@ xsysguard - Develop
 
 // TODO: - xref:poll[Example: Polling file descriptors]
 
-- xref:header[Header file: xsysguard.h]
+- xref:xsysguard_h[Header file: xsysguard.h]
 
 Compile the examples:
 
@@ -108,7 +108,7 @@ help(void)
 XSG_MODULE(parse, help, "config example");
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-== Header file: xsysguard.h [["header"]]
+== Header file: xsysguard.h [["xsysguard_h"]]
 
 You can download `xsysguard.h` from the Subversion
 http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk/src/include/xsysguard.h?view=markup[repository].
