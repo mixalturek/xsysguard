@@ -498,7 +498,24 @@ N statgrab:process_count:stopped
 N statgrab:process_count:zombie 
 ------------------------------------------------------------
 
-`sortby`:: `name`, `pid`, `uid`, `gid`, `size`, `res`, `cpu` or `time`
+`sortby`:: one of `name`, `pid`, `uid`, `gid`, `size`, `res`, `cpu` or `time`
+`process_name`:: the name of the command that was run
+`proctitle`:: the command line of the process; take note - this can be
+	modified by the process, so isn't guaranteed to be the original
+	command line
+`pid`:: the process ID
+`parent`:: the parent process ID
+`pgid`:: the process ID of the process group leader
+`uid`:: the UID the process is running as
+`euid`:: the effective UID the process is running as
+`gid`:: the GID the process is running as
+`egid`:: the effective GID the process is running as
+`proc_size`:: the size of the process in bytes
+`proc_resident`:: the size of the process that's resident in memory
+`time_spent`:: the number of seconds the process has been running
+`cpu_percent`:: the current percentage of CPU the process is using
+`nice`:: the nice value of the process
+`state`:: the current state of the process
 
 === ModuleEnv variables
 
