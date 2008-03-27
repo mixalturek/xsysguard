@@ -28,7 +28,7 @@ xref:uname[uname]::		get name and information about current kernel
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== daemon - execute xsysguardd processes [[daemon]]
+== daemon - execute xsysguardd processes [["daemon"]]
 
 ------------------------------------------------------------
 N daemon:<command>:number:<rpn>
@@ -64,7 +64,7 @@ SetEnv "remotehost" "ssh login@server xsysguardd" Overwrite
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== env - get environment variables [[env]]
+== env - get environment variables [["env"]]
 
 ------------------------------------------------------------
 S env:<name>:read:all
@@ -91,7 +91,7 @@ S env:<name>:readline:<number>:igrep:<pattern>:<index>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== exec - execute processes and read from their stdout [[exec]]
+== exec - execute processes and read from their stdout [["exec"]]
 
 ------------------------------------------------------------
 S exec:<command>:read:all
@@ -125,7 +125,7 @@ S exec:<command>:readline:<number>:igrep:<pattern>:<index>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== file - read regular files [[file]]
+== file - read regular files [["file"]]
 
 ------------------------------------------------------------
 N file:<filename>:exists
@@ -171,7 +171,7 @@ SetEnv "idle"	"cpu %*d %*d %*d %d"	Overwrite
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== inotail - tail files in follow mode (`tail -F`) using inotify [[inotail]]
+== inotail - tail files in follow mode (`tail -F`) using inotify [["inotail"]]
 
 // From inotail(1):
 Inotail module is a replacement for the xref:tail[tail] module. It makes use of
@@ -208,7 +208,7 @@ S inotail:<filename>:readline:<number>:igrep:<pattern>:<index>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== iw - libiw (wireless extension library) [[iw]]
+== iw - libiw (wireless extension library) [["iw"]]
 
 http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html[Library Homepage]
 
@@ -259,7 +259,7 @@ N iw:<interface>:range:max_quality:quality
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== number - get a fixed number [[number]]
+== number - get a fixed number [["number"]]
 
 ------------------------------------------------------------
 N number:<number>
@@ -268,7 +268,7 @@ N number:<number>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== random - random number generator [[random]]
+== random - random number generator [["random"]]
 
 ------------------------------------------------------------
 N random
@@ -277,7 +277,7 @@ N random
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== sensors - libsensors (lm-sensors - Linux hardware monitoring) [[sensors]]
+== sensors - libsensors (lm-sensors - Linux hardware monitoring) [["sensors"]]
 
 http://www.lm-sensors.org[Library Homepage]
 
@@ -295,7 +295,7 @@ N sensors:<chip>:<sensor>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== statgrab - libstatgrab (get system statistics) [[statgrab]]
+== statgrab - libstatgrab (get system statistics) [["statgrab"]]
 
 http://www.i-scream.org/libstatgrab[Library Homepage]
 
@@ -556,7 +556,7 @@ N statgrab:process_count:zombie
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== string - get a fixed string [[string]]
+== string - get a fixed string [["string"]]
 
 ------------------------------------------------------------
 S string:<string>
@@ -565,7 +565,7 @@ S string:<string>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== tail - tail files in follow mode (`tail -F`) [[tail]]
+== tail - tail files in follow mode (`tail -F`) [["tail"]]
 
 Poll files every tick.
 
@@ -595,7 +595,7 @@ S tail:<filename>:readline:<number>:igrep:<pattern>:<index>
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== tick - get current tick [[tick]]
+== tick - get current tick [["tick"]]
 
 ------------------------------------------------------------
 N tick
@@ -604,7 +604,7 @@ N tick
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== time - date and time functions [[time]]
+== time - date and time functions [["time"]]
 
 ------------------------------------------------------------
 S time:{gm|local}:strftime:<timeformat>
@@ -664,7 +664,7 @@ Broken-down time representation:
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-== uname - get name and information about current kernel
+== uname - get name and information about current kernel [["uname"]]
 
 ------------------------------------------------------------
 S uname:sysname
