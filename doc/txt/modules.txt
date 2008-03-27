@@ -415,6 +415,23 @@ N statgrab:fs_stats:<device_name|mnt_point>:used_blocks
 N statgrab:fs_stats:<device_name|mnt_point>:avail_blocks 
 ------------------------------------------------------------
 
+`device_name`:: the name known to the operating system (eg. on linux it might be hda)
+`fs_type`:: the type of the filesystem
+`mnt_point`:: the mount point of the file system
+`size`:: the size, in bytes, of the file system
+`used`:: the amount of space, in bytes, used on the filesystem
+`avail`:: the amount of space, in bytes, available on the filesystem
+`total_inodes`:: the total number of inodes in the filesystem
+`used_inodes`:: the number of used inodes in the filesystem
+`free_inodes`:: the number of free inodes in the filesystem
+`avail_inodes`:: the number of free inodes available to non-privileged processes
+`io_size`:: a suggested optimal block size for IO operations
+`block_size`:: how big blocks actually are on the underlying filesystem
+`total_blocks`:: the total number of blocks in the filesystem
+`free_blocks`:: the number of free blocks in the filesystem
+`used_blocks`:: the number of used blocks in the filesystem
+`avail_blocks`:: the number of free blocks available to non-privileged processes
+
 === Get disk io statistics
 
 http://www.i-scream.org/libstatgrab/docs/sg_get_disk_io_stats.3.html['sg_get_disk_io_stats(3)']
