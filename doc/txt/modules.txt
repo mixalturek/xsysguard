@@ -82,6 +82,11 @@ S env:<name>:readline:<number>:igrep:<pattern>:<index>
 ------------------------------------------------------------
 
 `name`:: environment variable name
+`format`:: a 'scanf(3)' format string
+`pattern`:: a 'regex(7)' extended regular expression
+`index`:: a negative number (matching line/buffer), zero (matching string) or
+	a positive number (matching substring `index`)
+`number`:: zero (each line) or a positive number (line number `number`)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +109,11 @@ S exec:<command>:readline:<number>:igrep:<pattern>:<index>
 ------------------------------------------------------------
 
 `command`:: command executed by `/bin/sh -c`
+`format`:: a 'scanf(3)' format string
+`pattern`:: a 'regex(7)' extended regular expression
+`index`:: a negative number (matching line/buffer), zero (matching string) or
+	a positive number (matching substring `index`)
+`number`:: zero (each line) or a positive number (line number `number`)
 
 === Example
 
@@ -136,6 +146,12 @@ N file:<filename>:readline:<number>:scanf:counter:<format>
 S file:<filename>:readline:<number>:grep:<pattern>:<index>
 S file:<filename>:readline:<number>:igrep:<pattern>:<index>
 ------------------------------------------------------------
+
+`format`:: a 'scanf(3)' format string
+`pattern`:: a 'regex(7)' extended regular expression
+`index`:: a negative number (matching line/buffer), zero (matching string) or
+	a positive number (matching substring `index`)
+`number`:: zero (each line) or a positive number (line number `number`)
 
 === Example
 
@@ -182,6 +198,12 @@ N inotail:<filename>:readline:<number>:scanf:counter:<format>
 S inotail:<filename>:readline:<number>:grep:<pattern>:<index>
 S inotail:<filename>:readline:<number>:igrep:<pattern>:<index>
 ------------------------------------------------------------
+
+`format`:: a 'scanf(3)' format string
+`pattern`:: a 'regex(7)' extended regular expression
+`index`:: a negative number (matching line/buffer), zero (matching string) or
+	a positive number (matching substring `index`)
+`number`:: zero (each line) or a positive number (line number `number`)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -520,6 +542,12 @@ N tail:<filename>:readline:<number>:scanf:counter:<format>
 S tail:<filename>:readline:<number>:grep:<pattern>:<index>
 S tail:<filename>:readline:<number>:igrep:<pattern>:<index>
 ------------------------------------------------------------
+
+`format`:: a 'scanf(3)' format string
+`pattern`:: a 'regex(7)' extended regular expression
+`index`:: a negative number (matching line/buffer), zero (matching string) or
+	a positive number (matching substring `index`)
+`number`:: zero (each line) or a positive number (line number `number`)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
