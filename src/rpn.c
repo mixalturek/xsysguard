@@ -32,23 +32,27 @@
 
 /******************************************************************************/
 
+typedef struct _heap_t {
+	uint32_t id;
+	double num;
+	xsg_string_t *str;
+} heap_t;
+
 struct _xsg_rpn_t {
 	xsg_list_t *op_list;
 	xsg_string_t *stack;	/* S=string, N=number, X=both */
-	double num_heap;	/* for LOAD and STORE */
-	xsg_string_t *str_heap; /* for LOAD and STORE */
+	xsg_list_t *heap_list;
 };
 
 typedef struct _op_t {
 	void (*op)(void);
-	double (*num_func)(void *arg);
-	const char *(*str_func)(void *arg);
+	char store;		/* S=string, N=number, X=both */
+	double (*num_load)(void *arg);
+	const char *(*str_load)(void *arg);
 	void *arg;
 } op_t;
 
 /******************************************************************************/
-
-static xsg_list_t *rpn_list = NULL;
 
 static double *num_stack = NULL;
 static xsg_string_t **str_stack = NULL;
@@ -56,44 +60,47 @@ static xsg_string_t **str_stack = NULL;
 static unsigned stack_index;
 static unsigned max_stack_size = 0;
 
-static xsg_rpn_t *current_rpn = NULL; /* for LOAD and STORE */
-
 /******************************************************************************/
 
-static void
-op_load(void)
+static heap_t *
+find_heap(xsg_rpn_t *rpn, uint32_t id)
 {
-	num_stack[stack_index + 1] = current_rpn->num_heap;
-	xsg_string_assign(str_stack[stack_index + 1], current_rpn->str_heap->str);
-	stack_index += 1;
+	xsg_list_t *l;
+	heap_t *heap;
+
+	for (l = rpn->heap_list; l; l = l->next) {
+		heap = l->data;
+
+		if (heap->id == id) {
+			return heap;
+		}
+	}
+
+	heap = xsg_new(heap_t, 1);
+
+	heap->id = id;
+	heap->num = DNAN;
+	heap->str = xsg_string_new(NULL);
+
+	rpn->heap_list = xsg_list_prepend(rpn->heap_list, (void *) heap);
+
+	return heap;
 }
 
-static void
-op_store(void)
+static double
+load_number(void *arg)
 {
-	if (num_stack[stack_index - 1] != 0.0) {
-		current_rpn->num_heap = num_stack[stack_index];
-		xsg_string_assign(current_rpn->str_heap, str_stack[stack_index]->str);
-	}
-	stack_index -= 2;
+	heap_t *heap = (heap_t *) arg;
+
+	return heap->num;
 }
 
-static void
-op_store_str(void)
+static const char *
+load_string(void *arg)
 {
-	if (num_stack[stack_index - 1] != 0.0) {
-		xsg_string_assign(current_rpn->str_heap, str_stack[stack_index]->str);
-	}
-	stack_index -= 2;
-}
+	heap_t *heap = (heap_t *) arg;
 
-static void
-op_store_num(void)
-{
-	if (num_stack[stack_index - 1] != 0.0) {
-		current_rpn->num_heap = num_stack[stack_index];
-	}
-	stack_index -= 2;
+	return heap->str->str;
 }
 
 /******************************************************************************/
@@ -744,8 +751,7 @@ op_strreverse(void)
 static double
 get_number(void *arg)
 {
-	double *d = (double *) arg;
-	return *d;
+	return *(double *) arg;
 }
 
 static const char *
@@ -797,12 +803,10 @@ void
 xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 {
 	rpn[0] = xsg_new(xsg_rpn_t, 1);
+
 	rpn[0]->op_list = NULL;
 	rpn[0]->stack = xsg_string_new(NULL);
-	rpn[0]->str_heap = xsg_string_new(NULL);
-	rpn[0]->num_heap = DNAN;
-
-	rpn_list = xsg_list_append(rpn_list, rpn[0]);
+	rpn[0]->heap_list = NULL;
 
 	do {
 		double number;
@@ -814,30 +818,35 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		if (xsg_conf_find_number(&number)) {
 			double *numberp = xsg_new(double, 1);
 			*numberp = number;
-			op->num_func = get_number;
+			op->num_load = get_number;
 			op->arg = (void *) numberp;
 			PUSH("N");
 		} else if (xsg_conf_find_string(&string)) {
-			op->str_func = get_string;
+			op->str_load = get_string;
 			op->arg = (void *) string;
 			PUSH("S");
 		} else if (xsg_conf_find_command("LOAD")) {
-			op->op = op_load;
+			heap_t *heap = find_heap(*rpn, xsg_conf_read_uint());
+			op->num_load = load_number;
+			op->str_load = load_string;
+			op->arg = (void *) heap;
 			PUSH("X");
 		} else if (xsg_conf_find_command("STORE")) {
+			heap_t *heap = find_heap(*rpn, xsg_conf_read_uint());
 			/* NOTE: "NX" needs to be first!
 			 * ("NN" and "NS" will match "NX" too) */
 			if (pop(rpn[0]->stack, "NX")) {
-				op->op = op_store;
+				op->store = 'X';
 			} else if (pop(rpn[0]->stack, "NN")) {
-				op->op = op_store_num;
+				op->store = 'N';
 			} else if (pop(rpn[0]->stack, "NS")) {
-				op->op = op_store_str;
+				op->store = 'S';
 			} else {
 				xsg_conf_error("RPN: STORE: stack was '%s', "
 						"but 'NN' or 'NS' expected",
 						rpn[0]->stack->str);
 			}
+			op->arg = (void *) heap;
 		} else if (xsg_conf_find_command("LT")) {
 			POP("NN", "LT");
 			op->op = op_lt;
@@ -1172,8 +1181,8 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"or STRREVERSE expected");
 			}
 
-			op->num_func = num;
-			op->str_func = str;
+			op->num_load = num;
+			op->str_load = str;
 			op->arg = arg;
 
 			if (num != NULL && str != NULL) {
@@ -1193,8 +1202,9 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			str_stack = xsg_renew(xsg_string_t *, str_stack,
 					rpn[0]->stack->len);
 
-			for (j = max_stack_size; j < rpn[0]->stack->len; j++)
+			for (j = max_stack_size; j < rpn[0]->stack->len; j++) {
 				str_stack[j] = xsg_string_new(NULL);
+			}
 
 			max_stack_size = rpn[0]->stack->len;
 		}
@@ -1204,7 +1214,11 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 	} while (xsg_conf_find_comma());
 
 	if (rpn[0]->stack->len < 1) {
-		xsg_conf_error("RPN: no element on the stack");
+		xsg_conf_error("RPN: no element left on the stack");
+	}
+
+	if (rpn[0]->stack->len > 1) {
+		xsg_conf_error("RPN: more than one element left on the stack");
 	}
 }
 
@@ -1217,20 +1231,18 @@ calc(xsg_rpn_t *rpn)
 
 	stack_index = -1;
 
-	current_rpn = rpn;
-
 	for (l = rpn->op_list; l; l = l->next) {
 		op_t *op = (op_t *) l->data;
 
 		if (op->op) {
 			op->op();
-		} else {
+		} else if (op->num_load || op->str_load) {
 			stack_index++;
-			if (op->num_func) {
-				num_stack[stack_index] = op->num_func(op->arg);
+			if (op->num_load) {
+				num_stack[stack_index] = op->num_load(op->arg);
 			}
-			if (op->str_func) {
-				const char *s = op->str_func(op->arg);
+			if (op->str_load) {
+				const char *s = op->str_load(op->arg);
 
 				if (s == NULL) {
 					xsg_string_truncate(str_stack[stack_index], 0);
@@ -1238,6 +1250,20 @@ calc(xsg_rpn_t *rpn)
 					xsg_string_assign(str_stack[stack_index], s);
 				}
 			}
+		} else if (op->store != '\0') {
+			heap_t *heap = (heap_t *) op->arg;
+
+			if (op->store == 'X' || op->store == 'N') {
+				if (num_stack[stack_index - 1] != 0.0) {
+					heap->num = num_stack[stack_index];
+				}
+			}
+			if (op->store == 'X' || op->store == 'S') {
+				if (num_stack[stack_index - 1] != 0.0) {
+					xsg_string_assign(heap->str, str_stack[stack_index]->str);
+				}
+			}
+			stack_index -= 2;
 		}
 	}
 }
