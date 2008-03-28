@@ -434,6 +434,7 @@ usage(bool enable_fontconfig)
 		"Options:\n"
 		"  -h, --help         Print this help message to stdout\n"
 		"  -H, --mhelp=MODULE Print help message for MODULE to stdout\n"
+		"  -L, --license      Print license to stdout\n"
 		"  -m, --modules      Print a list of all available modules to stdout\n"
 		"  -f, --fonts        Print a list of all available fonts to stdout\n"
 		"  -d, --fontdirs     Print a list of all font dirs to stdout (libfontconfig)\n"
@@ -527,6 +528,20 @@ usage(bool enable_fontconfig)
 }
 
 static void
+license(void)
+{
+	printf( "xsysguard " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
+		"  This program is free software; you can redistribute it and/or modify\n"
+		"  it under the terms of the GNU General Public License as published by\n"
+		"  the Free Software Foundation; either version 2 of the License, or\n"
+		"  (at your option) any later version.\n\n"
+		"  This program is distributed in the hope that it will be useful,\n"
+		"  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		"  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+		"  GNU General Public License for more details.\n\n");
+}
+
+static void
 list_font_dirs(void)
 {
 	char **pathv;
@@ -555,6 +570,7 @@ main(int argc, char **argv)
 	bool list_dirs = FALSE;
 	char *mhelp = NULL;
 	bool print_usage = FALSE;
+	bool print_license = FALSE;
 	uint64_t interval = DEFAULT_INTERVAL;
 	uint64_t num = 0;
 	int font_cache_size = DEFAULT_FONT_CACHE_SIZE;
@@ -564,6 +580,7 @@ main(int argc, char **argv)
 	struct option long_options[] = {
 		{ "help",         0, NULL, 'h' },
 		{ "mhelp",        1, NULL, 'H' },
+		{ "license",      0, NULL, 'L' },
 		{ "interval",     1, NULL, 'i' },
 		{ "num",          1, NULL, 'n' },
 		{ "nofontconfig", 0, NULL, 'N' },
@@ -582,7 +599,7 @@ main(int argc, char **argv)
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hH:i:n:NF:I:l:mfdct",
+		option = getopt_long(argc, argv, "hH:Li:n:NF:I:l:mfdct",
 				long_options, &option_index);
 
 		if (option == EOF) {
@@ -641,9 +658,17 @@ main(int argc, char **argv)
 		case '?':
 			print_usage = TRUE;
 			break;
+		case 'L':
+			print_license = TRUE;
+			break;
 		default:
 			break;
 		}
+	}
+
+	if (print_license) {
+		license();
+		exit(EXIT_SUCCESS);
 	}
 
 	if (print_usage) {

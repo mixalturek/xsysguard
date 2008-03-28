@@ -316,6 +316,7 @@ usage(void)
 		"Options:\n"
 		"  -h, --help          Print this help message to stdout\n"
 		"  -H, --mhelp=MODULE  Print help message for MODULE to stdout\n"
+		"  -L, --license       Print license to stdout\n"
 		"  -m, --modules       Print a list of all available modules to stdout\n"
 		"  -s, --stderr        Print log messages to stderr\n"
 		"  -c, --color         Enable colored logging\n"
@@ -354,6 +355,20 @@ usage(void)
 #endif
 }
 
+static void
+license(void)
+{
+	printf( "xsysguardd " XSYSGUARD_VERSION " Copyright 2005-2008 by Sascha Wessel <sawe@users.sf.net>\n\n"
+		"  This program is free software; you can redistribute it and/or modify\n"
+		"  it under the terms of the GNU General Public License as published by\n"
+		"  the Free Software Foundation; either version 2 of the License, or\n"
+		"  (at your option) any later version.\n\n"
+		"  This program is distributed in the hope that it will be useful,\n"
+		"  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		"  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+		"  GNU General Public License for more details.\n\n");
+}
+
 /******************************************************************************
  *
  * main
@@ -365,12 +380,14 @@ main(int argc, char **argv)
 {
 	bool list_modules = FALSE;
 	bool print_usage = FALSE;
+	bool print_license = FALSE;
 	bool log_level_overwrite = FALSE;
 	char *mhelp = NULL;
 
 	struct option long_options[] = {
 		{ "help",    0, NULL, 'h' },
 		{ "mhelp",   1, NULL, 'H' },
+		{ "license", 0, NULL, 'L' },
 		{ "log",     1, NULL, 'l' },
 		{ "color",   0, NULL, 'c' },
 		{ "time",    0, NULL, 't' },
@@ -391,7 +408,7 @@ main(int argc, char **argv)
 	while (1) {
 		int option, option_index = 0;
 
-		option = getopt_long(argc, argv, "hH:l:csmt", long_options,
+		option = getopt_long(argc, argv, "hH:Ll:csmt", long_options,
 				&option_index);
 
 		if (option == EOF)
@@ -429,6 +446,9 @@ main(int argc, char **argv)
 		case '?':
 			print_usage = TRUE;
 			log_to_stderr = TRUE;
+		case 'L':
+			print_license = TRUE;
+			log_to_stderr = TRUE;
 			break;
 		default:
 			break;
@@ -455,6 +475,11 @@ main(int argc, char **argv)
 			printf("%s - %s\n", mhelp, info);
 		}
 
+		exit(EXIT_SUCCESS);
+	}
+
+	if (print_license) {
+		license();
 		exit(EXIT_SUCCESS);
 	}
 
