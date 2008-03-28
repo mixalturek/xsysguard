@@ -517,6 +517,12 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 			}
 		}
 	}
+
+	if (linechart->min == linechart->max) {
+		/* we want one nice centered line */
+		linechart->min = linechart->min - 0.1;
+		linechart->max = linechart->max + 0.1;
+	}
 }
 
 static void
