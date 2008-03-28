@@ -1,0 +1,58 @@
+Set Background Color black
+Set Size 360 360
+
+SetEnv font VeraBd/9
+
+LineChart 1 0 0 360 40
++ sensors:*:in0 blue
+Text 1 0 0 120 40 white ${font} "in0:\t%02.2fV" TabWidth 60 Alignment CenterLeft
++ sensors:*:in0
+
+Rectangle 0 40 400 40 #111 Filled
+
+LineChart 1 0 40 360 40
++ sensors:*:in1 blue
+Text 1 0 40 120 40 white ${font} "in1:\t%02.2fV" TabWidth 60 Alignment CenterLeft
++ sensors:*:in1
+
+LineChart 1 0 80 360 40
++ sensors:*:in2 blue
+Text 1 0 80 120 40 white ${font} "in2:\t%02.2fV" TabWidth 60 Alignment CenterLeft
++ sensors:*:in2
+
+Rectangle 0 120 400 40 #111 Filled
+
+LineChart 1 0 120 360 40
++ sensors:*:in3 blue
+Text 1 0 120 120 40 white ${font} "in3:\t%02.2fV" TabWidth 60 Alignment CenterLeft
++ sensors:*:in3
+
+LineChart 1 0 160 360 40
++ sensors:*:in4 blue
+Text 1 0 160 120 40 white ${font} "in4:\t%02.2fV" TabWidth 60 Alignment CenterLeft
++ sensors:*:in4
+
+Rectangle 0 200 400 40 #111 Filled
+
+LineChart 1 0 200 360 40
++ sensors:*:fan1 blue
+Text 1 0 200 120 40 white ${font} "fan1:\t%04.0f" TabWidth 60 Alignment CenterLeft
++ sensors:*:fan1
+
+LineChart 1 0 240 360 40
++ sensors:*:fan2 blue
+Text 1 0 240 120 40 white ${font} "fan2:\t%04.0f" TabWidth 60 Alignment CenterLeft
++ sensors:*:fan2
+
+Rectangle 0 280 400 40 #111 Filled
+
+LineChart 1 0 280 360 40
++ sensors:*:temp1 blue
+Text 1 0 280 120 40 white ${font} "temp1:\t%02.1f" TabWidth 60 Alignment CenterLeft
++ sensors:*:temp1
+
+LineChart 1 0 320 360 40
++ sensors:*:temp2 blue
+Text 1 0 320 120 40 white ${font} "temp2:\t%02.1f" TabWidth 60 Alignment CenterLeft
++ sensors:*:temp2
+
