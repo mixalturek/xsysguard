@@ -181,7 +181,7 @@ xsg_var_flush_dirty(void)
 void
 xsg_vard_parse(uint8_t type, uint32_t remote_id, uint64_t update)
 {
-	xsg_rpn_t *rpn;
+	xsg_rpn_t *rpn = NULL;
 	xsg_var_t *var;
 
 	var = xsg_new(xsg_var_t, 1);
