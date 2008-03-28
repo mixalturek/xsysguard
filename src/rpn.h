@@ -27,8 +27,11 @@
 
 /******************************************************************************/
 
-extern void
-xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn);
+extern xsg_rpn_t *
+xsg_rpn_parse_num(uint64_t update, xsg_var_t *var);
+
+extern xsg_rpn_t *
+xsg_rpn_parse_str(uint64_t update, xsg_var_t *var);
 
 extern double
 xsg_rpn_get_num(xsg_rpn_t *rpn);

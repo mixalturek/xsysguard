@@ -32,12 +32,12 @@ typedef struct _var_t {
 	xsg_var_t *var;
 
 	enum {
-		VAR_INT     = 1,
-		VAR_UINT    = 2,
-		VAR_DOUBLE  = 3,
-		VAR_CHAR    = 4,
-		VAR_STRING  = 5,
-		VAR_POINTER = 6,
+		VAR_INT     = 1, /* num */
+		VAR_UINT    = 2, /* num */
+		VAR_DOUBLE  = 3, /* num */
+		VAR_CHAR    = 4, /* num */
+		VAR_STRING  = 5, /* str */
+		VAR_POINTER = 6, /* num */
 	} type;
 
 	double num;
@@ -254,6 +254,20 @@ xsg_printf_new(const char *format)
 	return p;
 }
 
+bool
+xsg_printf_next_var_is_string(xsg_printf_t *p)
+{
+	var_t *var;
+
+	if (p->next_var == NULL) {
+		xsg_conf_error("printf: no more variables expected");
+	}
+
+	var = (var_t *) p->next_var->data;
+
+	return (var->type == VAR_STRING);
+}
+
 void
 xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v)
 {
@@ -263,7 +277,7 @@ xsg_printf_add_var(xsg_printf_t *p, xsg_var_t *v)
 		xsg_conf_error("printf: no more variables expected");
 	}
 
-	var = p->next_var->data;
+	var = (var_t *) p->next_var->data;
 
 	var->var = v;
 

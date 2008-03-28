@@ -114,17 +114,6 @@ scroll_image(xsg_widget_t *widget)
 
 /******************************************************************************/
 
-static void
-parse_var(xsg_widget_t *widget, xsg_var_t *var)
-{
-	image_t *image;
-
-	image = widget->data;
-
-	xsg_printf_add_var(image->print, var);
-	xsg_conf_read_newline();
-}
-
 void
 xsg_widget_image_parse(xsg_window_t *window)
 {
@@ -153,7 +142,7 @@ xsg_widget_image_parse(xsg_window_t *window)
 	while (!xsg_conf_find_newline()) {
 		if (xsg_conf_find_command("Visible")) {
 			widget->visible_update = xsg_conf_read_update();
-			widget->visible_var = xsg_var_parse(
+			widget->visible_var = xsg_var_parse_num(
 					widget->visible_update, window, widget);
 		} else if (xsg_conf_find_command("Angle")) {
 			angle = xsg_conf_read_double();
@@ -168,7 +157,16 @@ xsg_widget_image_parse(xsg_window_t *window)
 	}
 
 	while (xsg_conf_find_command("+")) {
-		parse_var(widget, xsg_var_parse(widget->update, window, widget));
+		xsg_var_t *var;
+
+		if (xsg_printf_next_var_is_string(image->print)) {
+			var = xsg_var_parse_str(widget->update, window, widget);
+		} else {
+			var = xsg_var_parse_num(widget->update, window, widget);
+		}
+
+		xsg_printf_add_var(image->print, var);
+		xsg_conf_read_newline();
 	}
 }
 

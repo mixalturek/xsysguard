@@ -186,7 +186,13 @@ xsg_vard_parse(uint8_t type, uint32_t remote_id, uint64_t update)
 
 	var = xsg_new(xsg_var_t, 1);
 
-	xsg_rpn_parse(update, var, &rpn);
+	if (type == STR) {
+		rpn = xsg_rpn_parse_str(update, var);
+	} else if (type == NUM) {
+		rpn = xsg_rpn_parse_num(update, var);
+	} else {
+		xsg_error("invalid var type");
+	}
 
 	var->update = (update == 0) ? UINT64_MAX : update;
 	var->remote_id = remote_id;

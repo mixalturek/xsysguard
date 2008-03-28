@@ -354,7 +354,7 @@ void
 xsg_window_parse_visible(xsg_window_t *window)
 {
 	window->visible_update = xsg_conf_read_uint();
-	window->visible_var = xsg_var_parse(window->visible_update, window,
+	window->visible_var = xsg_var_parse_num(window->visible_update, window,
 			NULL);
 	xsg_conf_read_newline();
 }

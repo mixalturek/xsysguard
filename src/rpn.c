@@ -792,21 +792,23 @@ pop(xsg_string_t *stack, const char *str)
 
 /******************************************************************************/
 
-#define PUSH(s) xsg_string_append(rpn[0]->stack, s)
+#define PUSH(s) xsg_string_append(rpn->stack, s)
 #define POP(s, log) \
-	if (!pop(rpn[0]->stack, s)) { \
+	if (!pop(rpn->stack, s)) { \
 		xsg_conf_error("RPN: %s: stack was '%s', but '%s' expected", \
-				log, rpn[0]->stack->str, s); \
+				log, rpn->stack->str, s); \
 	}
 
-void
-xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
+static xsg_rpn_t *
+parse(uint64_t update, xsg_var_t *var)
 {
-	rpn[0] = xsg_new(xsg_rpn_t, 1);
+	xsg_rpn_t *rpn;
 
-	rpn[0]->op_list = NULL;
-	rpn[0]->stack = xsg_string_new(NULL);
-	rpn[0]->heap_list = NULL;
+	rpn = xsg_new(xsg_rpn_t, 1);
+
+	rpn->op_list = NULL;
+	rpn->stack = xsg_string_new(NULL);
+	rpn->heap_list = NULL;
 
 	do {
 		double number;
@@ -826,25 +828,25 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			op->arg = (void *) string;
 			PUSH("S");
 		} else if (xsg_conf_find_command("LOAD")) {
-			heap_t *heap = find_heap(*rpn, xsg_conf_read_uint());
+			heap_t *heap = find_heap(rpn, xsg_conf_read_uint());
 			op->num_load = load_number;
 			op->str_load = load_string;
 			op->arg = (void *) heap;
 			PUSH("X");
 		} else if (xsg_conf_find_command("STORE")) {
-			heap_t *heap = find_heap(*rpn, xsg_conf_read_uint());
+			heap_t *heap = find_heap(rpn, xsg_conf_read_uint());
 			/* NOTE: "NX" needs to be first!
 			 * ("NN" and "NS" will match "NX" too) */
-			if (pop(rpn[0]->stack, "NX")) {
+			if (pop(rpn->stack, "NX")) {
 				op->store = 'X';
-			} else if (pop(rpn[0]->stack, "NN")) {
+			} else if (pop(rpn->stack, "NN")) {
 				op->store = 'N';
-			} else if (pop(rpn[0]->stack, "NS")) {
+			} else if (pop(rpn->stack, "NS")) {
 				op->store = 'S';
 			} else {
 				xsg_conf_error("RPN: STORE: stack was '%s', "
 						"but 'NN' or 'NS' expected",
-						rpn[0]->stack->str);
+						rpn->stack->str);
 			}
 			op->arg = (void *) heap;
 		} else if (xsg_conf_find_command("LT")) {
@@ -898,19 +900,19 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		} else if (xsg_conf_find_command("IF")) {
 			/* NOTE: "NXX" needs to be first!
 			 * ("NNN" and "NSS" will match "NXX" too) */
-			if (pop(rpn[0]->stack, "NXX")) {
+			if (pop(rpn->stack, "NXX")) {
 				op->op = op_if;
 				PUSH("X");
-			} else if (pop(rpn[0]->stack, "NNN")) {
+			} else if (pop(rpn->stack, "NNN")) {
 				op->op = op_if_num;
 				PUSH("N");
-			} else if (pop(rpn[0]->stack, "NSS")) {
+			} else if (pop(rpn->stack, "NSS")) {
 				op->op = op_if_str;
 				PUSH("S");
 			} else {
 				xsg_conf_error("RPN: IF: stack was '%s', but "
 						"'NNN' or 'NSS' expected",
-						rpn[0]->stack->str);
+						rpn->stack->str);
 			}
 		} else if (xsg_conf_find_command("MIN")) {
 			POP("NN", "MIN");
@@ -1027,13 +1029,13 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		} else if (xsg_conf_find_command("DUP")) {
 			/* NOTE: "X" needs to be first!
 			 * ("N" and "S" will match "X" too) */
-			if (pop(rpn[0]->stack, "X")) {
+			if (pop(rpn->stack, "X")) {
 				op->op = op_dup;
 				PUSH("XX");
-			} else if (pop(rpn[0]->stack, "N")) {
+			} else if (pop(rpn->stack, "N")) {
 				op->op = op_dup_num;
 				PUSH("NN");
-			} else if (pop(rpn[0]->stack, "S")) {
+			} else if (pop(rpn->stack, "S")) {
 				op->op = op_dup_str;
 				PUSH("SS");
 			} else {
@@ -1041,11 +1043,11 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 						"stack");
 			}
 		} else if (xsg_conf_find_command("POP")) {
-			if (pop(rpn[0]->stack, "X")) {
+			if (pop(rpn->stack, "X")) {
 				op->op = op_pop;
-			} else if (pop(rpn[0]->stack, "N")) {
+			} else if (pop(rpn->stack, "N")) {
 				op->op = op_pop;
-			} else if (pop(rpn[0]->stack, "S")) {
+			} else if (pop(rpn->stack, "S")) {
 				op->op = op_pop;
 			} else {
 				xsg_conf_error("RPN: POP: no element on the "
@@ -1054,31 +1056,31 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 		} else if (xsg_conf_find_command("EXC")) {
 			/* NOTE: order is important! "XX" needs to be first!
 			 * then "XN", "XS", "NX", "SX" */
-			if (pop(rpn[0]->stack, "XX")) {
+			if (pop(rpn->stack, "XX")) {
 				op->op = op_exc;
 				PUSH("XX");
-			} else if (pop(rpn[0]->stack, "XN")) {
+			} else if (pop(rpn->stack, "XN")) {
 				op->op = op_exc;
 				PUSH("NX");
-			} else if (pop(rpn[0]->stack, "XS")) {
+			} else if (pop(rpn->stack, "XS")) {
 				op->op = op_exc;
 				PUSH("SX");
-			} else if (pop(rpn[0]->stack, "NX")) {
+			} else if (pop(rpn->stack, "NX")) {
 				op->op = op_exc;
 				PUSH("XN");
-			} else if (pop(rpn[0]->stack, "SX")) {
+			} else if (pop(rpn->stack, "SX")) {
 				op->op = op_exc;
 				PUSH("XS");
-			} else if (pop(rpn[0]->stack, "NS")) {
+			} else if (pop(rpn->stack, "NS")) {
 				op->op = op_exc;
 				PUSH("SN");
-			} else if (pop(rpn[0]->stack, "SN")) {
+			} else if (pop(rpn->stack, "SN")) {
 				op->op = op_exc;
 				PUSH("NS");
-			} else if (pop(rpn[0]->stack, "NN")) {
+			} else if (pop(rpn->stack, "NN")) {
 				op->op = op_exc_nn;
 				PUSH("NN");
-			} else if (pop(rpn[0]->stack, "SS")) {
+			} else if (pop(rpn->stack, "SS")) {
 				op->op = op_exc_ss;
 				PUSH("SS");
 			} else {
@@ -1194,32 +1196,68 @@ xsg_rpn_parse(uint64_t update, xsg_var_t *var, xsg_rpn_t **rpn)
 			}
 		}
 
-		if (rpn[0]->stack->len > max_stack_size) {
+		if (rpn->stack->len > max_stack_size) {
 			size_t j;
 
 			num_stack = xsg_renew(double, num_stack,
-					rpn[0]->stack->len);
+					rpn->stack->len);
 			str_stack = xsg_renew(xsg_string_t *, str_stack,
-					rpn[0]->stack->len);
+					rpn->stack->len);
 
-			for (j = max_stack_size; j < rpn[0]->stack->len; j++) {
+			for (j = max_stack_size; j < rpn->stack->len; j++) {
 				str_stack[j] = xsg_string_new(NULL);
 			}
 
-			max_stack_size = rpn[0]->stack->len;
+			max_stack_size = rpn->stack->len;
 		}
 
-		rpn[0]->op_list = xsg_list_append(rpn[0]->op_list, op);
+		rpn->op_list = xsg_list_append(rpn->op_list, op);
 
 	} while (xsg_conf_find_comma());
 
-	if (rpn[0]->stack->len < 1) {
+	if (rpn->stack->len < 1) {
 		xsg_conf_error("RPN: no element left on the stack");
 	}
 
-	if (rpn[0]->stack->len > 1) {
+	if (rpn->stack->len > 1) {
 		xsg_conf_error("RPN: more than one element left on the stack");
 	}
+
+	return rpn;
+}
+
+xsg_rpn_t *
+xsg_rpn_parse_num(uint64_t update, xsg_var_t *var)
+{
+	xsg_rpn_t *rpn;
+	char type;
+
+	rpn = parse(update, var);
+
+	type = rpn->stack->str[rpn->stack->len - 1];
+
+	if (unlikely(type != 'N') && unlikely(type != 'X')) {
+		xsg_conf_error("RPN: no number left on the stack");
+	}
+
+	return rpn;
+}
+
+xsg_rpn_t *
+xsg_rpn_parse_str(uint64_t update, xsg_var_t *var)
+{
+	xsg_rpn_t *rpn;
+	char type;
+
+	rpn = parse(update, var);
+
+	type = rpn->stack->str[rpn->stack->len - 1];
+
+	if (unlikely(type != 'S') && unlikely(type != 'X')) {
+		xsg_conf_error("RPN: no string left on the stack");
+	}
+
+	return rpn;
 }
 
 /******************************************************************************/
@@ -1272,6 +1310,7 @@ double
 xsg_rpn_get_num(xsg_rpn_t *rpn)
 {
 	double num;
+#if 0
 	char type;
 
 	type = rpn->stack->str[rpn->stack->len - 1];
@@ -1280,7 +1319,7 @@ xsg_rpn_get_num(xsg_rpn_t *rpn)
 		xsg_warning("RPN: no number on the stack");
 		return DNAN;
 	}
-
+#endif
 	calc(rpn);
 
 	num = num_stack[stack_index];
@@ -1292,6 +1331,7 @@ char *
 xsg_rpn_get_str(xsg_rpn_t *rpn)
 {
 	char *str;
+#if 0
 	char type;
 
 	type = rpn->stack->str[rpn->stack->len - 1];
@@ -1300,12 +1340,11 @@ xsg_rpn_get_str(xsg_rpn_t *rpn)
 		xsg_warning("RPN: no string on the stack");
 		return NULL;
 	}
-
+#endif
 	calc(rpn);
 
 	str = str_stack[stack_index]->str;
 
 	return str;
 }
-
 

@@ -80,14 +80,34 @@ xsg_var_flush_dirty(void)
 /******************************************************************************/
 
 xsg_var_t *
-xsg_var_parse(uint64_t update, xsg_window_t *window, xsg_widget_t *widget)
+xsg_var_parse_num(uint64_t update, xsg_window_t *window, xsg_widget_t *widget)
 {
 	xsg_var_t *var;
 	xsg_rpn_t *rpn;
 
 	var = xsg_new(xsg_var_t, 1);
 
-	xsg_rpn_parse(update, var, &rpn);
+	rpn = xsg_rpn_parse_num(update, var);
+
+	var->window = window;
+	var->widget = widget;
+	var->dirty = FALSE;
+	var->rpn = rpn;
+
+	var_list = xsg_list_append(var_list, var);
+
+	return var;
+}
+
+xsg_var_t *
+xsg_var_parse_str(uint64_t update, xsg_window_t *window, xsg_widget_t *widget)
+{
+	xsg_var_t *var;
+	xsg_rpn_t *rpn;
+
+	var = xsg_new(xsg_var_t, 1);
+
+	rpn = xsg_rpn_parse_str(update, var);
 
 	var->window = window;
 	var->widget = widget;

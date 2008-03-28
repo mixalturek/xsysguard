@@ -30,6 +30,9 @@
 extern xsg_printf_t *
 xsg_printf_new(const char *format);
 
+extern bool
+xsg_printf_next_var_is_string(xsg_printf_t *print);
+
 extern void
 xsg_printf_add_var(xsg_printf_t *print, xsg_var_t *var);
 
