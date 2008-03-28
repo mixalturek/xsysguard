@@ -515,7 +515,9 @@ STRREVERSE	[s] -> [strreverse(s)]		reverse all of the bytes in a string
 ==== Load and Store
 
 ------------------------------------------------------------
-LOAD		-> [HEAP]
-STORE		[n][x] -> (n != 0 ? HEAP=x)
+LOAD:<addr>	-> [(addr)]
+STORE:<addr>	[n][x] -> (n != 0 ? (addr)=x)
 ------------------------------------------------------------
+
+`adddr`:: an unsigned integer
 
