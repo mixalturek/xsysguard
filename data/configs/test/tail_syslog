@@ -1,0 +1,6 @@
+Set Background Color white
+Set Size 800 50
+
+Text 1 0 0 800 50 black Vera/10 %s Alignment Center
++ tail:/var/log/syslog:readline:0:all
+
