@@ -86,9 +86,9 @@ Set Mouse <button> {Move|Exit}
 	invisible to window managers
 `CopyFromParent`:: grab background image from parent window (e.g. for
 	windows swallowed in FvwmButtons); if `update` is not 0, xsysguard
-	grabs the background image every `update` * `interval` milliseconds which may
-	cause flickering; sending a SIGHUP to a xsysguard process forces
-	grabbing too
+	grabs the background image every `update` * `interval` milliseconds
+	which may cause flickering; sending a SIGHUP to a xsysguard process
+	forces grabbing too
 `CopyFromRoot`:: grab background image from root window; see `CopyFromParent`
 	for details
 `Xshape`:: select the alpha threshold above which mask bits are set; the default
@@ -149,7 +149,8 @@ Rectangle <x> <y> <width> <height> <color> [Visible <update> <rpn>] [Angle <angl
 `color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
 
 === Example
 
@@ -221,7 +222,8 @@ Image <update> <x> <y> <width> <height> <printformat> [Visible <update> <rpn>] [
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `printformat`:: a 'printf(3)' format string
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
 
 === Example
 
@@ -244,7 +246,8 @@ BarChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angl
 
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
 `color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
 `mask_image`:: for each pixel:
 		- red =	(red * mask.red) / 255
@@ -285,7 +288,8 @@ LineChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <ang
 
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
 `color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
 
 === Example
@@ -312,7 +316,8 @@ AreaChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <ang
 
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
 `color`:: #RGB, #RGBA, #RRGGBB, #RRGGBBAA or color name (rgb.txt)
 
 === Example
@@ -350,8 +355,10 @@ Text <update> <x> <y> <width> <height> <color> <font> <printformat> [Visible <up
 `font`:: an Imlib2 font name: `name/size`
 `printformat`:: a 'printf(3)' format string
 `rpn`:: see xref:rpn[RPN expressions]
-`angle`:: degrees with 0 degrees being vertical from top to bottom going clockwise from there
-`alignment`:: one of `TopLeft`, `TopCenter`, `TopRight`, `CenterLeft`, `Center`, `CenterRight`, `BottomLeft`, `BottomCenter` or `BottomRight`
+`angle`:: degrees with 0 degrees being vertical from top to bottom going
+	clockwise from there
+`alignment`:: one of `TopLeft`, `TopCenter`, `TopRight`, `CenterLeft`, `Center`,
+	`CenterRight`, `BottomLeft`, `BottomCenter` or `BottomRight`
 
 === Example
 
