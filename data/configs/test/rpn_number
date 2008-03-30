@@ -1,0 +1,94 @@
+Set Background Color white
+Set Size 600 500
+
+Text 1 0 0 600 20 black VeraBd/12 tick/pi\t%e\t%e TabWidth 200
++ tick
++ PI
+
+Text 1 0 20 600 20 black Vera/12 NEG\t%e\t%e TabWidth 200
++ tick,NEG
++ PI,NEG
+
+Text 1 0 40 600 20 black Vera/12 INC\t%e\t%e TabWidth 200
++ tick,INC
++ PI,INC
+
+Text 1 0 60 600 20 black Vera/12 DEC\t%e\t%e TabWidth 200
++ tick,DEC
++ PI,DEC
+
+Text 1 0 80 600 20 black Vera/12 SIN\t%e\t%e TabWidth 200
++ tick,SIN
++ PI,SIN
+
+Text 1 0 100 600 20 black Vera/12 COS\t%e\t%e TabWidth 200
++ tick,COS
++ PI,COS
+
+Text 1 0 120 600 20 black Vera/12 LOG\t%e\t%e TabWidth 200
++ tick,LOG
++ PI,LOG
+
+Text 1 0 140 600 20 black Vera/12 EXP\t%e\t%e TabWidth 200
++ tick,EXP
++ PI,EXP
+
+Text 1 0 160 600 20 black Vera/12 SQRT\t%e\t%e TabWidth 200
++ tick,SQRT
++ PI,SQRT
+
+Text 1 0 180 600 20 black Vera/12 ATAN\t%e\t%e TabWidth 200
++ tick,ATAN
++ PI,ATAN
+
+Text 1 0 200 600 20 black Vera/12 ROUND\t%e\t%e TabWidth 200
++ tick,ROUND
++ PI,ROUND
+
+Text 1 0 220 600 20 black Vera/12 FLOOR\t%e\t%e TabWidth 200
++ tick,FLOOR
++ PI,FLOOR
+
+Text 1 0 240 600 20 black Vera/12 CEIL\t%e\t%e TabWidth 200
++ tick,CEIL
++ PI,CEIL
+
+Text 1 0 260 600 20 black Vera/12 DEG2RAD\t%e\t%e TabWidth 200
++ tick,DEG2RAD
++ PI,DEG2RAD
+
+Text 1 0 280 600 20 black Vera/12 RAD2DEG\t%e\t%e TabWidth 200
++ tick,RAD2DEG
++ PI,RAD2DEG
+
+Text 1 0 300 600 20 black Vera/12 ABS\t%e\t%e TabWidth 200
++ tick,ABS
++ PI,ABS
+
+Text 1 0 320 600 20 black Vera/12 ADD\t%e TabWidth 300
++ tick,PI,ADD
+
+Text 1 0 340 600 20 black Vera/12 SUB\t%e TabWidth 300
++ tick,PI,SUB
+
+Text 1 0 360 600 20 black Vera/12 MUL\t%e TabWidth 300
++ tick,PI,MUL
+
+Text 1 0 380 600 20 black Vera/12 DIV\t%e TabWidth 300
++ tick,PI,DIV
+
+Text 1 0 400 600 20 black Vera/12 MOD\t%e TabWidth 300
++ tick,PI,MOD
+
+Text 1 0 420 600 20 black Vera/12 POW\t%e TabWidth 300
++ tick,PI,POW
+
+Text 1 0 440 600 20 black Vera/12 ATAN2\t%e TabWidth 300
++ tick,PI,ATAN2
+
+Text 1 0 460 600 20 black Vera/12 MIN\t%e TabWidth 300
++ tick,PI,MIN
+
+Text 1 0 480 600 20 black Vera/12 MAX\t%e TabWidth 300
++ tick,PI,MAX
+
