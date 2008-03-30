@@ -1,0 +1,49 @@
+Set Background Color white
+Set Size 300 240
+
+Text 1 0 0 300 20 black Vera/10 " \tgm\tlocal" TabWidth 100
+
+Text 1 0 20 300 20 black Vera/10 sec\t%u\t%u TabWidth 100
++ time:gm:sec
++ time:local:sec
+
+Text 1 0 40 300 20 black Vera/10 usec\t%u\t%u TabWidth 100
++ time:gm:usec
++ time:local:usec
+
+Text 1 0 60 300 20 black Vera/10 tm_sec\t%u\t%u TabWidth 100
++ time:gm:tm_sec
++ time:local:tm_sec
+
+Text 1 0 80 300 20 black Vera/10 tm_min\t%u\t%u TabWidth 100
++ time:gm:tm_min
++ time:local:tm_min
+
+Text 1 0 100 300 20 black Vera/10 tm_hour\t%u\t%u TabWidth 100
++ time:gm:tm_hour
++ time:local:tm_hour
+
+Text 1 0 120 300 20 black Vera/10 tm_mday\t%u\t%u TabWidth 100
++ time:gm:tm_mday
++ time:local:tm_mday
+
+Text 1 0 140 300 20 black Vera/10 tm_mon\t%u\t%u TabWidth 100
++ time:gm:tm_mon
++ time:local:tm_mon
+
+Text 1 0 160 300 20 black Vera/10 tm_year\t%u\t%u TabWidth 100
++ time:gm:tm_year
++ time:local:tm_year
+
+Text 1 0 180 300 20 black Vera/10 tm_wday\t%u\t%u TabWidth 100
++ time:gm:tm_wday
++ time:local:tm_wday
+
+Text 1 0 200 300 20 black Vera/10 tm_yday\t%u\t%u TabWidth 100
++ time:gm:tm_yday
++ time:local:tm_yday
+
+Text 1 0 220 300 20 black Vera/10 tm_isdst\t%u\t%u TabWidth 100
++ time:gm:tm_isdst
++ time:local:tm_isdst
+
