@@ -106,6 +106,16 @@ load_string(void *arg)
 /******************************************************************************/
 
 static void
+op_not(void)
+{
+	if (num_stack[stack_index] != 0.0) {
+		num_stack[stack_index] = 0.0;
+	} else {
+		num_stack[stack_index] = 1.0;
+	}
+}
+
+static void
 op_lt(void)
 {
 	if (isnan(num_stack[stack_index - 1])) {
@@ -849,6 +859,10 @@ parse(uint64_t update, xsg_var_t *var)
 						rpn->stack->str);
 			}
 			op->arg = (void *) heap;
+		} else if (xsg_conf_find_command("NOT")) {
+			POP("N", "NOT");
+			op->op = op_not;
+			PUSH("N");
 		} else if (xsg_conf_find_command("LT")) {
 			POP("NN", "LT");
 			op->op = op_lt;
