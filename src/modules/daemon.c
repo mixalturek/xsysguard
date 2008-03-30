@@ -569,7 +569,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 				if (xsg_log_level >= daemon->log_level_buffer) {
 					xsg_log(XSG_LOG_DOMAIN,
 						MAX(daemon->log_level_buffer,
-						2), "[%d]%s: Received log "
+						2), "[%d]%s: received log "
 						"message: %s",
 						(int) daemon->pid, daemon->command,
 						daemon->log_buffer->str);
@@ -587,7 +587,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 
 			if (unlikely(daemon_var == NULL)
 			 || unlikely(daemon_var->daemon != daemon)) {
-				xsg_warning("[%d]%s: Received invalid "
+				xsg_warning("[%d]%s: received invalid "
 						"id: %"PRIu32,
 						(int) daemon->pid, daemon->command,
 						daemon->id_buffer);
@@ -622,7 +622,7 @@ stdout_daemon(void *arg, xsg_main_poll_events_t events)
 				if (daemon_var->new_num_fill == sizeof(double)) {
 					daemon_var->num = daemon_var->new_num;
 
-					xsg_debug("[%d]%s: Received number for "
+					xsg_debug("[%d]%s: received number for "
 							"id %"PRIu32": %f",
 							(int) daemon->pid,
 							daemon->command,
