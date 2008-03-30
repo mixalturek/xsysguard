@@ -994,13 +994,13 @@ parse(uint64_t update, xsg_var_t *var)
 			POP("NN", "POW");
 			op->op = op_pow;
 			PUSH("N");
-		} else if (xsg_conf_find_command("ATAN")) {
-			POP("N", "ATAN");
-			op->op = op_atan;
-			PUSH("N");
 		} else if (xsg_conf_find_command("ATAN2")) {
 			POP("NN", "ATAN2");
 			op->op = op_atan2;
+			PUSH("N");
+		} else if (xsg_conf_find_command("ATAN")) {
+			POP("N", "ATAN");
+			op->op = op_atan;
 			PUSH("N");
 		} else if (xsg_conf_find_command("ROUND")) {
 			POP("N", "ROUND");
