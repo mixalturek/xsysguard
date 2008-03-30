@@ -1,0 +1,16 @@
+Set Background Color white
+Set Size 200 100
+
+Text 1 0 0 200 100 black VeraBd/12 %u\n%s%s%s%s%s%s%s%s%s%s Alignment Center
++ tick,10,MOD
++ tick,10,MOD,0,EQ,"zero","",IF
++ tick,10,MOD,1,EQ,"one","",IF
++ tick,10,MOD,2,EQ,"two","",IF
++ tick,10,MOD,3,EQ,"three","",IF
++ tick,10,MOD,4,EQ,"four","",IF
++ tick,10,MOD,5,EQ,"five","",IF
++ tick,10,MOD,6,EQ,"six","",IF
++ tick,10,MOD,7,EQ,"seven","",IF
++ tick,10,MOD,8,EQ,"eight","",IF
++ tick,10,MOD,9,EQ,"nine","",IF
+
