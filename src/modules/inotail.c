@@ -171,7 +171,7 @@ find_inotail_buffer(const char *filename)
 	int fd, ifd;
 
 	for (l = inotail_list; l; l = l->next) {
-		t = l->data;
+		t = (inotail_t *) l->data;
 
 		if (strcmp(t->filename, filename) == 0) {
 			return t->buffer;
@@ -214,7 +214,8 @@ find_inotail_buffer(const char *filename)
 	t->poll.events = XSG_MAIN_POLL_READ;
 	t->poll.func = read_inotify_event;
 	t->poll.arg = t;
-	t->wd = inotify_add_watch(t->poll.fd, filename, IN_MODIFY);
+	t->wd = inotify_add_watch(ifd, t->filename,
+			IN_MODIFY | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
 
 	if (t->wd < 0) {
 		xsg_conf_error("inotify_add_watch failed: %s", strerror(errno));
@@ -222,7 +223,24 @@ find_inotail_buffer(const char *filename)
 
 	xsg_main_add_poll(&t->poll);
 
+	inotail_list = xsg_list_append(inotail_list, (void *) t);
+
 	return t->buffer;
+}
+
+/******************************************************************************/
+
+static void
+init_inotail(void)
+{
+	xsg_list_t *l;
+	inotail_t *t;
+
+	for (l = inotail_list; l; l = l->next) {
+		t = (inotail_t *) l->data;
+
+		update_inotail(t);
+	}
 }
 
 /******************************************************************************/
@@ -246,6 +264,8 @@ parse_inotail(
 	xsg_free(filename);
 
 	xsg_buffer_parse(buffer, var, num, str, arg);
+
+	xsg_main_add_init_func(init_inotail);
 }
 
 static const char *
