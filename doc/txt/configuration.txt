@@ -532,5 +532,5 @@ LOAD:<addr>	-> [(addr)]
 STORE:<addr>	[n][x] -> (n != 0 ? (addr)=x)
 ------------------------------------------------------------
 
-`adddr`:: an unsigned integer
+`addr`:: an unsigned integer
 
