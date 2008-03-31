@@ -261,7 +261,7 @@ xsg_conf_find_command(const char *command)
 		nptr++;
 	}
 
-	if (isalpha(nptr[0]) || nptr[0] == '_') {
+	if (isalnum(nptr[0]) || nptr[0] == '_') {
 		return FALSE;
 	} else {
 		ptr = nptr;
