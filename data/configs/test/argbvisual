@@ -1,0 +1,6 @@
+Set Background Color #0044
+Set Size 200 200
+Set ARGBVisual on
+
+Rectangle 0 0 100 200 #0000 ColorRange 0 1 200 #00ff
+
