@@ -1,0 +1,30 @@
+Set Background Color orange
+Set Size 600 40
+Set Position -0 0
+Set Layer Above
+Set Decorations off
+Set OverrideRedirect on
+
+# visible is true for 3 seconds for each new syslog line
+
+# tail:...	[line]
+# DUP		[line][line]
+# LOAD:0	[line][line][oldline]
+# STRCMP	[line][line!=oldline]
+# DUP		[line][line!=oldline][line!=oldline]
+# tick		[line][line!=oldline][line!=oldline][tick]
+# STORE:1	[line][line!=oldline]
+# EXC		[line!=oldline][line]
+# STORE:0
+# tick		[tick]
+# LOAD:1	[tick][storedtick]
+# SUB		[tick-storedtick]
+# 3		[tick-storedtick][3]
+# LE		[(tick-storedtick) <= 3]
+
+Set Visible 1 tail:/var/log/syslog:readline:0:all, DUP, LOAD:0, STRCMP, DUP, \
+	    tick, STORE:1, EXC, STORE:0, tick, LOAD:1, SUB, 3, LE
+
+Text 1 0 0 600 40 blue VeraBd/10 %s Alignment Center
++ tail:/var/log/syslog:readline:0:all,70,STRTRUNCATE
+
