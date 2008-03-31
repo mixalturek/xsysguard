@@ -756,6 +756,54 @@ op_strreverse(void)
 	}
 }
 
+static void
+op_strchug(void)
+{
+	char *string;
+	size_t len;
+
+	string = str_stack[stack_index]->str;
+
+	while (*string && isspace((unsigned char) *string)) {
+		string++;
+	}
+
+	len = strlen(string);
+
+	str_stack[stack_index]->len = len;
+	memmove(str_stack[stack_index]->str, string, len + 1);
+}
+
+static void
+op_strchomp(void)
+{
+	char *string;
+	size_t len;
+
+	string = str_stack[stack_index]->str;
+	len = str_stack[stack_index]->len;
+
+	while (len--) {
+		if (isspace((unsigned char) string[len])) {
+			string[len] = '\0';
+		} else {
+			break;
+		}
+	}
+
+	str_stack[stack_index]->len = len + 1;
+}
+
+static void
+op_strtruncate(void)
+{
+	size_t len;
+
+	len = num_stack[stack_index];
+	xsg_string_truncate(str_stack[stack_index - 1], len);
+	stack_index -= 1;
+}
+
 /******************************************************************************/
 
 static double
@@ -1169,6 +1217,18 @@ parse(uint64_t update, xsg_var_t *var)
 			POP("S", "STRREVERSE");
 			op->op = op_strreverse;
 			PUSH("S");
+		} else if (xsg_conf_find_command("STRCHUG")) {
+			POP("S", "STRCHUG");
+			op->op = op_strchug;
+			PUSH("S");
+		} else if (xsg_conf_find_command("STRCHOMP")) {
+			POP("S", "STRCHOMP");
+			op->op = op_strchomp;
+			PUSH("S");
+		} else if (xsg_conf_find_command("STRTRUNCATE")) {
+			POP("SN", "STRTRUNCATE");
+			op->op = op_strtruncate;
+			PUSH("S");
 		} else {
 			double (*num)(void *);
 			const char *(*str)(void *);
@@ -1176,7 +1236,7 @@ parse(uint64_t update, xsg_var_t *var)
 
 			if (!xsg_modules_parse(update, var, &num, &str, &arg)) {
 				xsg_conf_error("number, string, module name, "
-						"LOAD, STORE, "
+						"LOAD, STORE, NOT"
 						"LT, LE, GT, GE, EQ, NE, "
 						"ISNAN, ISINF, ISNANZERO, "
 						"ISINFZERO, ISNANONE, ISINFONE, "
@@ -1194,7 +1254,8 @@ parse(uint64_t update, xsg_var_t *var)
 						"STRTOL, STRTOLL, STRTOUL, "
 						"STRTOULL, STRLEN, STRCMP, "
 						"STRCASECMP, STRUP, STRDOWN "
-						"or STRREVERSE expected");
+						"STRREVERSE, STRCHUG, STRCHOMP "
+						"or STRTRUNCATE expected");
 			}
 
 			op->num_load = num;
