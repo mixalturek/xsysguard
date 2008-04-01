@@ -194,11 +194,11 @@ parse_env(const char *config_name)
 	value = xsg_conf_read_string();
 	overwrite = xsg_conf_find_command("Overwrite");
 
-	xsg_message("%s: setting environment variable %s=\"%s\"",
+	xsg_message("%s: setting environment variable %s=%s",
 			config_name, variable, value);
 
 	if (xsg_setenv(variable, value, overwrite) != 0) {
-		xsg_warning("%s: cannot set environment variable %s=\"%s\": %s",
+		xsg_warning("%s: cannot set environment variable %s=%s: %s",
 				config_name, variable, value, strerror(errno));
 	}
 
@@ -314,7 +314,7 @@ find_config_file(char *name)
 	}
 
 	if (unlikely(strlen(name) < 1)) {
-		xsg_error("cannot find config file: \"\"");
+		xsg_error("cannot find config file: config name len is 0");
 	}
 
 	if (name[0] == '/') {
@@ -345,14 +345,14 @@ find_config_file(char *name)
 		file = xsg_build_filename(*p, name, NULL);
 		if (xsg_file_test(file, XSG_FILE_TEST_IS_REGULAR)) {
 			xsg_strfreev(pathv);
-			xsg_message("%s: found config file \"%s\"", name, file);
+			xsg_message("%s: found config file: %s", name, file);
 			return file;
 		}
 		xsg_free(file);
 	}
 
 	xsg_strfreev(pathv);
-	xsg_error("cannot find config file: \"%s\"", name);
+	xsg_error("cannot find config file: %s", name);
 	return NULL;
 }
 
@@ -393,10 +393,10 @@ get_config_file(const char *config_name, const char *filename)
 	buffer = xsg_malloc(size + 1);
 
 	if (config_name != NULL) {
-		xsg_message("%s: reading config file \"%s\"", config_name,
+		xsg_message("%s: reading config file: %s", config_name,
 				filename);
 	} else {
-		xsg_message("reading config file \"%s\"", filename);
+		xsg_message("reading config file: %s", filename);
 	}
 
 	bytes_read = 0;
