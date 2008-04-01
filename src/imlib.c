@@ -124,35 +124,35 @@ xsg_imlib_load_image(const char *filename)
 		image = imlib_load_image_with_error_return(file, &error);
 
 		if (image != NULL) {
-			xsg_debug("loaded image: \"%s\"", file);
+			xsg_debug("loaded image: %s", file);
 			return image;
 		} else {
-			xsg_message("loading image \"%s\" failed: %s", file,
+			xsg_message("loading image failed: %s: %s", file,
 					error2str(error));
 			xsg_hash_table_remove(image_hash_table, filename);
 		}
 	}
 
 	for (p = pathv; *p; p++) {
-		xsg_debug("searching for image \"%s\" in \"%s\"", filename, *p);
+		xsg_debug("searching for image %s in %s", filename, *p);
 
 		file = xsg_build_filename(*p, filename, NULL);
 
 		image = imlib_load_image_with_error_return(file, &error);
 
 		if (image != NULL) {
-			xsg_message("loaded image: \"%s\"", file);
+			xsg_message("loaded image: %s", file);
 			xsg_hash_table_insert(image_hash_table,
 					xsg_strdup(filename), file);
 			return image;
 		} else {
-			xsg_message("loading image \"%s\" failed: %s", file,
+			xsg_message("loading image failed: %s: %s", file,
 					error2str(error));
 			xsg_free(file);
 		}
 	}
 
-	xsg_warning("cannot load image: \"%s\"", filename);
+	xsg_warning("cannot load image: %s", filename);
 
 	return NULL;
 }
@@ -716,7 +716,7 @@ xsg_imlib_init_font_path(bool enable_fontconfig)
 	}
 
 	for (p = pathv; *p; p++) {
-		xsg_message("adding dir to font path: \"%s\"", *p);
+		xsg_message("adding dir to font path: %s", *p);
 		imlib_add_path_to_font_path(*p);
 	}
 
@@ -731,7 +731,7 @@ xsg_imlib_init_font_path(bool enable_fontconfig)
 	if (pathv != NULL) {
 		for (p = pathv; *p; p++) {
 			xsg_message("adding dir to font path (fontconfig): "
-					"\"%s\"", *p);
+					"%s", *p);
 			imlib_add_path_to_font_path(*p);
 		}
 		xsg_strfreev(pathv);
