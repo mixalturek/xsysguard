@@ -86,8 +86,8 @@ modules_list_insert_sorted(module_t *module)
 		module_t *m = l->data;
 
 		if (0 == strcmp(m->name, module->name)) {
-			xsg_warning("found multiple \"%s\" modules. Using "
-					"\"%s\".", m->name, m->file);
+			xsg_warning("found multiple \"%s\" modules; using: "
+					"%s", m->name, m->file);
 			return;
 		}
 	}
@@ -117,7 +117,7 @@ xsg_modules_init(void)
 
 	xsg_debug("searching for modules...");
 	for (p = pathv; *p; p++) {
-		xsg_debug("searching for modules in \"%s\"", *p);
+		xsg_debug("searching for modules in: %s", *p);
 		dir = opendir(*p);
 		if (dir == NULL) {
 			continue;
@@ -131,7 +131,7 @@ xsg_modules_init(void)
 						NULL);
 				m->module = NULL;
 				modules_list_insert_sorted(m);
-				xsg_message("found module in \"%s\": \"%s\"",
+				xsg_message("found module in: %s: %s",
 						*p, filename);
 			}
 		}
@@ -167,27 +167,27 @@ module_load(module_t *m)
 	handle = dlopen(m->file, RTLD_NOW);
 
 	if (!handle) {
-		xsg_error("cannot load module %s: %s", m->name, dlerror());
+		xsg_error("cannot load module: %s: %s", m->name, dlerror());
 	}
 
 	module = (xsg_module_t *) dlsym(handle, "xsg_module");
 
 	if (!module) {
-		xsg_error("cannot load module %s: %s", m->name, dlerror());
+		xsg_error("cannot load module: %s: %s", m->name, dlerror());
 	}
 
 	if (module->parse == NULL) {
-		xsg_error("cannot load module %s: parse function is NULL",
+		xsg_error("cannot load module: %s: parse function is NULL",
 				m->name);
 	}
 
 	if (module->help == NULL) {
-		xsg_error("cannot load module %s: help function is NULL",
+		xsg_error("cannot load module: %s: help function is NULL",
 				m->name);
 	}
 
 	if (module->info == NULL) {
-		xsg_error("cannot load module %s: info char* is NULL",
+		xsg_error("cannot load module: %s: info char* is NULL",
 				m->name);
 	}
 
