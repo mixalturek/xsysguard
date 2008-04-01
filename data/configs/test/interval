@@ -1,0 +1,15 @@
+Set Background Color black
+Set Size 200 100
+
+# Run: xsysguard -i 10 test/interval
+
+Text 1 0 0 200 100 #0f4dc1 VeraBd/20 "%u:%02u" Alignment Center
++ tick,NOT,DUP,time:gm:sec,STORE:0,time:gm:usec,STORE:1, \
+  time:gm:sec, 100, MUL, time:gm:usec, 10000, DIV, ADD, \
+  LOAD:0,      100, MUL, LOAD:1,       10000, DIV, ADD, \
+  SUB,100,DIV
++ tick,NOT,DUP,time:gm:sec,STORE:0,time:gm:usec,STORE:1, \
+  time:gm:sec, 100, MUL, time:gm:usec, 10000, DIV, ADD, \
+  LOAD:0,      100, MUL, LOAD:1,       10000, DIV, ADD, \
+  SUB,100,MOD
+
