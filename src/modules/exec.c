@@ -91,6 +91,7 @@ read_stdout_exec(void *arg, xsg_main_poll_events_t events)
 	if (n == -1) {
 		xsg_debug("[%d]%s: read(stdout) failed: %s", (int) e->pid,
 				e->command, strerror(errno));
+		xsg_buffer_clear(e->buffer);
 		kill_exec(e);
 		return;
 	}
@@ -98,6 +99,7 @@ read_stdout_exec(void *arg, xsg_main_poll_events_t events)
 	if (n == 0) {
 		xsg_debug("[%d]%s: read(stdout) returned EOF", (int) e->pid,
 				e->command);
+		xsg_buffer_clear(e->buffer);
 		kill_exec(e);
 		return;
 	}
@@ -182,11 +184,9 @@ catch_execs(void)
 
 			if (ret > 0) {
 				if (WIFEXITED(status) || WIFSIGNALED(status)) {
-					xsg_buffer_clear(e->buffer);
 					e->pid = 0;
 				}
 			} else if (ret < 0) {
-				xsg_buffer_clear(e->buffer);
 				e->pid = 0;
 			}
 		}
