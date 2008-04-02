@@ -1,0 +1,8 @@
+Set Background Color black
+Set Size 300 100
+
+Text 10 10 10 280 80 orange VeraBd/10 "device:\t%s\nname:\t%s\ntemp:\t%d" TabWidth 100
++ exec:"nc localhost 7634":readline:1:scanf:s:"|%[^|]"
++ exec:"nc localhost 7634":readline:1:scanf:s:"|%*[^|]|%[^|]"
++ exec:"nc localhost 7634":readline:1:scanf:n:"|%*[^|]|%*[^|]|%d"
+
