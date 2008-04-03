@@ -63,6 +63,12 @@
 #undef XSG_MODULE_NAME
 #undef XSG_MODULE
 
+#define XSG_MODULE(parse, help, info) static const char info_lstat[] = info
+#define XSG_MODULE_NAME "lstat"
+#include "modules/lstat.c"
+#undef XSG_MODULE_NAME
+#undef XSG_MODULE
+
 #define XSG_MODULE(parse, help, info) static const char info_number[] = info
 #define XSG_MODULE_NAME "number"
 #include "modules/number.c"
@@ -122,6 +128,7 @@ xsg_module_t xsg_modules_array[] = {
 	{ parse_exec, help_exec, info_exec, "exec" },
 	{ parse_file, help_file, info_file, "file" },
 	{ parse_inotail, help_inotail, info_inotail, "inotail" },
+	{ parse_lstat, help_lstat, info_lstat, "lstat" },
 	{ parse_number, help_number, info_number, "number" },
 	{ parse_random, help_random, info_random, "random" },
 	{ parse_stat, help_stat, info_stat, "stat" },
