@@ -7,6 +7,7 @@ xref:exec[exec]::		execute processes and read from their stdout
 xref:file[file]::		read regular files
 xref:inotail[inotail]::		tail files in follow mode (`tail -F`) using inotify
 xref:iw[iw]::			libiw (wireless extension library)
+xref:lstat[lstat]::		get symbolic link status
 xref:number[number]::		get a fixed number
 xref:random[random]::		random number generator
 xref:sensors[sensors]::		libsensors (lm-sensors - Linux hardware monitoring)
@@ -251,6 +252,46 @@ N iw:<interface>:range:max_quality:quality
 + iw:*:stats:quality:quality,iw:*:range:max_quality:quality,DIV,100,MUL
 + iw:*:config:essid
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== lstat - get symbolic link status [["lstat"]]
+
+------------------------------------------------------------
+N lstat:<filename>:dev
+N lstat:<filename>:ino
+N lstat:<filename>:mode
+N lstat:<filename>:nlink
+N lstat:<filename>:uid
+N lstat:<filename>:gid
+N lstat:<filename>:rdev
+N lstat:<filename>:size
+N lstat:<filename>:blksize
+N lstat:<filename>:blocks
+N lstat:<filename>:atime
+N lstat:<filename>:mtime
+N lstat:<filename>:ctime
+N lstat:<filename>:isreg
+N lstat:<filename>:isdir
+N lstat:<filename>:ischr
+N lstat:<filename>:isblk
+N lstat:<filename>:isfifo
+N lstat:<filename>:islnk
+N lstat:<filename>:issock
+N lstat:<filename>:isuid
+N lstat:<filename>:isgid
+N lstat:<filename>:isvtx
+N lstat:<filename>:irusr
+N lstat:<filename>:iwusr
+N lstat:<filename>:ixusr
+N lstat:<filename>:irgrp
+N lstat:<filename>:iwgrp
+N lstat:<filename>:ixgrp
+N lstat:<filename>:iroth
+N lstat:<filename>:iwoth
+N lstat:<filename>:ixoth
+------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
