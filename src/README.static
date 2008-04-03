@@ -9,8 +9,8 @@ Statically linked executables for Linux
   licensed under the GNU LESSER GENERAL PUBLIC LICENSE.
 
   Dynamic module loading is not supported, instead the following modules are
-  statically linked: daemon, env, exec, file, inotail, number, random, stat,
-  string, tail, tick, time and uname.
+  statically linked: daemon, env, exec, file, inotail, lstat, number, random,
+  stat, string, tail, tick, time and uname.
 
 
 Copyright
