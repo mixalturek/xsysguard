@@ -66,6 +66,10 @@ render_linechart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			widget->xoffset, widget->yoffset,
 			widget->width, widget->height);
 
+	if (linechart->min >= linechart->max) {
+		return;
+	}
+
 	if ((linechart->angle == NULL) || (linechart->angle->angle == 0.0)) {
 		int xoffset, yoffset;
 		double pixel_mult;
@@ -516,12 +520,6 @@ update_linechart(xsg_widget_t *widget, xsg_var_t *var)
 				}
 			}
 		}
-	}
-
-	if (linechart->min == linechart->max) {
-		/* we want one nice centered line */
-		linechart->min = linechart->min - 0.1;
-		linechart->max = linechart->max + 0.1;
 	}
 }
 
