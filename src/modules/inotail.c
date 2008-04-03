@@ -137,7 +137,7 @@ update_inotail(inotail_t *t)
 }
 
 static void
-read_inotify_event(void *arg, xsg_main_poll_events_t events)
+read_inotail_event(void *arg, xsg_main_poll_events_t events)
 {
 	inotail_t *t = (inotail_t *) arg;
 	struct inotify_event event;
@@ -212,7 +212,7 @@ find_inotail_buffer(const char *filename)
 
 	t->poll.fd = ifd;
 	t->poll.events = XSG_MAIN_POLL_READ;
-	t->poll.func = read_inotify_event;
+	t->poll.func = read_inotail_event;
 	t->poll.arg = t;
 	t->wd = inotify_add_watch(ifd, t->filename,
 			IN_MODIFY | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
