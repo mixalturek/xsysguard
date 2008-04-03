@@ -251,6 +251,8 @@ help_stat(void)
 	PRINT(iwoth);
 	PRINT(ixoth);
 
+#undef PRINT
+
 	return string->str;
 }
 
