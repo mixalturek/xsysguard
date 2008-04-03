@@ -738,7 +738,11 @@ xsg_conf_read_string(void)
 
 	while (ptr[0] != '\0') {
 		if (escape) {
-			xsg_string_append_c(string, read_escape());
+			if (ptr[0] == '\n') {
+				line++;
+			} else {
+				xsg_string_append_c(string, read_escape());
+			}
 			escape = FALSE;
 			ptr++;
 			continue;
