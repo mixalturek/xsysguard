@@ -5,6 +5,7 @@ xref:daemon[daemon]::		execute xsysguardd processes
 xref:env[env]::			get environment variables
 xref:exec[exec]::		execute processes and read from their stdout
 xref:file[file]::		read regular files
+xref:inostat[inostat]:: 	get file status using inotify 
 xref:inotail[inotail]::		tail files in follow mode (`tail -F`) using inotify
 xref:iw[iw]::			libiw (wireless extension library)
 xref:lstat[lstat]::		get symbolic link status
@@ -164,6 +165,46 @@ SetEnv "idle"	"cpu %*d %*d %*d %d"	Overwrite
 + file:/proc/stat:readline:1:scanf:counter:${system}
 + file:/proc/stat:readline:1:scanf:counter:${idle}
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== inostat - get file status using inotify [["inostat"]]
+
+------------------------------------------------------------
+N inostat:<filename>:dev
+N inostat:<filename>:ino
+N inostat:<filename>:mode
+N inostat:<filename>:nlink
+N inostat:<filename>:uid
+N inostat:<filename>:gid
+N inostat:<filename>:rdev
+N inostat:<filename>:size
+N inostat:<filename>:blksize
+N inostat:<filename>:blocks
+N inostat:<filename>:atime
+N inostat:<filename>:mtime
+N inostat:<filename>:ctime
+N inostat:<filename>:isreg
+N inostat:<filename>:isdir
+N inostat:<filename>:ischr
+N inostat:<filename>:isblk
+N inostat:<filename>:isfifo
+N inostat:<filename>:islnk
+N inostat:<filename>:issock
+N inostat:<filename>:isuid
+N inostat:<filename>:isgid
+N inostat:<filename>:isvtx
+N inostat:<filename>:irusr
+N inostat:<filename>:iwusr
+N inostat:<filename>:ixusr
+N inostat:<filename>:irgrp
+N inostat:<filename>:iwgrp
+N inostat:<filename>:ixgrp
+N inostat:<filename>:iroth
+N inostat:<filename>:iwoth
+N inostat:<filename>:ixoth
+------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
