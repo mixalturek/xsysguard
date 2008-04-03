@@ -29,7 +29,7 @@
 
 /******************************************************************************/
 
-typedef struct _inotify_t {
+typedef struct _inotail_t {
 	char *filename;
 	xsg_buffer_t *buffer;
 	dev_t dev;
