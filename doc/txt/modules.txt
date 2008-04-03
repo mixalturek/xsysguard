@@ -10,6 +10,7 @@ xref:iw[iw]::			libiw (wireless extension library)
 xref:number[number]::		get a fixed number
 xref:random[random]::		random number generator
 xref:sensors[sensors]::		libsensors (lm-sensors - Linux hardware monitoring)
+xref:stat[stat]::		get file status
 xref:statgrab[statgrab]::	libstatgrab (get system statistics)
 xref:string[string]::		get a fixed string
 xref:tail[tail]::		tail files in follow mode (`tail -F`)
@@ -128,11 +129,6 @@ S exec:<command>:readline:<number>:igrep:<pattern>:<index>
 == file - read regular files [["file"]]
 
 ------------------------------------------------------------
-N file:<filename>:exists
-N file:<filename>:is_regular
-N file:<filename>:is_symlink
-N file:<filename>:is_dir
-N file:<filename>:is_executable
 S file:<filename>:read:all
 S file:<filename>:read:scanf:string:<format>
 N file:<filename>:read:scanf:number:<format>
@@ -291,6 +287,46 @@ N sensors:<chip>:<sensor>
 === ModuleEnv variables
 
 `SENSORS_CHIP0`, `SENSORS_CHIP1`, ...
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+== stat - get file status [["stat"]]
+
+------------------------------------------------------------
+N stat:<filename>:dev
+N stat:<filename>:ino
+N stat:<filename>:mode
+N stat:<filename>:nlink
+N stat:<filename>:uid
+N stat:<filename>:gid
+N stat:<filename>:rdev
+N stat:<filename>:size
+N stat:<filename>:blksize
+N stat:<filename>:blocks
+N stat:<filename>:atime
+N stat:<filename>:mtime
+N stat:<filename>:ctime
+N stat:<filename>:isreg
+N stat:<filename>:isdir
+N stat:<filename>:ischr
+N stat:<filename>:isblk
+N stat:<filename>:isfifo
+N stat:<filename>:islnk
+N stat:<filename>:issock
+N stat:<filename>:isuid
+N stat:<filename>:isgid
+N stat:<filename>:isvtx
+N stat:<filename>:irusr
+N stat:<filename>:iwusr
+N stat:<filename>:ixusr
+N stat:<filename>:irgrp
+N stat:<filename>:iwgrp
+N stat:<filename>:ixgrp
+N stat:<filename>:iroth
+N stat:<filename>:iwoth
+N stat:<filename>:ixoth
+------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
