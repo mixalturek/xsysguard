@@ -251,7 +251,7 @@ parse_inostat(
 
 	filename = xsg_conf_read_string();
 
-	arg = (void *) filename;
+	*arg = (void *) filename;
 
 	if (xsg_conf_find_command("dev")) {
 		*num = get_inostat_dev;
