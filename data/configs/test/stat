@@ -1,0 +1,64 @@
+Set Background Color white
+Set Size 400 400
+
+SetEnv file /var/log/syslog
+
+Text 1 0 0 400 400 black VeraBd/10 "${file}        %s%s%s %s%s%s %s%s%s
+dev:\t%u
+ino:\t%u
+mode:\t0x%x
+nlink:\t%u
+uid:\t%u
+gid:\t%u
+rdev:\t%u
+size:\t%u
+blksize:\t%u
+blocks:\t%u
+atime:\t%u
+mtime:\t%u
+ctime:\t%u
+isreg:\t%u
+isdir:\t%u
+ischr:\t%u
+isblk:\t%u
+isfifo:\t%u
+islnk:\t%u
+issock:\t%u
+isuid:\t%u
+isgid:\t%u
+isvtx:\t%u
+" \
+TabWidth 200
++ stat:${file}:irusr,"r","-",IF
++ stat:${file}:iwusr,"w","-",IF
++ stat:${file}:ixusr,"x","-",IF
++ stat:${file}:irgrp,"r","-",IF
++ stat:${file}:iwgrp,"w","-",IF
++ stat:${file}:ixgrp,"x","-",IF
++ stat:${file}:iroth,"r","-",IF
++ stat:${file}:iwoth,"w","-",IF
++ stat:${file}:ixoth,"x","-",IF
++ stat:${file}:dev
++ stat:${file}:ino
++ stat:${file}:mode
++ stat:${file}:nlink
++ stat:${file}:uid
++ stat:${file}:gid
++ stat:${file}:rdev
++ stat:${file}:size
++ stat:${file}:blksize
++ stat:${file}:blocks
++ stat:${file}:atime
++ stat:${file}:mtime
++ stat:${file}:ctime
++ stat:${file}:isreg
++ stat:${file}:isdir
++ stat:${file}:ischr
++ stat:${file}:isblk
++ stat:${file}:isfifo
++ stat:${file}:islnk
++ stat:${file}:issock
++ stat:${file}:isuid
++ stat:${file}:isgid
++ stat:${file}:isvtx
+
