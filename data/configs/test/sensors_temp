@@ -5,7 +5,7 @@ Text 1 10 340 200 50 blue VeraBd/10 "CPU: %.1f°C   M/B: %.1f°C" Alignment Bott
 + sensors:*:"CPU Temp"
 + sensors:*:"M/B Temp"
 
-LineChart 1 0 0 1200 400 Min 20
+LineChart 1 0 50 1200 300
 + sensors:*:"CPU Temp" blue
 + sensors:*:"M/B Temp" blue
 
