@@ -1,0 +1,64 @@
+Set Background Color white
+Set Size 400 400
+
+SetEnv file /var/log/syslog
+
+Text 1000 0 0 400 400 black VeraBd/10 "${file}        %s%s%s %s%s%s %s%s%s
+dev:\t%u
+ino:\t%u
+mode:\t0x%x
+nlink:\t%u
+uid:\t%u
+gid:\t%u
+rdev:\t%u
+size:\t%u
+blksize:\t%u
+blocks:\t%u
+atime:\t%u
+mtime:\t%u
+ctime:\t%u
+isreg:\t%u
+isdir:\t%u
+ischr:\t%u
+isblk:\t%u
+isfifo:\t%u
+islnk:\t%u
+issock:\t%u
+isuid:\t%u
+isgid:\t%u
+isvtx:\t%u
+" \
+TabWidth 200
++ inostat:${file}:irusr,"r","-",IF
++ inostat:${file}:iwusr,"w","-",IF
++ inostat:${file}:ixusr,"x","-",IF
++ inostat:${file}:irgrp,"r","-",IF
++ inostat:${file}:iwgrp,"w","-",IF
++ inostat:${file}:ixgrp,"x","-",IF
++ inostat:${file}:iroth,"r","-",IF
++ inostat:${file}:iwoth,"w","-",IF
++ inostat:${file}:ixoth,"x","-",IF
++ inostat:${file}:dev
++ inostat:${file}:ino
++ inostat:${file}:mode
++ inostat:${file}:nlink
++ inostat:${file}:uid
++ inostat:${file}:gid
++ inostat:${file}:rdev
++ inostat:${file}:size
++ inostat:${file}:blksize
++ inostat:${file}:blocks
++ inostat:${file}:atime
++ inostat:${file}:mtime
++ inostat:${file}:ctime
++ inostat:${file}:isreg
++ inostat:${file}:isdir
++ inostat:${file}:ischr
++ inostat:${file}:isblk
++ inostat:${file}:isfifo
++ inostat:${file}:islnk
++ inostat:${file}:issock
++ inostat:${file}:isuid
++ inostat:${file}:isgid
++ inostat:${file}:isvtx
+
