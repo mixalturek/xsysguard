@@ -8,12 +8,12 @@ xsysguard - Develop
 
 - xref:xsysguard_h[Header file: xsysguard.h]
 
-Compile the examples:
+== Build
 
 [sh]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-gcc -o my.so my.c -fPIC -shared
-cp my.so ~/.xsysguard/modules/my.so
+gcc -o $NAME.so $NAME.c -fPIC -shared
+cp $NAME.so ~/.xsysguard/modules/$NAME.so
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 == Example: Minimal module [["minimal"]]
@@ -33,7 +33,7 @@ parse(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -43,10 +43,10 @@ parse(
 static const char *
 help(void)
 {
-	return "my help message";
+	return "TODO: help";
 }
 
-XSG_MODULE(parse, help, "my module");
+XSG_MODULE(parse, help, "TODO: info");
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 == Example: Parsing config options [["config"]]
@@ -75,7 +75,7 @@ parse(
 	uint64_t update,
 	xsg_var_t *var,
 	double (**num)(void *),
-	char *(**str)(void *),
+	const char *(**str)(void *),
 	void **arg
 )
 {
@@ -111,7 +111,8 @@ XSG_MODULE(parse, help, "config example");
 == Header file: xsysguard.h [["xsysguard_h"]]
 
 You can download `xsysguard.h` from the Subversion
-http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk/src/include/xsysguard.h?view=markup[repository].
+http://xsysguard.svn.sourceforge.net/viewvc/xsysguard/trunk/src/include/xsysguard.h?view=markup[repository],
+if needed.
 
 [c]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
