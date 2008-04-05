@@ -10,23 +10,19 @@ http://enlightenment.org[Imlib2].
 - powerful link:configuration.html[configuration] file format
 - full alpha channel support, including XShape and ARGB visuals
 - configurable widgets:
-	link:configuration.html#line[Line],
-	link:configuration.html#rectangle[Rectangle],
-	link:configuration.html#ellipse[Ellipse],
-	link:configuration.html#polygon[Polygon],
-	link:configuration.html#image[Image],
 	link:configuration.html#barchart[BarChart],
 	link:configuration.html#linechart[LineChart],
-	link:configuration.html#areachart[AreaChart] and
-	link:configuration.html#text[Text]
+	link:configuration.html#areachart[AreaChart],
+	link:configuration.html#text[Text],
+	link:configuration.html#image[Image], ...
 - data sources implemented as link:modules.html[modules]
   * link:modules.html#daemon[daemon module]: run a
     link:xsysguardd.1.html[xsysguardd] daemon process on your linux based
     server, router, wlan accesspoint or satellite/cable receiver
-  * link:modules.html#file[file module]: parse files with scanf or regexp's
-    (e.g. `/proc/\*` or `/sys/*`)
+  * link:modules.html#file[file module]: parse files with scanf or
+    regular expressions (e.g. `/proc/\*` or `/sys/*`)
   * link:modules.html#exec[exec module]: execute processes and parse their
-    stdout with scanf or regexp's
+    stdout with scanf or regular expressions
   * ...
 
 ////////////////////////////////////////////////////////////////////////////////
