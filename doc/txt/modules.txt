@@ -36,7 +36,7 @@ xref:uname[uname]::		get name and information about current kernel
 The daemon module will read from stdout and write to stdin of a child process
 (xsysguardd).
 
-A common case is to forward stdin and stdout over a ssh connection using public
+A common use is to forward stdin and stdout over a ssh connection using public
 key authentication.
 
 ------------------------------------------------------------
