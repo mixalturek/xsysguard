@@ -33,13 +33,19 @@ xref:uname[uname]::		get name and information about current kernel
 
 == daemon - execute xsysguardd processes [["daemon"]]
 
+The daemon module will read from stdout and write to stdin of a child process
+(xsysguardd).
+
+A common case is to forward stdin and stdout over a ssh connection using public
+key authentication.
+
 ------------------------------------------------------------
 N daemon:<command>:number:<rpn>
 S daemon:<command>:string:<rpn>
 ------------------------------------------------------------
 
 `command`::  command executed by `/bin/sh -c`
-`rpn`::	remote link:configuration.html#rpn[RPN] expression
+`rpn`::	a string containing a remote link:configuration.html#rpn[RPN] expression
 
 === Environment variables
 
