@@ -19,7 +19,7 @@ http://enlightenment.org[Imlib2].
 	link:configuration.html#linechart[LineChart],
 	link:configuration.html#areachart[AreaChart] and
 	link:configuration.html#text[Text]
-- data sources extendable by link:modules.html[modules]
+- data sources implemented as link:modules.html[modules]
   * link:modules.html#daemon[daemon module]: run a
     link:xsysguardd.1.html[xsysguardd] daemon process on your linux based
     server, router, wlan accesspoint or satellite/cable receiver
