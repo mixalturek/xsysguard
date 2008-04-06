@@ -722,49 +722,60 @@ gettimeofday_and_add(struct timeval *tv, time_t tv_sec, suseconds_t tv_usec)
 static void
 handle_move_event(xsg_window_t *window, XEvent *event)
 {
-	static int x, y, press_x, press_y;
+	static int orig_x, orig_y, press_x, press_y;
 	static Window win = None;
-	int move_x, move_y;
-	int win_x, win_y;
-	XWindowAttributes win_attr;
-	Window root, child;
-	unsigned int mask;
 
 	switch (event->type) {
-	case ButtonPress:
+	case ButtonPress: {
+		Window *children, parent, root, child;
+		XWindowAttributes win_attr;
+		unsigned int nchildren;
+		int win_x, win_y;
+		unsigned int mask;
+
 		win = event->xbutton.window;
 
 		XGetWindowAttributes(display, win, &win_attr);
 
-		if (window->override_redirect) {
-			x = win_attr.x;
-			y = win_attr.y;
-		} else {
-			XTranslateCoordinates(display, win,
-					RootWindow(display, screen),
-					win_attr.x, win_attr.y, &x, &y, &child);
+		XQueryTree(display, win, &root, &parent,
+				 &children, &nchildren);
+
+		if (children) {
+			XFree(children);
 		}
+
+		XTranslateCoordinates(display, parent, root,
+				win_attr.x, win_attr.y,
+				&orig_x, &orig_y, &child);
 
 		XQueryPointer(display, RootWindow(display, screen),
 				&root, &child, &press_x, &press_y,
 				&win_x, &win_y, &mask);
 		break;
+	}
 	case ButtonRelease:
 		win = None;
 		break;
-	case MotionNotify:
+	case MotionNotify: {
+		Window root, child;
+		int win_x, win_y;
+		unsigned int mask;
+		int move_x, move_y;
+
 		if (win != event->xmotion.window) {
 			break;
 		}
-		xsg_debug("Moving window...");
+
+		xsg_debug("moving window...");
+
 		XQueryPointer(display, RootWindow(display, screen),
-				&root, &child,
-				&move_x, &move_y,
+				&root, &child, &move_x, &move_y,
 				&win_x, &win_y, &mask);
 		XMoveWindow(display, win,
-				x + (move_x - press_x),
-				y + (move_y - press_y));
+				orig_x + (move_x - press_x),
+				orig_y + (move_y - press_y));
 		break;
+	}
 	default:
 		break;
 	}
