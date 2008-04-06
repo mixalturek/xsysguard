@@ -24,6 +24,10 @@
 #include <math.h>
 #include <iwlib.h>
 
+#ifndef IW_QUAL_RCPI
+# define IW_QUAL_RCPI 0x80
+#endif
+
 /******************************************************************************/
 
 static int skfd = -1;
