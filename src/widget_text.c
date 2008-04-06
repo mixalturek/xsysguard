@@ -140,8 +140,12 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				     columnv++) {
 					int column_advance;
 
-					imlib_get_text_advance(*columnv,
+					if (**columnv == '\0') {
+						column_advance = space_advance;
+					} else {
+						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
+					}
 
 					width += column_advance;
 
@@ -174,11 +178,15 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				xsg_imlib_text_draw_with_return_metrics(
+				if (**columnv == '\0') {
+					column_advance = space_advance;
+				} else {
+					xsg_imlib_text_draw_with_return_metrics(
 						xoffset + width,
 						line_y, *columnv,
 						NULL, NULL,
 						&column_advance, NULL);
+				}
 
 				width += column_advance;
 
@@ -239,8 +247,12 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				     columnv++) {
 					int column_advance;
 
-					imlib_get_text_advance(*columnv,
+					if (**columnv == '\0') {
+						column_advance = space_advance;
+					} else {
+						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
+					}
 
 					height += column_advance;
 
@@ -273,10 +285,14 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				xsg_imlib_text_draw_with_return_metrics(line_x,
+				if (**columnv == '\0') {
+					column_advance = space_advance;
+				} else {
+					xsg_imlib_text_draw_with_return_metrics(line_x,
 						yoffset + height, *columnv,
 						NULL, NULL, NULL,
 						&column_advance);
+				}
 
 				height += column_advance;
 
@@ -338,8 +354,12 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				     columnv++) {
 					int column_advance;
 
-					imlib_get_text_advance(*columnv,
+					if (**columnv == '\0') {
+						column_advance = space_advance;
+					} else {
+						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
+					}
 
 					width += column_advance;
 
@@ -372,10 +392,14 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				xsg_imlib_text_draw_with_return_metrics(xoffset
+				if (**columnv == '\0') {
+					column_advance = space_advance;
+				} else {
+					xsg_imlib_text_draw_with_return_metrics(xoffset
 						+ width, line_y, *columnv,
 						NULL, NULL, &column_advance,
 						NULL);
+				}
 
 				width += column_advance;
 
@@ -436,8 +460,12 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				     columnv++) {
 					int column_advance;
 
-					imlib_get_text_advance(*columnv,
+					if (**columnv =='\0') {
+						column_advance = space_advance;
+					} else {
+						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
+					}
 
 					height += column_advance;
 
@@ -470,10 +498,14 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				xsg_imlib_text_draw_with_return_metrics(line_x,
+				if (**columnv == '\0') {
+					column_advance = space_advance;
+				} else {
+					xsg_imlib_text_draw_with_return_metrics(line_x,
 						yoffset + height, *columnv,
 						NULL, NULL, NULL,
 						&column_advance);
+				}
 
 				height += column_advance;
 
@@ -533,8 +565,12 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				     columnv++) {
 					int column_advance;
 
-					imlib_get_text_advance(*columnv,
+					if (**columnv == '\0') {
+						column_advance = space_advance;
+					} else {
+						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
+					}
 
 					width += column_advance;
 
@@ -566,10 +602,14 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			for (columnv = columns; *columnv != NULL; columnv++) {
 				int column_advance;
 
-				xsg_imlib_text_draw_with_return_metrics(xoffset
+				if (**columnv == '\0') {
+					column_advance = space_advance;
+				} else {
+					xsg_imlib_text_draw_with_return_metrics(xoffset
 						+ width, line_y, *columnv,
 						NULL, NULL, &column_advance,
 						NULL);
+				}
 
 				width += column_advance;
 
