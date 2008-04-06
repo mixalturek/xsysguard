@@ -727,25 +727,14 @@ handle_move_event(xsg_window_t *window, XEvent *event)
 
 	switch (event->type) {
 	case ButtonPress: {
-		Window *children, parent, root, child;
-		XWindowAttributes win_attr;
-		unsigned int nchildren;
+		Window root, child;
 		int win_x, win_y;
 		unsigned int mask;
 
 		win = event->xbutton.window;
 
-		XGetWindowAttributes(display, win, &win_attr);
-
-		XQueryTree(display, win, &root, &parent,
-				 &children, &nchildren);
-
-		if (children) {
-			XFree(children);
-		}
-
-		XTranslateCoordinates(display, parent, root,
-				win_attr.x, win_attr.y,
+		XTranslateCoordinates(display, win,
+				RootWindow(display, screen), 0, 0,
 				&orig_x, &orig_y, &child);
 
 		XQueryPointer(display, RootWindow(display, screen),
