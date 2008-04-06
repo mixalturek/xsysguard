@@ -145,7 +145,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 					width += column_advance;
 
-					if (columnv + 1 != NULL) {
+					if (columnv[1] != NULL) {
 						width += space_advance;
 
 						if (text->tab_width > 0) {
@@ -182,7 +182,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 				width += column_advance;
 
-				if (columnv + 1 != NULL) {
+				if (columnv[1] != NULL) {
 					width += space_advance;
 
 					if (text->tab_width > 0)
@@ -244,7 +244,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 					height += column_advance;
 
-					if (columnv + 1 != NULL) {
+					if (columnv[1] != NULL) {
 						height += space_advance;
 
 						if (text->tab_width > 0) {
@@ -280,7 +280,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 				height += column_advance;
 
-				if (columnv + 1 != NULL) {
+				if (columnv[1] != NULL) {
 					height += space_advance;
 
 					if (text->tab_width > 0) {
@@ -343,7 +343,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 					width += column_advance;
 
-					if (columnv + 1 != NULL) {
+					if (columnv[1] != NULL) {
 						width += space_advance;
 
 						if (text->tab_width > 0) {
@@ -379,7 +379,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 				width += column_advance;
 
-				if (columnv + 1 != NULL) {
+				if (columnv[1] != NULL) {
 					width += space_advance;
 
 					if (text->tab_width > 0) {
@@ -441,7 +441,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 					height += column_advance;
 
-					if (columnv + 1 != NULL) {
+					if (columnv[1] != NULL) {
 						height += space_advance;
 
 						if (text->tab_width > 0) {
@@ -477,7 +477,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 				height += column_advance;
 
-				if (columnv + 1 != NULL) {
+				if (columnv[1] != NULL) {
 					height += space_advance;
 
 					if (text->tab_width > 0) {
@@ -538,7 +538,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 					width += column_advance;
 
-					if (columnv + 1 != NULL) {
+					if (columnv[1] != NULL) {
 						width += space_advance;
 
 						if (text->tab_width > 0) {
@@ -573,7 +573,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 				width += column_advance;
 
-				if (columnv + 1 != NULL) {
+				if (columnv[1] != NULL) {
 					width += space_advance;
 
 					if (text->tab_width > 0) {
