@@ -22,9 +22,14 @@
 xsysguard - Configuration
 =========================
 
+.Environment variables
 - xref:moduleenv[ModuleEnv]
 - xref:setenv[SetEnv]
+
+.Window properties
 - xref:set[Set]
+
+.Widgets
 - xref:line[Line]
 - xref:rectangle[Rectangle]
 - xref:ellipse[Ellipse]
@@ -35,6 +40,7 @@ xsysguard - Configuration
 - xref:areachart[AreaChart]
 - xref:text[Text]
 
+.RPN expressions
 - xref:rpn[RPN (reverse polish notation) expressions]
 
 == ModuleEnv [["moduleenv"]]

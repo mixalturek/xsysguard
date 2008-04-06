@@ -22,29 +22,29 @@
 xsysguard - Modules
 ===================
 
-xref:daemon[daemon]::		execute xsysguardd processes
-xref:env[env]::			get environment variables
-xref:exec[exec]::		execute processes and read from their stdout
-xref:file[file]::		read regular files
-xref:inostat[inostat]:: 	get file status using inotify 
-xref:inotail[inotail]::		tail files in follow mode (`tail -F`) using inotify
-xref:iw[iw]::			libiw (wireless extension library)
-xref:lstat[lstat]::		get symbolic link status
-xref:number[number]::		get a fixed number
-xref:random[random]::		random number generator
-xref:sensors[sensors]::		libsensors (lm-sensors - Linux hardware monitoring)
-xref:stat[stat]::		get file status
-xref:statgrab[statgrab]::	libstatgrab (get system statistics)
-xref:string[string]::		get a fixed string
-xref:tail[tail]::		tail files in follow mode (`tail -F`)
-xref:tick[tick]::		get current tick
-xref:time[time]::		date and time functions
-xref:uname[uname]::		get name and information about current kernel
+- xref:daemon[daemon]		- execute xsysguardd processes
+- xref:env[env]			- get environment variables
+- xref:exec[exec]		- execute processes and read from their stdout
+- xref:file[file]		- read regular files
+- xref:inostat[inostat]		- get file status using inotify 
+- xref:inotail[inotail]		- tail files in follow mode (`tail -F`) using inotify
+- xref:iw[iw]			- libiw (wireless extension library)
+- xref:lstat[lstat]		- get symbolic link status
+- xref:number[number]		- get a fixed number
+- xref:random[random]		- random number generator
+- xref:sensors[sensors]		- libsensors (lm-sensors - Linux hardware monitoring)
+- xref:stat[stat]		- get file status
+- xref:statgrab[statgrab]	- libstatgrab (get system statistics)
+- xref:string[string]		- get a fixed string
+- xref:tail[tail]		- tail files in follow mode (`tail -F`)
+- xref:tick[tick]		- get current tick
+- xref:time[time]		- date and time functions
+- xref:uname[uname]		- get name and information about current kernel
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-.Return types:
+.Return types
 `N`:: returns a number
 `S`:: returns a string
 `X`:: returns both
