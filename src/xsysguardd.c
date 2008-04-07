@@ -446,6 +446,7 @@ main(int argc, char **argv)
 		case '?':
 			print_usage = TRUE;
 			log_to_stderr = TRUE;
+			break;
 		case 'L':
 			print_license = TRUE;
 			log_to_stderr = TRUE;
