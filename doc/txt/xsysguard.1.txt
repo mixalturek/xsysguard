@@ -27,7 +27,7 @@ Sascha Wessel <sawe@users.sf.net>
 NAME
 ----
 
-xsysguard - a resource friendly system monitor based on Imlib2
+xsysguard - a resource-friendly system monitor based on Imlib2
 
 
 SYNOPSIS
