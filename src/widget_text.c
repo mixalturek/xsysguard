@@ -20,6 +20,7 @@
 
 #include <xsysguard.h>
 #include <string.h>
+#include <alloca.h>
 
 #include "widgets.h"
 #include "widget.h"
@@ -61,19 +62,35 @@ typedef struct {
 	alignment_t alignment;
 	unsigned int tab_width;
 	xsg_string_t *string;
-	char **lines;
 	int space_advance;
 	int line_advance;
 } text_t;
 
 /******************************************************************************/
 
+static char *
+copy_substr(char *s, char *buf)
+{
+	while (*s != '\t' && *s != '\n' && *s != '\0') {
+		*buf = *s;
+		buf++;
+		s++;
+	}
+
+	*buf = '\0';
+
+	return s;
+}
+
+/******************************************************************************/
+
 static void
 render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 {
+	unsigned line_count = 1;
 	text_t *text;
-	unsigned line_count, line_index;
-	char **linev;
+	char *buf;
+	char *s;
 
 	xsg_debug("%s: render Text: x=%d, y=%d, w=%u, h=%u",
 			xsg_window_get_config_name(widget->window),
@@ -82,13 +99,24 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 	text = widget->data;
 
+	buf = (char *) alloca(text->string->len + 1);
+
+	s = text->string->str - 1;
+
 	/* count lines */
-	line_count = 0;
-	for (linev = text->lines; linev != NULL && *linev != NULL; linev++) {
-		line_count++;
+	if (text->alignment & Y_CENTER || text->alignment & BOTTOM) {
+		char *str = text->string->str;
+
+		while (*str != '\0') {
+			if (*str == '\n') {
+				line_count++;
+			}
+			str++;
+		}
 	}
 
 	imlib_context_set_font(text->font);
+
 	imlib_context_set_color(text->color.red, text->color.green,
 			text->color.blue, text->color.alpha);
 
@@ -117,31 +145,28 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
 
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
+		do {
 			int xoffset = 0;
 			int width = 0;
 
-			columns = xsg_strsplit_set(text->lines[line_index],
-					"\t", 0);
+			if (text->alignment & X_CENTER || text->alignment & RIGHT) {
+				char *begin_of_line = s;
 
-			if ((text->alignment & X_CENTER)
-			 || (text->alignment & RIGHT)) {
-				for (columnv = columns;
-				     *columnv != NULL;
-				     columnv++) {
+				do {
 					int column_advance;
 
-					if (**columnv == '\0') {
-						column_advance = text->space_advance;
-					} else {
-						imlib_get_text_advance(*columnv,
+					s++;
+
+					s = copy_substr(s, buf);
+
+					if (*buf != '\0') {
+						imlib_get_text_advance(buf,
 							&column_advance, NULL);
 					}
 
 					width += column_advance;
 
-					if (columnv[1] != NULL) {
+					if (*s == '\t') {
 						width += text->space_advance;
 
 						if (text->tab_width > 0) {
@@ -149,7 +174,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 								- (width % text->tab_width);
 						}
 					}
-				}
+				} while (*s == '\t');
+
+				s = begin_of_line;
 			}
 
 			if (text->alignment & LEFT) {
@@ -167,34 +194,36 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			width = 0;
 
-			for (columnv = columns; *columnv != NULL; columnv++) {
+			do {
 				int column_advance;
 
-				if (**columnv == '\0') {
-					column_advance = text->space_advance;
-				} else {
+				s++;
+
+				s = copy_substr(s, buf);
+
+				if (*buf != '\0') {
 					xsg_imlib_text_draw_with_return_metrics(
 						xoffset + width,
-						line_y, *columnv,
+						line_y, buf,
 						NULL, NULL,
 						&column_advance, NULL);
 				}
 
 				width += column_advance;
 
-				if (columnv[1] != NULL) {
+				if (*s == '\t') {
 					width += text->space_advance;
 
-					if (text->tab_width > 0)
+					if (text->tab_width > 0) {
 						width += text->tab_width
 							- (width % text->tab_width);
+					}
 				}
-			}
-
-			xsg_strfreev(columns);
+			} while (*s == '\t');
 
 			line_y += text->line_advance;
-		}
+
+		} while (*s == '\n');
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
 
@@ -224,31 +253,24 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
 
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
+		do {
 			int yoffset = 0;
 			int height = 0;
 
-			columns = xsg_strsplit_set(text->lines[line_index],
-					"\t", 0);
+			if (text->alignment & X_CENTER || text->alignment & RIGHT) {
+				char *begin_of_line = s;
 
-			if ((text->alignment & X_CENTER)
-			 || (text->alignment & RIGHT)) {
-				for (columnv = columns;
-				     *columnv != NULL;
-				     columnv++) {
+				do {
 					int column_advance;
 
-					if (**columnv == '\0') {
-						column_advance = text->space_advance;
-					} else {
-						imlib_get_text_advance(*columnv,
+					if (*buf != '\0') {
+						imlib_get_text_advance(buf,
 							&column_advance, NULL);
 					}
 
 					height += column_advance;
 
-					if (columnv[1] != NULL) {
+					if (*s == '\t') {
 						height += text->space_advance;
 
 						if (text->tab_width > 0) {
@@ -256,7 +278,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 								- (height % text->tab_width);
 						}
 					}
-				}
+				} while (*s == '\t');
+
+				s = begin_of_line;
 			}
 
 			if (text->alignment & LEFT) {
@@ -274,21 +298,23 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			height = 0;
 
-			for (columnv = columns; *columnv != NULL; columnv++) {
+			do {
 				int column_advance;
 
-				if (**columnv == '\0') {
-					column_advance = text->space_advance;
-				} else {
+				s++;
+
+				s = copy_substr(s, buf);
+
+				if (*buf != '\0') {
 					xsg_imlib_text_draw_with_return_metrics(line_x,
-						yoffset + height, *columnv,
+						yoffset + height, buf,
 						NULL, NULL, NULL,
 						&column_advance);
 				}
 
 				height += column_advance;
 
-				if (columnv[1] != NULL) {
+				if (*s == '\t') {
 					height += text->space_advance;
 
 					if (text->tab_width > 0) {
@@ -296,12 +322,10 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 							- (height % text->tab_width);
 					}
 				}
-			}
-
-			xsg_strfreev(columns);
+			} while (*s == '\t');
 
 			line_x -= text->line_advance;
-		}
+		} while (*s == '\n');
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
 
@@ -331,31 +355,28 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
 
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
+		do {
 			int xoffset = 0;
 			int width = 0;
 
-			columns = xsg_strsplit_set(text->lines[line_index],
-					"\t", 0);
+			if (text->alignment & X_CENTER || text->alignment & LEFT) {
+				char *begin_of_line = s;
 
-			if ((text->alignment & X_CENTER)
-			 || (text->alignment & LEFT)) {
-				for (columnv = columns;
-				     *columnv != NULL;
-				     columnv++) {
+				do {
 					int column_advance;
 
-					if (**columnv == '\0') {
-						column_advance = text->space_advance;
-					} else {
-						imlib_get_text_advance(*columnv,
+					s++;
+
+					s = copy_substr(s, buf);
+
+					if (*buf != '\0') {
+						imlib_get_text_advance(buf,
 							&column_advance, NULL);
 					}
 
 					width += column_advance;
 
-					if (columnv[1] != NULL) {
+					if (*s == '\t') {
 						width += text->space_advance;
 
 						if (text->tab_width > 0) {
@@ -363,7 +384,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 								- (width % text->tab_width);
 						}
 					}
-				}
+				} while (*s == '\t');
+
+				s = begin_of_line;
 			}
 
 			if (text->alignment & LEFT) {
@@ -381,21 +404,23 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			width = 0;
 
-			for (columnv = columns; *columnv != NULL; columnv++) {
+			do {
 				int column_advance;
 
-				if (**columnv == '\0') {
-					column_advance = text->space_advance;
-				} else {
+				s++;
+
+				s = copy_substr(s, buf);
+
+				if (*buf != '\0') {
 					xsg_imlib_text_draw_with_return_metrics(xoffset
-						+ width, line_y, *columnv,
+						+ width, line_y, buf,
 						NULL, NULL, &column_advance,
 						NULL);
 				}
 
 				width += column_advance;
 
-				if (columnv[1] != NULL) {
+				if (*s == '\t') {
 					width += text->space_advance;
 
 					if (text->tab_width > 0) {
@@ -403,12 +428,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 							- (width % text->tab_width);
 					}
 				}
-			}
-
-			xsg_strfreev(columns);
+			} while (*s == '\t');
 
 			line_y -= text->line_advance;
-		}
+
+		} while (*s == '\n');
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
 
@@ -437,31 +461,28 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
 
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
+		do {
 			int yoffset = 0;
 			int height = 0;
 
-			columns = xsg_strsplit_set(text->lines[line_index],
-					"\t", 0);
+			if (text->alignment & X_CENTER || text->alignment & LEFT) {
+				char *begin_of_line = s;
 
-			if ((text->alignment & X_CENTER)
-			 || (text->alignment & LEFT)) {
-				for (columnv = columns;
-				     *columnv != NULL;
-				     columnv++) {
+				do {
 					int column_advance;
 
-					if (**columnv =='\0') {
-						column_advance = text->space_advance;
-					} else {
-						imlib_get_text_advance(*columnv,
+					s++;
+
+					s = copy_substr(s, buf);
+
+					if (*buf != '\0') {
+						imlib_get_text_advance(buf,
 							&column_advance, NULL);
 					}
 
 					height += column_advance;
 
-					if (columnv[1] != NULL) {
+					if (*s == '\t') {
 						height += text->space_advance;
 
 						if (text->tab_width > 0) {
@@ -469,7 +490,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 								- (height % text->tab_width);
 						}
 					}
-				}
+				} while (*s == '\t');
+
+				s = begin_of_line;
 			}
 
 			if (text->alignment & LEFT) {
@@ -487,21 +510,23 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			height = 0;
 
-			for (columnv = columns; *columnv != NULL; columnv++) {
+			do {
 				int column_advance;
 
-				if (**columnv == '\0') {
-					column_advance = text->space_advance;
-				} else {
+				s++;
+
+				s = copy_substr(s, buf);
+
+				if (*buf != '\0') {
 					xsg_imlib_text_draw_with_return_metrics(line_x,
-						yoffset + height, *columnv,
+						yoffset + height, buf,
 						NULL, NULL, NULL,
 						&column_advance);
 				}
 
 				height += column_advance;
 
-				if (columnv[1] != NULL) {
+				if (*s == '\t') {
 					height += text->space_advance;
 
 					if (text->tab_width > 0) {
@@ -509,12 +534,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 							- (height % text->tab_width);
 					}
 				}
-			}
-
-			xsg_strfreev(columns);
+			} while (*s == '\t');
 
 			line_x += text->line_advance;
-		}
+
+		} while (*s == '\n');
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
 	} else {
@@ -542,31 +566,28 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
 
-		for (line_index = 0; line_index < line_count; line_index++) {
-			char **columns, **columnv;
+		do {
 			int xoffset = 0;
 			int width = 0;
 
-			columns = xsg_strsplit_set(text->lines[line_index],
-					"\t", 0);
+			if (text->alignment & X_CENTER || text->alignment & RIGHT) {
+				char *begin_of_line = s;
 
-			if ((text->alignment & X_CENTER)
-			 || (text->alignment & RIGHT)) {
-				for (columnv = columns;
-				     *columnv != NULL;
-				     columnv++) {
+				do {
 					int column_advance;
 
-					if (**columnv == '\0') {
-						column_advance = text->space_advance;
-					} else {
-						imlib_get_text_advance(*columnv,
+					s++;
+
+					s = copy_substr(s, buf);
+
+					if (*buf != '\0') {
+						imlib_get_text_advance(buf,
 							&column_advance, NULL);
 					}
 
 					width += column_advance;
 
-					if (columnv[1] != NULL) {
+					if (*s == '\t') {
 						width += text->space_advance;
 
 						if (text->tab_width > 0) {
@@ -574,7 +595,9 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 								- (width % text->tab_width);
 						}
 					}
-				}
+				} while (*s == '\t');
+
+				s = begin_of_line;
 			}
 
 			if (text->alignment & LEFT) {
@@ -591,21 +614,23 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			width = 0;
 
-			for (columnv = columns; *columnv != NULL; columnv++) {
+			do {
 				int column_advance;
 
-				if (**columnv == '\0') {
-					column_advance = text->space_advance;
-				} else {
+				s++;
+
+				s = copy_substr(s, buf);
+
+				if (*buf != '\0') {
 					xsg_imlib_text_draw_with_return_metrics(xoffset
-						+ width, line_y, *columnv,
+						+ width, line_y, buf,
 						NULL, NULL, &column_advance,
 						NULL);
 				}
 
 				width += column_advance;
 
-				if (columnv[1] != NULL) {
+				if (*s == '\t') {
 					width += text->space_advance;
 
 					if (text->tab_width > 0) {
@@ -613,12 +638,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 							- (width % text->tab_width);
 					}
 				}
-			}
-
-			xsg_strfreev(columns);
+			} while (*s == '\t');
 
 			line_y += text->line_advance;
-		}
+
+		} while (*s == '\n');
 
 		imlib_context_set_image(buffer);
 
@@ -652,12 +676,6 @@ update_text(xsg_widget_t *widget, xsg_var_t *var)
 	}
 
 	xsg_string_assign(text->string, s);
-
-	if (text->lines) {
-		xsg_strfreev(text->lines);
-	}
-
-	text->lines = xsg_strsplit_set(s, "\n", 0);
 
 	xsg_window_update_append_rect(widget->window, widget->xoffset,
 			widget->yoffset, widget->width, widget->height);
@@ -700,7 +718,6 @@ xsg_widget_text_parse(xsg_window_t *window)
 	text->alignment = TOP_LEFT;
 	text->tab_width = 0;
 	text->string = xsg_string_new(NULL);
-	text->lines = NULL;
 
 	text->font = imlib_load_font(text->font_name);
 
