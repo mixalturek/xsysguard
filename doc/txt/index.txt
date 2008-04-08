@@ -22,7 +22,7 @@
 xsysguard - General Info
 ========================
 
-xsysguard is a resource friendly system monitor based on Imlib2
+xsysguard is a resource-friendly system monitor based on Imlib2.
 
 == Features
 
