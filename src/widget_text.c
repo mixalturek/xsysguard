@@ -62,6 +62,8 @@ typedef struct {
 	unsigned int tab_width;
 	xsg_string_t *string;
 	char **lines;
+	int space_advance;
+	int line_advance;
 } text_t;
 
 /******************************************************************************/
@@ -71,7 +73,6 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 {
 	text_t *text;
 	unsigned line_count, line_index;
-	int line_advance, space_advance;
 	char **linev;
 
 	xsg_debug("%s: render Text: x=%d, y=%d, w=%u, h=%u",
@@ -91,15 +92,6 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 	imlib_context_set_color(text->color.red, text->color.green,
 			text->color.blue, text->color.alpha);
 
-	imlib_get_text_advance(" ", &space_advance, &line_advance);
-
-	if (unlikely(line_advance < 1)) {
-		xsg_error("line_advance must be greater than 0");
-	}
-	if (unlikely(space_advance < 1)) {
-		xsg_error("space_advance must be greater than 0");
-	}
-
 	if ((text->angle == NULL) || (text->angle->angle == 0.0)) {
 		int line_y = 0;
 
@@ -116,11 +108,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		} else if (text->alignment & Y_CENTER) {
 			line_y = widget->yoffset - up_y
 				+ ((int) ((int) widget->height
-					- (line_advance * line_count)) / 2);
+					- (text->line_advance * line_count)) / 2);
 		} else if (text->alignment & BOTTOM) {
 			line_y = widget->yoffset - up_y
 				+ ((int) widget->height
-					- (line_advance * line_count));
+					- (text->line_advance * line_count));
 		} else {
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
@@ -141,7 +133,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					int column_advance;
 
 					if (**columnv == '\0') {
-						column_advance = space_advance;
+						column_advance = text->space_advance;
 					} else {
 						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
@@ -150,7 +142,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					width += column_advance;
 
 					if (columnv[1] != NULL) {
-						width += space_advance;
+						width += text->space_advance;
 
 						if (text->tab_width > 0) {
 							width += text->tab_width
@@ -179,7 +171,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int column_advance;
 
 				if (**columnv == '\0') {
-					column_advance = space_advance;
+					column_advance = text->space_advance;
 				} else {
 					xsg_imlib_text_draw_with_return_metrics(
 						xoffset + width,
@@ -191,7 +183,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				width += column_advance;
 
 				if (columnv[1] != NULL) {
-					width += space_advance;
+					width += text->space_advance;
 
 					if (text->tab_width > 0)
 						width += text->tab_width
@@ -201,7 +193,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			xsg_strfreev(columns);
 
-			line_y += line_advance;
+			line_y += text->line_advance;
 		}
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
@@ -219,15 +211,15 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 		if (text->alignment & TOP) {
 			line_x = widget->xoffset - up_x + widget->width
-				- line_advance;
+				- text->line_advance;
 		} else if (text->alignment & Y_CENTER) {
 			line_x = widget->xoffset - up_x + widget->width
-				- line_advance - ((int) ((int) widget->width
-					- (line_advance * line_count)) / 2);
+				- text->line_advance - ((int) ((int) widget->width
+					- (text->line_advance * line_count)) / 2);
 		} else if (text->alignment & BOTTOM) {
 			line_x = widget->xoffset - up_x + widget->width
-				- line_advance - ((int) widget->width
-					- (line_advance * line_count));
+				- text->line_advance - ((int) widget->width
+					- (text->line_advance * line_count));
 		} else {
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
@@ -248,7 +240,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					int column_advance;
 
 					if (**columnv == '\0') {
-						column_advance = space_advance;
+						column_advance = text->space_advance;
 					} else {
 						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
@@ -257,7 +249,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					height += column_advance;
 
 					if (columnv[1] != NULL) {
-						height += space_advance;
+						height += text->space_advance;
 
 						if (text->tab_width > 0) {
 							height += text->tab_width
@@ -286,7 +278,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int column_advance;
 
 				if (**columnv == '\0') {
-					column_advance = space_advance;
+					column_advance = text->space_advance;
 				} else {
 					xsg_imlib_text_draw_with_return_metrics(line_x,
 						yoffset + height, *columnv,
@@ -297,7 +289,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				height += column_advance;
 
 				if (columnv[1] != NULL) {
-					height += space_advance;
+					height += text->space_advance;
 
 					if (text->tab_width > 0) {
 						height += text->tab_width
@@ -308,7 +300,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			xsg_strfreev(columns);
 
-			line_x -= line_advance;
+			line_x -= text->line_advance;
 		}
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
@@ -326,15 +318,15 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 		if (text->alignment & TOP) {
 			line_y = widget->yoffset - up_y + widget->height
-				- line_advance;
+				- text->line_advance;
 		} else if (text->alignment & Y_CENTER) {
 			line_y = widget->yoffset - up_y + widget->height
-				- line_advance - ((int) ((int) widget->height
-					- (line_advance * line_count)) / 2);
+				- text->line_advance - ((int) ((int) widget->height
+					- (text->line_advance * line_count)) / 2);
 		} else if (text->alignment & BOTTOM) {
 			line_y = widget->yoffset - up_y + widget->height
-				- line_advance - ((int) widget->height
-					- (line_advance * line_count));
+				- text->line_advance - ((int) widget->height
+					- (text->line_advance * line_count));
 		} else {
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
@@ -355,7 +347,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					int column_advance;
 
 					if (**columnv == '\0') {
-						column_advance = space_advance;
+						column_advance = text->space_advance;
 					} else {
 						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
@@ -364,7 +356,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					width += column_advance;
 
 					if (columnv[1] != NULL) {
-						width += space_advance;
+						width += text->space_advance;
 
 						if (text->tab_width > 0) {
 							width += text->tab_width
@@ -393,7 +385,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int column_advance;
 
 				if (**columnv == '\0') {
-					column_advance = space_advance;
+					column_advance = text->space_advance;
 				} else {
 					xsg_imlib_text_draw_with_return_metrics(xoffset
 						+ width, line_y, *columnv,
@@ -404,7 +396,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				width += column_advance;
 
 				if (columnv[1] != NULL) {
-					width += space_advance;
+					width += text->space_advance;
 
 					if (text->tab_width > 0) {
 						width += text->tab_width
@@ -415,7 +407,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			xsg_strfreev(columns);
 
-			line_y -= line_advance;
+			line_y -= text->line_advance;
 		}
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
@@ -436,11 +428,11 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		} else if (text->alignment & Y_CENTER) {
 			line_x = widget->xoffset - up_x
 				+ ((int) ((int) widget->width
-					- (line_advance * line_count)) / 2);
+					- (text->line_advance * line_count)) / 2);
 		} else if (text->alignment & BOTTOM) {
 			line_x = widget->xoffset - up_x
 				+ ((int) widget->width
-					- (line_advance * line_count));
+					- (text->line_advance * line_count));
 		} else {
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
@@ -461,7 +453,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					int column_advance;
 
 					if (**columnv =='\0') {
-						column_advance = space_advance;
+						column_advance = text->space_advance;
 					} else {
 						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
@@ -470,7 +462,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					height += column_advance;
 
 					if (columnv[1] != NULL) {
-						height += space_advance;
+						height += text->space_advance;
 
 						if (text->tab_width > 0) {
 							height += text->tab_width
@@ -499,7 +491,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int column_advance;
 
 				if (**columnv == '\0') {
-					column_advance = space_advance;
+					column_advance = text->space_advance;
 				} else {
 					xsg_imlib_text_draw_with_return_metrics(line_x,
 						yoffset + height, *columnv,
@@ -510,7 +502,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				height += column_advance;
 
 				if (columnv[1] != NULL) {
-					height += space_advance;
+					height += text->space_advance;
 
 					if (text->tab_width > 0) {
 						height += text->tab_width
@@ -521,7 +513,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			xsg_strfreev(columns);
 
-			line_x += line_advance;
+			line_x += text->line_advance;
 		}
 
 		imlib_context_set_cliprect(0, 0, 0, 0);
@@ -542,10 +534,10 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			line_y = 0;
 		} else if (text->alignment & Y_CENTER) {
 			line_y = (int) ((int) text->angle->height
-					- (line_advance * line_count)) / 2;
+					- (text->line_advance * line_count)) / 2;
 		} else if (text->alignment & BOTTOM) {
 			line_y = (int) text->angle->height
-				- (line_advance * line_count);
+				- (text->line_advance * line_count);
 		} else {
 			xsg_error("unknown alignment: %x", text->alignment);
 		}
@@ -566,7 +558,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					int column_advance;
 
 					if (**columnv == '\0') {
-						column_advance = space_advance;
+						column_advance = text->space_advance;
 					} else {
 						imlib_get_text_advance(*columnv,
 							&column_advance, NULL);
@@ -575,7 +567,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 					width += column_advance;
 
 					if (columnv[1] != NULL) {
-						width += space_advance;
+						width += text->space_advance;
 
 						if (text->tab_width > 0) {
 							width += text->tab_width
@@ -603,7 +595,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				int column_advance;
 
 				if (**columnv == '\0') {
-					column_advance = space_advance;
+					column_advance = text->space_advance;
 				} else {
 					xsg_imlib_text_draw_with_return_metrics(xoffset
 						+ width, line_y, *columnv,
@@ -614,7 +606,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				width += column_advance;
 
 				if (columnv[1] != NULL) {
-					width += space_advance;
+					width += text->space_advance;
 
 					if (text->tab_width > 0) {
 						width += text->tab_width
@@ -625,7 +617,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 
 			xsg_strfreev(columns);
 
-			line_y += line_advance;
+			line_y += text->line_advance;
 		}
 
 		imlib_context_set_image(buffer);
@@ -713,7 +705,18 @@ xsg_widget_text_parse(xsg_window_t *window)
 	text->font = imlib_load_font(text->font_name);
 
 	if (unlikely(text->font == NULL)) {
-		xsg_error("Cannot load font: \"%s\"", text->font_name);
+		xsg_conf_error("cannot load font: \"%s\"", text->font_name);
+	}
+
+	imlib_context_set_font(text->font);
+
+	imlib_get_text_advance(" ", &text->space_advance, &text->line_advance);
+
+	if (unlikely(text->line_advance < 1)) {
+		xsg_conf_error("font too small: line_advance must be greater than 0");
+	}
+	if (unlikely(text->space_advance < 1)) {
+		xsg_conf_error("font too small: space_advance must be greater than 0");
 	}
 
 	while (!xsg_conf_find_newline()) {
