@@ -76,7 +76,7 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 		mask_img = xsg_imlib_load_image(barchart->mask);
 
 		if (unlikely(mask_img == NULL)) {
-			xsg_warning("cannot load mask image \"%s\"", barchart->mask);
+			xsg_warning("cannot load mask image: %s", barchart->mask);
 		}
 	}
 
@@ -143,11 +143,13 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				yoffset = 0;
 			}
 
-			if ((yoffset + height) > widget->height)
+			if ((yoffset + height) > widget->height) {
 				height -= (yoffset + height) - widget->height;
+			}
 
-			if (height <= 0)
+			if (height <= 0) {
 				continue;
+			}
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle;
@@ -237,11 +239,13 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				xoffset = 0;
 			}
 
-			if ((xoffset + width) > widget->width)
+			if ((xoffset + width) > widget->width) {
 				width -= (xoffset + width) - widget->width;
+			}
 
-			if (width <= 0)
+			if (width <= 0) {
 				continue;
+			}
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 90.0;
@@ -331,11 +335,13 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				yoffset = 0;
 			}
 
-			if ((yoffset + height) > widget->height)
+			if ((yoffset + height) > widget->height) {
 				height -= (yoffset + height) - widget->height;
+			}
 
-			if (height <= 0)
+			if (height <= 0) {
 				continue;
+			}
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 180.0;
@@ -425,11 +431,13 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				xoffset = 0;
 			}
 
-			if ((xoffset + width) > widget->width)
+			if ((xoffset + width) > widget->width) {
 				width -= (xoffset + width) - widget->width;
+			}
 
-			if (width <= 0)
+			if (width <= 0) {
 				continue;
+			}
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle + 270.0;
@@ -532,11 +540,13 @@ render_barchart(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				yoffset = 0;
 			}
 
-			if (yoffset + height > chart_height)
+			if (yoffset + height > chart_height) {
 				height -= (yoffset + height) - chart_height;
+			}
 
-			if (height <= 0)
+			if (height <= 0) {
 				continue;
+			}
 
 			if (barchart_var->range != NULL) {
 				double range_angle = barchart_var->range_angle;
