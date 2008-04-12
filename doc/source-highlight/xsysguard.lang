@@ -1,3 +1,5 @@
+# GNU Source-highlight language file
+
 string delim "\"" "\"" escape "\\"
 string delim "'" "'" escape "\\"
 
@@ -12,7 +14,7 @@ function = "+|.|:|,|Interval|Name|Class|Resource|Size|Position|Sticky|Mouse",
 	"SkipTaskbar|SkipPager|Layer|Decorations|OverrideRedirect|Background",
 	"CacheSize|FontCacheSize|XShape|ARGBVisual|Visible|Angle|ColorRange",
 	"Filled|Closed|Min|Max|Background|Mask|AddPrev|Dump|Alignment",
-	"TabWidth|Past|Overwrite"
+	"TabWidth|Past|Overwrite|Top"
 
 variable = "on|off|Above|Normal|Below|Color|CopyFromParent|CopyFromRoot",
 	"TopLeft|TopCenter|TopRight|CenterLeft|CenterRight|Center|BottomLeft",
