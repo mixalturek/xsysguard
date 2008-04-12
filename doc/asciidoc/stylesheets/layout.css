@@ -4,7 +4,7 @@ body {
 }
 
 div#layout-menu {
-	font-size: 0.8em;
+	font-size: 0.9em;
 	font-family: sans-serif;
 	padding: 0;
 	margin: 0;
@@ -12,7 +12,7 @@ div#layout-menu {
 	overflow: hidden;
 }
 div#layout-menu ul {
-	padding: .3em 0;
+	padding: .4em 0;
 	margin: 0;
 	float: left;
 }
@@ -24,7 +24,7 @@ div#layout-menu ul li {
 }
 div#layout-menu ul li a {
 	text-decoration: none;
-	padding: 0 .3em;
+	padding: 0 .4em;
 }
 div#layout-menu ul li:before {
 	content: "|";
