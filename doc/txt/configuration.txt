@@ -338,7 +338,7 @@ LineChart 1 160 5 80 50 Angle 25
 
 ------------------------------------------------------------
 AreaChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angle>] [Min <rpn>] [Max <rpn>] [Background <image>]
-+ <rpn> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <height> <color>] [AddPrev]
++ <rpn> <color> [ColorRange <angle> <count> <distance> <color> ...] [Top <count> <color> ...] [AddPrev]
 ------------------------------------------------------------
 
 `update`:: evaluate `rpn` expressions every `update` * `interval` milliseconds
