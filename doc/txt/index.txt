@@ -19,8 +19,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ////////////////////////////////////////////////////////////////////////////////
 
-xsysguard - General Info
-========================
+xsysguard - Home
+================
 
 xsysguard is a resource-friendly system monitor based on Imlib2.
 
