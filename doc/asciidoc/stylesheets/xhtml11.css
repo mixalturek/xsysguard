@@ -137,6 +137,9 @@ div.sidebarblock > div.content {
   padding: 0.5em;
 }
 
+div.listingblock {
+  margin-right: 0%;
+}
 div.listingblock > div.content {
   border: 1px solid silver;
   background: #f4f4f4;
