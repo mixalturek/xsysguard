@@ -77,7 +77,7 @@ S daemon:<command>:string:<rpn>
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SetEnv "XSYSGUARD_DAEMON_TIMEOUT"	16
 SetEnv "XSYSGUARD_DAEMON_MAXBUFLEN"	262144
@@ -147,7 +147,7 @@ S exec:<command>:readline:<number>:igrep:<pattern>:<index>
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 + exec:"ping localhost":readline:0:all
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -180,7 +180,7 @@ S file:<filename>:readline:<number>:igrep:<pattern>:<index>
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SetEnv "user"	"cpu %d"		Overwrite
 SetEnv "nice"	"cpu %*d %d"		Overwrite
@@ -315,7 +315,7 @@ N iw:<interface>:range:max_quality:quality
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 + iw:*:stats:quality:quality,iw:*:range:max_quality:quality,DIV,100,MUL
 + iw:*:config:essid
@@ -495,7 +495,7 @@ N statgrab:cpu_percents:nice
 
 Avoid `statgrab:cpu_percents:*` on linux/unix systems. Instead:
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 + statgrab:cpu_stats_diff:user,statgrab:cpu_stats_diff:total,DIV,100,MUL
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -801,7 +801,7 @@ Broken-down time representation:
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 + time:local:strftime:"%a %b %e / %H:%M:%S"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

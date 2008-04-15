@@ -54,7 +54,7 @@ See link:modules.html[modules] page for more informations.
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ModuleEnv statgrab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,7 +75,7 @@ Please note that all windows share the same environment.
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 SetEnv "host" "remote.host.name"
 SetEnv "user" "login_name"
@@ -126,7 +126,7 @@ Set Mouse <button> {Move|Exit}
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Set Name "xsysguard"
 Set Class "xsysguard"
@@ -160,7 +160,7 @@ Line <x1> <y1> <x2> <y2> <color> [Visible <update> <rpn>]
 
 image:images/configuration_line.png["xsysguard test/line"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Line 10 10 90 50 blue
 Line 100 20 190 40 orange
@@ -183,7 +183,7 @@ Rectangle <x> <y> <width> <height> <color> [Visible <update> <rpn>] [Angle <angl
 
 image:images/configuration_rectangle.png["xsysguard test/rectangle"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Rectangle 10 10 80 40 blue
 Rectangle 110 10 30 40 orange Filled
@@ -211,7 +211,7 @@ Ellipse <xc> <yc> <a> <b> <color> [Visible <update> <rpn>] [Filled]
 
 image:images/configuration_ellipse.png["xsysguard test/ellipse"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Ellipse 60 30 50 20 blue
 Ellipse 145 30 15 15 orange Filled
@@ -232,7 +232,7 @@ Polygon <color> <count> <x> <y> <x> <y> ... [Visible <update> <rpn>] [Filled|Clo
 
 image:images/configuration_polygon.png["xsysguard test/polygon"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Polygon blue 4 10 10 20 50 30 20 90 36
 Polygon red 3 100 10 190 15 130 50 Closed
@@ -256,7 +256,7 @@ Image <update> <x> <y> <width> <height> <printformat> [Visible <update> <rpn>] [
 
 image:images/configuration_image.png["xsysguard test/image"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Image 0 10 10 48 40 "test/image_xorg.png"
 Image 0 80 00 64 60 "test/image_xorg.png" Angle 30
@@ -286,7 +286,7 @@ BarChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <angl
 
 image:images/configuration_barchart.png["xsysguard test/barchart"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 BarChart 1 10 10 20 40 Min 0 Max 1
 + random orange
@@ -323,7 +323,7 @@ LineChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <ang
 
 image:images/configuration_linechart.png["xsysguard test/linechart"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 LineChart 1 10 10 60 40 Min 0 Max 1.5
 + random,0.5,ADD darkred
@@ -351,7 +351,7 @@ AreaChart <update> <x> <y> <width> <height> [Visible <update> <rpn>] [Angle <ang
 
 image:images/configuration_areachart.png["xsysguard test/areachart"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AreaChart 1 10 10 60 40 Min 0 Max 2
 + random blue
@@ -391,7 +391,7 @@ Text <update> <x> <y> <width> <height> <color> <font> <printformat> [Visible <up
 
 image:images/configuration_text.png["xsysguard test/text"]
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Text 1 8 18 160 40 grey "VeraBd/20" "%s"
 + time:local:strftime:"%T"
@@ -423,7 +423,7 @@ result pushed back on.
 
 === Example
 
-[xsysguard,source-highlight/xsysguard.lang]
+[xsysguard,../misc/xsysguard.lang]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 3,4,MUL				3 * 4
 3,4,5,DIV,SUB			3 - (4 / 5)

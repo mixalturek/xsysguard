@@ -90,7 +90,7 @@ IMG_FILES  := $(wildcard images/*.png)
 
 ASCIIDOC  := python asciidoc/asciidoc.py --unsafe -e --attribute=revision=$(VERSION)
 HIGHLIGHT ?= source-highlight
-LANG_DEF  := source-highlight/xsysguard.lang
+LANG_DEF  := ../misc/xsysguard.lang
 HL_CONF   := asciidoc/source-highlight-filter.conf
 HL := $(shell echo | $(HIGHLIGHT) --lang-def=$(LANG_DEF) > /dev/null 2>&1 && echo $(HL_CONF))
 
