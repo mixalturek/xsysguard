@@ -104,7 +104,7 @@ parse_sensors(
 
 	chip_name_prefix = xsg_conf_read_string();
 
-	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
+	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
 		const sensors_feature_data *feature_data;
 		char *feature_data_name;
 		int nr1 = 0, nr2 = 0;
@@ -189,7 +189,7 @@ help_sensors(void)
 	}
 
 	chip_nr = 0;
-	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
+	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
 		char name[128];
 
 		snprintf(name, sizeof(name), "SENSORS_CHIP%d", i++);
@@ -202,7 +202,7 @@ help_sensors(void)
 	xsg_string_append(string, "\n");
 
 	chip_nr = 0;
-	while ((chip_name = sensors_get_detected_chips(&chip_nr)) != NULL) {
+	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
 		const sensors_feature_data *feature_data;
 		int nr1 = 0, nr2 = 0;
 
