@@ -28,6 +28,11 @@
 # define IW_QUAL_RCPI 0x80
 #endif
 
+#ifndef KILO
+#define KILO 1e3
+#endif
+
+
 /******************************************************************************/
 
 static int skfd = -1;

@@ -3,3 +3,7 @@
 /xsysguard.creator.user
 /xsysguard.files
 /xsysguard.includes
+/Makefile.config
+/src/xsysguard
+/src/xsysguardd
+*.so
