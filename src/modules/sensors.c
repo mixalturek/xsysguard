@@ -108,6 +108,7 @@ parse_sensors(
 
 	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
 		const sensors_feature *feature_data;
+		const sensors_subfeature *subfeature_data;
 		char *feature_data_name;
 		int nr1 = 0, nr2 = 0;
 
@@ -125,10 +126,29 @@ parse_sensors(
 			feature_t *feature;
 			char *label = NULL;
 			bool found = FALSE;
-#if 0
-			if (feature_data->mapping != SENSORS_NO_MAPPING)
-				continue;
-#endif
+
+			while ((subfeature_data = sensors_get_all_subfeatures(chip_name, feature_data, &nr2)) != NULL) {
+				if (sensors_get_value(chip_name, subfeature_data->number, &value) != 0) {
+					continue;
+				}
+
+				if (subfeature_data->name && !strcmp(subfeature_data->name, feature_data_name)) {
+					feature = xsg_new(feature_t, 1);
+					feature->number = subfeature_data->number;
+					feature->chip_name = xsg_new(sensors_chip_name, 1);
+					memcpy((void *) feature->chip_name, (const void *) chip_name,
+							sizeof(sensors_chip_name));
+
+					num[0] = get_sensors_feature;
+					arg[0] = (void *) feature;
+
+					xsg_free(chip_name_prefix);
+					xsg_free(feature_data_name);
+
+					return;
+				}
+			}
+
 			if (sensors_get_value(chip_name, feature_data->number, &value) != 0) {
 				continue;
 			}
@@ -206,16 +226,25 @@ help_sensors(void)
 	chip_nr = 0;
 	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
 		const sensors_feature *feature_data;
+		const sensors_subfeature *subfeature_data;
 		int nr1 = 0, nr2 = 0;
 
 		while ((feature_data = sensors_get_features(chip_name, &nr1)) != NULL) {
 			double value = DNAN;
 			char *label = NULL;
-#if 0
-			if (feature_data->mapping != SENSORS_NO_MAPPING) {
-				continue;
+
+			while ((subfeature_data = sensors_get_all_subfeatures(chip_name, feature_data, &nr2)) != NULL) {
+				if (sensors_get_value(chip_name, subfeature_data->number, &value) != 0) {
+					continue;
+				}
+
+				xsg_string_append_printf(string,
+						"N %s:%s:%-32s %6.2f\n",
+						XSG_MODULE_NAME,
+						chip_name->prefix,
+						subfeature_data->name, value);
 			}
-#endif
+
 			if (sensors_get_value(chip_name, feature_data->number, &value) != 0) {
 				continue;
 			}
