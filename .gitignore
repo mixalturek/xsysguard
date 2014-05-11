@@ -6,4 +6,6 @@
 /Makefile.config
 /src/xsysguard
 /src/xsysguardd
+/doc/
+/build/
 *.so
