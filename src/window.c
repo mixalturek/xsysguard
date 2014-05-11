@@ -536,14 +536,15 @@ grab_root_background(xsg_window_t *window)
 static void
 grab_parent_background(xsg_window_t *window)
 {
-	Status status;
 	unsigned int nchildren;
 	Window *children = NULL;
 	Window root;
 	Window parent = None;
 
-	status = XQueryTree(display, window->window, &root, &parent, &children,
-			&nchildren);
+	if (!XQueryTree(display, window->window, &root, &parent, &children,
+			&nchildren)) {
+		return;
+	}
 
 	if (children != NULL) {
 		XFree(children);

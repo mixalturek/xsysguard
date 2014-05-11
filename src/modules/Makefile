@@ -61,7 +61,7 @@ UNAME ?= $(shell uname -s || uname)
 
 ################################################################################
 
-CFLAGS      ?= -O2 -g
+CFLAGS      ?= -O2 -g -Wall
 LDFLAGS     ?= 
 
 ALL_CFLAGS  := -I../include -D$(UNAME) $(CFLAGS)
