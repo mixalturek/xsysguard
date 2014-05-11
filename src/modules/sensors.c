@@ -22,8 +22,6 @@
 #include <string.h>
 #include <sensors/sensors.h>
 
-#define DEFAULT_SENSORS_CONF "/etc/sensors.conf"
-
 /******************************************************************************/
 
 typedef struct _feature_t {
@@ -38,7 +36,7 @@ init_sensors(void)
 {
 	static bool initialized = FALSE;
 	const char *config;
-	FILE *f;
+	FILE *f = NULL;
 
 	if (initialized) {
 		return TRUE;
@@ -46,22 +44,26 @@ init_sensors(void)
 
 	config = xsg_getenv("XSYSGUARD_SENSORS_CONFIG");
 
-	if (config == NULL) {
-		config = DEFAULT_SENSORS_CONF;
+	if (config != NULL) {
+		if ((f = fopen(config, "r")) == NULL) {
+			xsg_warning("cannot open configuration file: %s", config);
+			return FALSE;
+		}
 	}
 
-	if ((f = fopen(config, "r")) == NULL) {
-		xsg_warning("cannot open configuration file: %s", config);
-		return FALSE;
-	}
-
+	// The function accepts NULL file, which is suggested for most applications
 	if (sensors_init(f)) {
-		fclose(f);
+		if (f != NULL) {
+			fclose(f);
+		}
+
 		xsg_warning("cannot initialize sensors: sensors_init failed");
 		return FALSE;
 	}
 
-	fclose(f);
+	if (f != NULL) {
+		fclose(f);
+	}
 
 	initialized = TRUE;
 
