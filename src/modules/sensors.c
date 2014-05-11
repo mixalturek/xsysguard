@@ -78,7 +78,7 @@ get_sensors_feature(void *arg)
 	feature_t *feature = (feature_t *) arg;
 	double value = DNAN;
 
-	sensors_get_feature(*feature->chip_name, feature->number, &value);
+	sensors_get_value(feature->chip_name, feature->number, &value);
 
 	xsg_debug("get_sensors_feature: %f", value);
 
@@ -107,7 +107,7 @@ parse_sensors(
 	chip_name_prefix = xsg_conf_read_string();
 
 	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
-		const sensors_feature_data *feature_data;
+		const sensors_feature *feature_data;
 		char *feature_data_name;
 		int nr1 = 0, nr2 = 0;
 
@@ -120,7 +120,7 @@ parse_sensors(
 
 		feature_data_name = xsg_conf_read_string();
 
-		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
+		while ((feature_data = sensors_get_features(chip_name, &nr1)) != NULL) {
 			double value = DNAN;
 			feature_t *feature;
 			char *label = NULL;
@@ -129,11 +129,11 @@ parse_sensors(
 			if (feature_data->mapping != SENSORS_NO_MAPPING)
 				continue;
 #endif
-			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0) {
+			if (sensors_get_value(chip_name, feature_data->number, &value) != 0) {
 				continue;
 			}
 
-			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0) {
+			if ((label = sensors_get_label(chip_name, feature_data)) == NULL) {
 				continue;
 			}
 
@@ -205,10 +205,10 @@ help_sensors(void)
 
 	chip_nr = 0;
 	while ((chip_name = sensors_get_detected_chips(NULL, &chip_nr)) != NULL) {
-		const sensors_feature_data *feature_data;
+		const sensors_feature *feature_data;
 		int nr1 = 0, nr2 = 0;
 
-		while ((feature_data = sensors_get_all_features(*chip_name, &nr1, &nr2)) != NULL) {
+		while ((feature_data = sensors_get_features(chip_name, &nr1)) != NULL) {
 			double value = DNAN;
 			char *label = NULL;
 #if 0
@@ -216,11 +216,11 @@ help_sensors(void)
 				continue;
 			}
 #endif
-			if (sensors_get_feature(*chip_name, feature_data->number, &value) != 0) {
+			if (sensors_get_value(chip_name, feature_data->number, &value) != 0) {
 				continue;
 			}
 
-			if (sensors_get_label(*chip_name, feature_data->number, &label) != 0) {
+			if ((label = sensors_get_label(chip_name, feature_data)) == NULL) {
 				continue;
 			}
 
