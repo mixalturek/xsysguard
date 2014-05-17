@@ -127,7 +127,7 @@ static void
 get_host_info(uint64_t tick)
 {
 	xsg_debug("sg_get_host_info");
-	host_info = sg_get_host_info();
+	host_info = sg_get_host_info(NULL);
 	if (!host_info) {
 		xsg_warning("%s returned NULL", "sg_get_host_info");
 		libstatgrab_error();
@@ -138,7 +138,7 @@ static void
 get_cpu_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_cpu_stats");
-	cpu_stats = sg_get_cpu_stats();
+	cpu_stats = sg_get_cpu_stats(NULL);
 	if (!cpu_stats) {
 		xsg_warning("%s returned NULL", "sg_get_cpu_stats");
 		libstatgrab_error();
@@ -152,7 +152,7 @@ get_cpu_stats_diff(uint64_t tick)
 	xsg_list_t *l;
 
 	xsg_debug("sg_get_cpu_stats_diff");
-	diff = sg_get_cpu_stats_diff();
+	diff = sg_get_cpu_stats_diff(NULL);
 	if (!diff) {
 		xsg_warning("%s returned NULL", "sg_get_cpu_stats_diff");
 		libstatgrab_error();
@@ -187,7 +187,7 @@ static void
 get_cpu_percents(uint64_t tick)
 {
 	xsg_debug("sg_get_cpu_percents");
-	cpu_percents = sg_get_cpu_percents();
+	cpu_percents = sg_get_cpu_percents(NULL);
 	if (!cpu_percents) {
 		xsg_warning("%s returned NULL", "sg_get_cpu_percents");
 		libstatgrab_error();
@@ -198,7 +198,7 @@ static void
 get_mem_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_mem_stats");
-	mem_stats = sg_get_mem_stats();
+	mem_stats = sg_get_mem_stats(NULL);
 	if (!mem_stats) {
 		xsg_warning("%s returned NULL", "sg_get_mem_stats");
 		libstatgrab_error();
@@ -209,7 +209,7 @@ static void
 get_load_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_load_stats");
-	load_stats = sg_get_load_stats();
+	load_stats = sg_get_load_stats(NULL);
 	if (!load_stats) {
 		xsg_warning("%s returned NULL", "sg_get_load_stats");
 		libstatgrab_error();
@@ -220,7 +220,7 @@ static void
 get_user_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_user_stats");
-	user_stats = sg_get_user_stats();
+	user_stats = sg_get_user_stats(NULL);
 	if (!user_stats) {
 		xsg_warning("%s returned NULL", "sg_get_user_stats");
 		libstatgrab_error();
@@ -231,7 +231,7 @@ static void
 get_swap_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_swap_stats");
-	swap_stats = sg_get_swap_stats();
+	swap_stats = sg_get_swap_stats(NULL);
 	if (!swap_stats) {
 		xsg_warning("%s returned NULL", "sg_get_swap_stats");
 		libstatgrab_error();
@@ -453,7 +453,7 @@ static void
 get_page_stats(uint64_t tick)
 {
 	xsg_debug("sg_get_page_stats");
-	page_stats = sg_get_page_stats();
+	page_stats = sg_get_page_stats(NULL);
 	if (!page_stats) {
 		xsg_warning("%s returned NULL", "sg_get_page_stats");
 		libstatgrab_error();
@@ -467,7 +467,7 @@ get_page_stats_diff(uint64_t tick)
 	xsg_list_t *l;
 
 	xsg_debug("sg_get_page_stats_diff");
-	diff = sg_get_page_stats_diff();
+	diff = sg_get_page_stats_diff(NULL);
 	if (!diff) {
 		xsg_warning("%s returned NULL", "sg_get_page_stats_diff");
 		libstatgrab_error();
@@ -3742,7 +3742,7 @@ init_stats(void)
 	first_time = FALSE;
 
 	xsg_message("running sg_init()");
-	sg_init();
+	sg_init(1);
 
 	xsg_message("running sg_snapshot()");
 	sg_snapshot();
