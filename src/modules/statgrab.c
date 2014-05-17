@@ -58,20 +58,20 @@ static sg_mem_stats *mem_stats = NULL;
 static sg_load_stats *load_stats = NULL;
 static sg_user_stats *user_stats = NULL;
 static sg_swap_stats *swap_stats = NULL;
-static int fs_entries = 0;
+static size_t fs_entries = 0;
 static sg_fs_stats *fs_stats_by_device_name = NULL;
 static sg_fs_stats *fs_stats_by_mnt_point = NULL;
-static int disk_io_entries = 0;
+static size_t disk_io_entries = 0;
 static sg_disk_io_stats * disk_io_stats = NULL;
 static xsg_list_t *disk_io_stats_diff_list = NULL;
-static int network_io_entries = 0;
+static size_t network_io_entries = 0;
 static sg_network_io_stats *network_io_stats = NULL;
 static xsg_list_t *network_io_stats_diff_list = NULL;
-static int network_iface_entries = 0;
+static size_t network_iface_entries = 0;
 static sg_network_iface_stats *network_iface_stats = NULL;
 static sg_page_stats *page_stats = NULL;
 static xsg_list_t *page_stats_diff_list = NULL;
-static int process_entries = 0;
+static size_t process_entries = 0;
 static sg_process_stats *process_stats = NULL;
 static sg_process_stats *process_stats_by_name = NULL;
 static sg_process_stats *process_stats_by_pid = NULL;
@@ -107,7 +107,7 @@ libstatgrab_error(void)
 	error_arg = sg_get_error_arg();
 	errnum = sg_get_error_errno();
 
-	sg_set_error(SG_ERROR_NONE, "");
+	// sg_set_error(SG_ERROR_NONE, "");
 
 	if (errnum > 0) {
 		xsg_warning("libstatgrab: %s: %s: %s", error_str, error_arg,
@@ -279,7 +279,7 @@ static void
 get_disk_io_stats_diff(uint64_t tick)
 {
 	sg_disk_io_stats *diff;
-	int entries;
+	size_t entries;
 	xsg_list_t *l;
 
 	xsg_debug("sg_get_disk_io_stats_diff");
@@ -360,7 +360,7 @@ static void
 get_network_io_stats_diff(uint64_t tick)
 {
 	sg_network_io_stats *diff;
-	int entries;
+	size_t entries;
 	xsg_list_t *l;
 
 	xsg_debug("sg_get_network_io_stats_diff");
@@ -1262,7 +1262,7 @@ get_user_stats_login_name(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_user_stats_device(void *arg)
 {
 	if (likely(user_stats != NULL)) {
@@ -1275,7 +1275,7 @@ get_user_stats_device(void *arg)
 	}
 }
 
-static char *
+static const char *
 get_user_stats_hostname(void *arg)
 {
 	if (likely(user_stats != NULL)) {
