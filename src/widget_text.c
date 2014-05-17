@@ -153,7 +153,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				char *begin_of_line = s;
 
 				do {
-					int column_advance;
+					int column_advance = 0;
 
 					s++;
 
@@ -195,7 +195,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			width = 0;
 
 			do {
-				int column_advance;
+				int column_advance = 0;
 
 				s++;
 
@@ -261,7 +261,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				char *begin_of_line = s;
 
 				do {
-					int column_advance;
+					int column_advance = 0;
 
 					if (*buf != '\0') {
 						imlib_get_text_advance(buf,
@@ -299,7 +299,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			height = 0;
 
 			do {
-				int column_advance;
+				int column_advance = 0;
 
 				s++;
 
@@ -363,7 +363,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				char *begin_of_line = s;
 
 				do {
-					int column_advance;
+					int column_advance = 0;
 
 					s++;
 
@@ -405,7 +405,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			width = 0;
 
 			do {
-				int column_advance;
+				int column_advance = 0;
 
 				s++;
 
@@ -469,7 +469,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				char *begin_of_line = s;
 
 				do {
-					int column_advance;
+					int column_advance = 0;
 
 					s++;
 
@@ -511,7 +511,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			height = 0;
 
 			do {
-				int column_advance;
+				int column_advance = 0;
 
 				s++;
 
@@ -574,7 +574,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 				char *begin_of_line = s;
 
 				do {
-					int column_advance;
+					int column_advance = 0;
 
 					s++;
 
@@ -615,7 +615,7 @@ render_text(xsg_widget_t *widget, Imlib_Image buffer, int up_x, int up_y)
 			width = 0;
 
 			do {
-				int column_advance;
+				int column_advance = 0;
 
 				s++;
 

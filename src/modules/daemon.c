@@ -213,12 +213,12 @@ kill_daemon(daemon_t *daemon)
 {
 	int n;
 
-	xsg_message("[%d]%s: killing daemon...", (int) daemon->pid,
-			daemon->command);
-
 	if (unlikely(daemon == NULL)) {
 		return;
 	}
+
+	xsg_message("[%d]%s: killing daemon...", (int) daemon->pid,
+			daemon->command);
 
 	if (daemon->state == RUNNING) {
 		daemon->state = KILL;
