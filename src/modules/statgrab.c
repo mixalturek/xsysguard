@@ -1250,28 +1250,41 @@ parse_load_stats(
  ******************************************************************************/
 
 static const char *
-get_user_stats_name_list(void *arg)
+get_user_stats_login_name(void *arg)
 {
 	if (likely(user_stats != NULL)) {
-		xsg_debug("get_user_stats_name_list: \"%s\"",
-				user_stats->name_list);
-		return user_stats->name_list;
+		xsg_debug("get_user_stats_login_name: \"%s\"",
+				user_stats->login_name);
+		return user_stats->login_name;
 	} else {
-		xsg_debug("get_user_stats_name_list: UNKNOWN");
+		xsg_debug("get_user_stats_login_name: UNKNOWN");
 		return NULL;
 	}
 }
 
-static double
-get_user_stats_num_entries(void *arg)
+static char *
+get_user_stats_device(void *arg)
 {
 	if (likely(user_stats != NULL)) {
-		xsg_debug("get_user_stats_num_entries: %f",
-				(double) user_stats->num_entries);
-		return (double) user_stats->num_entries;
+		xsg_debug("get_user_stats_device: %s",
+				user_stats->device);
+		return user_stats->device;
 	} else {
-		xsg_debug("get_user_stats_num_entries: UNKNOWN");
-		return DNAN;
+		xsg_debug("get_user_stats_device: UNKNOWN");
+		return NULL;
+	}
+}
+
+static char *
+get_user_stats_hostname(void *arg)
+{
+	if (likely(user_stats != NULL)) {
+		xsg_debug("get_user_stats_hostname: %s",
+				user_stats->hostname);
+		return user_stats->hostname;
+	} else {
+		xsg_debug("get_user_stats_hostname: UNKNOWN");
+		return NULL;
 	}
 }
 
@@ -1285,12 +1298,14 @@ parse_user_stats(
 	void **arg
 )
 {
-	if (xsg_conf_find_command("num_entries")) {
-		*num = get_user_stats_num_entries;
-	} else if (xsg_conf_find_command("name_list")) {
-		*str = get_user_stats_name_list;
+	if (xsg_conf_find_command("device")) {
+		*str = get_user_stats_device;
+	} else if (xsg_conf_find_command("login_name")) {
+		*str = get_user_stats_login_name;
+	} else if (xsg_conf_find_command("hostname")) {
+		*str = get_user_stats_hostname;
 	} else {
-		xsg_conf_error("num_entries or name_list expected");
+		xsg_conf_error("device, login_name or hostname expected");
 	}
 }
 
@@ -4013,8 +4028,9 @@ help_statgrab(void)
 	xsg_string_append_c(string, '\n');
 
 	get_user_stats(0);
-	help2s(string, "user_stats", "name_list", get_user_stats_name_list(NULL));
-	help2n0(string, "user_stats", "num_entries", get_user_stats_num_entries(NULL));
+	help2s(string, "user_stats", "login_name", get_user_stats_login_name(NULL));
+	help2s(string, "user_stats", "device", get_user_stats_device(NULL));
+	help2s(string, "user_stats", "hostname", get_user_stats_hostname(NULL));
 	xsg_string_append_c(string, '\n');
 
 	get_swap_stats(0);
