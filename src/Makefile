@@ -65,7 +65,7 @@ CFLAGS      ?= -O2 -g -Wall
 LDFLAGS     ?= 
 
 ALL_CFLAGS  := -Iinclude -rdynamic -D$(UNAME) $(CFLAGS)
-ALL_LDFLAGS := -fPIC -lm -ldl $(LDFLAGS)
+ALL_LDFLAGS := -fPIC -lm -ldl -lXext -lX11 $(LDFLAGS)
 
 ################################################################################
 
