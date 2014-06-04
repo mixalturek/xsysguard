@@ -1,5 +1,6 @@
 xsysguard 0.2
 * Build scripts for crating of Debian package.
+* FIXMEs in manual pages solved.
 * Linker errors fixed by explicit linking with -lXext -lX11.
 * Issues found by cppcheck fixed.
 * libstatgrab API changed in version 0.90, statgrab module made compilable again.
