@@ -1,0 +1,2 @@
+?package(xsysguard):needs="X11" section="Applications/System/Monitoring"\
+  title="xsysguard" command="/usr/bin/xsysguard TODO"

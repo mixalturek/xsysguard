@@ -1,0 +1,18 @@
+Description: HTML code for inserting of SourceForge tracking image removed.
+ Fix for privacy-breach-logo error reported by lintian (Debian policy).
+Author: Michal Turek <mixalturek@users.sf.net>
+Last-Update: 2014-06-04
+
+
+--- xsysguard-0.2.orig/doc/asciidoc/layout.conf
++++ xsysguard-0.2/doc/asciidoc/layout.conf
+@@ -80,9 +80,6 @@ endif::doctype-manpage[]
+ Last updated {localdate} {localtime}<br />
+ &copy; 2005-2008 <a href="mailto:{email}">{author}</a> - <a href="http://xsysguard.sf.net">xsysguard {revision}</a>
+ </div>
+-<div id="footer-badges">
+-<a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=169315&amp;type=1" width="88" height="31" style="border:none" alt="SourceForge.net Logo" /></a>
+-</div>
+ </div>
+ </body>
+ </html>
