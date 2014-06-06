@@ -4,6 +4,7 @@ Set Layer Above
 Set Background Color black
 Set Decorations off
 Set Mouse 1 Move
+Set Position -0 0
 
 Rectangle 2 2 60 50 #484848 ColorRange 0 1 50 #161616
 
