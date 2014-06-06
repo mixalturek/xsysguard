@@ -3,8 +3,11 @@ Set Size 64 54
 Set Layer Above
 Set Background Color black
 Set Decorations off
-Set Mouse 1 Move
 Set Position -0 60
+Set Layer Below
+Set Sticky on
+Set SkipTaskbar on
+Set SkipPager on
 
 Rectangle 2 2 60 50 #484848 ColorRange 0 1 50 #161616
 
@@ -15,7 +18,7 @@ AreaChart 1 2 2 60 50 Min 0 Max 1
 + statgrab:cpu_stats_diff:iowait,statgrab:cpu_stats_diff:total,DIV #0a43ae AddPrev
 + statgrab:cpu_stats_diff:swap,statgrab:cpu_stats_diff:total,DIV #073180 AddPrev
 
-Text 0 3 2 58 14 #b0b0b0 Arial_Bold/8 "CPU"
+Text 0 3 2 58 14 #b0b0b0 DejaVuSansCondensed-Bold/7 "CPU"
 
-Text 1 3 2 58 14 #b0b0b0 Arial_Bold/8 "%d %%" Alignment TopRight
+Text 1 3 2 58 14 #b0b0b0 DejaVuSansCondensed-Bold/7 "%d%%" Alignment TopRight
 + 1,statgrab:cpu_stats_diff:idle,statgrab:cpu_stats_diff:total,DIV,SUB,100,MUL
