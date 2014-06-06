@@ -96,9 +96,13 @@ distclean:
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/test
+	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/smallblue
+	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL) -d $(DESTDIR)$(IMAGE_DIR)/test
 	$(INSTALL) -d $(DESTDIR)$(FONT_DIR)
 	$(INSTALL_DATA) $(CONFIG_FILES) $(DESTDIR)$(CONFIG_DIR)/test
+	$(INSTALL_DATA) $(CONFIG_FILES) $(DESTDIR)$(CONFIG_DIR)/smallblue
+	$(INSTALL_DATA) $(CONFIG_FILES) $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL_DATA) $(IMAGE_FILES) $(DESTDIR)$(IMAGE_DIR)/test
 	ln -f -s /usr/share/icons $(DESTDIR)$(IMAGE_DIR)
 
