@@ -1,4 +1,5 @@
 ?package(xsysguard):needs="X11" \
   section="Applications/System/Monitoring"\
   title="xsysguard"\
+  icon="/usr/share/pixmaps/xsysguard.xpm" \
   command="/usr/bin/xsysguard smallblue/clock smallblue/cpu smallblue/load smallblue/mem smallblue/net_eth0 smallblue/net_wlan0"
