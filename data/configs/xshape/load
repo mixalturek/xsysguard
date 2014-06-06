@@ -1,0 +1,11 @@
+Set Background Color #000000fe
+Set Decorations off
+Set Layer Above
+Set Sticky on
+Set XShape 255
+Set Size 40 12
+
+SetEnv font VeraBd/8 Overwrite
+
+Text 1 0 0 40 12 white ${font} "%.2f" Alignment TopRight
++ statgrab:load_stats:min1

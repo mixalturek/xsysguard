@@ -1,0 +1,19 @@
+Set Name CLOCK
+Set Size 64 54
+Set Layer Above
+Set Background Color black
+Set Decorations off
+Set Mouse 1 Move
+
+Rectangle 2 2 60 50 #484848 ColorRange 0 1 50 #161616
+
+Text 1 5 2 56 18 #b0b0b0 Arial_Bold/12 "%02d:%02d"
++ time:local:tm_hour
++ time:local:tm_min
+
+Text 1 49 7 12 13 #b0b0b0 Arial_Bold/8 "%02d"
++ time:local:tm_sec
+
+Text 1 2 24 60 22 #a0a0a0 Arial_Bold/8 "%s\n%s" Alignment Center
++ time:local:strftime:"%a"
++ time:local:strftime:"%F"

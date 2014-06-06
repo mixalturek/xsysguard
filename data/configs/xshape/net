@@ -1,0 +1,17 @@
+Set Background Color #080808
+Set Decorations off
+Set Layer Above
+Set Sticky on
+Set Size 60 16
+
+ModuleEnv statgrab
+SetEnv INTERFACE ${STATGRAB_INTERFACE0}
+
+Line 0 0 59 0 #222
+Line 0 15 59 15 #222
+Line 0 1 0 14 #222
+Line 59 1 59 14 #222
+
+LineChart 1 1 1 58 14
++ statgrab:network_io_stats_diff:${INTERFACE}:rx #00f
++ statgrab:network_io_stats_diff:${INTERFACE}:tx #00b

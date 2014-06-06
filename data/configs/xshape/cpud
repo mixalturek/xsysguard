@@ -1,0 +1,32 @@
+Set Background Color #080808
+Set Decorations off
+Set Layer Above
+Set Sticky on
+Set Size 60 16
+
+SetEnv CPU 0
+SetEnv CPULINE 0
+SetEnv DAEMON "xsysguardd"
+
+Line 0 0 59 0 #222
+Line 0 15 59 15 #222
+Line 0 1 0 14 #222
+Line 59 1 59 14 #222
+
+SetEnv us "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %d\"" Overwrite
+SetEnv ni "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %d\"" Overwrite
+SetEnv sy "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %*d %d\"" Overwrite
+SetEnv id "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %*d %*d %d\"" Overwrite
+SetEnv io "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %*d %*d %*d %d\"" Overwrite
+SetEnv ir "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %*d %*d %*d %*d %d\"" Overwrite
+SetEnv so "file:/proc/stat:readline:${CPULINE}:scanf:c:\"cpu${CPU} %*d %*d %*d %*d %*d %*d %d\"" Overwrite
+
+SetEnv sum "${us},${ni},ADD,${sy},ADD,${id},ADD,${io},ISNANZERO,ADD,${ir},ISNANZERO,ADD,${so}, ISNANZERO,ADD" Overwrite
+
+AreaChart 1 1 1 58 14 Min 0 Max 1
++ daemon:${DAEMON}:n:"${us},${sum},DIV" #00f
++ daemon:${DAEMON}:n:"${ni},${sum},DIV" #00e AddPrev
++ daemon:${DAEMON}:n:"${sy},${sum},DIV" #00d AddPrev
++ daemon:${DAEMON}:n:"${io},${sum},DIV" #00c AddPrev
++ daemon:${DAEMON}:n:"${ir},${sum},DIV" #00b AddPrev
++ daemon:${DAEMON}:n:"${so},${sum},DIV" #00a AddPrev
