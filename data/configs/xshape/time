@@ -5,7 +5,7 @@ Set Sticky on
 Set XShape 255
 Set Size 60 12
 
-SetEnv font VeraBd/8 Overwrite
+SetEnv font DejaVuSansCondensed-Bold/8 Overwrite
 
 Text 1 0 0 60 12 white ${font} "%s"
 + time:local:strftime:"%H:%M:%S"
