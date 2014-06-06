@@ -1,6 +1,5 @@
 Set Name NET_WLAN0
 Set Size 64 54
-Set Layer Above
 Set Background Color black
 Set Decorations off
 Set Position -0 300
