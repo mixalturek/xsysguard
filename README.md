@@ -76,7 +76,6 @@ xsysguard_smallgray &
     - libsensors API changed, sensors module made compilable again.
     - libiw API changed, iw module made compilable again.
     - Development moved to [https://github.com/mixalturek/xsysguard](https://github.com/mixalturek/xsysguard).
-
     - Expanded documentation.
     - Improved Text widget performance.
     - Fixed xsysguardd command line option handling.
