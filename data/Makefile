@@ -95,12 +95,15 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/smallgray
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL) -d $(DESTDIR)$(IMAGE_DIR)/test
+	$(INSTALL) -d $(DESTDIR)$(IMAGE_DIR)/test
 	$(INSTALL) -d $(DESTDIR)$(FONT_DIR)
+	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL_DATA) $(wildcard configs/test/*) $(DESTDIR)$(CONFIG_DIR)/test
 	$(INSTALL_DATA) $(wildcard configs/smallblue/*) $(DESTDIR)$(CONFIG_DIR)/smallblue
 	$(INSTALL_DATA) $(wildcard configs/smallgray/*) $(DESTDIR)$(CONFIG_DIR)/smallgray
 	$(INSTALL_DATA) $(wildcard configs/xshape/*) $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL_DATA) $(wildcard images/test/*) $(DESTDIR)$(IMAGE_DIR)/test
+	$(INSTALL_PROGRAM) $(wildcard scripts/*) $(DESTDIR)$(bindir)
 	ln -f -s /usr/share/icons $(DESTDIR)$(IMAGE_DIR)
 
 .PHONY: all clean distclean install
