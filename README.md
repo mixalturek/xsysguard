@@ -64,9 +64,7 @@ xsysguard_smallgray &
 
 ## ChangeLog
 
-xsysguard 0.1 (2008-04-06)
-
-- 0.2 (2014-06-11)
+- xsysguard 0.2 (2014-06-11)
     - Scripts to run all smallgray or smallblue widgets.
     - Predefined smallblue and smallgray modules.
     - Build scripts for creation of Debian package.
@@ -77,12 +75,13 @@ xsysguard 0.1 (2008-04-06)
     - Compiler warnings -Wall enabled and solved.
     - libsensors API changed, sensors module made compilable again.
     - libiw API changed, iw module made compilable again.
-    - Project moved to [https://github.com/mixalturek/xsysguard](https://github.com/mixalturek/xsysguard).
+    - Development moved to [https://github.com/mixalturek/xsysguard](https://github.com/mixalturek/xsysguard).
+
     - Expanded documentation.
     - Improved Text widget performance.
     - Fixed xsysguardd command line option handling.
 
-- 0.1 (2008-04-06)
+- xsysguard 0.1 (2008-04-06)
     - First public release.
 
 
