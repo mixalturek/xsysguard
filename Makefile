@@ -89,7 +89,7 @@ $(info )
 
 ################################################################################
 
-all: modules xsysguardd xsysguard data
+all: modules xsysguardd xsysguard doc data
 
 modules:
 	$(MAKE) -C src modules
@@ -108,6 +108,8 @@ data:
 
 clean:
 	$(MAKE) -C src clean
+	$(MAKE) -C doc clean
+	$(MAKE) -C data clean
 
 distclean: clean
 

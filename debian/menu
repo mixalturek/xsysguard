@@ -1,0 +1,5 @@
+?package(xsysguard):needs="X11" \
+  section="Applications/System/Monitoring"\
+  title="xsysguard"\
+  icon="/usr/share/pixmaps/xsysguard.xpm" \
+  command="xsysguard_smallblue"

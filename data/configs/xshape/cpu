@@ -1,0 +1,72 @@
+Set Background Color #080808
+Set Decorations off
+Set Layer Above
+Set Sticky on
+Set Size 60 16
+
+SetEnv CPU 0
+SetEnv CPULINE 0
+
+Line 0 0 59 0 #222
+Line 0 15 59 15 #222
+Line 0 1 0 14 #222
+Line 59 1 59 14 #222
+
+SetEnv us "cpu${CPU} %d" Overwrite
+SetEnv ni "cpu${CPU} %*d %d" Overwrite
+SetEnv sy "cpu${CPU} %*d %*d %d" Overwrite
+SetEnv id "cpu${CPU} %*d %*d %*d %d" Overwrite
+SetEnv io "cpu${CPU} %*d %*d %*d %*d %d" Overwrite
+SetEnv ir "cpu${CPU} %*d %*d %*d %*d %*d %d" Overwrite
+SetEnv so "cpu${CPU} %*d %*d %*d %*d %*d %*d %d" Overwrite
+
+AreaChart 1 1 1 58 14 Min 0 Max 1
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00f
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${ni}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00e AddPrev
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${sy}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00d AddPrev
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${io}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00c AddPrev
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${ir}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00b AddPrev
++ file:/proc/stat:readline:${CPULINE}:scanf:c:${so}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${us}, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ni},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${sy},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${id},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${io},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${ir},ADD, \
+  file:/proc/stat:readline:${CPULINE}:scanf:c:${so},ADD,DIV #00a AddPrev
+  

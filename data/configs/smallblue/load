@@ -1,0 +1,21 @@
+Set Name LOAD
+Set Size 64 54
+Set Background Color black
+Set Decorations off
+Set Position -0 120
+Set Layer Below
+Set Sticky on
+Set SkipTaskbar on
+Set SkipPager on
+
+Rectangle 2 2 60 50 #484848 ColorRange 0 1 50 #161616
+
+LineChart 5 2 14 60 36
++ statgrab:load_stats:min15 #0d55db
++ statgrab:load_stats:min5 #266df3
++ statgrab:load_stats:min1 #538cf5
+
+Text 0 3 2 58 14 #b0b0b0 DejaVuSansCondensed-Bold/7 "LOAD"
+
+Text 5 3 2 58 14 #b0b0b0 DejaVuSansCondensed-Bold/7 "%.2f" Alignment TopRight
++ statgrab:load_stats:min1

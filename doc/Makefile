@@ -172,6 +172,9 @@ man1/%.1: txt/%.1.txt
 	-f asciidoc/docbook.conf \
 	-o - $< | \
 	xsltproc --load-trace -o $@ asciidoc/manpage.xsl -
+	sed -i 's%\[FIXME: source\]%xsysguard $(VERSION)%' $@
+	sed -i 's%\[FIXME: manual\]%User Commands%' $@
+	sed -i 's%\[FIXME: author\] \[see http://docbook.sf.net/el/author\]%Sascha Wessel%' $@
 
 .PHONY: all man1 html clean distclean install
 

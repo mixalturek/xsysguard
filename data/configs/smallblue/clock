@@ -1,0 +1,22 @@
+Set Name CLOCK
+Set Size 64 54
+Set Background Color black
+Set Decorations off
+Set Position -0 0
+Set Layer Below
+Set Sticky on
+Set SkipTaskbar on
+Set SkipPager on
+
+Rectangle 2 2 60 50 #484848 ColorRange 0 1 50 #161616
+
+Text 1 2 2 60 18 #b0b0b0 DejaVuSansCondensed-Bold/10 "%02d:%02d:%02d" Alignment Center
++ time:local:tm_hour
++ time:local:tm_min
++ time:local:tm_sec
+
+Text 1 2 22 60 22 #a0a0a0 DejaVuSansCondensed-Bold/6 "%s\n%s" Alignment Center
++ time:local:strftime:"%A"
+
+Text 1 2 34 60 22 #a0a0a0 DejaVuSansCondensed-Bold/6 "%s\n%s" Alignment Center
++ time:local:strftime:"%F"

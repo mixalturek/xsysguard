@@ -1,0 +1,29 @@
+Source: xsysguard
+Section: x11
+Priority: extra
+Maintainer: Michal Turek <mixalturek@users.sf.net>
+Build-Depends: debhelper (>= 9.0.0), libimlib2-dev, libstatgrab-dev, libsensors4-dev, libiw-dev, python, source-highlight, xsltproc, docbook-xsl
+Standards-Version: 3.9.5
+Homepage: https://github.com/mixalturek/xsysguard
+#Vcs-Git: git://git.debian.org/collab-maint/xsysguard.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/xsysguard.git;a=summary
+
+Package: xsysguard
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, statgrab
+Description: Resource-friendly system monitor based on Imlib2
+ xsysguard is a resource-friendly system monitor based on Imlib2.
+ .
+ Features
+  - written in c, minimal dependencies
+  - powerful configuration file format
+  - full alpha channel support, including XShape and ARGB visuals
+  - configurable widgets: BarChart, LineChart, AreaChart, Text, Image, ...
+  - data sources implemented as modules
+      - daemon module: run a xsysguardd daemon process on your linux based
+        server, router, wlan accesspoint or satellite/cable receiver
+      - file module: parse files with scanf or regular expressions
+        (e.g. /proc/* or /sys/*)
+      - exec module: execute processes and parse their stdout with scanf
+        or regular expressions
+      - ...

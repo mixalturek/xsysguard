@@ -1,8 +1,0 @@
-xsysguard 0.2
-* Expanded documentation
-* Improved Text widget performance
-* Bug fixes:
-  - Fixed xsysguardd command line option handling
-
-xsysguard 0.1 (2008-04-06)
-* First public release
