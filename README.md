@@ -47,7 +47,7 @@ cd xsysguard-0.2
 
 debuild -us -uc
 
-sudo dpkg -i ../netwmpager_0.2-1_*.deb
+sudo dpkg -i ../xsysguard_0.2-1_*.deb
 ```
 
 
