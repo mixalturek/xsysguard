@@ -10,7 +10,7 @@ Homepage: https://github.com/mixalturek/xsysguard
 
 Package: xsysguard
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, statgrab
+Depends: ${shlibs:Depends}, ${misc:Depends}, statgrab, fonts-dejavu-extra
 Description: Resource-friendly system monitor based on Imlib2
  xsysguard is a resource-friendly system monitor based on Imlib2.
  .

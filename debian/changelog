@@ -1,3 +1,9 @@
+xsysguard (0.2.1-1) UNRELEASED; urgency=medium
+
+  * Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).
+
+ -- Michal Turek <mixalturek@users.sf.net>  Sat, 14 Jun 2014 12:45:41 +0200
+
 xsysguard (0.2-1) unstable; urgency=low
 
   * Scripts to run all smallgray or smallblue widgets.
@@ -6,7 +12,8 @@ xsysguard (0.2-1) unstable; urgency=low
   * FIXMEs in manual pages solved.
   * Linker errors fixed by explicit linking with -lXext -lX11.
   * Issues found by cppcheck fixed.
-  * libstatgrab API changed in version 0.90, statgrab module made compilable again.
+  * libstatgrab API changed in version 0.90, statgrab module made compilable \
+    again.
   * Compiler warnings -Wall enabled and solved.
   * libsensors API changed, sensors module made compilable again.
   * libiw API changed, iw module made compilable again.
