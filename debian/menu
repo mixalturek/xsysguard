@@ -2,4 +2,4 @@
   section="Applications/System/Monitoring"\
   title="xsysguard"\
   icon="/usr/share/pixmaps/xsysguard.xpm" \
-  command="xsysguard_smallblue"
+  command="xsysguard_biggray"

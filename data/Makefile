@@ -93,6 +93,8 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/test
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/smallblue
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/smallgray
+	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/bigblue
+	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/biggray
 	$(INSTALL) -d $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL) -d $(DESTDIR)$(IMAGE_DIR)/test
 	$(INSTALL) -d $(DESTDIR)$(IMAGE_DIR)/test
@@ -101,6 +103,8 @@ install:
 	$(INSTALL_DATA) $(wildcard configs/test/*) $(DESTDIR)$(CONFIG_DIR)/test
 	$(INSTALL_DATA) $(wildcard configs/smallblue/*) $(DESTDIR)$(CONFIG_DIR)/smallblue
 	$(INSTALL_DATA) $(wildcard configs/smallgray/*) $(DESTDIR)$(CONFIG_DIR)/smallgray
+	$(INSTALL_DATA) $(wildcard configs/bigblue/*) $(DESTDIR)$(CONFIG_DIR)/bigblue
+	$(INSTALL_DATA) $(wildcard configs/biggray/*) $(DESTDIR)$(CONFIG_DIR)/biggray
 	$(INSTALL_DATA) $(wildcard configs/xshape/*) $(DESTDIR)$(CONFIG_DIR)/xshape
 	$(INSTALL_DATA) $(wildcard images/test/*) $(DESTDIR)$(IMAGE_DIR)/test
 	$(INSTALL_PROGRAM) $(wildcard scripts/*) $(DESTDIR)$(bindir)

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+xsysguard biggray/clock biggray/cpu biggray/load biggray/mem biggray/net_eth0 biggray/net_wlan0 $*

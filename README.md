@@ -64,6 +64,10 @@ xsysguard_smallgray &
 
 ## ChangeLog
 
+- xsysguard 0.2.1-SNAPSHOT (2014-08-05)
+    - Predefined bigblue and biggray configurations.
+    - Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).
+
 - xsysguard 0.2 (2014-06-11)
     - Scripts to run all smallgray or smallblue widgets.
     - Predefined smallblue and smallgray modules.

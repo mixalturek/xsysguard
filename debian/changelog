@@ -1,13 +1,14 @@
 xsysguard (0.2.1-1) UNRELEASED; urgency=medium
 
+  * Predefined bigblue and biggray configurations.
   * Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).
 
- -- Michal Turek <mixalturek@users.sf.net>  Sat, 14 Jun 2014 12:45:41 +0200
+ -- Michal Turek <mixalturek@users.sf.net>  Tue, 05 Aug 2014 19:28:20 +0200
 
 xsysguard (0.2-1) unstable; urgency=low
 
   * Scripts to run all smallgray or smallblue widgets.
-  * Predefined smallblue and smallgray modules.
+  * Predefined smallblue and smallgray configurations.
   * Build scripts for creation of Debian package.
   * FIXMEs in manual pages solved.
   * Linker errors fixed by explicit linking with -lXext -lX11.
