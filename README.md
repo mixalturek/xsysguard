@@ -59,6 +59,8 @@ See `xsysguard --help` or `man xsysguard` for instructions.
 xsysguard MODULE &
 xsysguard_smallblue &
 xsysguard_smallgray &
+xsysguard_bigblue &
+xsysguard_biggray &
 ```
 
 
@@ -69,8 +71,8 @@ xsysguard_smallgray &
     - Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).
 
 - xsysguard 0.2 (2014-06-11)
-    - Scripts to run all smallgray or smallblue widgets.
-    - Predefined smallblue and smallgray modules.
+    - Scripts to run all smallgray or smallblue configurations.
+    - Predefined smallblue and smallgray configurations.
     - Build scripts for creation of Debian package.
     - FIXMEs in manual pages solved.
     - Linker errors fixed by explicit linking with -lXext -lX11.

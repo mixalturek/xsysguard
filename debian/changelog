@@ -7,7 +7,7 @@ xsysguard (0.2.1-1) UNRELEASED; urgency=medium
 
 xsysguard (0.2-1) unstable; urgency=low
 
-  * Scripts to run all smallgray or smallblue widgets.
+  * Scripts to run all smallgray or smallblue configurations.
   * Predefined smallblue and smallgray configurations.
   * Build scripts for creation of Debian package.
   * FIXMEs in manual pages solved.
