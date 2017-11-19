@@ -10,3 +10,4 @@
 /doc/man1/
 /build/
 *.so
+.idea

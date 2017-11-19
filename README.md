@@ -50,6 +50,15 @@ debuild -us -uc
 sudo dpkg -i ../xsysguard_0.2-1_*.deb
 ```
 
+Build inside Docker container to not mess OS by development packages.
+
+```bash
+cd docker
+docker build --tag xsysguard-build .
+docker run --rm -v `pwd`:/mnt xsysguard-build cp /build/xsysguard_0.2.1-1_amd64.deb /build/xsysguard-dbgsym_0.2.1-1_amd64.deb /mnt
+docker rmi xsysguard-build
+```
+
 
 ## Usage
 
