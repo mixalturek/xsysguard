@@ -5,7 +5,7 @@ ENV XSYSGUARD_VERSION=0.2.1
 
 RUN apt-get update
 RUN apt-get install -y build-essential devscripts lintian
-RUN apt-get install -y wget libiw-dev libsensors4-dev libimlib2-dev libstatgrab-dev statgrab xsltproc source-highlight python docbook-xsl
+RUN apt-get install -y wget libiw-dev libsensors-dev libimlib2-dev libstatgrab-dev statgrab xsltproc source-highlight python docbook-xsl
 
 RUN mkdir /build \
 && cd /build \
