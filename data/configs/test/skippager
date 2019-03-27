@@ -1,3 +1,4 @@
 Set Background Color black
 Set Size 100 100
 Set SkipPager on
+Set OverrideRedirect on
