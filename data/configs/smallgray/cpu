@@ -7,7 +7,6 @@ Set Layer Below
 Set Sticky on
 Set SkipTaskbar on
 Set SkipPager on
-Set OverrideRedirect on
 
 Rectangle 0 0 64 54 #555555
 

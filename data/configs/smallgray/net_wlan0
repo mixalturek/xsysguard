@@ -7,7 +7,6 @@ Set Layer Below
 Set Sticky on
 Set SkipTaskbar on
 Set SkipPager on
-Set OverrideRedirect on
 
 ModuleEnv statgrab
 SetEnv INTERFACE_WLAN0 wlan0
