@@ -27,8 +27,8 @@
 Install [all dependencies](http://xsysguard.sourceforge.net/). Download a tarbal from Releases/Tags.
 
 ```shell
-tar -xf xsysguard-0.2.tar.gz
-cd xsysguard-0.2
+tar -xf xsysguard-0.2.2.tar.gz
+cd xsysguard-0.2.2
 
 make config prefix=/usr/local
 make
@@ -41,13 +41,13 @@ sudo make install
 Download a tarbal from Releases/Tags.
 
 ```shell
-cp xsysguard-0.2.tar.gz xsysguard_0.2.orig.tar.gz
-tar -xf xsysguard_0.2.orig.tar.gz
-cd xsysguard-0.2
+cp xsysguard-0.2.2.tar.gz xsysguard_0.2.2.orig.tar.gz
+tar -xf xsysguard_0.2.2.orig.tar.gz
+cd xsysguard-0.2.2
 
 debuild -us -uc
 
-sudo dpkg -i ../xsysguard_0.2-1_*.deb
+sudo dpkg -i ../xsysguard_0.2.2-1_*.deb
 ```
 
 Build inside Docker container to not mess OS by development packages.
@@ -55,7 +55,7 @@ Build inside Docker container to not mess OS by development packages.
 ```bash
 cd docker
 docker build --tag xsysguard-build .
-docker run --rm -v `pwd`:/mnt xsysguard-build cp /build/xsysguard_0.2.1-1_amd64.deb /build/xsysguard-dbgsym_0.2.1-1_amd64.deb /mnt
+docker run --rm -v `pwd`:/mnt xsysguard-build cp /build/xsysguard_0.2.2-1_amd64.deb /build/xsysguard-dbgsym_0.2.2-1_amd64.deb /mnt
 docker rmi xsysguard-build
 ```
 
@@ -75,7 +75,10 @@ xsysguard_biggray &
 
 ## ChangeLog
 
-- xsysguard 0.2.1-SNAPSHOT (2014-08-05)
+- xsysguard 0.2.2 (2020-02-04)
+    - New configuration biggray/acpi.
+
+- xsysguard 0.2.1 (2014-08-05)
     - Predefined bigblue and biggray configurations.
     - Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).
 

@@ -1,4 +1,10 @@
-xsysguard (0.2.1-1) UNRELEASED; urgency=medium
+xsysguard (0.2.2-1) unstable; urgency=low
+
+  * New configuration biggray/acpi.
+
+ -- Michal Turek <mixalturek@users.sf.net>  Tue, 01 Feb 2020 20:01:14 +0100
+
+xsysguard (0.2.1-1) unstable; urgency=medium
 
   * Predefined bigblue and biggray configurations.
   * Dependency to fonts-dejavu-extra added (DejaVuSansCondensed-Bold font).

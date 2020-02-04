@@ -1,7 +1,7 @@
 # Dirty, there is no need to be nice
 FROM debian:buster
 
-ENV XSYSGUARD_VERSION=0.2.1
+ENV XSYSGUARD_VERSION=0.2.2
 
 RUN apt-get update
 RUN apt-get install -y build-essential devscripts lintian

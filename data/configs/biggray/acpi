@@ -1,0 +1,42 @@
+Set Name ACPI
+Set Size 96 81
+Set Background Color black
+Set Decorations off
+Set Position -0 540
+Set Layer Below
+Set Sticky on
+Set SkipTaskbar on
+Set SkipPager on
+
+Rectangle 0 0 96 81 #555555
+
+
+Text 0 4 2 87 21 #b0b0b0 DejaVuSansCondensed-Bold/8 "BAT" Alignment TopLeft
+
+Text 10 4 2 87 18 #b0b0b0 DejaVuSansCondensed-Bold/8 "%s" Alignment TopRight
++ exec:"acpi --battery":readline:1:scanf:s:"Battery %*d: %*s %*s %s"
+
+
+BarChart 10 4 20 87 17 Min 0 Angle 90
++ 100 #073180
++ exec:"acpi --battery":readline:1:scanf:n:"Battery %*d: %*s %d" #538cf5
+
+Text 10 4 19 87 16 #ccc DejaVuSansCondensed-Bold/8 "%s%s%s %d %%" Alignment Center
++ exec:"acpi --battery":readline:1:scanf:s:"Battery %*d: %[^,]","Charging",STRCASECMP,"","+",IF
++ exec:"acpi --battery":readline:1:scanf:s:"Battery %*d: %[^,]","Discharging",STRCASECMP,"","-",IF
++ exec:"acpi --battery":readline:1:scanf:s:"Battery %*d: %[^,]","Full",STRCASECMP,"","=",IF
++ exec:"acpi --battery":readline:1:scanf:n:"Battery %*d: %*s %d"
+
+Rectangle 4 22 87 15 #fff2 ColorRange 0 3 5 #ddd2 1 #2222 5 #0002
+
+
+Text 0 4 41 87 19 #b0b0b0 DejaVuSansCondensed-Bold/8 "AC" Alignment TopLeft
+
+Text 10 4 41 87 19 #b0b0b0 DejaVuSansCondensed-Bold/8 "%s" Alignment TopRight
++ exec:"acpi --ac-adapter":readline:1:scanf:s:"Adapter %*d: %s"
+
+
+Text 0 4 58 87 19 #b0b0b0 DejaVuSansCondensed-Bold/8 "TEMP" Alignment TopLeft
+
+Text 10 4 58 87 16 #b0b0b0 DejaVuSansCondensed-Bold/8 "%d °C" Alignment TopRight
++ exec:"acpi --thermal":readline:1:scanf:n:"Thermal %*d: %*s %d"
